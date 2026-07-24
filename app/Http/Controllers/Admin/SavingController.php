@@ -135,7 +135,7 @@ class SavingController extends Controller
         ActivityLog::create([
             'user_id' => Auth::id(),
             'subject_type' => 'savings',
-            'subject_id' => $memberNumber,
+            'subject_id' => null,
             'description' => "Admin viewed member savings: {$memberNumber}",
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),

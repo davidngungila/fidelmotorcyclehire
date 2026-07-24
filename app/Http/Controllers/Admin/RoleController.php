@@ -91,7 +91,7 @@ class RoleController extends Controller
         ActivityLog::create([
             'user_id' => Auth::id(),
             'subject_type' => 'role',
-            'subject_id' => (string) $role->id,
+            'subject_id' => $role->id,
             'description' => "Admin created role: {$role->name}",
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
@@ -114,7 +114,7 @@ class RoleController extends Controller
         ActivityLog::create([
             'user_id' => Auth::id(),
             'subject_type' => 'role',
-            'subject_id' => (string) $role->id,
+            'subject_id' => $role->id,
             'description' => "Admin viewed edit role form: {$role->name}",
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
@@ -153,7 +153,7 @@ class RoleController extends Controller
         ActivityLog::create([
             'user_id' => Auth::id(),
             'subject_type' => 'role',
-            'subject_id' => (string) $role->id,
+            'subject_id' => $role->id,
             'description' => "Admin updated role: {$role->name}",
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
@@ -187,7 +187,7 @@ class RoleController extends Controller
         ActivityLog::create([
             'user_id' => Auth::id(),
             'subject_type' => 'role',
-            'subject_id' => (string) $roleId,
+            'subject_id' => $roleId,
             'description' => "Admin deleted role: {$roleName}",
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),

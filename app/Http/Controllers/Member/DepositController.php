@@ -125,7 +125,7 @@ class DepositController extends Controller
         ActivityLog::create([
             'user_id' => $user->id,
             'subject_type' => 'deposit',
-            'subject_id' => $certificateNumber,
+            'subject_id' => null,
             'description' => "Member viewed deposit: {$certificateNumber}",
             'properties' => ['member_number' => $memberNumber, 'product' => $deposit['product'] ?? null],
             'ip_address' => $request->ip(),

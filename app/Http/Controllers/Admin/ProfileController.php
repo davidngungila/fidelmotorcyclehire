@@ -95,7 +95,7 @@ class ProfileController extends Controller
         ActivityLog::create([
             'user_id' => $user->id,
             'subject_type' => 'user',
-            'subject_id' => (string) $user->id,
+            'subject_id' => $user->id,
             'description' => 'Admin updated their profile',
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),

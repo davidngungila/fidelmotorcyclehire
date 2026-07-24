@@ -105,7 +105,7 @@ class UserController extends Controller
         ActivityLog::create([
             'user_id' => Auth::id(),
             'subject_type' => 'user',
-            'subject_id' => (string) $user->id,
+            'subject_id' => $user->id,
             'description' => "Admin created user: {$user->name}",
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
@@ -128,7 +128,7 @@ class UserController extends Controller
         ActivityLog::create([
             'user_id' => Auth::id(),
             'subject_type' => 'user',
-            'subject_id' => (string) $user->id,
+            'subject_id' => $user->id,
             'description' => "Admin viewed edit user form: {$user->name}",
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
@@ -179,7 +179,7 @@ class UserController extends Controller
         ActivityLog::create([
             'user_id' => Auth::id(),
             'subject_type' => 'user',
-            'subject_id' => (string) $user->id,
+            'subject_id' => $user->id,
             'description' => "Admin updated user: {$user->name}",
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
@@ -218,7 +218,7 @@ class UserController extends Controller
         ActivityLog::create([
             'user_id' => Auth::id(),
             'subject_type' => 'user',
-            'subject_id' => (string) $userId,
+            'subject_id' => $userId,
             'description' => "Admin deleted user: {$userName}",
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),

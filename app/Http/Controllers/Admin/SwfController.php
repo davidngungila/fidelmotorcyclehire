@@ -140,7 +140,7 @@ class SwfController extends Controller
         ActivityLog::create([
             'user_id' => Auth::id(),
             'subject_type' => 'swf',
-            'subject_id' => $memberNumber,
+            'subject_id' => null,
             'description' => "Admin viewed member SWF: {$memberNumber}",
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),

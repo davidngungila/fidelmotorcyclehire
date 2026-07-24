@@ -95,7 +95,7 @@ class MemberController extends Controller
         ActivityLog::create([
             'user_id' => Auth::id(),
             'subject_type' => 'member',
-            'subject_id' => $memberNumber,
+            'subject_id' => null,
             'description' => "Admin viewed member profile: {$memberNumber}",
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
@@ -126,7 +126,7 @@ class MemberController extends Controller
         ActivityLog::create([
             'user_id' => Auth::id(),
             'subject_type' => 'member',
-            'subject_id' => $memberNumber,
+            'subject_id' => null,
             'description' => "Admin viewed member loans: {$memberNumber}",
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
@@ -157,7 +157,7 @@ class MemberController extends Controller
         ActivityLog::create([
             'user_id' => Auth::id(),
             'subject_type' => 'member',
-            'subject_id' => $memberNumber,
+            'subject_id' => null,
             'description' => "Admin viewed member savings: {$memberNumber}",
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),

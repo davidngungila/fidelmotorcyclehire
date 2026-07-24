@@ -134,7 +134,7 @@ class SettingController extends Controller
             'user_id' => Auth::id(),
             'description' => "Admin updated {$tab} settings",
             'subject_type' => 'settings',
-            'subject_id' => $tab,
+            'subject_id' => null,
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
             'properties' => [

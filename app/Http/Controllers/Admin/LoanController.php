@@ -227,7 +227,7 @@ class LoanController extends Controller
         ActivityLog::create([
             'user_id' => Auth::id(),
             'subject_type' => 'loan',
-            'subject_id' => $loanNumber,
+            'subject_id' => null,
             'description' => "Admin viewed loan {$loanNumber}",
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),

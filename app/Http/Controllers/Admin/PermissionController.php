@@ -83,7 +83,7 @@ class PermissionController extends Controller
         ActivityLog::create([
             'user_id' => Auth::id(),
             'subject_type' => 'permission',
-            'subject_id' => (string) $permission->id,
+            'subject_id' => $permission->id,
             'description' => "Admin created permission: {$permission->name}",
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
@@ -105,7 +105,7 @@ class PermissionController extends Controller
         ActivityLog::create([
             'user_id' => Auth::id(),
             'subject_type' => 'permission',
-            'subject_id' => (string) $permission->id,
+            'subject_id' => $permission->id,
             'description' => "Admin viewed edit permission form: {$permission->name}",
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
@@ -137,7 +137,7 @@ class PermissionController extends Controller
         ActivityLog::create([
             'user_id' => Auth::id(),
             'subject_type' => 'permission',
-            'subject_id' => (string) $permission->id,
+            'subject_id' => $permission->id,
             'description' => "Admin updated permission: {$permission->name}",
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
@@ -164,7 +164,7 @@ class PermissionController extends Controller
         ActivityLog::create([
             'user_id' => Auth::id(),
             'subject_type' => 'permission',
-            'subject_id' => (string) $permissionId,
+            'subject_id' => $permissionId,
             'description' => "Admin deleted permission: {$permissionName}",
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),

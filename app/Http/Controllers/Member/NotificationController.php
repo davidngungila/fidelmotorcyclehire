@@ -109,7 +109,7 @@ class NotificationController extends Controller
             ActivityLog::create([
                 'user_id' => $user->id,
                 'subject_type' => 'notification',
-                'subject_id' => 'all',
+                'subject_id' => null,
                 'description' => 'Member marked all notifications as read',
                 'properties' => ['member_number' => $memberNumber, 'count' => count($allIds)],
                 'ip_address' => $request->ip(),
@@ -124,7 +124,7 @@ class NotificationController extends Controller
             ActivityLog::create([
                 'user_id' => $user->id,
                 'subject_type' => 'notification',
-                'subject_id' => $id,
+                'subject_id' => null,
                 'description' => "Member marked notification as read: {$id}",
                 'properties' => ['member_number' => $memberNumber],
                 'ip_address' => $request->ip(),
