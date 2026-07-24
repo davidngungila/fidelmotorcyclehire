@@ -83,7 +83,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
         <div class="stat-card glass">
             <div class="bg-blob" style="background: #ef4444;"></div>
@@ -105,7 +105,7 @@
             </p>
         </div>
 
-        <div class="stat-card glass">
+        <div class="stat-card glass sm:col-span-2 lg:col-span-1">
             <div class="bg-blob" style="background: #10b981;"></div>
             <div class="flex items-start justify-between mb-3">
                 <div class="icon-wrap bg-green-50 dark:bg-green-900/30 text-green-500">
@@ -116,33 +116,19 @@
                     {{ number_format($savDelta, 1) }}%
                 </span>
             </div>
-            <p class="text-[11px] uppercase font-bold tracking-wider text-primary-500 dark:text-primary-400 mb-1">Savings Balance</p>
+            <p class="text-[11px] uppercase font-bold tracking-wider text-primary-500 dark:text-primary-400 mb-1">Savings & Deposits</p>
             <p class="text-xl lg:text-2xl font-extrabold text-primary-900 dark:text-white leading-tight">
-                {{ fmtTsh($savingsBalance) }}
+                {{ fmtTsh($savingsBalance + $depositBalance) }}
             </p>
-            <p class="text-[11px] text-primary-500 dark:text-primary-400 mt-1">
-                Interest earned: {{ fmtTsh($savings['interest_earned'] ?? 0) }}
-            </p>
-        </div>
-
-        <div class="stat-card glass">
-            <div class="bg-blob" style="background: #3b82f6;"></div>
-            <div class="flex items-start justify-between mb-3">
-                <div class="icon-wrap bg-blue-50 dark:bg-blue-900/30 text-blue-500">
-                    <i class="fa-solid fa-money-bill-trend-up"></i>
-                </div>
-                <span class="inline-flex items-center gap-1 text-[11px] font-bold text-green-500 bg-green-50 dark:bg-green-900/30 px-2 py-0.5 rounded-full">
-                    <i class="fa-solid fa-arrow-up"></i>
-                    {{ number_format($depDelta, 1) }}%
-                </span>
+            <div class="flex items-center gap-3 mt-1">
+                <p class="text-[11px] text-primary-500 dark:text-primary-400">
+                    Interest: {{ fmtTsh($savings['interest_earned'] ?? 0) }}
+                </p>
+                <span class="text-primary-300 dark:text-primary-600">•</span>
+                <p class="text-[11px] text-primary-500 dark:text-primary-400">
+                    {{ count($deposits) }} fixed deposit{{ count($deposits) !== 1 ? 's' : '' }}
+                </p>
             </div>
-            <p class="text-[11px] uppercase font-bold tracking-wider text-primary-500 dark:text-primary-400 mb-1">Deposit Balance</p>
-            <p class="text-xl lg:text-2xl font-extrabold text-primary-900 dark:text-white leading-tight">
-                {{ fmtTsh($depositBalance) }}
-            </p>
-            <p class="text-[11px] text-primary-500 dark:text-primary-400 mt-1">
-                {{ count($deposits) }} fixed deposit{{ count($deposits) !== 1 ? 's' : '' }}
-            </p>
         </div>
 
         <div class="stat-card glass">
