@@ -10,6 +10,7 @@
   <div class="glass rounded-2xl p-6 lg:p-8 border border-primary-100 dark:border-dark-border">
     <form method="POST" action="{{ route('admin.profile.update') }}" enctype="multipart/form-data" x-data="{ showPassword: false }">
       @csrf
+      @method('PUT')
 
       <div class="space-y-6">
 

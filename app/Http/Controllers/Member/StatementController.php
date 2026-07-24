@@ -9,10 +9,10 @@ use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Traits\FlashMessages;
 use Illuminate\Http\Request;
-use Illuminate\Http\StreamedResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class StatementController extends Controller
 {
