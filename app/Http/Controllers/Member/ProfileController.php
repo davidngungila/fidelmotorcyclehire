@@ -1,0 +1,155 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers\Member;
+
+use App\Contracts\GoogleSheetRepositoryInterface;
+use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
+use App\Traits\FlashMessages;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\View\View;
+
+class ProfileController extends Controller
+{
+    use FlashMessages;
+
+    public function __construct(
+        protected GoogleSheetRepositoryInterface $repository,
+    ) {}
+
+    public function show(Request $request): View
+    {
+        Gate::authorize('member-only');
+
+        $user = Auth::user();
+        $memberNumber = $user->member_number;
+        $member = !empty($memberNumber) ? $this->repository->getMemberByNumber($memberNumber) : null;
+
+        $fullName = $member['name'] ?? $user->name;
+        $initials = $this->extractInitials($fullName);
+
+        return view('member.profile.show', compact(
+            'user',
+            'member',
+            'initials',
+            'fullName'
+        ));
+    }
+
+    public function index(Request $request): View
+    {
+        return $this->show($request);
+    }
+
+    public function edit(Request $request): View
+    {
+        Gate::authorize('member-only');
+
+        $user = Auth::user();
+        $memberNumber = $user->member_number;
+        $member = !empty($memberNumber) ? $this->repository->getMemberByNumber($memberNumber) : null;
+
+        $fullName = $member['name'] ?? $user->name;
+
+        return view('member.profile.edit', compact(
+            'user',
+            'member',
+            'fullName'
+        ));
+    }
+
+    public function update(Request $request)
+    {
+        Gate::authorize('member-only');
+
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$user->id],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'address' => ['nullable', 'string', 'max:500'],
+            'occupation' => ['nullable', 'string', 'max:255'],
+            'employer' => ['nullable', 'string', 'max:255'],
+            'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+            'current_password' => ['nullable', 'required_with:new_password'],
+            'new_password' => ['nullable', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        // Handle password change
+        if (!empty($validated['new_password'])) {
+            if (!Hash::check($validated['current_password'], $user->password)) {
+                $this->error('Current password is incorrect.');
+                return redirect()->back();
+            }
+            $user->password = Hash::make($validated['new_password']);
+        }
+
+        // Handle photo upload
+        if ($request->hasFile('photo')) {
+            $file = $request->file('photo');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('profile-photos', $fileName, 'public');
+            $user->photo = $filePath;
+
+            // Delete old photo if exists
+            if ($user->getOriginal('photo') && Storage::disk('public')->exists($user->getOriginal('photo'))) {
+                Storage::disk('public')->delete($user->getOriginal('photo'));
+            }
+        }
+
+        // Handle photo removal
+        if ($request->input('remove_photo')) {
+            if ($user->getOriginal('photo') && Storage::disk('public')->exists($user->getOriginal('photo'))) {
+                Storage::disk('public')->delete($user->getOriginal('photo'));
+            }
+            $user->photo = null;
+        }
+
+        // Update user fields
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        $user->phone = $validated['phone'] ?? $user->phone;
+        $user->address = $validated['address'] ?? $user->address;
+        $user->occupation = $validated['occupation'] ?? $user->occupation;
+        $user->employer = $validated['employer'] ?? $user->employer;
+        $user->save();
+
+        ActivityLog::create([
+            'user_id' => $user->id,
+            'subject_type' => 'user',
+            'subject_id' => (string) $user->id,
+            'description' => 'Member updated their profile',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'properties' => [
+                'name' => $user->name,
+                'email' => $user->email,
+                'photo_updated' => $request->hasFile('photo'),
+            ],
+        ]);
+
+        $this->success('Profile updated successfully.');
+
+        return redirect()->route('member.profile.show');
+    }
+
+    protected function extractInitials(string $name): string
+    {
+        $parts = array_values(array_filter(explode(' ', trim($name))));
+        if (count($parts) === 0) {
+            return 'M';
+        }
+        if (count($parts) === 1) {
+            return strtoupper(substr($parts[0], 0, 1));
+        }
+
+        return strtoupper(substr($parts[0], 0, 1) . substr($parts[count($parts) - 1], 0, 1));
+    }
+}
