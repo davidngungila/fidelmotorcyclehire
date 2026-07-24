@@ -29,21 +29,9 @@
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
-        .glass {
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-green-400 via-emerald-500 to-teal-600 relative overflow-hidden" x-data="{ toast: {{ session('flash') ? 'true' : 'false' }}, toastMsg: '{{ session('flash')['message'] ?? '' }}', toastLevel: '{{ session('flash')['level'] ?? 'info' }}' }" x-init="if (toast) { setTimeout(() => toast = false, 5000); }">
-
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute -top-40 -right-40 w-96 h-96 bg-green-300/30 rounded-full blur-3xl"></div>
-        <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-emerald-300/30 rounded-full blur-3xl"></div>
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-teal-400/20 rounded-full blur-3xl"></div>
-    </div>
+<body class="min-h-screen bg-white" x-data="{ toast: {{ session('flash') ? 'true' : 'false' }}, toastMsg: '{{ session('flash')['message'] ?? '' }}', toastLevel: '{{ session('flash')['level'] ?? 'info' }}' }" x-init="if (toast) { setTimeout(() => toast = false, 5000); }">
 
     <div class="fixed top-6 right-6 z-50" x-show="toast" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:translate-x-4" x-transition:enter-end="opacity-100 translate-y-0 sm:translate-x-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:translate-x-0" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:translate-x-4">
         <div :class="{
@@ -74,32 +62,30 @@
         </div>
     </div>
 
-    <div class="relative min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
+    <div class="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
         <div class="w-full max-w-md">
             <div class="text-center mb-8">
-                <div class="inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl shadow-lg mb-4">
-                    <div class="w-14 h-14 bg-gradient-to-br from-green-400 to-emerald-600 rounded-xl flex items-center justify-center">
-                        <i class="fa-solid fa-leaf text-white text-2xl"></i>
-                    </div>
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-600 rounded-2xl shadow-lg mb-4">
+                    <i class="fa-solid fa-leaf text-white text-2xl"></i>
                 </div>
-                <h1 class="text-3xl font-bold text-white mb-2">Feedtan Digital</h1>
-                <p class="text-green-100 text-sm">Membership Portal</p>
+                <h1 class="text-2xl font-bold text-gray-900 mb-1">Feedtan Digital</h1>
+                <p class="text-gray-500 text-sm">Membership Portal</p>
             </div>
 
-            <div class="glass rounded-3xl shadow-2xl p-8">
-                <div class="text-center mb-8">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-2">Sign In</h2>
+            <div class="bg-white border border-gray-200 rounded-2xl shadow-lg p-6 sm:p-8">
+                <div class="text-center mb-6">
+                    <h2 class="text-xl font-bold text-gray-900 mb-1">Sign In</h2>
                     <p class="text-gray-500 text-sm">Welcome back! Please enter your details.</p>
                 </div>
 
-                <form method="POST" action="{{ route('login') }}" class="space-y-5">
+                <form method="POST" action="{{ route('login') }}" class="space-y-4">
                     @csrf
 
                     <div>
-                        <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1.5">Email Address</label>
                         <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
-                                <i class="fa-solid fa-envelope"></i>
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                <i class="fa-solid fa-envelope text-sm"></i>
                             </span>
                             <input
                                 type="email"
@@ -109,12 +95,12 @@
                                 required
                                 autofocus
                                 autocomplete="email"
-                                class="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 @error('email') border-red-300 focus:ring-red-500 @enderror"
+                                class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 @error('email') border-red-300 focus:ring-red-500 @enderror"
                                 placeholder="you@example.com"
                             >
                         </div>
                         @error('email')
-                            <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                            <p class="mt-1.5 text-sm text-red-600 flex items-center gap-1">
                                 <i class="fa-solid fa-circle-exclamation text-xs"></i>
                                 {{ $message }}
                             </p>
@@ -122,10 +108,10 @@
                     </div>
 
                     <div>
-                        <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
                         <div class="relative" x-data="{ show: false }">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
-                                <i class="fa-solid fa-lock"></i>
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                <i class="fa-solid fa-lock text-sm"></i>
                             </span>
                             <input
                                 :type="show ? 'text' : 'password'"
@@ -133,15 +119,15 @@
                                 name="password"
                                 required
                                 autocomplete="current-password"
-                                class="w-full pl-11 pr-12 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 @error('password') border-red-300 focus:ring-red-500 @enderror"
+                                class="w-full pl-10 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 @error('password') border-red-300 focus:ring-red-500 @enderror"
                                 placeholder="Enter your password"
                             >
-                            <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600 transition-colors">
-                                <i :class="show ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+                            <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors">
+                                <i :class="show ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'" class="text-sm"></i>
                             </button>
                         </div>
                         @error('password')
-                            <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                            <p class="mt-1.5 text-sm text-red-600 flex items-center gap-1">
                                 <i class="fa-solid fa-circle-exclamation text-xs"></i>
                                 {{ $message }}
                             </p>
@@ -160,58 +146,22 @@
                             <span class="text-sm text-gray-600 group-hover:text-gray-800 transition-colors">Remember me</span>
                         </label>
 
-                        <a href="{{ route('password.request') }}" class="text-sm font-semibold text-green-600 hover:text-green-700 transition-colors">
+                        <a href="{{ route('password.request') }}" class="text-sm font-medium text-green-600 hover:text-green-700 transition-colors">
                             Forgot password?
                         </a>
                     </div>
 
                     <button
                         type="submit"
-                        class="w-full py-3.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-xl shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40 transition-all duration-200 flex items-center justify-center gap-2"
+                        class="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
                     >
                         <span>Sign In</span>
                         <i class="fa-solid fa-arrow-right text-sm"></i>
                     </button>
                 </form>
-
-                <div class="mt-8">
-                    <div class="relative">
-                        <div class="absolute inset-0 flex items-center">
-                            <div class="w-full border-t border-gray-200"></div>
-                        </div>
-                        <div class="relative flex justify-center text-sm">
-                            <span class="px-3 bg-white text-gray-400 font-medium">Demo Accounts</span>
-                        </div>
-                    </div>
-
-                    <div class="mt-4 p-4 bg-gradient-to-br from-green-50 to-emerald-50 border border-green-100 rounded-xl space-y-3">
-                        <div class="flex items-start gap-3">
-                            <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                <i class="fa-solid fa-user-shield text-green-600 text-xs"></i>
-                            </div>
-                            <div>
-                                <p class="text-sm font-semibold text-gray-900">Admin</p>
-                                <p class="text-xs text-gray-600">admin@feedtan.co.tz</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-3">
-                            <div class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                <i class="fa-solid fa-user text-emerald-600 text-xs"></i>
-                            </div>
-                            <div>
-                                <p class="text-sm font-semibold text-gray-900">Member</p>
-                                <p class="text-xs text-gray-600">member@feedtan.co.tz</p>
-                            </div>
-                        </div>
-                        <p class="text-xs text-gray-500 flex items-center gap-1 pt-2 border-t border-green-100">
-                            <i class="fa-solid fa-info-circle"></i>
-                            <span>Use any password for demo access</span>
-                        </p>
-                    </div>
-                </div>
             </div>
 
-            <p class="text-center text-green-100 text-sm mt-8">
+            <p class="text-center text-gray-400 text-xs mt-6">
                 &copy; {{ date('Y') }} Feedtan Digital. All rights reserved.
             </p>
         </div>
