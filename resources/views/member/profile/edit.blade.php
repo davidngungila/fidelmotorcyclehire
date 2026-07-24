@@ -20,54 +20,55 @@
     </div>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    
-    <!-- Left Column - Profile Photo -->
-    <div class="lg:col-span-1">
-      <div class="glass rounded-2xl p-6 border border-primary-100 dark:border-dark-border sticky top-6">
-        <div class="flex flex-col items-center text-center">
-          <div class="relative mb-4">
-            <div class="w-32 h-32 rounded-full overflow-hidden shadow-2xl ring-4 ring-primary-100 dark:ring-primary-800/50">
-              @if($user->photo)
-                <img src="{{ asset('storage/' . $user->photo) }}" alt="Profile Photo" class="w-full h-full object-cover">
-              @else
-                <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-400 to-indigo-600">
-                  <span class="text-5xl font-extrabold text-white">{{ strtoupper(substr($user->name ?? 'M', 0, 1)) }}</span>
-                </div>
-              @endif
+  <form method="POST" action="{{ route('member.profile.update') }}" enctype="multipart/form-data" class="space-y-6">
+    @csrf
+    @method('PUT')
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- Left Column - Profile Photo -->
+      <div class="lg:col-span-1">
+        <div class="glass rounded-2xl p-6 border border-primary-100 dark:border-dark-border sticky top-6">
+          <div class="flex flex-col items-center text-center">
+            <div class="relative mb-4">
+              <div class="w-32 h-32 rounded-full overflow-hidden shadow-2xl ring-4 ring-primary-100 dark:ring-primary-800/50">
+                @if($user->photo)
+                  <img src="{{ asset('storage/' . $user->photo) }}" alt="Profile Photo" class="w-full h-full object-cover">
+                @else
+                  <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-400 to-indigo-600">
+                    <span class="text-5xl font-extrabold text-white">{{ strtoupper(substr($user->name ?? 'M', 0, 1)) }}</span>
+                  </div>
+                @endif
+              </div>
+              <label class="absolute bottom-2 right-2 w-10 h-10 bg-primary-600 hover:bg-primary-500 text-white rounded-full flex items-center justify-center cursor-pointer shadow-lg transition-all hover:scale-110">
+                <i class="fa-solid fa-camera text-sm"></i>
+                <input type="file" name="photo" accept="image/jpeg,image/png,image/jpg,image/gif" class="hidden">
+              </label>
             </div>
-            <label class="absolute bottom-2 right-2 w-10 h-10 bg-primary-600 hover:bg-primary-500 text-white rounded-full flex items-center justify-center cursor-pointer shadow-lg transition-all hover:scale-110">
-              <i class="fa-solid fa-camera text-sm"></i>
-              <input type="file" name="photo" accept="image/jpeg,image/png,image/jpg,image/gif" class="hidden" @change="$el.form.submit()">
-            </label>
+            <h3 class="font-bold text-primary-900 dark:text-white">{{ $user->name ?? 'Member' }}</h3>
+            <p class="text-xs text-primary-500 dark:text-primary-400 mb-4">{{ $user->email ?? 'No email' }}</p>
+
+            <div class="w-full pt-4 border-t border-primary-100 dark:border-dark-border">
+              <p class="text-[10px] font-semibold text-primary-500 dark:text-primary-400 mb-2">PHOTO GUIDELINES</p>
+              <ul class="text-[11px] text-primary-600 dark:text-primary-400 space-y-1">
+                <li>• JPG, PNG or GIF format</li>
+                <li>• Maximum size: 2MB</li>
+                <li>• Recommended: 400x400px</li>
+              </ul>
+            </div>
+
+            @if($user->photo)
+              <button type="button" onclick="document.getElementById('removePhoto').click()" class="mt-4 w-full px-4 py-2 rounded-lg border border-red-200 hover:border-red-300 dark:border-red-800/30 dark:hover:border-red-800/50 text-red-600 dark:text-red-400 text-xs font-bold transition-colors">
+                <i class="fa-solid fa-trash mr-1.5"></i> Remove Photo
+              </button>
+              <input type="checkbox" name="remove_photo" value="1" id="removePhoto" class="hidden">
+            @endif
           </div>
-          <h3 class="font-bold text-primary-900 dark:text-white">{{ $user->name ?? 'Member' }}</h3>
-          <p class="text-xs text-primary-500 dark:text-primary-400 mb-4">{{ $user->email ?? 'No email' }}</p>
-          
-          <div class="w-full pt-4 border-t border-primary-100 dark:border-dark-border">
-            <p class="text-[10px] font-semibold text-primary-500 dark:text-primary-400 mb-2">PHOTO GUIDELINES</p>
-            <ul class="text-[11px] text-primary-600 dark:text-primary-400 space-y-1">
-              <li>• JPG, PNG or GIF format</li>
-              <li>• Maximum size: 2MB</li>
-              <li>• Recommended: 400x400px</li>
-            </ul>
-          </div>
-          
-          @if($user->photo)
-            <button type="button" onclick="document.getElementById('removePhoto').click()" class="mt-4 w-full px-4 py-2 rounded-lg border border-red-200 hover:border-red-300 dark:border-red-800/30 dark:hover:border-red-800/50 text-red-600 dark:text-red-400 text-xs font-bold transition-colors">
-              <i class="fa-solid fa-trash mr-1.5"></i> Remove Photo
-            </button>
-            <input type="checkbox" name="remove_photo" value="1" id="removePhoto" class="hidden">
-          @endif
         </div>
       </div>
-    </div>
 
-    <!-- Right Column - Form Fields -->
-    <div class="lg:col-span-2">
-      <form method="POST" action="{{ route('member.profile.update') }}" enctype="multipart/form-data" class="space-y-6">
-        @csrf
-        @method('PUT')
+      <!-- Right Column - Form Fields -->
+      <div class="lg:col-span-2">
 
         <!-- Personal Information Card -->
         <div class="glass rounded-2xl p-6 lg:p-8 border border-primary-100 dark:border-dark-border">
@@ -223,9 +224,9 @@
             <i class="fa-solid fa-check mr-1.5"></i> Save Changes
           </button>
         </div>
-      </form>
+      </div>
     </div>
-  </div>
+  </form>
 
 </div>
 
