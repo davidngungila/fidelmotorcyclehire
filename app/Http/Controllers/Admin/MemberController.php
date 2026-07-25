@@ -266,26 +266,15 @@ class MemberController extends Controller
             $jobId = Str::uuid()->toString();
             $file = $request->file('file');
             
-            // Store file in public storage to ensure it's accessible
-            $filePath = $file->storeAs('imports', 'import_' . $jobId . '.' . $file->getClientOriginalExtension(), 'local');
-
-            // Process import synchronously for reliability
+            // Process import directly from uploaded file without storing
             $googleSheetRepository = $this->googleSheetRepository;
             $import = new \App\Imports\MembersImport($googleSheetRepository);
             
-            // Get full storage path
-            $fullPath = storage_path('app/' . $filePath);
-            
-            Excel::import($import, $fullPath);
+            Excel::import($import, $file);
 
             $importedCount = $import->getImportedCount();
             $errors = $import->getErrors();
             $createdUsers = $import->getCreatedUsers();
-
-            // Clean up file
-            if (file_exists($fullPath)) {
-                unlink($fullPath);
-            }
 
             // Log activity
             ActivityLog::create([
