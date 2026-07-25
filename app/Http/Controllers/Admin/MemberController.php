@@ -11,6 +11,7 @@ use App\Imports\MembersImport;
 use App\Jobs\ImportMembersJob;
 use App\Models\ActivityLog;
 use App\Services\AdminDashboardService;
+use App\Services\EncryptedIdService;
 use App\Services\MemberService;
 use App\Traits\FlashMessages;
 use Illuminate\Http\Request;
@@ -29,6 +30,7 @@ class MemberController extends Controller
         protected GoogleSheetRepositoryInterface $googleSheetRepository,
         protected MemberService $memberService,
         protected AdminDashboardService $dashboardService,
+        protected EncryptedIdService $encryptedIdService,
     ) {
     }
 
@@ -121,8 +123,10 @@ class MemberController extends Controller
         ]);
     }
 
-    public function show(Request $request, string $memberNumber)
+    public function show(Request $request, string $encryptedMemberNumber)
     {
+        $memberNumber = $this->encryptedIdService->decrypt($encryptedMemberNumber);
+        
         Gate::authorize('view-member-data', $memberNumber);
 
         // First check database for imported members
@@ -205,6 +209,7 @@ class MemberController extends Controller
         return view('admin.members.show', [
             'member' => $member,
             'memberNumber' => $memberNumber,
+            'encryptedMemberNumber' => $encryptedMemberNumber,
             'loans' => $loans,
             'savings' => $savings,
             'deposits' => $deposits,
@@ -214,8 +219,10 @@ class MemberController extends Controller
         ]);
     }
 
-    public function loans(Request $request, string $memberNumber)
+    public function loans(Request $request, string $encryptedMemberNumber)
     {
+        $memberNumber = $this->encryptedIdService->decrypt($encryptedMemberNumber);
+        
         Gate::authorize('view-member-data', $memberNumber);
 
         $member = $this->googleSheetRepository->getMemberByNumber($memberNumber);
@@ -241,12 +248,15 @@ class MemberController extends Controller
             'member' => $member,
             'loans' => $loans,
             'memberNumber' => $memberNumber,
+            'encryptedMemberNumber' => $encryptedMemberNumber,
             'dashboardService' => $this->dashboardService,
         ]);
     }
 
-    public function savings(Request $request, string $memberNumber)
+    public function savings(Request $request, string $encryptedMemberNumber)
     {
+        $memberNumber = $this->encryptedIdService->decrypt($encryptedMemberNumber);
+        
         Gate::authorize('view-member-data', $memberNumber);
 
         $member = $this->googleSheetRepository->getMemberByNumber($memberNumber);
@@ -272,6 +282,7 @@ class MemberController extends Controller
             'member' => $member,
             'savings' => $savings,
             'memberNumber' => $memberNumber,
+            'encryptedMemberNumber' => $encryptedMemberNumber,
             'dashboardService' => $this->dashboardService,
         ]);
     }

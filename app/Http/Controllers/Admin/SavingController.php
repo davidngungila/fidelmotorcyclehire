@@ -8,6 +8,7 @@ use App\Contracts\GoogleSheetRepositoryInterface;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Services\AdminDashboardService;
+use App\Services\EncryptedIdService;
 use App\Services\MemberService;
 use App\Traits\FlashMessages;
 use Illuminate\Http\Request;
@@ -22,6 +23,7 @@ class SavingController extends Controller
         protected GoogleSheetRepositoryInterface $googleSheetRepository,
         protected MemberService $memberService,
         protected AdminDashboardService $dashboardService,
+        protected EncryptedIdService $encryptedIdService,
     ) {
     }
 
@@ -113,8 +115,10 @@ class SavingController extends Controller
         ]);
     }
 
-    public function show(Request $request, string $memberNumber)
+    public function show(Request $request, string $encryptedMemberNumber)
     {
+        $memberNumber = $this->encryptedIdService->decrypt($encryptedMemberNumber);
+        
         Gate::authorize('admin-only');
 
         $member = $this->googleSheetRepository->getMemberByNumber($memberNumber);

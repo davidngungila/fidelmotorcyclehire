@@ -68,16 +68,16 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/members', [AdminMemberController::class, 'index'])->name('members.index');
     Route::get('/members/template', [AdminMemberController::class, 'downloadTemplate'])->name('members.template');
     Route::get('/members/import/{jobId}/progress', [AdminMemberController::class, 'importProgress'])->name('members.import-progress');
-    Route::get('/members/{memberNumber}', [AdminMemberController::class, 'show'])->name('members.show');
-    Route::get('/members/{memberNumber}/loans', [AdminMemberController::class, 'loans'])->name('members.loans');
-    Route::get('/members/{memberNumber}/savings', [AdminMemberController::class, 'savings'])->name('members.savings');
+    Route::get('/members/{encryptedMemberNumber}', [AdminMemberController::class, 'show'])->name('members.show');
+    Route::get('/members/{encryptedMemberNumber}/loans', [AdminMemberController::class, 'loans'])->name('members.loans');
+    Route::get('/members/{encryptedMemberNumber}/savings', [AdminMemberController::class, 'savings'])->name('members.savings');
     Route::post('/members/import', [AdminMemberController::class, 'import'])->name('members.import');
 
     Route::get('/loans', [AdminLoanController::class, 'index'])->name('loans.index');
-    Route::get('/loans/{loanNumber}', [AdminLoanController::class, 'show'])->name('loans.show');
+    Route::get('/loans/{encryptedLoanNumber}', [AdminLoanController::class, 'show'])->name('loans.show');
 
     Route::get('/savings', [AdminSavingController::class, 'index'])->name('savings.index');
-    Route::get('/savings/{memberNumber}', [AdminSavingController::class, 'show'])->name('savings.show');
+    Route::get('/savings/{encryptedMemberNumber}', [AdminSavingController::class, 'show'])->name('savings.show');
 
     Route::get('/deposits', [AdminDepositController::class, 'index'])->name('deposits.index');
     Route::get('/deposits/{certificateNumber}', [AdminDepositController::class, 'show'])->name('deposits.show');
