@@ -50,7 +50,7 @@
       <div class="flex-shrink-0">
         <div class="w-28 h-28 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 text-white flex items-center justify-center text-4xl font-bold shadow-xl ring-4 ring-white dark:ring-primary-900/40">
           @if($memberPhoto)
-            <img src="{{ $memberPhoto }}" alt="{{ $memberName }}" class="w-full h-full object-cover rounded-2xl"/>
+            <img src="{{ asset('storage/' . $memberPhoto) }}" alt="{{ $memberName }}" class="w-full h-full object-cover rounded-2xl"/>
           @else
             <svg class="w-14 h-14 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>

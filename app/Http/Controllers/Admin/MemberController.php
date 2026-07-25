@@ -46,7 +46,20 @@ class MemberController extends Controller
         }
 
         // Get members from database (imported members)
-        $dbMembers = \App\Models\Member::all()->map(function($member) {
+        $dbMembersQuery = \App\Models\Member::query();
+        
+        // Apply search filter to database members
+        if ($request->filled('q')) {
+            $searchTerm = $request->input('q');
+            $dbMembersQuery->where(function($query) use ($searchTerm) {
+                $query->where('member_number', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('full_name', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('email', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('phone', 'like', '%' . $searchTerm . '%');
+            });
+        }
+        
+        $dbMembers = $dbMembersQuery->get()->map(function($member) {
             return [
                 'member_number' => $member->member_number,
                 'name' => $member->full_name,
@@ -55,6 +68,7 @@ class MemberController extends Controller
                 'email' => $member->email,
                 'branch' => $member->branch ?? '-',
                 'status' => $member->status,
+                'photo' => $member->photo,
             ];
         })->toArray();
 
@@ -143,6 +157,7 @@ class MemberController extends Controller
                 'emergency_contact_relationship' => $dbMember->emergency_contact_relationship,
                 'registration_fee' => $dbMember->registration_fee,
                 'notes' => $dbMember->notes,
+                'photo' => $dbMember->photo,
             ];
             
             // For imported members, try to get data from Google Sheets if available
