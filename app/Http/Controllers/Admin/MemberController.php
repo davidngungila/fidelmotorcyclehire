@@ -265,19 +265,52 @@ class MemberController extends Controller
         try {
             $jobId = Str::uuid()->toString();
             $file = $request->file('file');
-            $filePath = $file->storeAs('temp', 'import_' . $jobId . '.' . $file->getClientOriginalExtension());
+            
+            // Store file in public storage to ensure it's accessible
+            $filePath = $file->storeAs('imports', 'import_' . $jobId . '.' . $file->getClientOriginalExtension(), 'local');
 
-            ImportMembersJob::dispatch($filePath, Auth::id(), $jobId);
+            // Process import synchronously for reliability
+            $googleSheetRepository = $this->googleSheetRepository;
+            $import = new \App\Imports\MembersImport($googleSheetRepository);
+            
+            // Get full storage path
+            $fullPath = storage_path('app/' . $filePath);
+            
+            Excel::import($import, $fullPath);
+
+            $importedCount = $import->getImportedCount();
+            $errors = $import->getErrors();
+            $createdUsers = $import->getCreatedUsers();
+
+            // Clean up file
+            if (file_exists($fullPath)) {
+                unlink($fullPath);
+            }
+
+            // Log activity
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'description' => 'Admin imported members from Excel',
+                'properties' => [
+                    'imported_count' => $importedCount,
+                    'created_users_count' => count($createdUsers),
+                    'created_users' => $createdUsers,
+                    'errors_count' => count($errors),
+                    'errors' => $errors,
+                ],
+            ]);
 
             return response()->json([
                 'success' => true,
                 'job_id' => $jobId,
-                'message' => 'Import started successfully'
+                'message' => 'Import completed successfully',
+                'imported' => $importedCount,
+                'errors' => $errors,
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to start import: ' . $e->getMessage()
+                'message' => 'Failed to import: ' . $e->getMessage()
             ], 500);
         }
     }
