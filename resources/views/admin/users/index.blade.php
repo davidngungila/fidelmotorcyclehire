@@ -5,71 +5,7 @@
 
 @section('content')
 
-<div x-data="{
-  searchQuery: @json($searchQuery ?? ''),
-  showPasswordModal: false,
-  showConfirmModal: false,
-  newPassword: '',
-  userName: '',
-  userIdToReset: null,
-  changePerPage(value) {
-    const params = new URLSearchParams(window.location.search);
-    params.set('per_page', value);
-    params.delete('page');
-    window.location.href = window.location.pathname + '?' + params.toString();
-  },
-  confirmDelete(form, userName) {
-    if (confirm('Are you sure you want to delete user "' + userName + '"? This action cannot be undone.')) {
-      form.submit();
-    }
-  },
-  openConfirmModal(userId, userName) {
-    this.userIdToReset = userId;
-    this.userName = userName;
-    this.showConfirmModal = true;
-  },
-  closeConfirmModal() {
-    this.showConfirmModal = false;
-    this.userIdToReset = null;
-    this.userName = '';
-  },
-  async confirmReset() {
-    this.showConfirmModal = false;
-    
-    try {
-      const response = await fetch('/admin/users/' + this.userIdToReset + '/reset-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        }
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        this.newPassword = data.new_password;
-        this.userName = data.user_name;
-        this.showPasswordModal = true;
-      } else {
-        alert('Failed to reset password: ' + data.message);
-      }
-    } catch (error) {
-      alert('Error resetting password: ' + error.message);
-    }
-    
-    this.userIdToReset = null;
-  },
-  copyPassword() {
-    navigator.clipboard.writeText(this.newPassword);
-    alert('Password copied to clipboard!');
-  },
-  closePasswordModal() {
-    this.showPasswordModal = false;
-    this.newPassword = '';
-    this.userName = '';
-  }
-}" class="space-y-6">
+<div x-data="usersList()" class="space-y-6">
 
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div class="flex flex-col sm:flex-row sm:items-center gap-3 flex-1 max-w-2xl">
@@ -379,5 +315,77 @@
     </div>
   </div>
 </div>
+
+@push('scripts')
+<script>
+  function usersList() {
+    return {
+      searchQuery: @json($searchQuery ?? ''),
+      showPasswordModal: false,
+      showConfirmModal: false,
+      newPassword: '',
+      userName: '',
+      userIdToReset: null,
+      changePerPage(value) {
+        const params = new URLSearchParams(window.location.search);
+        params.set('per_page', value);
+        params.delete('page');
+        window.location.href = window.location.pathname + '?' + params.toString();
+      },
+      confirmDelete(form, userName) {
+        if (confirm('Are you sure you want to delete user "' + userName + '"? This action cannot be undone.')) {
+          form.submit();
+        }
+      },
+      openConfirmModal(userId, userName) {
+        this.userIdToReset = userId;
+        this.userName = userName;
+        this.showConfirmModal = true;
+      },
+      closeConfirmModal() {
+        this.showConfirmModal = false;
+        this.userIdToReset = null;
+        this.userName = '';
+      },
+      async confirmReset() {
+        this.showConfirmModal = false;
+        
+        try {
+          const response = await fetch('/admin/users/' + this.userIdToReset + '/reset-password', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            this.newPassword = data.new_password;
+            this.userName = data.user_name;
+            this.showPasswordModal = true;
+          } else {
+            alert('Failed to reset password: ' + data.message);
+          }
+        } catch (error) {
+          alert('Error resetting password: ' + error.message);
+        }
+        
+        this.userIdToReset = null;
+      },
+      copyPassword() {
+        navigator.clipboard.writeText(this.newPassword);
+        alert('Password copied to clipboard!');
+      },
+      closePasswordModal() {
+        this.showPasswordModal = false;
+        this.newPassword = '';
+        this.userName = '';
+      }
+    }
+  }
+</script>
+@endpush
 
 @endsection
