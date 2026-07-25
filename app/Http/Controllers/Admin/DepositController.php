@@ -201,7 +201,7 @@ class DepositController extends Controller
         ActivityLog::create([
             'user_id' => Auth::id(),
             'subject_type' => 'deposit',
-            'subject_id' => $certificateNumber,
+            'subject_id' => null,
             'description' => "Admin viewed deposit: {$certificateNumber}",
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
