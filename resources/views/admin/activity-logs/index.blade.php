@@ -35,25 +35,25 @@
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="text-xs font-semibold text-gray-500 dark:text-gray-400">Date & Time</label>
-            <p class="text-sm text-gray-900 dark:text-white" x-text="selectedLog?.created_at"></p>
+            <p class="text-sm text-gray-900 dark:text-white break-words" x-text="selectedLog?.created_at"></p>
           </div>
           <div>
             <label class="text-xs font-semibold text-gray-500 dark:text-gray-400">IP Address</label>
-            <p class="text-sm text-gray-900 dark:text-white" x-text="selectedLog?.ip_address"></p>
+            <p class="text-sm text-gray-900 dark:text-white break-words" x-text="selectedLog?.ip_address"></p>
           </div>
         </div>
         <div>
           <label class="text-xs font-semibold text-gray-500 dark:text-gray-400">User</label>
-          <p class="text-sm text-gray-900 dark:text-white" x-text="selectedLog?.user_name"></p>
-          <p class="text-xs text-gray-500 dark:text-gray-400" x-text="selectedLog?.user_email"></p>
+          <p class="text-sm text-gray-900 dark:text-white break-words" x-text="selectedLog?.user_name"></p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 break-words" x-text="selectedLog?.user_email"></p>
         </div>
         <div>
           <label class="text-xs font-semibold text-gray-500 dark:text-gray-400">Action / Description</label>
-          <p class="text-sm text-gray-900 dark:text-white" x-text="selectedLog?.description"></p>
+          <p class="text-sm text-gray-900 dark:text-white break-words" x-text="selectedLog?.description"></p>
         </div>
         <div>
           <label class="text-xs font-semibold text-gray-500 dark:text-gray-400">Subject</label>
-          <p class="text-sm text-gray-900 dark:text-white" x-text="selectedLog?.subject"></p>
+          <p class="text-sm text-gray-900 dark:text-white break-words" x-text="selectedLog?.subject"></p>
         </div>
         <div>
           <label class="text-xs font-semibold text-gray-500 dark:text-gray-400">User Agent</label>
@@ -61,7 +61,7 @@
         </div>
         <div x-show="selectedLog?.properties">
           <label class="text-xs font-semibold text-gray-500 dark:text-gray-400">Properties</label>
-          <div class="p-3 rounded-xl bg-gray-900 border border-gray-800 overflow-x-auto max-h-48">
+          <div class="p-3 rounded-xl bg-gray-900 border border-gray-800 overflow-x-auto max-h-48 overflow-y-auto">
             <pre class="text-[10px] leading-relaxed text-green-300 whitespace-pre-wrap break-all" x-text="selectedLog?.properties_json"></pre>
           </div>
         </div>
