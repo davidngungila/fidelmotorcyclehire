@@ -7,6 +7,68 @@
 
 <div x-data="activityLogsList()" class="space-y-6">
 
+  <!-- Activity Log Details Modal -->
+  <div x-show="showModal" 
+       x-transition:enter="transition ease-out duration-300"
+       x-transition:enter-start="opacity-0"
+       x-transition:enter-end="opacity-100"
+       x-transition:leave="transition ease-in duration-200"
+       x-transition:leave-start="opacity-100"
+       x-transition:leave-end="opacity-0"
+       class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+       style="display: none;">
+    <div x-show="showModal"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Activity Log Details</h3>
+        <button @click="closeModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
+      <div class="space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="text-xs font-semibold text-gray-500 dark:text-gray-400">Date & Time</label>
+            <p class="text-sm text-gray-900 dark:text-white" x-text="selectedLog?.created_at"></p>
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-gray-500 dark:text-gray-400">IP Address</label>
+            <p class="text-sm text-gray-900 dark:text-white" x-text="selectedLog?.ip_address"></p>
+          </div>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-gray-500 dark:text-gray-400">User</label>
+          <p class="text-sm text-gray-900 dark:text-white" x-text="selectedLog?.user_name"></p>
+          <p class="text-xs text-gray-500 dark:text-gray-400" x-text="selectedLog?.user_email"></p>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-gray-500 dark:text-gray-400">Action / Description</label>
+          <p class="text-sm text-gray-900 dark:text-white" x-text="selectedLog?.description"></p>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-gray-500 dark:text-gray-400">Subject</label>
+          <p class="text-sm text-gray-900 dark:text-white" x-text="selectedLog?.subject"></p>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-gray-500 dark:text-gray-400">User Agent</label>
+          <p class="text-xs text-gray-900 dark:text-white break-all" x-text="selectedLog?.user_agent"></p>
+        </div>
+        <div x-show="selectedLog?.properties">
+          <label class="text-xs font-semibold text-gray-500 dark:text-gray-400">Properties</label>
+          <div class="p-3 rounded-xl bg-gray-900 border border-gray-800 overflow-x-auto max-h-48">
+            <pre class="text-[10px] leading-relaxed text-green-300 whitespace-pre-wrap break-all" x-text="selectedLog?.properties_json"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="glass p-5 lg:p-6">
     <form method="GET" action="{{ route('admin.activity-logs.index') }}" class="space-y-4">
       <div class="flex items-center justify-between mb-1">
@@ -101,6 +163,7 @@
               <th>Subject</th>
               <th>Properties</th>
               <th>User Agent</th>
+              <th class="text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -195,6 +258,12 @@
                     <span class="text-[11px] text-primary-400 dark:text-primary-600 italic">-</span>
                   @endif
                 </td>
+                <td class="pt-3 text-right">
+                  <button @click="viewDetails({{ $log->id }}, '{{ addslashes($log->created_at ? $log->created_at->format('d M Y H:i:s') : '-') }}', '{{ addslashes($userName) }}', '{{ addslashes($userEmail) }}', '{{ addslashes($log->description) }}', '{{ addslashes($subjectLabel) }}', '{{ addslashes($log->ip_address ?? '-') }}', '{{ addslashes($log->user_agent ?? '-') }}', '{{ addslashes($propertiesJson) }}')"
+                          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-50 hover:bg-primary-100 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-[11px] font-bold transition-colors">
+                    <i class="fa-solid fa-eye text-[10px]"></i> View Details
+                  </button>
+                </td>
               </tr>
             @endforeach
           </tbody>
@@ -285,11 +354,32 @@
 <script>
   function activityLogsList() {
     return {
+      showModal: false,
+      selectedLog: null,
       changePerPage(value) {
         const params = new URLSearchParams(window.location.search);
         params.set('per_page', value);
         params.delete('page');
         window.location.href = window.location.pathname + '?' + params.toString();
+      },
+      viewDetails(id, createdAt, userName, userEmail, description, subject, ipAddress, userAgent, propertiesJson) {
+        this.selectedLog = {
+          id: id,
+          created_at: createdAt,
+          user_name: userName,
+          user_email: userEmail,
+          description: description,
+          subject: subject,
+          ip_address: ipAddress,
+          user_agent: userAgent,
+          properties: propertiesJson && propertiesJson !== '' ? true : false,
+          properties_json: propertiesJson
+        };
+        this.showModal = true;
+      },
+      closeModal() {
+        this.showModal = false;
+        this.selectedLog = null;
       }
     }
   }
