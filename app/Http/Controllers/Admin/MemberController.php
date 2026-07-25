@@ -176,6 +176,13 @@ class MemberController extends Controller
                 return redirect()->route('admin.members.index');
             }
 
+            // Add photo field if available in Google Sheets data
+            if (isset($member['photo'])) {
+                $member['photo'] = $member['photo'];
+            } elseif (isset($member['Photo'])) {
+                $member['photo'] = $member['Photo'];
+            }
+
             $loans = $this->googleSheetRepository->getMemberLoans($memberNumber);
             $savings = $this->googleSheetRepository->getMemberSavings($memberNumber);
             $deposits = $this->googleSheetRepository->getMemberDeposits($memberNumber);
