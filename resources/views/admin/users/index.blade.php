@@ -303,7 +303,7 @@
         }
         
         try {
-          const response = await fetch('{{ route('admin.users.reset-password', '') }}'.replace(':id', userId), {
+          const response = await fetch('/admin/users/' + userId + '/reset-password', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
