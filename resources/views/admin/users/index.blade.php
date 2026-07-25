@@ -136,7 +136,7 @@
               </td>
               <td class="text-right whitespace-nowrap">
                 <div class="flex items-center justify-end gap-2">
-                  <button @click="resetPassword({{ $user->id }}, '{{ addslashes($user->name) }}')"
+                  <button @click="openConfirmModal({{ $user->id }}, '{{ addslashes($user->name) }}')"
                           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 text-amber-700 dark:text-amber-300 text-[11px] font-bold transition-colors border border-amber-200 dark:border-amber-800/40">
                     <i class="fa-solid fa-key text-[10px]"></i> Reset Password
                   </button>
@@ -233,6 +233,46 @@
   </div>
 </div>
 
+<!-- Password Reset Confirmation Modal -->
+<div x-show="showConfirmModal" 
+     x-transition:enter="transition ease-out duration-300"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition ease-in duration-200"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0"
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+     style="display: none;">
+  <div x-show="showConfirmModal"
+       x-transition:enter="transition ease-out duration-300"
+       x-transition:enter-start="opacity-0 scale-95"
+       x-transition:enter-end="opacity-100 scale-100"
+       x-transition:leave="transition ease-in duration-200"
+       x-transition:leave-start="opacity-100 scale-100"
+       x-transition:leave-end="opacity-0 scale-95"
+       class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4">
+    <div class="text-center">
+      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
+        <i class="fa-solid fa-key text-2xl text-amber-600 dark:text-amber-400"></i>
+      </div>
+      <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Reset Password?</h3>
+      <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
+        Are you sure you want to reset the password for <span class="font-semibold text-gray-900 dark:text-white" x-text="userName"></span>?
+      </p>
+      <div class="flex gap-3">
+        <button @click="closeConfirmModal()"
+                class="flex-1 px-4 py-2.5 rounded-lg bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white text-sm font-bold transition-colors">
+          Cancel
+        </button>
+        <button @click="confirmReset()"
+                class="flex-1 px-4 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-sm font-bold transition-colors">
+          <i class="fa-solid fa-key mr-2"></i> Reset Password
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Password Reset Modal -->
 <div x-show="showPasswordModal" 
      x-transition:enter="transition ease-out duration-300"
@@ -284,8 +324,10 @@
     return {
       searchQuery: @json($searchQuery ?? ''),
       showPasswordModal: false,
+      showConfirmModal: false,
       newPassword: '',
       userName: '',
+      userIdToReset: null,
       changePerPage(value) {
         const params = new URLSearchParams(window.location.search);
         params.set('per_page', value);
@@ -297,13 +339,21 @@
           form.submit();
         }
       },
-      async resetPassword(userId, userName) {
-        if (!confirm('Are you sure you want to reset the password for "' + userName + '"?')) {
-          return;
-        }
+      openConfirmModal(userId, userName) {
+        this.userIdToReset = userId;
+        this.userName = userName;
+        this.showConfirmModal = true;
+      },
+      closeConfirmModal() {
+        this.showConfirmModal = false;
+        this.userIdToReset = null;
+        this.userName = '';
+      },
+      async confirmReset() {
+        this.showConfirmModal = false;
         
         try {
-          const response = await fetch('/admin/users/' + userId + '/reset-password', {
+          const response = await fetch('/admin/users/' + this.userIdToReset + '/reset-password', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -323,6 +373,8 @@
         } catch (error) {
           alert('Error resetting password: ' + error.message);
         }
+        
+        this.userIdToReset = null;
       },
       copyPassword() {
         navigator.clipboard.writeText(this.newPassword);
