@@ -525,11 +525,13 @@ class GoogleSheetRepository implements GoogleSheetRepositoryInterface
             throw new InvalidArgumentException('Member number cannot be empty.');
         }
 
-        if (strlen($memberNumber) > 50) {
-            throw new InvalidArgumentException('Member number cannot exceed 50 characters.');
+        // Allow longer strings for encrypted IDs (up to 500 chars for encrypted data)
+        if (strlen($memberNumber) > 500) {
+            throw new InvalidArgumentException('Member number cannot exceed 500 characters.');
         }
 
-        if (! preg_match('/^[A-Za-z0-9_-]+$/', $memberNumber)) {
+        // Allow encrypted strings (base64-like with special chars) or regular member numbers
+        if (! preg_match('/^[A-Za-z0-9_\-+\/=]+$/', $memberNumber)) {
             throw new InvalidArgumentException('Member number contains invalid characters.');
         }
 

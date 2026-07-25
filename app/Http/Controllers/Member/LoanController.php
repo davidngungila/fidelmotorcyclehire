@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Member;
 use App\Contracts\GoogleSheetRepositoryInterface;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Services\EncryptedIdService;
 use App\Traits\FlashMessages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,6 +20,7 @@ class LoanController extends Controller
 
     public function __construct(
         protected GoogleSheetRepositoryInterface $repository,
+        protected EncryptedIdService $encryptedIdService,
     ) {}
 
     public function index(Request $request): View
@@ -67,8 +69,10 @@ class LoanController extends Controller
         ));
     }
 
-    public function show(Request $request, string $loanNumber): View
+    public function show(Request $request, string $encryptedLoanNumber): View
     {
+        $loanNumber = $this->encryptedIdService->decrypt($encryptedLoanNumber);
+        
         Gate::authorize('member-only');
 
         $user = Auth::user();

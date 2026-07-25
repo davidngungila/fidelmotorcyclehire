@@ -10,6 +10,7 @@ use App\Http\Requests\UpdateUserRequest;
 use App\Models\ActivityLog;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\EncryptedIdService;
 use App\Traits\FlashMessages;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -19,6 +20,11 @@ use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
     use FlashMessages;
+
+    public function __construct(
+        protected EncryptedIdService $encryptedIdService,
+    ) {
+    }
 
     public function index(Request $request)
     {
@@ -121,8 +127,10 @@ class UserController extends Controller
         return redirect()->route('admin.users.index');
     }
 
-    public function edit(Request $request, int $id)
+    public function edit(Request $request, string $encryptedId)
     {
+        $id = (int) $this->encryptedIdService->decrypt($encryptedId);
+        
         $user = User::with('roles')->findOrFail($id);
 
         ActivityLog::create([
@@ -142,8 +150,10 @@ class UserController extends Controller
         ]);
     }
 
-    public function update(UpdateUserRequest $request, int $id)
+    public function update(UpdateUserRequest $request, string $encryptedId)
     {
+        $id = (int) $this->encryptedIdService->decrypt($encryptedId);
+        
         $user = User::findOrFail($id);
         $validated = $request->validated();
 
@@ -194,8 +204,10 @@ class UserController extends Controller
         return redirect()->route('admin.users.index');
     }
 
-    public function destroy(Request $request, int $id)
+    public function destroy(Request $request, string $encryptedId)
     {
+        $id = (int) $this->encryptedIdService->decrypt($encryptedId);
+        
         $user = User::findOrFail($id);
         $userName = $user->name;
         $userId = $user->id;
@@ -233,8 +245,10 @@ class UserController extends Controller
         return redirect()->route('admin.users.index');
     }
 
-    public function resetPassword(Request $request, int $id)
+    public function resetPassword(Request $request, string $encryptedId)
     {
+        $id = (int) $this->encryptedIdService->decrypt($encryptedId);
+        
         $user = User::findOrFail($id);
         
         // Generate a random password

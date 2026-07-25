@@ -8,6 +8,7 @@ use App\Contracts\GoogleSheetRepositoryInterface;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Services\AdminDashboardService;
+use App\Services\EncryptedIdService;
 use App\Services\MemberService;
 use App\Traits\FlashMessages;
 use Illuminate\Http\Request;
@@ -22,6 +23,7 @@ class DepositController extends Controller
         protected GoogleSheetRepositoryInterface $googleSheetRepository,
         protected MemberService $memberService,
         protected AdminDashboardService $dashboardService,
+        protected EncryptedIdService $encryptedIdService,
     ) {
     }
 
@@ -107,8 +109,10 @@ class DepositController extends Controller
         ]);
     }
 
-    public function show(Request $request, string $certificateNumber)
+    public function show(Request $request, string $encryptedCertificateNumber)
     {
+        $certificateNumber = $this->encryptedIdService->decrypt($encryptedCertificateNumber);
+        
         Gate::authorize('admin-only');
 
         $allMembers = $this->googleSheetRepository->getAllMembers();

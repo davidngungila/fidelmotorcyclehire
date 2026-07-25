@@ -80,16 +80,16 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/savings/{encryptedMemberNumber}', [AdminSavingController::class, 'show'])->name('savings.show');
 
     Route::get('/deposits', [AdminDepositController::class, 'index'])->name('deposits.index');
-    Route::get('/deposits/{certificateNumber}', [AdminDepositController::class, 'show'])->name('deposits.show');
+    Route::get('/deposits/{encryptedCertificateNumber}', [AdminDepositController::class, 'show'])->name('deposits.show');
 
     Route::get('/swf', [AdminSwfController::class, 'index'])->name('swf.index');
-    Route::get('/swf/{memberNumber}', [AdminSwfController::class, 'show'])->name('swf.show');
+    Route::get('/swf/{encryptedMemberNumber}', [AdminSwfController::class, 'show'])->name('swf.show');
 
     Route::get('/investments', [AdminInvestmentController::class, 'index'])->name('investments.index');
-    Route::get('/investments/{memberNumber}', [AdminInvestmentController::class, 'show'])->name('investments.show');
+    Route::get('/investments/{encryptedMemberNumber}', [AdminInvestmentController::class, 'show'])->name('investments.show');
 
     Route::get('/shares', [AdminShareController::class, 'index'])->name('shares.index');
-    Route::get('/shares/{memberNumber}', [AdminShareController::class, 'show'])->name('shares.show');
+    Route::get('/shares/{encryptedMemberNumber}', [AdminShareController::class, 'show'])->name('shares.show');
 
     Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
     Route::post('/reports/generate', [AdminReportController::class, 'generate'])->name('reports.generate');
@@ -97,10 +97,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
     Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
     Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
-    Route::get('/users/{id}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
-    Route::put('/users/{id}', [AdminUserController::class, 'update'])->name('users.update');
-    Route::delete('/users/{id}', [AdminUserController::class, 'destroy'])->name('users.destroy');
-    Route::post('/users/{id}/reset-password', [AdminUserController::class, 'resetPassword'])->name('users.reset-password');
+    Route::get('/users/{encryptedId}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
+    Route::put('/users/{encryptedId}', [AdminUserController::class, 'update'])->name('users.update');
+    Route::delete('/users/{encryptedId}', [AdminUserController::class, 'destroy'])->name('users.destroy');
+    Route::post('/users/{encryptedId}/reset-password', [AdminUserController::class, 'resetPassword'])->name('users.reset-password');
 
     Route::get('/settings', [AdminSettingController::class, 'index'])->name('settings.index');
     Route::put('/settings', [AdminSettingController::class, 'update'])->name('settings.update');
@@ -137,12 +137,12 @@ Route::prefix('member')->middleware(['auth', 'role:member', 'member.isolation'])
     Route::put('/profile', [MemberProfileController::class, 'update'])->name('profile.update');
 
     Route::get('/loans', [MemberLoanController::class, 'index'])->name('loans.index');
-    Route::get('/loans/{loanNumber}', [MemberLoanController::class, 'show'])->name('loans.show');
+    Route::get('/loans/{encryptedLoanNumber}', [MemberLoanController::class, 'show'])->name('loans.show');
 
     Route::get('/savings', [MemberSavingController::class, 'index'])->name('savings.index');
 
     Route::get('/deposits', [MemberDepositController::class, 'index'])->name('deposits.index');
-    Route::get('/deposits/{certificateNumber}', [MemberDepositController::class, 'show'])->name('deposits.show');
+    Route::get('/deposits/{encryptedCertificateNumber}', [MemberDepositController::class, 'show'])->name('deposits.show');
 
     Route::get('/swf', [MemberSwfController::class, 'index'])->name('swf.index');
 
