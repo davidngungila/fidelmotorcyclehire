@@ -2,7 +2,7 @@
 
 @section('layout_content')
 
-<div class="flex h-screen overflow-hidden" x-data="{ loading: false }">
+<div class="flex h-screen overflow-hidden" x-data="{ loading: false }" x-init="document.addEventListener('click', (e) => { const target = e.target; if (target.tagName === 'A' || target.tagName === 'BUTTON' || target.closest('a') || target.closest('button') || target.closest('form')) { const link = target.closest('a'); const button = target.closest('button'); const form = target.closest('form'); if (link && (link.getAttribute('href')?.startsWith('#') || link.getAttribute('href') === 'javascript:void(0)')) return; if (button && button.type === 'button' && !button.getAttribute('onclick')) return; if (form && form.method !== 'get' && form.method !== 'post') return; loading = true; setTimeout(() => loading = false, 5000); } });">
 
   <!-- Loading Overlay -->
   <div x-show="loading" x-transition:enter="transition ease-out duration-200"
