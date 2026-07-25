@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\EmailSettings;
 use App\Models\GoogleSheetsConfig;
 use App\Traits\FlashMessages;
 use Illuminate\Http\Request;
@@ -55,6 +56,8 @@ class SettingController extends Controller
             'require_strong_password' => $cachedSettings['require_strong_password'] ?? true,
         ];
 
+        $emailSettings = EmailSettings::first() ?? new EmailSettings();
+
         ActivityLog::create([
             'user_id' => Auth::id(),
             'description' => 'Admin viewed settings page',
@@ -67,13 +70,14 @@ class SettingController extends Controller
             'notificationSettings' => $notificationSettings,
             'googleSheetsSettings' => $googleSheetsSettings,
             'securitySettings' => $securitySettings,
+            'emailSettings' => $emailSettings,
         ]);
     }
 
     public function update(Request $request)
     {
         $validated = $request->validate([
-            'tab' => ['required', 'in:general,notifications,google_sheets,security'],
+            'tab' => ['required', 'in:general,notifications,google_sheets,security,email'],
             'app_name' => ['nullable', 'string', 'max:255'],
             'support_email' => ['nullable', 'email'],
             'timezone' => ['nullable', 'string'],
@@ -97,10 +101,53 @@ class SettingController extends Controller
             'login_attempts' => ['nullable', 'integer', 'min:1', 'max:20'],
             'lockout_minutes' => ['nullable', 'integer', 'min:1', 'max:1440'],
             'require_strong_password' => ['nullable', 'boolean'],
+            // Email settings
+            'mail_driver' => ['nullable', 'string', 'in:smtp,mailgun,ses,sendmail'],
+            'mail_host' => ['nullable', 'string'],
+            'mail_port' => ['nullable', 'integer'],
+            'mail_username' => ['nullable', 'string'],
+            'mail_password' => ['nullable', 'string'],
+            'mail_encryption' => ['nullable', 'string', 'in:tls,ssl,null'],
+            'mail_from_address' => ['nullable', 'email'],
+            'mail_from_name' => ['nullable', 'string'],
+            'is_active' => ['nullable', 'boolean'],
         ]);
 
         $tab = $validated['tab'];
         unset($validated['tab']);
+
+        // Handle email settings separately
+        if ($tab === 'email') {
+            $emailSettings = EmailSettings::first();
+            if (! $emailSettings) {
+                $emailSettings = new EmailSettings();
+            }
+            
+            $emailSettings->fill([
+                'mail_driver' => $validated['mail_driver'] ?? 'smtp',
+                'mail_host' => $validated['mail_host'] ?? 'smtp.mailtrap.io',
+                'mail_port' => $validated['mail_port'] ?? 2525,
+                'mail_username' => $validated['mail_username'] ?? null,
+                'mail_password' => $validated['mail_password'] ?? null,
+                'mail_encryption' => $validated['mail_encryption'] ?? 'tls',
+                'mail_from_address' => $validated['mail_from_address'] ?? 'noreply@example.com',
+                'mail_from_name' => $validated['mail_from_name'] ?? 'Member Portal',
+                'is_active' => $validated['is_active'] ?? true,
+            ]);
+            $emailSettings->save();
+
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'description' => 'Admin updated email settings',
+                'subject_type' => 'email_settings',
+                'subject_id' => $emailSettings->id,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            $this->success('Email settings saved successfully.');
+            return redirect()->back();
+        }
 
         $settings = Cache::get('admin_settings', []);
         $updatedFields = [];

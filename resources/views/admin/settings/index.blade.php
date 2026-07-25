@@ -359,6 +359,111 @@
         </form>
       </div>
 
+      <div x-show="activeTab === 'email'" style="display:none"
+           x-transition:enter="transition ease-out duration-200"
+           x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0">
+        <form method="POST" action="{{ route('admin.settings.update') }}" class="space-y-6">
+          @csrf
+          @method('PUT')
+          <input type="hidden" name="tab" value="email">
+
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-400 to-purple-600 text-white flex items-center justify-center text-xl shadow-md">
+              <i class="fa-solid fa-envelope"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-lg" :class="darkMode ? 'text-white' : 'text-primary-900'">Email Configuration</h3>
+              <p class="text-xs mt-0.5" :class="darkMode ? 'text-primary-400' : 'text-primary-600'">SMTP settings for password reset and notifications</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Mail Driver</label>
+              <select name="mail_driver" class="form-input">
+                <option value="smtp" {{ $emailSettings->mail_driver === 'smtp' ? 'selected' : '' }}>SMTP</option>
+                <option value="mailgun" {{ $emailSettings->mail_driver === 'mailgun' ? 'selected' : '' }}>Mailgun</option>
+                <option value="ses" {{ $emailSettings->mail_driver === 'ses' ? 'selected' : '' }}>Amazon SES</option>
+                <option value="sendmail" {{ $emailSettings->mail_driver === 'sendmail' ? 'selected' : '' }}>Sendmail</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Mail Host</label>
+              <input type="text" name="mail_host" value="{{ $emailSettings->mail_host ?? 'smtp.mailtrap.io' }}"
+                     class="form-input" placeholder="smtp.mailtrap.io">
+            </div>
+
+            <div>
+              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Mail Port</label>
+              <input type="number" name="mail_port" value="{{ $emailSettings->mail_port ?? 2525 }}"
+                     class="form-input" placeholder="2525">
+            </div>
+
+            <div>
+              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Encryption</label>
+              <select name="mail_encryption" class="form-input">
+                <option value="tls" {{ $emailSettings->mail_encryption === 'tls' ? 'selected' : '' }}>TLS</option>
+                <option value="ssl" {{ $emailSettings->mail_encryption === 'ssl' ? 'selected' : '' }}>SSL</option>
+                <option value="null" {{ $emailSettings->mail_encryption === 'null' || !$emailSettings->mail_encryption ? 'selected' : '' }}>None</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Username</label>
+              <input type="text" name="mail_username" value="{{ $emailSettings->mail_username ?? '' }}"
+                     class="form-input" placeholder="SMTP username">
+            </div>
+
+            <div>
+              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Password</label>
+              <input type="password" name="mail_password" value="{{ $emailSettings->mail_password ?? '' }}"
+                     class="form-input" placeholder="SMTP password">
+            </div>
+
+            <div>
+              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">From Address</label>
+              <input type="email" name="mail_from_address" value="{{ $emailSettings->mail_from_address ?? 'noreply@example.com' }}"
+                     class="form-input" placeholder="noreply@example.com">
+            </div>
+
+            <div>
+              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">From Name</label>
+              <input type="text" name="mail_from_name" value="{{ $emailSettings->mail_from_name ?? 'Member Portal' }}"
+                     class="form-input" placeholder="Member Portal">
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between p-4 rounded-xl border border-primary-100 dark:border-primary-900/50 bg-primary-50/50 dark:bg-primary-900/20 mt-4">
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 rounded-xl bg-white dark:bg-primary-900/50 border border-primary-100 dark:border-primary-800/50 flex items-center justify-center text-primary-500">
+                <i class="fa-solid fa-power-off text-sm"></i>
+              </div>
+              <div>
+                <h4 class="text-sm font-semibold" :class="darkMode ? 'text-white' : 'text-primary-900'">Enable Email Service</h4>
+                <p class="text-xs mt-0.5" :class="darkMode ? 'text-primary-400' : 'text-primary-600'">Activate email sending for password reset and notifications</p>
+              </div>
+            </div>
+            <label x-data="{ on: {{ $emailSettings->is_active ? 'true' : 'false' }} }"
+                   class="relative inline-flex items-center cursor-pointer">
+              <input type="hidden" :value="on ? 1 : 0" name="is_active">
+              <input type="checkbox" class="sr-only peer" :checked="on" @change="on = !on; $el.previousElementSibling.value = on ? 1 : 0">
+              <div class="w-12 h-7 rounded-full transition-colors bg-gray-200 dark:bg-gray-700 peer-checked:bg-primary-600"></div>
+              <div class="absolute left-0.5 top-0.5 w-6 h-6 bg-white rounded-full shadow-md transition-transform peer-checked:translate-x-5 flex items-center justify-center">
+                <i :class="on ? 'fa-solid fa-check text-primary-600' : 'fa-solid fa-xmark text-gray-400'" class="text-[10px]"></i>
+              </div>
+            </label>
+          </div>
+
+          <div class="pt-6 mt-6 border-t border-primary-100 dark:border-primary-900/50 flex justify-end">
+            <button type="submit"
+                    class="px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95">
+              <i class="fa-solid fa-envelope mr-1.5 text-[13px]"></i> Save Email Settings
+            </button>
+          </div>
+        </form>
+      </div>
+
     </div>
   </div>
 </div>
@@ -375,6 +480,7 @@
         { key: 'notifications', label: 'Notifications', icon: 'fa-solid fa-bell' },
         { key: 'google_sheets', label: 'Google Sheets', icon: 'fa-brands fa-google' },
         { key: 'security', label: 'Security', icon: 'fa-solid fa-shield-halved' },
+        { key: 'email', label: 'Email', icon: 'fa-solid fa-envelope' },
       ]
     }
   }
