@@ -160,9 +160,6 @@
               <th>User</th>
               <th>Action / Description</th>
               <th>IP Address</th>
-              <th>Subject</th>
-              <th>Properties</th>
-              <th>User Agent</th>
               <th class="text-right">Actions</th>
             </tr>
           </thead>
@@ -221,45 +218,17 @@
                   </span>
                 </td>
 
-                <td class="pt-3">
-                  @if($subjectLabel !== '-')
-                    <span class="badge badge-blue text-[10px] whitespace-nowrap">{{ $subjectLabel }}</span>
-                  @else
-                    <span class="text-[11px] text-primary-400 dark:text-primary-600 italic">-</span>
-                  @endif
-                </td>
-
-                <td class="pt-3" x-data="{ open{{ $log->id }}: false }">
-                  @if($hasProperties)
-                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary-50 dark:bg-primary-900/40 border border-primary-100 dark:border-primary-800/50">
-                      <button @click="open{{ $log->id }} = !open{{ $log->id }}"
-                              class="text-[10px] font-bold text-primary-700 dark:text-primary-300 hover:text-primary-600 transition-colors inline-flex items-center gap-1">
-                        <i class="fa-solid fa-brackets-curly text-[9px]"></i>
-                        {{ count($log->properties) }} keys
-                        <i :class="open{{ $log->id }} ? 'fa-chevron-up' : 'fa-chevron-down'" class="fa-solid text-[9px] ml-0.5"></i>
-                      </button>
-                    </div>
-                    <div x-show="open{{ $log->id }}" x-collapse class="mt-2">
-                      <div class="p-3 rounded-xl bg-gray-900 border border-gray-800 overflow-x-auto max-w-sm">
-                        <pre class="text-[10px] leading-relaxed text-green-300 whitespace-pre-wrap break-all">{{ $propertiesJson }}</pre>
-                      </div>
-                    </div>
-                  @else
-                    <span class="text-[11px] text-primary-400 dark:text-primary-600 italic">-</span>
-                  @endif
-                </td>
-
-                <td class="pt-3">
-                  @if($log->user_agent)
-                    <span class="text-[10px] text-primary-600 dark:text-primary-400 block max-w-[180px] truncate" title="{{ $log->user_agent }}">
-                      {{ \Illuminate\Support\Str::limit($log->user_agent, 50, '...') }}
-                    </span>
-                  @else
-                    <span class="text-[11px] text-primary-400 dark:text-primary-600 italic">-</span>
-                  @endif
-                </td>
                 <td class="pt-3 text-right">
-                  <button @click="viewDetails({{ $log->id }}, '{{ addslashes($log->created_at ? $log->created_at->format('d M Y H:i:s') : '-') }}', '{{ addslashes($userName) }}', '{{ addslashes($userEmail) }}', '{{ addslashes($log->description) }}', '{{ addslashes($subjectLabel) }}', '{{ addslashes($log->ip_address ?? '-') }}', '{{ addslashes($log->user_agent ?? '-') }}', '{{ addslashes($propertiesJson) }}')"
+                  <button @click="viewDetails($event)"
+                          :data-log-id="{{ $log->id }}"
+                          :data-created-at="{{ $log->created_at ? $log->created_at->format('d M Y H:i:s') : '-' }}"
+                          :data-user-name="{{ addslashes($userName) }}"
+                          :data-user-email="{{ addslashes($userEmail) }}"
+                          :data-description="{{ addslashes($log->description) }}"
+                          :data-subject="{{ addslashes($subjectLabel) }}"
+                          :data-ip-address="{{ addslashes($log->ip_address ?? '-') }}"
+                          :data-user-agent="{{ addslashes($log->user_agent ?? '-') }}"
+                          :data-properties="{{ json_encode($propertiesJson) }}"
                           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-50 hover:bg-primary-100 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-[11px] font-bold transition-colors">
                     <i class="fa-solid fa-eye text-[10px]"></i> View Details
                   </button>
@@ -362,18 +331,19 @@
         params.delete('page');
         window.location.href = window.location.pathname + '?' + params.toString();
       },
-      viewDetails(id, createdAt, userName, userEmail, description, subject, ipAddress, userAgent, propertiesJson) {
+      viewDetails(event) {
+        const button = event.target.closest('button');
         this.selectedLog = {
-          id: id,
-          created_at: createdAt,
-          user_name: userName,
-          user_email: userEmail,
-          description: description,
-          subject: subject,
-          ip_address: ipAddress,
-          user_agent: userAgent,
-          properties: propertiesJson && propertiesJson !== '' ? true : false,
-          properties_json: propertiesJson
+          id: button.dataset.logId,
+          created_at: button.dataset.createdAt,
+          user_name: button.dataset.userName,
+          user_email: button.dataset.userEmail,
+          description: button.dataset.description,
+          subject: button.dataset.subject,
+          ip_address: button.dataset.ipAddress,
+          user_agent: button.dataset.userAgent,
+          properties: button.dataset.properties && button.dataset.properties !== '' ? true : false,
+          properties_json: button.dataset.properties
         };
         this.showModal = true;
       },
