@@ -90,16 +90,9 @@
 
       <a href="{{ route('admin.savings.index') }}"
          class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-primary-200 hover:text-white transition-all duration-150
-                {{ request()->routeIs('admin.savings.*') ? 'active' : '' }}">
+                {{ request()->routeIs('admin.savings.*') || request()->routeIs('admin.deposits.*') ? 'active' : '' }}">
         <i class="fa-solid fa-piggy-bank w-4 text-center flex-shrink-0"></i>
-        <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Savings</span>
-      </a>
-
-      <a href="{{ route('admin.deposits.index') }}"
-         class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-primary-200 hover:text-white transition-all duration-150
-                {{ request()->routeIs('admin.deposits.*') ? 'active' : '' }}">
-        <i class="fa-solid fa-money-bill-trend-up w-4 text-center flex-shrink-0"></i>
-        <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Deposits</span>
+        <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Savings & Deposits</span>
       </a>
 
       <a href="{{ route('admin.swf.index') }}"
