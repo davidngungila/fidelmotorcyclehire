@@ -347,7 +347,7 @@ class MockGoogleSheetRepository implements GoogleSheetRepositoryInterface
         }
 
         return [
-            'total_members' => count(self::MEMBERS),
+            'total_members' => count($this->members),
             'total_savings' => $totalSavings,
             'total_loans' => $totalLoans,
             'total_deposits' => $totalDeposits,

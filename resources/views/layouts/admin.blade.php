@@ -2,7 +2,19 @@
 
 @section('layout_content')
 
-<div class="flex h-screen overflow-hidden">
+<div class="flex h-screen overflow-hidden" x-data="{ loading: false }">
+
+  <!-- Loading Overlay -->
+  <div x-show="loading" x-transition:enter="transition ease-out duration-200"
+       x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+       x-transition:leave="transition ease-in duration-150"
+       x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+       class="fixed inset-0 bg-black/30 backdrop-blur-sm z-[100] flex items-center justify-center">
+    <div class="bg-white dark:bg-dark-bg rounded-2xl shadow-2xl p-8 flex flex-col items-center gap-4">
+      <div class="w-12 h-12 border-4 border-primary-200 dark:border-primary-800 border-t-primary-600 rounded-full animate-spin"></div>
+      <p class="text-sm font-medium text-primary-700 dark:text-primary-300">Loading data...</p>
+    </div>
+  </div>
 
   <div x-show="sidebarOpen" @click="sidebarOpen=false"
        class="mobile-overlay lg:hidden" x-transition:enter="transition-opacity duration-200"
