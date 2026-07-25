@@ -8,6 +8,7 @@ use App\Contracts\GoogleSheetRepositoryInterface;
 use App\Exports\MembersTemplateExport;
 use App\Http\Controllers\Controller;
 use App\Imports\MembersImport;
+use App\Jobs\ImportMembersJob;
 use App\Models\ActivityLog;
 use App\Services\AdminDashboardService;
 use App\Services\MemberService;
@@ -15,7 +16,9 @@ use App\Traits\FlashMessages;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 
 class MemberController extends Controller
@@ -190,45 +193,38 @@ class MemberController extends Controller
         ]);
 
         try {
-            $import = new MembersImport($this->googleSheetRepository);
-            Excel::import($import, $request->file('file'));
+            $jobId = Str::uuid()->toString();
+            $file = $request->file('file');
+            $filePath = $file->storeAs('temp', 'import_' . $jobId . '.' . $file->getClientOriginalExtension());
 
-            $importedCount = $import->getImportedCount();
-            $errors = $import->getErrors();
-            $createdUsers = $import->getCreatedUsers();
+            ImportMembersJob::dispatch($filePath, $this->googleSheetRepository, Auth::id(), $jobId);
 
-            ActivityLog::create([
-                'user_id' => Auth::id(),
-                'description' => 'Admin imported members from Excel',
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-                'properties' => [
-                    'imported_count' => $importedCount,
-                    'created_users_count' => count($createdUsers),
-                    'created_users' => $createdUsers,
-                    'errors_count' => count($errors),
-                    'errors' => $errors,
-                ],
+            return response()->json([
+                'success' => true,
+                'job_id' => $jobId,
+                'message' => 'Import started successfully'
             ]);
-
-            if ($importedCount > 0) {
-                $message = "Successfully imported {$importedCount} member(s).";
-                if (count($createdUsers) > 0) {
-                    $message .= " Created " . count($createdUsers) . " user account(s).";
-                }
-                $this->success($message);
-                if (!empty($errors)) {
-                    $this->warning(count($errors) . ' row(s) were skipped due to errors.');
-                }
-            } else {
-                $this->error('No members were imported. Please check your file format.');
-            }
-
-            return redirect()->route('admin.members.index');
         } catch (\Exception $e) {
-            $this->error('Failed to import members: ' . $e->getMessage());
-            return redirect()->route('admin.members.index');
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to start import: ' . $e->getMessage()
+            ], 500);
         }
+    }
+
+    public function importProgress($jobId)
+    {
+        Gate::authorize('admin-only');
+
+        $progress = Cache::get("import_{$jobId}", [
+            'status' => 'pending',
+            'progress' => 0,
+            'message' => 'Waiting to start...',
+            'imported' => 0,
+            'total' => 0,
+        ]);
+
+        return response()->json($progress);
     }
 
     public function downloadTemplate()

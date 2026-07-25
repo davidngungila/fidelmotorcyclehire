@@ -249,25 +249,27 @@
 </div>
 
 <!-- Import Modal -->
-<div id="importModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+<div id="importModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" x-data="{ importing: false, progress: 0, status: '', message: '', jobId: null, imported: 0, total: 0, errors: [] }">
   <div class="bg-white dark:bg-dark-bg rounded-2xl shadow-2xl w-full max-w-lg">
     <div class="p-6 border-b border-gray-200 dark:border-dark-border">
       <div class="flex items-center justify-between">
         <h3 class="text-lg font-bold text-gray-900 dark:text-white">Import Members from Excel</h3>
-        <button type="button" onclick="document.getElementById('importModal').classList.add('hidden')"
+        <button type="button" @click="if(!importing) document.getElementById('importModal').classList.add('hidden')"
                 class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
           <i class="fa-solid fa-xmark text-xl"></i>
         </button>
       </div>
     </div>
-    <form method="POST" action="{{ route('admin.members.import') }}" enctype="multipart/form-data" class="p-6 space-y-4">
+    
+    <!-- Upload Form -->
+    <form x-show="!importing" method="POST" action="{{ route('admin.members.import') }}" enctype="multipart/form-data" class="p-6 space-y-4" @submit.prevent="handleImport">
       @csrf
       <div>
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select Excel File</label>
         <div class="relative border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 text-center hover:border-primary-500 dark:hover:border-primary-400 transition-colors">
-          <input type="file" name="file" accept=".xlsx,.xls,.csv" required
+          <input type="file" name="file" accept=".xlsx,.xls,.csv" required x-ref="fileInput"
                  class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                 onchange="if(this.files[0]) { this.parentElement.querySelector('.file-name').textContent = this.files[0].name; this.parentElement.querySelector('.upload-text').classList.add('hidden'); this.parentElement.querySelector('.file-name').classList.remove('hidden'); }">
+                 @change="$el.parentElement.querySelector('.file-name').textContent = $el.files[0].name; $el.parentElement.querySelector('.upload-text').classList.add('hidden'); $el.parentElement.querySelector('.file-name').classList.remove('hidden');">
           <div class="upload-text">
             <i class="fa-solid fa-cloud-arrow-up text-3xl text-gray-400 mb-2"></i>
             <p class="text-sm text-gray-600 dark:text-gray-400">Drag and drop your Excel file here, or click to browse</p>
@@ -288,7 +290,7 @@
         <p class="text-xs text-blue-700 dark:text-blue-400">member_number, full_name, gender, phone, email, status, registration_date, date_of_birth, national_id, occupation, employer, residential_address, member_type, marital_status, bank_name, bank_branch, account_name, account_number, bank_account_status, mobile_money_provider, mobile_money_number, emergency_contact_name, emergency_contact_phone, emergency_contact_relationship, registration_fee, notes</p>
       </div>
       <div class="flex items-center justify-end gap-3 pt-4">
-        <button type="button" onclick="document.getElementById('importModal').classList.add('hidden')"
+        <button type="button" @click="document.getElementById('importModal').classList.add('hidden')"
                 class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
           Cancel
         </button>
@@ -298,6 +300,44 @@
         </button>
       </div>
     </form>
+    
+    <!-- Progress Display -->
+    <div x-show="importing" class="p-6 space-y-4">
+      <div class="text-center">
+        <div class="w-16 h-16 border-4 border-primary-200 dark:border-primary-800 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"></div>
+        <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-2" x-text="status"></h4>
+        <p class="text-sm text-gray-600 dark:text-gray-400" x-text="message"></p>
+      </div>
+      
+      <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+        <div class="bg-primary-600 h-full transition-all duration-300" :style="`width: ${progress}%`"></div>
+      </div>
+      
+      <div class="flex items-center justify-between text-sm">
+        <span class="text-gray-600 dark:text-gray-400">
+          <span x-text="imported"></span> / <span x-text="total"></span> imported
+        </span>
+        <span class="font-semibold text-primary-600 dark:text-primary-400" x-text="progress + '%'"></span>
+      </div>
+      
+      <div x-show="errors.length > 0" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/40 rounded-lg p-4">
+        <p class="text-xs text-red-800 dark:text-red-300 font-semibold mb-2">
+          <i class="fa-solid fa-exclamation-triangle mr-1"></i> Errors (<span x-text="errors.length"></span>):
+        </p>
+        <div class="max-h-32 overflow-y-auto">
+          <template x-for="error in errors" :key="error">
+            <p class="text-xs text-red-700 dark:text-red-400" x-text="error"></p>
+          </template>
+        </div>
+      </div>
+      
+      <div x-show="status === 'completed' || status === 'failed'" class="flex items-center justify-end gap-3 pt-4">
+        <button type="button" @click="importing = false; document.getElementById('importModal').classList.add('hidden'); window.location.reload();"
+                class="px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors">
+          Close & Refresh
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -326,6 +366,68 @@
       },
       submitSearch() {
         this.$refs.searchForm.submit();
+      },
+      handleImport() {
+        const formData = new FormData();
+        const fileInput = this.$refs.fileInput;
+        
+        if (!fileInput.files[0]) {
+          alert('Please select a file');
+          return;
+        }
+        
+        formData.append('file', fileInput.files[0]);
+        formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+        
+        this.importing = true;
+        this.status = 'Uploading...';
+        this.message = 'Please wait while we upload your file...';
+        this.progress = 10;
+        
+        fetch('{{ route("admin.members.import") }}', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            this.jobId = data.job_id;
+            this.status = 'Processing...';
+            this.message = 'Importing members from Excel file...';
+            this.progress = 20;
+            this.pollProgress();
+          } else {
+            this.status = 'Failed';
+            this.message = data.message;
+            this.progress = 0;
+          }
+        })
+        .catch(error => {
+          this.status = 'Failed';
+          this.message = 'Upload failed: ' + error.message;
+          this.progress = 0;
+        });
+      },
+      pollProgress() {
+        const interval = setInterval(() => {
+          fetch(`{{ route('admin.members.import-progress', ':jobId') }}`.replace(':jobId', this.jobId))
+            .then(response => response.json())
+            .then(data => {
+              this.status = data.status;
+              this.message = data.message;
+              this.progress = data.progress;
+              this.imported = data.imported;
+              this.total = data.total;
+              this.errors = data.errors || [];
+              
+              if (data.status === 'completed' || data.status === 'failed') {
+                clearInterval(interval);
+              }
+            })
+            .catch(error => {
+              console.error('Progress check failed:', error);
+            });
+        }, 1000);
       }
     };
   }
