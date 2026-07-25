@@ -5,7 +5,7 @@
 
 @section('content')
 
-<div class="max-w-3xl mx-auto space-y-6">
+<div class="space-y-6">
 
   <div class="glass rounded-2xl p-6 lg:p-8 border border-primary-100 dark:border-dark-border">
     <form method="POST" action="{{ route('admin.profile.update') }}" enctype="multipart/form-data" x-data="{ showPassword: false }">
@@ -47,7 +47,7 @@
           <h3 class="font-bold text-primary-900 dark:text-white text-sm mb-4 flex items-center gap-2">
             <i class="fa-solid fa-user text-primary-500"></i> Personal Information
           </h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
               <label class="block text-xs font-semibold text-primary-700 dark:text-primary-300 mb-1.5">Full Name <span class="text-red-500">*</span></label>
               <input type="text" name="name" required value="{{ old('name', $user->name) }}"
@@ -76,10 +76,43 @@
               @enderror
             </div>
             <div>
+              <label class="block text-xs font-semibold text-primary-700 dark:text-primary-300 mb-1.5">Date of Birth</label>
+              <input type="date" name="date_of_birth" value="{{ old('date_of_birth', $user->date_of_birth) }}"
+                     class="form-input py-2.5 text-sm">
+              @error('date_of_birth')
+                <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+              @enderror
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-primary-700 dark:text-primary-300 mb-1.5">Gender</label>
+              <select name="gender" class="form-input py-2.5 text-sm">
+                <option value="">Select gender</option>
+                <option value="male" {{ old('gender', $user->gender) === 'male' ? 'selected' : '' }}>Male</option>
+                <option value="female" {{ old('gender', $user->gender) === 'female' ? 'selected' : '' }}>Female</option>
+                <option value="other" {{ old('gender', $user->gender) === 'other' ? 'selected' : '' }}>Other</option>
+              </select>
+              @error('gender')
+                <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+              @enderror
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-primary-700 dark:text-primary-300 mb-1.5">Marital Status</label>
+              <select name="marital_status" class="form-input py-2.5 text-sm">
+                <option value="">Select status</option>
+                <option value="single" {{ old('marital_status', $user->marital_status) === 'single' ? 'selected' : '' }}>Single</option>
+                <option value="married" {{ old('marital_status', $user->marital_status) === 'married' ? 'selected' : '' }}>Married</option>
+                <option value="divorced" {{ old('marital_status', $user->marital_status) === 'divorced' ? 'selected' : '' }}>Divorced</option>
+                <option value="widowed" {{ old('marital_status', $user->marital_status) === 'widowed' ? 'selected' : '' }}>Widowed</option>
+              </select>
+              @error('marital_status')
+                <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+              @enderror
+            </div>
+            <div class="md:col-span-2 lg:col-span-3">
               <label class="block text-xs font-semibold text-primary-700 dark:text-primary-300 mb-1.5">Address</label>
               <input type="text" name="address" value="{{ old('address', $user->address) }}"
                      class="form-input py-2.5 text-sm"
-                     placeholder="Your address">
+                     placeholder="Your full address">
               @error('address')
                 <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
               @enderror
@@ -99,6 +132,24 @@
                      class="form-input py-2.5 text-sm"
                      placeholder="Your employer">
               @error('employer')
+                <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+              @enderror
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-primary-700 dark:text-primary-300 mb-1.5">National ID</label>
+              <input type="text" name="national_id" value="{{ old('national_id', $user->national_id) }}"
+                     class="form-input py-2.5 text-sm"
+                     placeholder="National ID number">
+              @error('national_id')
+                <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+              @enderror
+            </div>
+            <div class="md:col-span-2 lg:col-span-3">
+              <label class="block text-xs font-semibold text-primary-700 dark:text-primary-300 mb-1.5">Bio / About Me</label>
+              <textarea name="bio" rows="3"
+                        class="form-input py-2.5 text-sm"
+                        placeholder="Tell us about yourself...">{{ old('bio', $user->bio) }}</textarea>
+              @error('bio')
                 <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
               @enderror
             </div>
