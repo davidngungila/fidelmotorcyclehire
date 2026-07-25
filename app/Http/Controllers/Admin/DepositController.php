@@ -212,6 +212,26 @@ class DepositController extends Controller
             ],
         ]);
 
+        // Mock data for tabs - replace with actual data from Google Sheets or database
+        $emergencyBalance = $amount * 0.2;
+        $flexBalance = $amount * 0.3;
+        $rdaBalance = $amount * 0.5;
+
+        $transactions = [
+            ['date' => $startDate, 'type' => 'credit', 'account' => 'RDA', 'amount' => $amount, 'balance' => $amount],
+            ['date' => date('Y-m-d', strtotime($startDate . ' + 30 days')), 'type' => 'credit', 'account' => 'Emergency', 'amount' => $amount * 0.1, 'balance' => $amount + ($amount * 0.1)],
+        ];
+
+        $targetAmount = $amount * 1.5;
+        $monthlyContribution = $amount * 0.1;
+        $totalSaved = $currentValue;
+        $savingProgress = ($totalSaved / $targetAmount) * 100;
+
+        $statements = [
+            ['period' => 'June 2026', 'date' => '2026-06-30'],
+            ['period' => 'May 2026', 'date' => '2026-05-31'],
+        ];
+
         return view('admin.deposits.show', [
             'deposit' => $deposit,
             'certificateNumber' => $certificateNumber,
@@ -225,6 +245,15 @@ class DepositController extends Controller
             'progress' => $progress,
             'timeline' => $timeline,
             'dashboardService' => $this->dashboardService,
+            'emergencyBalance' => $emergencyBalance,
+            'flexBalance' => $flexBalance,
+            'rdaBalance' => $rdaBalance,
+            'transactions' => $transactions,
+            'targetAmount' => $targetAmount,
+            'monthlyContribution' => $monthlyContribution,
+            'totalSaved' => $totalSaved,
+            'savingProgress' => $savingProgress,
+            'statements' => $statements,
         ]);
     }
 }
