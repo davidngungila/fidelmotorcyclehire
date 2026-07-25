@@ -38,11 +38,38 @@ class MemberController extends Controller
         $sortColumn = $request->input('sort', 'member_number');
         $sortDirection = $request->input('sort_direction', 'asc');
 
+        // Get members from Google Sheets
         if ($request->filled('q')) {
-            $members = $this->googleSheetRepository->searchMembers($request->input('q'));
+            $sheetMembers = $this->googleSheetRepository->searchMembers($request->input('q'));
         } else {
-            $members = $this->googleSheetRepository->getAllMembers();
+            $sheetMembers = $this->googleSheetRepository->getAllMembers();
         }
+
+        // Get members from database (imported members)
+        $dbMembers = \App\Models\Member::all()->map(function($member) {
+            return [
+                'member_number' => $member->member_number,
+                'name' => $member->full_name,
+                'gender' => $member->gender,
+                'phone' => $member->phone,
+                'email' => $member->email,
+                'branch' => $member->branch ?? '-',
+                'status' => $member->status,
+            ];
+        })->toArray();
+
+        // Merge members, prioritizing database members
+        $membersMap = [];
+        foreach ($dbMembers as $member) {
+            $membersMap[$member['member_number']] = $member;
+        }
+        foreach ($sheetMembers as $member) {
+            $memberNo = $member['member_number'] ?? $member['MemberNumber'] ?? null;
+            if ($memberNo && !isset($membersMap[$memberNo])) {
+                $membersMap[$memberNo] = $member;
+            }
+        }
+        $members = array_values($membersMap);
 
         $members = $this->memberService->sort($members, $sortColumn, $sortDirection);
         $chunked = $this->memberService->chunkArray($members, $perPage);
