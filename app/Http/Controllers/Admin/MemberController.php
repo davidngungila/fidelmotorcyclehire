@@ -263,6 +263,9 @@ class MemberController extends Controller
         ]);
 
         try {
+            // Increase execution time for large files
+            set_time_limit(300);
+            
             $jobId = Str::uuid()->toString();
             $file = $request->file('file');
             
@@ -297,9 +300,16 @@ class MemberController extends Controller
                 'errors' => $errors,
             ]);
         } catch (\Exception $e) {
+            // Log the actual error for debugging
+            \Log::error('Import failed: ' . $e->getMessage(), [
+                'exception' => $e,
+                'trace' => $e->getTraceAsString(),
+            ]);
+            
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to import: ' . $e->getMessage()
+                'message' => 'Failed to import: ' . $e->getMessage(),
+                'error_type' => get_class($e),
             ], 500);
         }
     }
