@@ -249,7 +249,78 @@
 </div>
 
 <!-- Import Modal -->
-<div id="importModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" x-data="{ importing: false, progress: 0, status: '', message: '', jobId: null, imported: 0, total: 0, errors: [] }">
+<div id="importModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" x-data="{ 
+  importing: false, 
+  progress: 0, 
+  status: '', 
+  message: '', 
+  jobId: null, 
+  imported: 0, 
+  total: 0, 
+  errors: [],
+  handleImport() {
+    const formData = new FormData();
+    const fileInput = this.$refs.fileInput;
+    
+    if (!fileInput.files[0]) {
+      alert('Please select a file');
+      return;
+    }
+    
+    formData.append('file', fileInput.files[0]);
+    formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+    
+    this.importing = true;
+    this.status = 'Uploading...';
+    this.message = 'Please wait while we upload your file...';
+    this.progress = 10;
+    
+    fetch('{{ route("admin.members.import") }}', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        this.jobId = data.job_id;
+        this.status = 'Processing...';
+        this.message = 'Importing members from Excel file...';
+        this.progress = 20;
+        this.pollProgress();
+      } else {
+        this.status = 'Failed';
+        this.message = data.message;
+        this.progress = 0;
+      }
+    })
+    .catch(error => {
+      this.status = 'Failed';
+      this.message = 'Upload failed: ' + error.message;
+      this.progress = 0;
+    });
+  },
+  pollProgress() {
+    const interval = setInterval(() => {
+      fetch(`{{ route('admin.members.import-progress', ':jobId') }}`.replace(':jobId', this.jobId))
+        .then(response => response.json())
+        .then(data => {
+          this.status = data.status;
+          this.message = data.message;
+          this.progress = data.progress;
+          this.imported = data.imported;
+          this.total = data.total;
+          this.errors = data.errors || [];
+          
+          if (data.status === 'completed' || data.status === 'failed') {
+            clearInterval(interval);
+          }
+        })
+        .catch(error => {
+          console.error('Progress check failed:', error);
+        });
+    }, 1000);
+  }
+}">
   <div class="bg-white dark:bg-dark-bg rounded-2xl shadow-2xl w-full max-w-lg">
     <div class="p-6 border-b border-gray-200 dark:border-dark-border">
       <div class="flex items-center justify-between">
@@ -366,68 +437,6 @@
       },
       submitSearch() {
         this.$refs.searchForm.submit();
-      },
-      handleImport() {
-        const formData = new FormData();
-        const fileInput = this.$refs.fileInput;
-        
-        if (!fileInput.files[0]) {
-          alert('Please select a file');
-          return;
-        }
-        
-        formData.append('file', fileInput.files[0]);
-        formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
-        
-        this.importing = true;
-        this.status = 'Uploading...';
-        this.message = 'Please wait while we upload your file...';
-        this.progress = 10;
-        
-        fetch('{{ route("admin.members.import") }}', {
-          method: 'POST',
-          body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            this.jobId = data.job_id;
-            this.status = 'Processing...';
-            this.message = 'Importing members from Excel file...';
-            this.progress = 20;
-            this.pollProgress();
-          } else {
-            this.status = 'Failed';
-            this.message = data.message;
-            this.progress = 0;
-          }
-        })
-        .catch(error => {
-          this.status = 'Failed';
-          this.message = 'Upload failed: ' + error.message;
-          this.progress = 0;
-        });
-      },
-      pollProgress() {
-        const interval = setInterval(() => {
-          fetch(`{{ route('admin.members.import-progress', ':jobId') }}`.replace(':jobId', this.jobId))
-            .then(response => response.json())
-            .then(data => {
-              this.status = data.status;
-              this.message = data.message;
-              this.progress = data.progress;
-              this.imported = data.imported;
-              this.total = data.total;
-              this.errors = data.errors || [];
-              
-              if (data.status === 'completed' || data.status === 'failed') {
-                clearInterval(interval);
-              }
-            })
-            .catch(error => {
-              console.error('Progress check failed:', error);
-            });
-        }, 1000);
       }
     };
   }
