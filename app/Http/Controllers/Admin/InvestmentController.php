@@ -154,7 +154,7 @@ class InvestmentController extends Controller
         ActivityLog::create([
             'user_id' => Auth::id(),
             'subject_type' => 'investment',
-            'subject_id' => $memberNumber,
+            'subject_id' => null,
             'description' => "Admin viewed member investments: {$memberNumber}",
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
