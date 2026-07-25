@@ -385,71 +385,69 @@
           </table>
         </div>
       </div>
-    </div>
-  </div>
 
-  <div x-show="activeTab === 'deposits'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
-    <div class="glass p-6">
-      <div class="flex items-center justify-between mb-5">
-        <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
-          <i class="fa-solid fa-money-bill-trend-up text-purple-500 text-xs"></i>
-          Fixed Deposits / Certificates
-          <span class="badge badge-purple ml-2" style="background: #f3e8ff; color: #6b21a8;">{{ count($deposits) }} Active</span>
-        </h3>
-      </div>
+      <div class="glass p-6">
+        <div class="flex items-center justify-between mb-5">
+          <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
+            <i class="fa-solid fa-money-bill-trend-up text-purple-500 text-xs"></i>
+            Fixed Deposits / Certificates
+            <span class="badge badge-purple ml-2" style="background: #f3e8ff; color: #6b21a8;">{{ count($deposits) }} Active</span>
+          </h3>
+        </div>
 
-      <div class="overflow-x-auto -webkit-scrollbar [&::-webkit-scrollbar]:hidden rounded-xl">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Certificate #</th>
-              <th>Product</th>
-              <th class="text-right">Amount</th>
-              <th class="text-right">Interest %</th>
-              <th>Start Date</th>
-              <th>Maturity</th>
-              <th>Status</th>
-              <th class="text-right">Current Value</th>
-            </tr>
-          </thead>
-          <tbody>
-            @forelse($deposits as $dep)
-              @php
-                $certNo = $dep['certificate_number'] ?? ($dep['CertificateNumber'] ?? '-');
-                $depProduct = $dep['product'] ?? ($dep['Product'] ?? '-');
-                $depAmount = $dep['amount'] ?? ($dep['Amount'] ?? 0);
-                $depInterest = $dep['interest'] ?? ($dep['Interest'] ?? 0);
-                $depStart = $dep['start_date'] ?? ($dep['StartDate'] ?? '-');
-                $depMaturity = $dep['maturity_date'] ?? ($dep['MaturityDate'] ?? '-');
-                $depCurrentValue = $dep['current_value'] ?? ($dep['CurrentValue'] ?? $depAmount);
-                $depStatus = $dashboardService->depositStatusBadge($dep['status'] ?? ($dep['Status'] ?? null));
-              @endphp
+        <div class="overflow-x-auto -webkit-scrollbar [&::-webkit-scrollbar]:hidden rounded-xl">
+          <table class="data-table">
+            <thead>
               <tr>
-                <td class="font-mono text-xs font-bold text-purple-700 dark:text-purple-300">{{ $certNo }}</td>
-                <td class="text-sm font-semibold text-primary-900 dark:text-white">{{ $depProduct }}</td>
-                <td class="text-right text-xs font-bold text-primary-900 dark:text-white">{{ $fmt($depAmount) }}</td>
-                <td class="text-right">
-                  <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-bold">
-                    <i class="fa-solid fa-percent text-[10px]"></i>
-                    {{ number_format((float)$depInterest, 2) }}%
-                  </span>
-                </td>
-                <td class="text-xs font-mono text-primary-700 dark:text-primary-300">{{ $depStart }}</td>
-                <td class="text-xs font-mono text-primary-700 dark:text-primary-300">{{ $depMaturity }}</td>
-                <td><span class="badge {{ $depStatus['class'] }}">{{ $depStatus['label'] }}</span></td>
-                <td class="text-right text-xs font-bold text-primary-900 dark:text-white">{{ $fmt($depCurrentValue) }}</td>
+                <th>Certificate #</th>
+                <th>Product</th>
+                <th class="text-right">Amount</th>
+                <th class="text-right">Interest %</th>
+                <th>Start Date</th>
+                <th>Maturity</th>
+                <th>Status</th>
+                <th class="text-right">Current Value</th>
               </tr>
-            @empty
-              <tr>
-                <td colspan="8" class="text-center py-12 text-primary-500 dark:text-primary-400">
-                  <i class="fa-solid fa-money-bill-trend-up text-3xl mb-3 block opacity-30"></i>
-                  <p class="text-sm font-semibold mb-1">No deposits found</p>
-                  <p class="text-xs">This member has no fixed deposit certificates</p>
-                </td>
-              </tr>
-            @endforelse
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              @forelse($deposits as $dep)
+                @php
+                  $certNo = $dep['certificate_number'] ?? ($dep['CertificateNumber'] ?? '-');
+                  $depProduct = $dep['product'] ?? ($dep['Product'] ?? '-');
+                  $depAmount = $dep['amount'] ?? ($dep['Amount'] ?? 0);
+                  $depInterest = $dep['interest'] ?? ($dep['Interest'] ?? 0);
+                  $depStart = $dep['start_date'] ?? ($dep['StartDate'] ?? '-');
+                  $depMaturity = $dep['maturity_date'] ?? ($dep['MaturityDate'] ?? '-');
+                  $depCurrentValue = $dep['current_value'] ?? ($dep['CurrentValue'] ?? $depAmount);
+                  $depStatus = $dashboardService->depositStatusBadge($dep['status'] ?? ($dep['Status'] ?? null));
+                @endphp
+                <tr>
+                  <td class="font-mono text-xs font-bold text-purple-700 dark:text-purple-300">{{ $certNo }}</td>
+                  <td class="text-sm font-semibold text-primary-900 dark:text-white">{{ $depProduct }}</td>
+                  <td class="text-right text-xs font-bold text-primary-900 dark:text-white">{{ $fmt($depAmount) }}</td>
+                  <td class="text-right">
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-bold">
+                      <i class="fa-solid fa-percent text-[10px]"></i>
+                      {{ number_format((float)$depInterest, 2) }}%
+                    </span>
+                  </td>
+                  <td class="text-xs font-mono text-primary-700 dark:text-primary-300">{{ $depStart }}</td>
+                  <td class="text-xs font-mono text-primary-700 dark:text-primary-300">{{ $depMaturity }}</td>
+                  <td><span class="badge {{ $depStatus['class'] }}">{{ $depStatus['label'] }}</span></td>
+                  <td class="text-right text-xs font-bold text-primary-900 dark:text-white">{{ $fmt($depCurrentValue) }}</td>
+                </tr>
+              @empty
+                <tr>
+                  <td colspan="8" class="text-center py-12 text-primary-500 dark:text-primary-400">
+                    <i class="fa-solid fa-money-bill-trend-up text-3xl mb-3 block opacity-30"></i>
+                    <p class="text-sm font-semibold mb-1">No deposits found</p>
+                    <p class="text-xs">This member has no fixed deposit certificates</p>
+                  </td>
+                </tr>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -652,8 +650,7 @@
       tabs: [
         { id: 'profile', label: 'Profile', icon: 'fa-solid fa-user', badge: null },
         { id: 'loans', label: 'Loans', icon: 'fa-solid fa-hand-holding-dollar', badge: {{ count($loans) }} },
-        { id: 'savings', label: 'Savings', icon: 'fa-solid fa-piggy-bank', badge: null },
-        { id: 'deposits', label: 'Deposits', icon: 'fa-solid fa-money-bill-trend-up', badge: {{ count($deposits) }} },
+        { id: 'savings', label: 'Savings & Deposits', icon: 'fa-solid fa-piggy-bank', badge: null },
         { id: 'swf', label: 'SWF', icon: 'fa-solid fa-shield-halved', badge: null },
         { id: 'investments', label: 'Investments', icon: 'fa-solid fa-chart-line', badge: {{ count($investments) }} },
       ],
