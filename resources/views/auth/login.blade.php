@@ -31,7 +31,23 @@
         }
     </style>
 </head>
-<body class="min-h-screen bg-white" x-data="{ toast: {{ session('flash') ? 'true' : 'false' }}, toastMsg: '{{ session('flash')['message'] ?? '' }}', toastLevel: '{{ session('flash')['level'] ?? 'info' }}' }" x-init="if (toast) { setTimeout(() => toast = false, 5000); }">
+<body class="min-h-screen bg-white" x-data="{ 
+    toast: {{ session('flash') ? 'true' : 'false' }}, 
+    toastMsg: '{{ session('flash')['message'] ?? '' }}', 
+    toastLevel: '{{ session('flash')['level'] ?? 'info' }}',
+    loading: false,
+    loadingSteps: [
+        'Connecting to server...',
+        'Verifying username...',
+        'Validating password...',
+        'Checking account permissions...',
+        'Loading user profile...',
+        'Synchronizing account data...',
+        'Preparing dashboard...',
+        'Login successful! Redirecting...'
+    ],
+    currentStep: 0
+}" x-init="if (toast) { setTimeout(() => toast = false, 5000); }">
 
     <div class="fixed top-6 right-6 z-50" x-show="toast" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:translate-x-4" x-transition:enter-end="opacity-100 translate-y-0 sm:translate-x-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:translate-x-0" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:translate-x-4">
         <div :class="{
@@ -62,7 +78,30 @@
         </div>
     </div>
 
-    <div class="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
+    <!-- Loading Overlay -->
+    <div x-show="loading" x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+         class="fixed inset-0 bg-white/95 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+        <div class="text-center max-w-md w-full">
+            <div class="w-16 h-16 border-4 border-green-200 border-t-green-600 rounded-full animate-spin mx-auto mb-6"></div>
+            <div class="space-y-3">
+                <template x-for="(step, index) in loadingSteps" :key="index">
+                    <div class="flex items-center gap-3 justify-center">
+                        <i class="fa-solid fa-check text-green-600 text-sm" x-show="index < currentStep"></i>
+                        <div class="w-4 h-4 border-2 border-green-300 rounded-full" x-show="index === currentStep"></div>
+                        <div class="w-4 h-4 border-2 border-gray-300 rounded-full" x-show="index > currentStep"></div>
+                        <p class="text-sm font-medium" 
+                           :class="index < currentStep ? 'text-green-600' : (index === currentStep ? 'text-gray-900' : 'text-gray-400')"
+                           x-text="step"></p>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    <div class="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8" x-show="!loading">
         <div class="w-full max-w-md">
             <div class="text-center mb-8">
                 <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-600 rounded-2xl shadow-lg mb-4">
@@ -153,6 +192,7 @@
 
                     <button
                         type="submit"
+                        @click="loading = true; currentStep = 0; const interval = setInterval(() => { if (currentStep < loadingSteps.length - 1) { currentStep++; } else { clearInterval(interval); } }, 200);"
                         class="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
                     >
                         <span>Sign In</span>
