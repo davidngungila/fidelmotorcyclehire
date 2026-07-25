@@ -31,13 +31,9 @@
     </div>
 
     <div class="flex items-center gap-3">
-      <a href="{{ route('admin.members.download-template') }}"
-         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95 whitespace-nowrap">
-        <i class="fa-solid fa-file-download text-[13px]"></i> Download Template
-      </a>
       <button type="button" onclick="document.getElementById('importModal').classList.remove('hidden')"
              class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95 whitespace-nowrap">
-        <i class="fa-solid fa-file-import text-[13px]"></i> Import Excel
+        <i class="fa-solid fa-file-import text-[13px]"></i> Import Members
       </button>
       <a href="{{ route('admin.users.create') }}"
          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95 whitespace-nowrap">
@@ -281,9 +277,14 @@
         </div>
       </div>
       <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/40 rounded-lg p-4">
-        <p class="text-xs text-blue-800 dark:text-blue-300 font-semibold mb-2">
-          <i class="fa-solid fa-info-circle mr-1"></i> Required Excel Columns:
-        </p>
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-xs text-blue-800 dark:text-blue-300 font-semibold">
+            <i class="fa-solid fa-info-circle mr-1"></i> Required Excel Columns:
+          </p>
+          <a href="{{ route('admin.members.template') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-semibold flex items-center gap-1">
+            <i class="fa-solid fa-download"></i> Download Template
+          </a>
+        </div>
         <p class="text-xs text-blue-700 dark:text-blue-400">member_number, full_name, gender, phone, email, status, registration_date, date_of_birth, national_id, occupation, employer, residential_address, member_type, marital_status, bank_name, bank_branch, account_name, account_number, bank_account_status, mobile_money_provider, mobile_money_number, emergency_contact_name, emergency_contact_phone, emergency_contact_relationship, registration_fee, notes</p>
       </div>
       <div class="flex items-center justify-end gap-3 pt-4">
