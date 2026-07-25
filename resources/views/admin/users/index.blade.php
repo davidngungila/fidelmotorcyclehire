@@ -257,10 +257,10 @@
       </div>
       <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Password Reset Successful</h3>
       <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-        New password for <span class="font-semibold text-gray-900 dark:text-white">{{ userName }}</span>
+        New password for <span class="font-semibold text-gray-900 dark:text-white" x-text="userName"></span>
       </p>
       <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-4 mb-4">
-        <p class="text-2xl font-mono font-bold text-primary-600 dark:text-primary-400 tracking-wider">{{ newPassword }}</p>
+        <p class="text-2xl font-mono font-bold text-primary-600 dark:text-primary-400 tracking-wider" x-text="newPassword"></p>
       </div>
       <div class="flex gap-3">
         <button @click="copyPassword()"
