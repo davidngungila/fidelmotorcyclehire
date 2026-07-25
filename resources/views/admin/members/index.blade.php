@@ -253,94 +253,14 @@
      x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
      x-transition:leave="transition ease-in duration-150"
      x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-     @open-import-modal.window="openModal()"
+     @open-import-modal.window="open()"
      class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-     x-data="{ 
-       showModal: false,
-       importing: false, 
-       progress: 0, 
-       status: '', 
-       message: '', 
-       jobId: null, 
-       imported: 0, 
-       total: 0, 
-       errors: [],
-       openModal() {
-         this.showModal = true;
-       },
-       closeModal() {
-         if (!this.importing) {
-           this.showModal = false;
-         }
-       },
-       handleImport() {
-         const formData = new FormData();
-         const fileInput = this.$refs.fileInput;
-         
-         if (!fileInput.files[0]) {
-           alert('Please select a file');
-           return;
-         }
-         
-         formData.append('file', fileInput.files[0]);
-         formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
-         
-         this.importing = true;
-         this.status = 'Uploading...';
-         this.message = 'Please wait while we upload your file...';
-         this.progress = 10;
-         
-         fetch('{{ route("admin.members.import") }}', {
-           method: 'POST',
-           body: formData
-         })
-         .then(response => response.json())
-         .then(data => {
-           if (data.success) {
-             this.jobId = data.job_id;
-             this.status = 'Processing...';
-             this.message = 'Importing members from Excel file...';
-             this.progress = 20;
-             this.pollProgress();
-           } else {
-             this.status = 'Failed';
-             this.message = data.message;
-             this.progress = 0;
-           }
-         })
-         .catch(error => {
-           this.status = 'Failed';
-           this.message = 'Upload failed: ' + error.message;
-           this.progress = 0;
-         });
-       },
-       pollProgress() {
-         const interval = setInterval(() => {
-           fetch(`{{ route('admin.members.import-progress', ':jobId') }}`.replace(':jobId', this.jobId))
-             .then(response => response.json())
-             .then(data => {
-               this.status = data.status;
-               this.message = data.message;
-               this.progress = data.progress;
-               this.imported = data.imported;
-               this.total = data.total;
-               this.errors = data.errors || [];
-               
-               if (data.status === 'completed' || data.status === 'failed') {
-                 clearInterval(interval);
-               }
-             })
-             .catch(error => {
-               console.error('Progress check failed:', error);
-             });
-         }, 1000);
-       }
-     }">
+     x-data="importModal()">
   <div class="bg-white dark:bg-dark-bg rounded-2xl shadow-2xl w-full max-w-lg">
     <div class="p-6 border-b border-gray-200 dark:border-dark-border">
       <div class="flex items-center justify-between">
         <h3 class="text-lg font-bold text-gray-900 dark:text-white">Import Members from Excel</h3>
-        <button type="button" @click="closeModal"
+        <button type="button" @click="showModal = false"
                 class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
           <i class="fa-solid fa-xmark text-xl"></i>
         </button>
@@ -376,7 +296,7 @@
         <p class="text-xs text-blue-700 dark:text-blue-400">member_number, full_name, gender, phone, email, status, registration_date, date_of_birth, national_id, occupation, employer, residential_address, member_type, marital_status, bank_name, bank_branch, account_name, account_number, bank_account_status, mobile_money_provider, mobile_money_number, emergency_contact_name, emergency_contact_phone, emergency_contact_relationship, registration_fee, notes</p>
       </div>
       <div class="flex items-center justify-end gap-3 pt-4">
-        <button type="button" @click="closeModal"
+        <button type="button" @click="showModal = false"
                 class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
           Cancel
         </button>
@@ -418,7 +338,7 @@
       </div>
       
       <div x-show="status === 'completed' || status === 'failed'" class="flex items-center justify-end gap-3 pt-4">
-        <button type="button" @click="importing = false; closeModal(); window.location.reload();"
+        <button type="button" @click="importing = false; showModal = false; window.location.reload();"
                 class="px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors">
           Close & Refresh
         </button>
@@ -452,6 +372,90 @@
       },
       submitSearch() {
         this.$refs.searchForm.submit();
+      }
+    };
+  }
+
+  function importModal() {
+    return {
+      showModal: false,
+      importing: false,
+      progress: 0,
+      status: '',
+      message: '',
+      jobId: null,
+      imported: 0,
+      total: 0,
+      errors: [],
+      open() {
+        this.showModal = true;
+      },
+      close() {
+        if (!this.importing) {
+          this.showModal = false;
+        }
+      },
+      handleImport() {
+        const formData = new FormData();
+        const fileInput = this.$refs.fileInput;
+        
+        if (!fileInput.files[0]) {
+          alert('Please select a file');
+          return;
+        }
+        
+        formData.append('file', fileInput.files[0]);
+        formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+        
+        this.importing = true;
+        this.status = 'Uploading...';
+        this.message = 'Please wait while we upload your file...';
+        this.progress = 10;
+        
+        fetch('{{ route("admin.members.import") }}', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            this.jobId = data.job_id;
+            this.status = 'Processing...';
+            this.message = 'Importing members from Excel file...';
+            this.progress = 20;
+            this.pollProgress();
+          } else {
+            this.status = 'Failed';
+            this.message = data.message;
+            this.progress = 0;
+          }
+        })
+        .catch(error => {
+          this.status = 'Failed';
+          this.message = 'Upload failed: ' + error.message;
+          this.progress = 0;
+        });
+      },
+      pollProgress() {
+        const interval = setInterval(() => {
+          fetch(`{{ route('admin.members.import-progress', ':jobId') }}`.replace(':jobId', this.jobId))
+            .then(response => response.json())
+            .then(data => {
+              this.status = data.status;
+              this.message = data.message;
+              this.progress = data.progress;
+              this.imported = data.imported;
+              this.total = data.total;
+              this.errors = data.errors || [];
+              
+              if (data.status === 'completed' || data.status === 'failed') {
+                clearInterval(interval);
+              }
+            })
+            .catch(error => {
+              console.error('Progress check failed:', error);
+            });
+        }, 1000);
       }
     };
   }
