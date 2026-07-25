@@ -232,4 +232,35 @@ class UserController extends Controller
 
         return redirect()->route('admin.users.index');
     }
+
+    public function resetPassword(Request $request, int $id)
+    {
+        $user = User::findOrFail($id);
+        
+        // Generate a random password
+        $newPassword = strtoupper(substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 8));
+        
+        $user->password = Hash::make($newPassword);
+        $user->save();
+
+        ActivityLog::create([
+            'user_id' => Auth::id(),
+            'subject_type' => 'user',
+            'subject_id' => $user->id,
+            'description' => "Admin reset password for user: {$user->name}",
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'properties' => [
+                'user_email' => $user->email,
+                'reset_by' => Auth::id(),
+            ],
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password reset successfully',
+            'new_password' => $newPassword,
+            'user_name' => $user->name,
+        ]);
+    }
 }

@@ -136,6 +136,10 @@
               </td>
               <td class="text-right whitespace-nowrap">
                 <div class="flex items-center justify-end gap-2">
+                  <button @click="resetPassword({{ $user->id }}, '{{ addslashes($user->name) }}')"
+                          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 text-amber-700 dark:text-amber-300 text-[11px] font-bold transition-colors border border-amber-200 dark:border-amber-800/40">
+                    <i class="fa-solid fa-key text-[10px]"></i> Reset Password
+                  </button>
                   <a href="{{ route('admin.users.edit', $user->id) }}"
                      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-[11px] font-bold transition-colors">
                     <i class="fa-solid fa-pen-to-square text-[10px]"></i> Edit
@@ -229,6 +233,49 @@
   </div>
 </div>
 
+<!-- Password Reset Modal -->
+<div x-show="showPasswordModal" 
+     x-transition:enter="transition ease-out duration-300"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition ease-in duration-200"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0"
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+     style="display: none;">
+  <div x-show="showPasswordModal"
+       x-transition:enter="transition ease-out duration-300"
+       x-transition:enter-start="opacity-0 scale-95"
+       x-transition:enter-end="opacity-100 scale-100"
+       x-transition:leave="transition ease-in duration-200"
+       x-transition:leave-start="opacity-100 scale-100"
+       x-transition:leave-end="opacity-0 scale-95"
+       class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4">
+    <div class="text-center">
+      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center">
+        <i class="fa-solid fa-check text-2xl text-green-600 dark:text-green-400"></i>
+      </div>
+      <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Password Reset Successful</h3>
+      <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+        New password for <span class="font-semibold text-gray-900 dark:text-white">{{ userName }}</span>
+      </p>
+      <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-4 mb-4">
+        <p class="text-2xl font-mono font-bold text-primary-600 dark:text-primary-400 tracking-wider">{{ newPassword }}</p>
+      </div>
+      <div class="flex gap-3">
+        <button @click="copyPassword()"
+                class="flex-1 px-4 py-2.5 rounded-lg bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-colors">
+          <i class="fa-solid fa-copy mr-2"></i> Copy Password
+        </button>
+        <button @click="closePasswordModal()"
+                class="flex-1 px-4 py-2.5 rounded-lg bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white text-sm font-bold transition-colors">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 @endsection
 
 @push('scripts')
@@ -236,6 +283,9 @@
   function usersList() {
     return {
       searchQuery: @json($searchQuery ?? ''),
+      showPasswordModal: false,
+      newPassword: '',
+      userName: '',
       changePerPage(value) {
         const params = new URLSearchParams(window.location.search);
         params.set('per_page', value);
@@ -246,6 +296,42 @@
         if (confirm('Are you sure you want to delete user "' + userName + '"? This action cannot be undone.')) {
           form.submit();
         }
+      },
+      async resetPassword(userId, userName) {
+        if (!confirm('Are you sure you want to reset the password for "' + userName + '"?')) {
+          return;
+        }
+        
+        try {
+          const response = await fetch('{{ route('admin.users.reset-password', '') }}'.replace(':id', userId), {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            this.newPassword = data.new_password;
+            this.userName = data.user_name;
+            this.showPasswordModal = true;
+          } else {
+            alert('Failed to reset password: ' + data.message);
+          }
+        } catch (error) {
+          alert('Error resetting password: ' + error.message);
+        }
+      },
+      copyPassword() {
+        navigator.clipboard.writeText(this.newPassword);
+        alert('Password copied to clipboard!');
+      },
+      closePasswordModal() {
+        this.showPasswordModal = false;
+        this.newPassword = '';
+        this.userName = '';
       }
     }
   }
