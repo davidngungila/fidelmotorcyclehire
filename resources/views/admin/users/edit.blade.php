@@ -5,7 +5,7 @@
 
 @section('content')
 
-<div class="max-w-3xl mx-auto space-y-6">
+<div class="space-y-6">
 
   <div class="flex items-center gap-4">
     <a href="{{ route('admin.users.index') }}"
@@ -52,8 +52,8 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div class="md:col-span-2">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div class="md:col-span-2 lg:col-span-3">
           <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Full Name *</label>
           <input type="text" name="name" value="{{ old('name', $user->name) }}" required
                  placeholder="e.g. John Mwangi"
@@ -63,12 +63,94 @@
           @enderror
         </div>
 
-        <div class="md:col-span-2">
+        <div class="md:col-span-2 lg:col-span-3">
           <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Email Address *</label>
           <input type="email" name="email" value="{{ old('email', $user->email) }}" required
                  placeholder="e.g. john@example.com"
                  class="form-input @error('email') !border-red-400 @enderror">
           @error('email')
+            <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
+          @enderror
+        </div>
+
+        <div>
+          <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Phone</label>
+          <input type="text" name="phone" value="{{ old('phone', $user->phone) }}"
+                 placeholder="+255 123 456 789"
+                 class="form-input @error('phone') !border-red-400 @enderror">
+          @error('phone')
+            <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
+          @enderror
+        </div>
+
+        <div>
+          <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Date of Birth</label>
+          <input type="date" name="date_of_birth" value="{{ old('date_of_birth', $user->date_of_birth) }}"
+                 class="form-input @error('date_of_birth') !border-red-400 @enderror">
+          @error('date_of_birth')
+            <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
+          @enderror
+        </div>
+
+        <div>
+          <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Gender</label>
+          <select name="gender" class="form-input @error('gender') !border-red-400 @enderror">
+            <option value="">Select gender</option>
+            <option value="male" {{ old('gender', $user->gender) === 'male' ? 'selected' : '' }}>Male</option>
+            <option value="female" {{ old('gender', $user->gender) === 'female' ? 'selected' : '' }}>Female</option>
+            <option value="other" {{ old('gender', $user->gender) === 'other' ? 'selected' : '' }}>Other</option>
+          </select>
+          @error('gender')
+            <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
+          @enderror
+        </div>
+
+        <div class="md:col-span-2 lg:col-span-3">
+          <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Address</label>
+          <input type="text" name="address" value="{{ old('address', $user->address) }}"
+                 placeholder="Your full address"
+                 class="form-input @error('address') !border-red-400 @enderror">
+          @error('address')
+            <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
+          @enderror
+        </div>
+
+        <div>
+          <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Occupation</label>
+          <input type="text" name="occupation" value="{{ old('occupation', $user->occupation) }}"
+                 placeholder="Your occupation"
+                 class="form-input @error('occupation') !border-red-400 @enderror">
+          @error('occupation')
+            <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
+          @enderror
+        </div>
+
+        <div>
+          <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Employer</label>
+          <input type="text" name="employer" value="{{ old('employer', $user->employer) }}"
+                 placeholder="Your employer"
+                 class="form-input @error('employer') !border-red-400 @enderror">
+          @error('employer')
+            <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
+          @enderror
+        </div>
+
+        <div>
+          <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">National ID</label>
+          <input type="text" name="national_id" value="{{ old('national_id', $user->national_id) }}"
+                 placeholder="National ID number"
+                 class="form-input @error('national_id') !border-red-400 @enderror">
+          @error('national_id')
+            <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
+          @enderror
+        </div>
+
+        <div class="md:col-span-2 lg:col-span-3">
+          <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Bio / About Me</label>
+          <textarea name="bio" rows="3"
+                    class="form-input @error('bio') !border-red-400 @enderror"
+                    placeholder="Tell us about yourself...">{{ old('bio', $user->bio) }}</textarea>
+          @error('bio')
             <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
           @enderror
         </div>
@@ -108,7 +190,7 @@
           <i class="fa-solid fa-shield-halved mr-1.5"></i> Access & Role Configuration
         </h3>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           <div>
             <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Role *</label>
             <select name="role" required class="form-input @error('role') !border-red-400 @enderror">
@@ -134,7 +216,21 @@
             @enderror
           </div>
 
-          <div class="md:col-span-2">
+          <div>
+            <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Marital Status</label>
+            <select name="marital_status" class="form-input @error('marital_status') !border-red-400 @enderror">
+              <option value="">Select status</option>
+              <option value="single" {{ old('marital_status', $user->marital_status) === 'single' ? 'selected' : '' }}>Single</option>
+              <option value="married" {{ old('marital_status', $user->marital_status) === 'married' ? 'selected' : '' }}>Married</option>
+              <option value="divorced" {{ old('marital_status', $user->marital_status) === 'divorced' ? 'selected' : '' }}>Divorced</option>
+              <option value="widowed" {{ old('marital_status', $user->marital_status) === 'widowed' ? 'selected' : '' }}>Widowed</option>
+            </select>
+            @error('marital_status')
+              <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
+            @enderror
+          </div>
+
+          <div class="md:col-span-2 lg:col-span-3">
             <label class="form-label uppercase tracking-wider mb-2" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Account Status</label>
             <div class="grid grid-cols-3 gap-3">
               @php
