@@ -53,6 +53,7 @@ class MembersImport implements ToCollection, WithHeadingRow
                     'emergency_contact_relationship' => $row['emergency_contact_relationship'] ?? $row['Emergency_Contact_Relationship'] ?? null,
                     'registration_fee' => $row['registration_fee'] ?? $row['Registration_Fee'] ?? null,
                     'notes' => $row['notes'] ?? $row['Notes'] ?? null,
+                    'photo' => $row['photo'] ?? $row['Photo'] ?? null,
                 ];
 
                 if (empty($memberData['member_number']) || empty($memberData['full_name'])) {
@@ -80,8 +81,15 @@ class MembersImport implements ToCollection, WithHeadingRow
                             'password' => Hash::make('password123'), // Default password
                             'role' => 'member',
                             'member_number' => $memberData['member_number'],
+                            'photo' => $memberData['photo'], // Include photo if available
                         ]);
                         $this->createdUsers[] = $memberData['email'];
+                    } else {
+                        // Update existing user with photo if available
+                        if (!empty($memberData['photo'])) {
+                            $existingUser->photo = $memberData['photo'];
+                            $existingUser->save();
+                        }
                     }
                 }
             } catch (\Exception $e) {
