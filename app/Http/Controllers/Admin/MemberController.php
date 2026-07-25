@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Contracts\GoogleSheetRepositoryInterface;
+use App\Exports\MembersTemplateExport;
 use App\Http\Controllers\Controller;
 use App\Imports\MembersImport;
 use App\Models\ActivityLog;
@@ -194,6 +195,7 @@ class MemberController extends Controller
 
             $importedCount = $import->getImportedCount();
             $errors = $import->getErrors();
+            $createdUsers = $import->getCreatedUsers();
 
             ActivityLog::create([
                 'user_id' => Auth::id(),
@@ -202,13 +204,19 @@ class MemberController extends Controller
                 'user_agent' => $request->userAgent(),
                 'properties' => [
                     'imported_count' => $importedCount,
+                    'created_users_count' => count($createdUsers),
+                    'created_users' => $createdUsers,
                     'errors_count' => count($errors),
                     'errors' => $errors,
                 ],
             ]);
 
             if ($importedCount > 0) {
-                $this->success("Successfully imported {$importedCount} member(s).");
+                $message = "Successfully imported {$importedCount} member(s).";
+                if (count($createdUsers) > 0) {
+                    $message .= " Created " . count($createdUsers) . " user account(s).";
+                }
+                $this->success($message);
                 if (!empty($errors)) {
                     $this->warning(count($errors) . ' row(s) were skipped due to errors.');
                 }
@@ -221,5 +229,12 @@ class MemberController extends Controller
             $this->error('Failed to import members: ' . $e->getMessage());
             return redirect()->route('admin.members.index');
         }
+    }
+
+    public function downloadTemplate()
+    {
+        Gate::authorize('admin-only');
+
+        return Excel::download(new MembersTemplateExport, 'members_import_template.xlsx');
     }
 }
