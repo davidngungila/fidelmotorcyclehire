@@ -111,19 +111,62 @@ class MemberController extends Controller
     {
         Gate::authorize('view-member-data', $memberNumber);
 
-        $member = $this->googleSheetRepository->getMemberByNumber($memberNumber);
+        // First check database for imported members
+        $dbMember = \App\Models\Member::where('member_number', $memberNumber)->first();
+        
+        if ($dbMember) {
+            $member = [
+                'member_number' => $dbMember->member_number,
+                'name' => $dbMember->full_name,
+                'gender' => $dbMember->gender,
+                'phone' => $dbMember->phone,
+                'email' => $dbMember->email,
+                'branch' => $dbMember->branch ?? '-',
+                'status' => $dbMember->status,
+                'registration_date' => $dbMember->registration_date,
+                'date_of_birth' => $dbMember->date_of_birth,
+                'national_id' => $dbMember->national_id,
+                'occupation' => $dbMember->occupation,
+                'employer' => $dbMember->employer,
+                'residential_address' => $dbMember->residential_address,
+                'member_type' => $dbMember->member_type,
+                'marital_status' => $dbMember->marital_status,
+                'bank_name' => $dbMember->bank_name,
+                'bank_branch' => $dbMember->bank_branch,
+                'account_name' => $dbMember->account_name,
+                'account_number' => $dbMember->account_number,
+                'bank_account_status' => $dbMember->bank_account_status,
+                'mobile_money_provider' => $dbMember->mobile_money_provider,
+                'mobile_money_number' => $dbMember->mobile_money_number,
+                'emergency_contact_name' => $dbMember->emergency_contact_name,
+                'emergency_contact_phone' => $dbMember->emergency_contact_phone,
+                'emergency_contact_relationship' => $dbMember->emergency_contact_relationship,
+                'registration_fee' => $dbMember->registration_fee,
+                'notes' => $dbMember->notes,
+            ];
+            
+            // For imported members, try to get data from Google Sheets if available
+            $loans = $this->googleSheetRepository->getMemberLoans($memberNumber);
+            $savings = $this->googleSheetRepository->getMemberSavings($memberNumber);
+            $deposits = $this->googleSheetRepository->getMemberDeposits($memberNumber);
+            $swf = $this->googleSheetRepository->getMemberSwf($memberNumber);
+            $investments = $this->googleSheetRepository->getMemberInvestments($memberNumber);
+        } else {
+            // Fall back to Google Sheets
+            $member = $this->googleSheetRepository->getMemberByNumber($memberNumber);
 
-        if (! $member) {
-            $this->error("Member {$memberNumber} not found.");
+            if (! $member) {
+                $this->error("Member {$memberNumber} not found.");
 
-            return redirect()->route('admin.members.index');
+                return redirect()->route('admin.members.index');
+            }
+
+            $loans = $this->googleSheetRepository->getMemberLoans($memberNumber);
+            $savings = $this->googleSheetRepository->getMemberSavings($memberNumber);
+            $deposits = $this->googleSheetRepository->getMemberDeposits($memberNumber);
+            $swf = $this->googleSheetRepository->getMemberSwf($memberNumber);
+            $investments = $this->googleSheetRepository->getMemberInvestments($memberNumber);
         }
-
-        $loans = $this->googleSheetRepository->getMemberLoans($memberNumber);
-        $savings = $this->googleSheetRepository->getMemberSavings($memberNumber);
-        $deposits = $this->googleSheetRepository->getMemberDeposits($memberNumber);
-        $swf = $this->googleSheetRepository->getMemberSwf($memberNumber);
-        $investments = $this->googleSheetRepository->getMemberInvestments($memberNumber);
 
         ActivityLog::create([
             'user_id' => Auth::id(),
