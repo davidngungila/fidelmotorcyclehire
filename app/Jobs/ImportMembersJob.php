@@ -49,7 +49,10 @@ class ImportMembersJob implements ShouldQueue
             $googleSheetRepository = app(GoogleSheetRepositoryInterface::class);
             $import = new MembersImport($googleSheetRepository);
             
-            Excel::import($import, $this->filePath);
+            // Get full storage path
+            $fullPath = storage_path('app/' . $this->filePath);
+            
+            Excel::import($import, $fullPath);
 
             $importedCount = $import->getImportedCount();
             $errors = $import->getErrors();
@@ -79,8 +82,8 @@ class ImportMembersJob implements ShouldQueue
             ]);
 
             // Clean up file
-            if (file_exists($this->filePath)) {
-                unlink($this->filePath);
+            if (file_exists($fullPath)) {
+                unlink($fullPath);
             }
         } catch (\Exception $e) {
             Cache::put("import_{$this->jobId}", [
@@ -92,8 +95,9 @@ class ImportMembersJob implements ShouldQueue
                 'error' => $e->getMessage(),
             ], 3600);
 
-            if (file_exists($this->filePath)) {
-                unlink($this->filePath);
+            $fullPath = storage_path('app/' . $this->filePath);
+            if (file_exists($fullPath)) {
+                unlink($fullPath);
             }
         }
     }
