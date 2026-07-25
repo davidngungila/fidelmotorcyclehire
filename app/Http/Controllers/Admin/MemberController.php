@@ -197,7 +197,7 @@ class MemberController extends Controller
             $file = $request->file('file');
             $filePath = $file->storeAs('temp', 'import_' . $jobId . '.' . $file->getClientOriginalExtension());
 
-            ImportMembersJob::dispatch($filePath, $this->googleSheetRepository, Auth::id(), $jobId);
+            ImportMembersJob::dispatch($filePath, Auth::id(), $jobId);
 
             return response()->json([
                 'success' => true,

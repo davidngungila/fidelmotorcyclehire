@@ -19,17 +19,15 @@ class ImportMembersJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $filePath;
-    protected $googleSheetRepository;
     protected $userId;
     protected $jobId;
 
     /**
      * Create a new job instance.
      */
-    public function __construct($filePath, GoogleSheetRepositoryInterface $googleSheetRepository, $userId, $jobId)
+    public function __construct($filePath, $userId, $jobId)
     {
         $this->filePath = $filePath;
-        $this->googleSheetRepository = $googleSheetRepository;
         $this->userId = $userId;
         $this->jobId = $jobId;
     }
@@ -48,7 +46,8 @@ class ImportMembersJob implements ShouldQueue
                 'total' => 0,
             ], 3600);
 
-            $import = new MembersImport($this->googleSheetRepository);
+            $googleSheetRepository = app(GoogleSheetRepositoryInterface::class);
+            $import = new MembersImport($googleSheetRepository);
             
             Excel::import($import, $this->filePath);
 
