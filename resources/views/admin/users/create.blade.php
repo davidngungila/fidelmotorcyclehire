@@ -5,7 +5,7 @@
 
 @section('content')
 
-<div class="max-w-3xl mx-auto space-y-6">
+<div class="space-y-6">
 
   <div class="flex items-center gap-4">
     <a href="{{ route('admin.users.index') }}"
