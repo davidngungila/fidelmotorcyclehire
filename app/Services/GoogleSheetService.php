@@ -51,7 +51,7 @@ class GoogleSheetService
         try {
             $client = new \Google\Client();
             $client->setAuthConfig($config);
-            $client->setScopes([\Google\Service\Sheets::SPREADSHEETS_READONLY]);
+            $client->setScopes([\Google\Service\Sheets::SPREADSHEETS]);
             $client->setAccessType('offline');
             $client->setPrompt('select_account consent');
 
@@ -148,6 +148,62 @@ class GoogleSheetService
         }
 
         return $result;
+    }
+
+    public function appendRow(string $spreadsheetId, string $range, array $data): bool
+    {
+        if (empty($spreadsheetId)) {
+            throw new InvalidArgumentException('Spreadsheet ID cannot be empty.');
+        }
+
+        if (empty($range)) {
+            throw new InvalidArgumentException('Range cannot be empty.');
+        }
+
+        if (! class_exists(\Google\Client::class)) {
+            throw new RuntimeException(
+                'Google Client SDK is not installed. Please run: composer require google/apiclient:"^2.0" to enable live Google Sheets integration.'
+            );
+        }
+
+        if ($this->service === null) {
+            throw new RuntimeException('GoogleSheetsService is not authenticated. Call authenticateUsingServiceAccount() first.');
+        }
+
+        try {
+            $body = new \Google\Service\Sheets\ValueRange([
+                'values' => [array_values($data)]
+            ]);
+
+            $params = [
+                'valueInputOption' => 'RAW'
+            ];
+
+            $this->logger->debug('GoogleSheetsService: Appending row to sheet.', [
+                'spreadsheet_id' => $spreadsheetId,
+                'range' => $range,
+                'data' => $data,
+            ]);
+
+            $response = $this->service->spreadsheets_values->append($spreadsheetId, $range, $body, $params);
+
+            $this->logger->info('GoogleSheetsService: Successfully appended row to sheet.', [
+                'spreadsheet_id' => $spreadsheetId,
+                'range' => $range,
+                'updates' => $response->getUpdates() ?? [],
+            ]);
+
+            return true;
+        } catch (Exception $e) {
+            $this->logger->error('GoogleSheetsService: Failed to append row to sheet.', [
+                'spreadsheet_id' => $spreadsheetId,
+                'range' => $range,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            throw new RuntimeException('Failed to append row to Google Sheets: '.$e->getMessage(), 0, $e);
+        }
     }
 
     public function getSpreadsheetId(): ?string

@@ -30,10 +30,16 @@
       </form>
     </div>
 
-    <a href="{{ route('admin.users.create') }}"
-       class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95 whitespace-nowrap">
-      <i class="fa-solid fa-user-plus text-[13px]"></i> New Member
-    </a>
+    <div class="flex items-center gap-3">
+      <button type="button" onclick="document.getElementById('importModal').classList.remove('hidden')"
+             class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95 whitespace-nowrap">
+        <i class="fa-solid fa-file-import text-[13px]"></i> Import Excel
+      </button>
+      <a href="{{ route('admin.users.create') }}"
+         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95 whitespace-nowrap">
+        <i class="fa-solid fa-user-plus text-[13px]"></i> New Member
+      </a>
+    </div>
   </div>
 
   <div class="glass p-5">
@@ -239,6 +245,54 @@
         </nav>
       </div>
     @endif
+  </div>
+</div>
+
+<!-- Import Modal -->
+<div id="importModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white dark:bg-dark-bg rounded-2xl shadow-2xl w-full max-w-lg">
+    <div class="p-6 border-b border-gray-200 dark:border-dark-border">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Import Members from Excel</h3>
+        <button type="button" onclick="document.getElementById('importModal').classList.add('hidden')"
+                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
+    </div>
+    <form method="POST" action="{{ route('admin.members.import') }}" enctype="multipart/form-data" class="p-6 space-y-4">
+      @csrf
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select Excel File</label>
+        <div class="relative border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 text-center hover:border-primary-500 dark:hover:border-primary-400 transition-colors">
+          <input type="file" name="file" accept=".xlsx,.xls,.csv" required
+                 class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                 onchange="if(this.files[0]) { this.parentElement.querySelector('.file-name').textContent = this.files[0].name; this.parentElement.querySelector('.upload-text').classList.add('hidden'); this.parentElement.querySelector('.file-name').classList.remove('hidden'); }">
+          <div class="upload-text">
+            <i class="fa-solid fa-cloud-arrow-up text-3xl text-gray-400 mb-2"></i>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Drag and drop your Excel file here, or click to browse</p>
+            <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">.xlsx, .xls, .csv (Max 10MB)</p>
+          </div>
+          <p class="file-name hidden text-sm font-medium text-primary-600 dark:text-primary-400"></p>
+        </div>
+      </div>
+      <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/40 rounded-lg p-4">
+        <p class="text-xs text-blue-800 dark:text-blue-300 font-semibold mb-2">
+          <i class="fa-solid fa-info-circle mr-1"></i> Required Excel Columns:
+        </p>
+        <p class="text-xs text-blue-700 dark:text-blue-400">member_number, name, gender, phone, email, branch, status, join_date</p>
+      </div>
+      <div class="flex items-center justify-end gap-3 pt-4">
+        <button type="button" onclick="document.getElementById('importModal').classList.add('hidden')"
+                class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+          Cancel
+        </button>
+        <button type="submit"
+                class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium transition-colors flex items-center gap-2">
+          <i class="fa-solid fa-file-import"></i> Import Members
+        </button>
+      </div>
+    </form>
   </div>
 </div>
 

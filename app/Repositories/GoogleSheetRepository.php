@@ -368,6 +368,25 @@ class GoogleSheetRepository implements GoogleSheetRepositoryInterface
         );
     }
 
+    public function addMember(array $memberData): bool
+    {
+        try {
+            if ($this->googleApiConfigured && $this->googleSheetService->isReady()) {
+                $this->googleSheetService->appendRow($this->spreadsheetId, 'Members!A:K', $memberData);
+                $this->clearAllCache();
+                return true;
+            }
+
+            return $this->fallback->addMember($memberData);
+        } catch (Throwable $e) {
+            $this->logger->error('GoogleSheetRepository: Failed to add member', [
+                'error' => $e->getMessage(),
+                'member_number' => $memberData['member_number'] ?? null,
+            ]);
+            return false;
+        }
+    }
+
     public function getLastSyncInfo(): array
     {
         $cacheKey = $this->cacheKey('last_sync_info');

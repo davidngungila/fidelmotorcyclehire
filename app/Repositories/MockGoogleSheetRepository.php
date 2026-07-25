@@ -8,7 +8,7 @@ use App\Contracts\GoogleSheetRepositoryInterface;
 
 class MockGoogleSheetRepository implements GoogleSheetRepositoryInterface
 {
-    protected const MEMBERS = [
+    protected array $members = [
         ['name' => 'John Kamau', 'gender' => 'Male', 'phone' => '+254711000001', 'email' => 'john.kamau@example.co.ke', 'address' => 'P.O. Box 1234, Nairobi', 'occupation' => 'Accountant', 'employer' => 'Kenya Revenue Authority', 'branch' => 'Nairobi', 'registration_date' => '2023-01-15', 'status' => 'Active', 'member_number' => 'M001'],
         ['name' => 'Jane Wanjiru', 'gender' => 'Female', 'phone' => '+254711000002', 'email' => 'jane.wanjiru@example.co.ke', 'address' => 'P.O. Box 5678, Mombasa', 'occupation' => 'Teacher', 'employer' => 'Mombasa County Govt', 'branch' => 'Mombasa', 'registration_date' => '2023-02-20', 'status' => 'Active', 'member_number' => 'M002'],
         ['name' => 'Peter Otieno', 'gender' => 'Male', 'phone' => '+254711000003', 'email' => 'peter.otieno@example.co.ke', 'address' => 'P.O. Box 9012, Kisumu', 'occupation' => 'Engineer', 'employer' => 'Kenya Power', 'branch' => 'Kisumu', 'registration_date' => '2023-03-10', 'status' => 'Active', 'member_number' => 'M003'],
@@ -223,7 +223,7 @@ class MockGoogleSheetRepository implements GoogleSheetRepositoryInterface
     public function getSheetData(string $sheetName, ?string $range = null): array
     {
         return match (strtolower(trim($sheetName))) {
-            'members', 'member' => self::MEMBERS,
+            'members', 'member' => $this->members,
             'loans', 'loan' => self::LOANS,
             'savings', 'saving' => $this->flattenNested(self::SAVINGS),
             'deposits', 'deposit' => $this->flattenNested(self::DEPOSITS),
@@ -236,7 +236,7 @@ class MockGoogleSheetRepository implements GoogleSheetRepositoryInterface
     public function getMemberByNumber(string $memberNumber): ?array
     {
         $memberNumber = strtoupper(trim($memberNumber));
-        foreach (self::MEMBERS as $member) {
+        foreach ($this->members as $member) {
             if ($member['member_number'] === $memberNumber) {
                 return $member;
             }
@@ -247,7 +247,7 @@ class MockGoogleSheetRepository implements GoogleSheetRepositoryInterface
 
     public function getAllMembers(): array
     {
-        return self::MEMBERS;
+        return $this->members;
     }
 
     public function getMemberLoans(string $memberNumber): array
@@ -360,10 +360,10 @@ class MockGoogleSheetRepository implements GoogleSheetRepositoryInterface
     {
         $query = strtolower(trim($query));
         if ($query === '') {
-            return self::MEMBERS;
+            return $this->members;
         }
 
-        return array_values(array_filter(self::MEMBERS, static function (array $member) use ($query): bool {
+        return array_values(array_filter($this->members, static function (array $member) use ($query): bool {
             $haystack = strtolower(implode(' ', [
                 $member['name'] ?? '',
                 $member['member_number'] ?? '',
@@ -378,6 +378,12 @@ class MockGoogleSheetRepository implements GoogleSheetRepositoryInterface
         }));
     }
 
+    public function addMember(array $memberData): bool
+    {
+        $this->members[] = $memberData;
+        return true;
+    }
+
     public function getLastSyncInfo(): array
     {
         return [
@@ -385,7 +391,7 @@ class MockGoogleSheetRepository implements GoogleSheetRepositoryInterface
             'source' => 'Mock / Sample Data',
             'status' => 'success',
             'records_synced' => [
-                'members' => count(self::MEMBERS),
+                'members' => count($this->members),
                 'loans' => count(self::LOANS),
                 'savings_accounts' => count(self::SAVINGS),
                 'deposits' => array_sum(array_map('count', self::DEPOSITS)),

@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Contracts\GoogleSheetRepositoryInterface;
 use App\Http\Controllers\Controller;
+use App\Imports\MembersImport;
 use App\Models\ActivityLog;
 use App\Services\AdminDashboardService;
 use App\Services\MemberService;
@@ -14,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MemberController extends Controller
 {
@@ -176,5 +178,48 @@ class MemberController extends Controller
             'memberNumber' => $memberNumber,
             'dashboardService' => $this->dashboardService,
         ]);
+    }
+
+    public function import(Request $request)
+    {
+        Gate::authorize('admin-only');
+
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:10240',
+        ]);
+
+        try {
+            $import = new MembersImport($this->googleSheetRepository);
+            Excel::import($import, $request->file('file'));
+
+            $importedCount = $import->getImportedCount();
+            $errors = $import->getErrors();
+
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'description' => 'Admin imported members from Excel',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'properties' => [
+                    'imported_count' => $importedCount,
+                    'errors_count' => count($errors),
+                    'errors' => $errors,
+                ],
+            ]);
+
+            if ($importedCount > 0) {
+                $this->success("Successfully imported {$importedCount} member(s).");
+                if (!empty($errors)) {
+                    $this->warning(count($errors) . ' row(s) were skipped due to errors.');
+                }
+            } else {
+                $this->error('No members were imported. Please check your file format.');
+            }
+
+            return redirect()->route('admin.members.index');
+        } catch (\Exception $e) {
+            $this->error('Failed to import members: ' . $e->getMessage());
+            return redirect()->route('admin.members.index');
+        }
     }
 }

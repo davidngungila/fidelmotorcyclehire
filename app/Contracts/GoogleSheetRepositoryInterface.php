@@ -28,5 +28,7 @@ interface GoogleSheetRepositoryInterface
 
     public function searchMembers(string $query): array;
 
+    public function addMember(array $memberData): bool;
+
     public function getLastSyncInfo(): array;
 }
