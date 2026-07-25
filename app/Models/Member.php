@@ -33,6 +33,7 @@ class Member extends Model
         'emergency_contact_relationship',
         'registration_fee',
         'notes',
+        'photo',
     ];
 
     protected $casts = [

@@ -114,9 +114,19 @@
               </td>
               <td>
                 <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 text-white flex items-center justify-center text-xs font-bold flex-shrink-0 shadow-sm">
-                    {{ strtoupper(substr($memberName, 0, 1) ?? 'M') }}
-                  </div>
+                  @php
+                    $memberPhoto = $member['photo'] ?? null;
+                    $memberPhoto = $memberPhoto ? (is_array($memberPhoto) ? ($memberPhoto['photo'] ?? null) : $memberPhoto) : null;
+                  @endphp
+                  @if($memberPhoto)
+                    <img src="{{ asset('storage/' . $memberPhoto) }}" 
+                         alt="{{ $memberName }}" 
+                         class="w-9 h-9 rounded-full object-cover flex-shrink-0 shadow-sm border-2 border-white dark:border-gray-700">
+                  @else
+                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 text-white flex items-center justify-center text-xs font-bold flex-shrink-0 shadow-sm">
+                      {{ strtoupper(substr($memberName, 0, 1) ?? 'M') }}
+                    </div>
+                  @endif
                   <div class="min-w-0">
                     <p class="text-sm font-semibold text-primary-900 dark:text-white truncate max-w-[200px]">{{ $memberName }}</p>
                     @if($memberEmail && $memberEmail !== '-')
