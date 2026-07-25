@@ -35,6 +35,7 @@ class GoogleSheetRepository implements GoogleSheetRepositoryInterface
         'deposits' => 'Deposits!A:I',
         'swf' => 'SWF!A:E',
         'investments' => 'Investments!A:H',
+        'shares' => 'Shares!A:F',
     ];
 
     protected ?string $spreadsheetId = null;
@@ -250,6 +251,27 @@ class GoogleSheetRepository implements GoogleSheetRepositoryInterface
             },
             fallbackCallable: fn (): array => $this->fallback->getMemberInvestments($memberNumber),
             operation: "getMemberInvestments({$memberNumber})",
+        );
+    }
+
+    public function getMemberShares(string $memberNumber): array
+    {
+        $memberNumber = $this->validateMemberNumber($memberNumber);
+        $cacheKey = $this->cacheKey('shares', $memberNumber);
+
+        return $this->executeWithCacheAndFallback(
+            cacheKey: $cacheKey,
+            liveCallable: function () use ($memberNumber): array {
+                $allRows = $this->getSheetData('shares');
+
+                return array_values(array_filter($allRows, static function (array $row) use ($memberNumber): bool {
+                    $current = strtoupper(trim((string) ($row['member_number'] ?? $row['MemberNumber'] ?? '')));
+
+                    return $current === $memberNumber;
+                }));
+            },
+            fallbackCallable: fn (): array => $this->fallback->getMemberShares($memberNumber),
+            operation: "getMemberShares({$memberNumber})",
         );
     }
 

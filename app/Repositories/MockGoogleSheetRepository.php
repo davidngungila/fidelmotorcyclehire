@@ -218,6 +218,25 @@ class MockGoogleSheetRepository implements GoogleSheetRepositoryInterface
         ],
     ];
 
+    protected const SHARES = [
+        'M001' => [
+            ['share_number' => 'SH-001', 'type' => 'Ordinary', 'quantity' => 100, 'value_per_share' => 1000, 'purchase_date' => '2023-01-15', 'status' => 'active'],
+            ['share_number' => 'SH-002', 'type' => 'Preference', 'quantity' => 50, 'value_per_share' => 1500, 'purchase_date' => '2023-06-20', 'status' => 'active'],
+        ],
+        'M002' => [
+            ['share_number' => 'SH-003', 'type' => 'Ordinary', 'quantity' => 150, 'value_per_share' => 1000, 'purchase_date' => '2023-02-20', 'status' => 'active'],
+        ],
+        'M003' => [
+            ['share_number' => 'SH-004', 'type' => 'Ordinary', 'quantity' => 200, 'value_per_share' => 1000, 'purchase_date' => '2023-03-10', 'status' => 'active'],
+        ],
+        'M005' => [
+            ['share_number' => 'SH-005', 'type' => 'Ordinary', 'quantity' => 300, 'value_per_share' => 1000, 'purchase_date' => '2023-05-18', 'status' => 'active'],
+        ],
+        'M007' => [
+            ['share_number' => 'SH-006', 'type' => 'Preference', 'quantity' => 100, 'value_per_share' => 1500, 'purchase_date' => '2023-07-30', 'status' => 'active'],
+        ],
+    ];
+
     protected const STATEMENT_TYPES = ['savings', 'loans', 'deposits', 'swf', 'investments'];
 
     public function getSheetData(string $sheetName, ?string $range = null): array
@@ -229,6 +248,7 @@ class MockGoogleSheetRepository implements GoogleSheetRepositoryInterface
             'deposits', 'deposit' => $this->flattenNested(self::DEPOSITS),
             'swf', 'social_welfare' => $this->flattenNested(self::SWF),
             'investments', 'investment' => $this->flattenNested(self::INVESTMENTS),
+            'shares', 'share' => $this->flattenNested(self::SHARES),
             default => [],
         };
     }
@@ -295,6 +315,13 @@ class MockGoogleSheetRepository implements GoogleSheetRepositoryInterface
         $memberNumber = strtoupper(trim($memberNumber));
 
         return self::INVESTMENTS[$memberNumber] ?? [];
+    }
+
+    public function getMemberShares(string $memberNumber): array
+    {
+        $memberNumber = strtoupper(trim($memberNumber));
+
+        return self::SHARES[$memberNumber] ?? [];
     }
 
     public function getMemberStatements(string $memberNumber, string $type): array

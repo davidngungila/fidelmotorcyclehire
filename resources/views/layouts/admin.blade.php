@@ -109,6 +109,13 @@
         <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Investments</span>
       </a>
 
+      <a href="{{ route('admin.shares.index') }}"
+         class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-primary-200 hover:text-white transition-all duration-150
+                {{ request()->routeIs('admin.shares.*') ? 'active' : '' }}">
+        <i class="fa-solid fa-building-columns w-4 text-center flex-shrink-0"></i>
+        <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Shares</span>
+      </a>
+
       <div x-show="!sidebarCollapsed">
         <p class="text-primary-500 text-[10px] font-bold uppercase tracking-widest px-3 pt-4 pb-1">Reports</p>
       </div>

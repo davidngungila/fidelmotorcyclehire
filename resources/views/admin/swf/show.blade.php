@@ -10,7 +10,22 @@
 
 @section('content')
 
-<div class="space-y-6">
+<div x-data="swfShow()" class="space-y-6">
+
+  <!-- Tab Navigation -->
+  <div class="glass p-2 rounded-xl flex gap-1 overflow-x-auto">
+    <template x-for="tab in tabs" :key="tab.id">
+      <button @click="activeTab = tab.id"
+              :class="activeTab === tab.id ? 'bg-white dark:bg-primary-900 shadow-sm text-primary-900 dark:text-white' : 'text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30'"
+              class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap">
+        <i :class="tab.icon" class="text-[11px]"></i>
+        <span x-text="tab.label"></span>
+      </button>
+    </template>
+  </div>
+
+  <!-- Overview Tab -->
+  <div x-show="activeTab === 'overview'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
   @if($member)
     <div class="glass p-6">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
@@ -108,12 +123,15 @@
       </div>
     </div>
   </div>
+  </div>
 
-  @if(isset($swfData['contributions']) && is_array($swfData['contributions']) && count($swfData['contributions']) > 0)
+  <!-- Contributions Tab -->
+  <div x-show="activeTab === 'contributions'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
     <div class="glass p-5">
       <h3 class="text-sm font-bold text-primary-900 dark:text-white mb-4 flex items-center gap-2">
         <i class="fa-solid fa-history text-purple-500"></i> Contribution History
       </h3>
+      @if(isset($swfData['contributions']) && is_array($swfData['contributions']) && count($swfData['contributions']) > 0)
       <div class="overflow-x-auto -webkit-scrollbar [&::-webkit-scrollbar]:hidden rounded-2xl">
         <table class="data-table">
           <thead>
@@ -149,13 +167,87 @@
           </tbody>
         </table>
       </div>
+      @else
+      <div class="text-center py-12">
+        <i class="fa-solid fa-inbox text-4xl text-primary-300 dark:text-primary-700 mb-3 block"></i>
+        <p class="text-sm font-semibold text-primary-600 dark:text-primary-400">No contribution history available</p>
+      </div>
+      @endif
     </div>
-  @else
-    <div class="glass p-8 text-center">
-      <i class="fa-solid fa-inbox text-4xl text-primary-300 dark:text-primary-700 mb-3 block"></i>
-      <p class="text-sm font-semibold text-primary-600 dark:text-primary-400">No contribution history available</p>
+  </div>
+
+  <!-- Benefits Tab -->
+  <div x-show="activeTab === 'benefits'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
+    <div class="glass p-5">
+      <h3 class="text-sm font-bold text-primary-900 dark:text-white mb-4 flex items-center gap-2">
+        <i class="fa-solid fa-hand-holding-heart text-orange-500"></i> Benefits History
+      </h3>
+      @if(isset($swfData['benefits']) && is_array($swfData['benefits']) && count($swfData['benefits']) > 0)
+      <div class="overflow-x-auto -webkit-scrollbar [&::-webkit-scrollbar]:hidden rounded-2xl">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Description</th>
+              <th class="text-right">Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach($swfData['benefits'] as $benefit)
+              @php
+                $date = $benefit['date'] ?? '-';
+                $type = $benefit['type'] ?? '-';
+                $description = $benefit['description'] ?? '-';
+                $amount = $benefit['amount'] ?? 0;
+                $status = $benefit['status'] ?? 'pending';
+                $statusClass = $status === 'paid' ? 'badge-green' : ($status === 'pending' ? 'badge-yellow' : 'badge-red');
+              @endphp
+              <tr>
+                <td class="font-mono text-[11px] text-primary-700 dark:text-primary-300">{{ $date }}</td>
+                <td>
+                  <span class="badge badge-purple">{{ ucfirst($type) }}</span>
+                </td>
+                <td class="text-xs text-primary-900 dark:text-white">{{ $description }}</td>
+                <td class="text-right font-bold text-xs text-orange-600 dark:text-orange-400">{{ $fmt($amount) }}</td>
+                <td><span class="badge {{ $statusClass }}">{{ ucfirst($status) }}</span></td>
+              </tr>
+            @endforeach
+          </tbody>
+        </table>
+      </div>
+      @else
+      <div class="text-center py-12">
+        <i class="fa-solid fa-hand-holding-heart text-4xl text-primary-300 dark:text-primary-700 mb-3 block"></i>
+        <p class="text-sm font-semibold text-primary-600 dark:text-primary-400">No benefits history available</p>
+      </div>
+      @endif
     </div>
-  @endif
+  </div>
+
 </div>
+
+@push('scripts')
+<script>
+  function swfShow() {
+    return {
+      activeTab: 'overview',
+      tabs: [
+        { id: 'overview', label: 'Overview', icon: 'fa-solid fa-circle-info' },
+        { id: 'contributions', label: 'Contributions', icon: 'fa-solid fa-coins' },
+        { id: 'benefits', label: 'Benefits', icon: 'fa-solid fa-hand-holding-heart' },
+      ],
+      init() {
+        const hash = window.location.hash.replace('#tab-', '');
+        const validTabs = this.tabs.map(t => t.id);
+        if (hash && validTabs.includes(hash)) {
+          this.activeTab = hash;
+        }
+      }
+    }
+  }
+</script>
+@endpush
 
 @endsection

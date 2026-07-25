@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\ActivityLogController as AdminActivityLogControll
 use App\Http\Controllers\Admin\RoleController as AdminRoleController;
 use App\Http\Controllers\Admin\PermissionController as AdminPermissionController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
+use App\Http\Controllers\Admin\ShareController as AdminShareController;
 use App\Http\Controllers\Member\DashboardController as MemberDashboardController;
 use App\Http\Controllers\Member\ProfileController as MemberProfileController;
 use App\Http\Controllers\Member\LoanController as MemberLoanController;
@@ -86,6 +87,9 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
 
     Route::get('/investments', [AdminInvestmentController::class, 'index'])->name('investments.index');
     Route::get('/investments/{memberNumber}', [AdminInvestmentController::class, 'show'])->name('investments.show');
+
+    Route::get('/shares', [AdminShareController::class, 'index'])->name('shares.index');
+    Route::get('/shares/{memberNumber}', [AdminShareController::class, 'show'])->name('shares.show');
 
     Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
     Route::post('/reports/generate', [AdminReportController::class, 'generate'])->name('reports.generate');
