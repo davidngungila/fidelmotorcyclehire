@@ -80,9 +80,15 @@
               <td class="text-xs text-primary-400 dark:text-primary-500 font-mono">{{ $rowNum }}.</td>
               <td>
                 <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 text-white flex items-center justify-center text-xs font-bold flex-shrink-0 shadow-sm">
-                    {{ strtoupper(substr($user->name, 0, 1) ?? 'U') }}
-                  </div>
+                  @if($user->photo)
+                    <img src="{{ asset('storage/' . $user->photo) }}" 
+                         alt="{{ $user->name }}" 
+                         class="w-9 h-9 rounded-full object-cover flex-shrink-0 shadow-sm border-2 border-white dark:border-gray-700">
+                  @else
+                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 text-white flex items-center justify-center text-xs font-bold flex-shrink-0 shadow-sm">
+                      {{ strtoupper(substr($user->name, 0, 1) ?? 'U') }}
+                    </div>
+                  @endif
                   <div class="min-w-0">
                     <p class="text-sm font-semibold text-primary-900 dark:text-white truncate max-w-[200px]">{{ $user->name }}</p>
                     @if($user->phone)
