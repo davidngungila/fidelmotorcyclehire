@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Contracts\GoogleSheetRepositoryInterface;
+use App\Models\Member;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
@@ -59,7 +60,13 @@ class MembersImport implements ToCollection, WithHeadingRow
                     continue;
                 }
 
-                // Add member to Google Sheets
+                // Save to database
+                Member::updateOrCreate(
+                    ['member_number' => $memberData['member_number']],
+                    $memberData
+                );
+
+                // Also add to Google Sheets for compatibility
                 $this->googleSheetRepository->addMember($memberData);
                 $this->importedCount++;
 
