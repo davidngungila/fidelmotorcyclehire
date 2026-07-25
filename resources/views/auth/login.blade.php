@@ -83,19 +83,17 @@
          x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
          x-transition:leave="transition ease-in duration-150"
          x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-         class="fixed inset-0 bg-white/95 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-        <div class="text-center max-w-md w-full">
-            <div class="w-16 h-16 border-4 border-green-200 border-t-green-600 rounded-full animate-spin mx-auto mb-6"></div>
-            <div class="space-y-3">
+         class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
+            <div class="w-20 h-20 border-4 border-green-200 border-t-green-600 rounded-full animate-spin mx-auto mb-6"></div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Signing In...</h3>
+            <div class="min-h-[40px] flex items-center justify-center">
+                <p class="text-lg font-medium text-green-600" x-text="loadingSteps[currentStep]"></p>
+            </div>
+            <div class="flex justify-center gap-2 mt-6">
                 <template x-for="(step, index) in loadingSteps" :key="index">
-                    <div class="flex items-center gap-3 justify-center">
-                        <i class="fa-solid fa-check text-green-600 text-sm" x-show="index < currentStep"></i>
-                        <div class="w-4 h-4 border-2 border-green-300 rounded-full" x-show="index === currentStep"></div>
-                        <div class="w-4 h-4 border-2 border-gray-300 rounded-full" x-show="index > currentStep"></div>
-                        <p class="text-sm font-medium" 
-                           :class="index < currentStep ? 'text-green-600' : (index === currentStep ? 'text-gray-900' : 'text-gray-400')"
-                           x-text="step"></p>
-                    </div>
+                    <div class="w-2 h-2 rounded-full transition-all duration-300"
+                         :class="index < currentStep ? 'bg-green-600' : (index === currentStep ? 'bg-green-400 w-3' : 'bg-gray-300')"></div>
                 </template>
             </div>
         </div>
