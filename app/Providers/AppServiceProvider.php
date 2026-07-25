@@ -17,6 +17,7 @@ use App\Repositories\GoogleSheetRepository;
 use App\Services\EncryptedIdService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Blade;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -46,6 +47,11 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::define('view-member-data', function (User $user, string $memberNumber): bool {
             return $user->isAdmin() || $user->member_number === $memberNumber;
+        });
+
+        // Blade directive to encrypt IDs
+        Blade::directive('encryptId', function ($expression) {
+            return "<?php echo app(\App\Services\EncryptedIdService::class)->encrypt({$expression}); ?>";
         });
     }
 }

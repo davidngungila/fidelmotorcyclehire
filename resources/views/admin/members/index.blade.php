@@ -171,11 +171,11 @@
               </td>
               <td class="text-right whitespace-nowrap">
                 <div class="flex items-center justify-end gap-2">
-                  <a href="{{ route('admin.members.show', $memberNo ?? 'FTN-' . str_pad((string)$rowNum, 5, '0', STR_PAD_LEFT)) }}"
+                  <a href="{{ route('admin.members.show', encryptId($memberNo ?? 'FTN-' . str_pad((string)$rowNum, 5, '0', STR_PAD_LEFT))) }}"
                      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-[11px] font-bold transition-colors">
                     <i class="fa-solid fa-eye text-[10px]"></i> View Profile
                   </a>
-                  <a href="{{ route('admin.members.show', ['memberNumber' => $memberNo ?? 'FTN-' . str_pad((string)$rowNum, 5, '0', STR_PAD_LEFT), '#tab-loans']) }}"
+                  <a href="{{ route('admin.members.show', encryptId($memberNo ?? 'FTN-' . str_pad((string)$rowNum, 5, '0', STR_PAD_LEFT))) }}#tab-loans"
                      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-50 hover:bg-orange-100 dark:bg-orange-900/30 dark:hover:bg-orange-900/50 text-orange-700 dark:text-orange-300 text-[11px] font-bold transition-colors border border-orange-200 dark:border-orange-800/40">
                     <i class="fa-solid fa-hand-holding-dollar text-[10px]"></i> Loans
                     <span class="badge badge-orange !text-[9px] !py-0.5 !px-1.5 ml-0.5">View</span>

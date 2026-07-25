@@ -84,7 +84,7 @@
             <td class="text-right text-xs font-bold text-primary-900 dark:text-white">{{ number_format($valuePerShare, 2) }} TSh</td>
             <td class="text-right text-xs font-bold text-green-600 dark:text-green-400">{{ number_format($totalValue, 2) }} TSh</td>
             <td class="text-right">
-              <a href="{{ route('admin.shares.show', $memberNo) }}" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-xs font-bold transition-colors">
+              <a href="{{ route('admin.shares.show', encryptId($memberNo)) }}" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-xs font-bold transition-colors">
                 <i class="fa-solid fa-eye text-[10px]"></i> View
               </a>
             </td>

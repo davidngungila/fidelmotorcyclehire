@@ -129,7 +129,7 @@
               </td>
               <td><span class="badge {{ $memberStatus['class'] }}">{{ $memberStatus['label'] }}</span></td>
               <td class="text-right whitespace-nowrap">
-                <a href="{{ route('admin.savings.show', $memberNo) }}"
+                <a href="{{ route('admin.savings.show', encryptId($memberNo)) }}"
                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/40 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-300 text-[11px] font-bold transition-colors">
                   <i class="fa-solid fa-eye text-[10px]"></i> View
                 </a>

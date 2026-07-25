@@ -150,7 +150,7 @@
                 </div>
               </td>
               <td class="text-right whitespace-nowrap">
-                <a href="{{ route('admin.loans.show', $loanNo) }}"
+                <a href="{{ route('admin.loans.show', encryptId($loanNo)) }}"
                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-[11px] font-bold transition-colors">
                   <i class="fa-solid fa-eye text-[10px]"></i> View
                 </a>

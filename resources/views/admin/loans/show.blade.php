@@ -58,7 +58,7 @@
             <div class="flex-1 min-w-0">
               <div class="flex items-center justify-between gap-2 flex-wrap">
                 <p class="text-sm font-bold text-primary-900 dark:text-white truncate">{{ $memberName }}</p>
-                <a href="{{ route('admin.members.show', $memberNo) }}" class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white dark:bg-primary-900/50 text-primary-600 dark:text-primary-400 text-[10px] font-bold hover:bg-primary-100 dark:hover:bg-primary-900 transition-colors">
+                <a href="{{ route('admin.members.show', encryptId($memberNo)) }}" class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white dark:bg-primary-900/50 text-primary-600 dark:text-primary-400 text-[10px] font-bold hover:bg-primary-100 dark:hover:bg-primary-900 transition-colors">
                   <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
                   View Profile
                 </a>

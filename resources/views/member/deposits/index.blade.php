@@ -141,7 +141,7 @@
                 </div>
 
                 <div class="mt-auto pt-3">
-                    <a href="{{ route('member.deposits.show', $dep['certificate_number']) }}"
+                    <a href="{{ route('member.deposits.show', encryptId($dep['certificate_number'])) }}"
                        class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-br from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 shadow-lg shadow-primary-500/20 hover:shadow-primary-500/30 transition-all">
                         <i class="fa-solid fa-file-lines text-xs"></i>
                         View Details

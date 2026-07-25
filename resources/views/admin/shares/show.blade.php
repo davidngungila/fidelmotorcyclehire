@@ -32,7 +32,7 @@
           </div>
         </div>
         <div class="flex items-center gap-3">
-          <a href="{{ route('admin.members.show', $memberNumber) }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-xs font-bold transition-colors">
+          <a href="{{ route('admin.members.show', encryptId($memberNumber)) }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-xs font-bold transition-colors">
             <i class="fa-solid fa-user text-[10px]"></i> View Profile
           </a>
           <a href="{{ route('admin.shares.index') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800/50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-bold transition-colors">

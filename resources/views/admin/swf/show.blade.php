@@ -53,7 +53,7 @@
           <a href="mailto:{{ $member['email'] ?? '' }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/40 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-300 text-xs font-bold transition-colors">
             <i class="fa-solid fa-envelope text-[10px]"></i> Email
           </a>
-          <a href="{{ route('admin.members.show', $memberNumber) }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-xs font-bold transition-colors">
+          <a href="{{ route('admin.members.show', encryptId($memberNumber)) }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-xs font-bold transition-colors">
             <i class="fa-solid fa-arrow-left text-[10px]"></i> Back
           </a>
         </div>
