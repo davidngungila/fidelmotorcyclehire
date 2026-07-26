@@ -36,6 +36,8 @@ class GoogleSheetRepository implements GoogleSheetRepositoryInterface
         'swf' => 'SWF!A:E',
         'investments' => 'Investments!A:H',
         'shares' => 'Shares!A:F',
+        'transactions' => 'Transactions!A:E',
+        'saving_plans' => 'Saving Plans!A:E',
     ];
 
     protected ?string $spreadsheetId = null;
@@ -272,6 +274,72 @@ class GoogleSheetRepository implements GoogleSheetRepositoryInterface
             },
             fallbackCallable: fn (): array => $this->fallback->getMemberShares($memberNumber),
             operation: "getMemberShares({$memberNumber})",
+        );
+    }
+
+    public function getMemberTransactions(string $memberNumber): array
+    {
+        $memberNumber = $this->validateMemberNumber($memberNumber);
+        $cacheKey = $this->cacheKey('transactions', $memberNumber);
+
+        return $this->executeWithCacheAndFallback(
+            cacheKey: $cacheKey,
+            liveCallable: function () use ($memberNumber): array {
+                $allRows = $this->getSheetData('transactions');
+
+                return array_values(array_filter($allRows, static function (array $row) use ($memberNumber): bool {
+                    $current = strtoupper(trim((string) ($row['membercode'] ?? $row['member_code'] ?? $row['MemberCode'] ?? '')));
+
+                    return $current === $memberNumber;
+                }));
+            },
+            fallbackCallable: fn (): array => $this->fallback->getMemberTransactions($memberNumber),
+            operation: "getMemberTransactions({$memberNumber})",
+        );
+    }
+
+    public function getMemberSavingPlans(string $memberNumber): array
+    {
+        $memberNumber = $this->validateMemberNumber($memberNumber);
+        $cacheKey = $this->cacheKey('saving_plans', $memberNumber);
+
+        return $this->executeWithCacheAndFallback(
+            cacheKey: $cacheKey,
+            liveCallable: function () use ($memberNumber): array {
+                $allRows = $this->getSheetData('saving_plans');
+
+                return array_values(array_filter($allRows, static function (array $row) use ($memberNumber): bool {
+                    $current = strtoupper(trim((string) ($row['memberid'] ?? $row['member_id'] ?? $row['MemberId'] ?? '')));
+
+                    return $current === $memberNumber;
+                }));
+            },
+            fallbackCallable: fn (): array => $this->fallback->getMemberSavingPlans($memberNumber),
+            operation: "getMemberSavingPlans({$memberNumber})",
+        );
+    }
+
+    public function getAllTransactions(): array
+    {
+        $cacheKey = $this->cacheKey('all_transactions');
+
+        return $this->executeWithCacheAndFallback(
+            cacheKey: $cacheKey,
+            liveCallable: fn (): array => $this->getSheetData('transactions'),
+            fallbackCallable: fn (): array => $this->fallback->getAllTransactions(),
+            operation: 'getAllTransactions()',
+        );
+    }
+
+    public function getAllSavingPlans(): array
+    {
+        $cacheKey = $this->cacheKey('all_saving_plans');
+
+        return $this->executeWithCacheAndFallback(
+            cacheKey: $cacheKey,
+            liveCallable: fn (): array => $this->getSheetData('saving_plans'),
+            fallbackCallable: fn (): array => $this->fallback->getAllSavingPlans(),
+            operation: 'getAllSavingPlans()',
         );
     }
 

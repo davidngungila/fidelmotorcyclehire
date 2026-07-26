@@ -116,6 +116,20 @@
         <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Shares</span>
       </a>
 
+      <a href="{{ route('admin.transactions.index') }}"
+         class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-primary-200 hover:text-white transition-all duration-150
+                {{ request()->routeIs('admin.transactions.*') ? 'active' : '' }}">
+        <i class="fa-solid fa-exchange-alt w-4 text-center flex-shrink-0"></i>
+        <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Transactions</span>
+      </a>
+
+      <a href="{{ route('admin.saving-plans.index') }}"
+         class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-primary-200 hover:text-white transition-all duration-150
+                {{ request()->routeIs('admin.saving-plans.*') ? 'active' : '' }}">
+        <i class="fa-solid fa-bullseye w-4 text-center flex-shrink-0"></i>
+        <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Saving Plans</span>
+      </a>
+
       <div x-show="!sidebarCollapsed">
         <p class="text-primary-500 text-[10px] font-bold uppercase tracking-widest px-3 pt-4 pb-1">Reports</p>
       </div>

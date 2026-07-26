@@ -165,7 +165,7 @@ class SettingController extends Controller
                 if (! $gsConfig) {
                     GoogleSheetsConfig::create([
                         'spreadsheet_id' => $settings['spreadsheet_id'],
-                        'sheet_names' => ['Members', 'Loans', 'Savings', 'Deposits', 'SWF', 'Investments', 'Transactions'],
+                        'sheet_names' => ['Members', 'Loans', 'Savings', 'Deposits', 'SWF', 'Investments', 'Transactions', 'Saving Plans'],
                         'is_active' => true,
                     ]);
                 } else {
