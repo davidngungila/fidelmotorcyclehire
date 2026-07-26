@@ -94,6 +94,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/shares/{encryptedMemberNumber}', [AdminShareController::class, 'show'])->name('shares.show');
 
     Route::get('/transactions', [AdminTransactionController::class, 'index'])->name('transactions.index');
+    Route::get('/transactions/create', [AdminTransactionController::class, 'create'])->name('transactions.create');
+    Route::post('/transactions', [AdminTransactionController::class, 'store'])->name('transactions.store');
     Route::get('/transactions/{encryptedMemberCode}', [AdminTransactionController::class, 'show'])->name('transactions.show');
 
     Route::get('/saving-plans', [AdminSavingPlanController::class, 'index'])->name('saving-plans.index');

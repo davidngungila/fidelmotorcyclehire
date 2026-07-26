@@ -30,6 +30,11 @@
         </div>
       </form>
     </div>
+    <a href="{{ route('admin.transactions.create') }}" 
+       class="flex items-center gap-2 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
+      <i class="fa-solid fa-plus"></i>
+      <span>New Transaction</span>
+    </a>
   </div>
 
   <div class="glass p-5">

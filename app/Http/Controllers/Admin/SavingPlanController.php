@@ -92,6 +92,7 @@ class SavingPlanController extends Controller
             'sortColumn' => $sortColumn,
             'sortDirection' => $sortDirection,
             'searchQuery' => $searchQuery,
+            'memberService' => $this->memberService,
         ]);
     }
 

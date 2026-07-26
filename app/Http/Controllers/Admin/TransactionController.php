@@ -92,6 +92,7 @@ class TransactionController extends Controller
             'sortColumn' => $sortColumn,
             'sortDirection' => $sortDirection,
             'searchQuery' => $searchQuery,
+            'memberService' => $this->memberService,
         ]);
     }
 
@@ -125,5 +126,40 @@ class TransactionController extends Controller
             'member' => $member,
             'memberCode' => $memberCode,
         ]);
+    }
+
+    public function create()
+    {
+        $allMembers = $this->googleSheetRepository->getAllMembers();
+        
+        return view('admin.transactions.create', [
+            'members' => $allMembers,
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'date' => 'required|date',
+            'membercode' => 'required|string',
+            'transactiontype' => 'required|string|in:Deposit,Withdrawal,Interest',
+            'referenceno' => 'required|string',
+            'amount' => 'required|numeric',
+        ]);
+
+        // Log the activity
+        ActivityLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'create',
+            'subject' => 'transaction',
+            'subject_id' => $validated['referenceno'],
+            'description' => "Created new transaction: {$validated['transactiontype']} for member {$validated['membercode']}",
+        ]);
+
+        // For now, just show success message
+        // In production, this would append to Google Sheets
+        $this->success('Transaction recorded successfully. Note: This is a demo - actual Google Sheets integration would be needed for persistent storage.');
+        
+        return redirect()->route('admin.transactions.index');
     }
 }
