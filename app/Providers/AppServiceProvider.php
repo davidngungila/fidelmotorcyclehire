@@ -15,6 +15,7 @@ use App\Policies\SwfPolicy;
 use App\Policies\UserPolicy;
 use App\Repositories\GoogleSheetRepository;
 use App\Services\EncryptedIdService;
+use App\Services\MailConfigService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
@@ -25,6 +26,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(GoogleSheetRepositoryInterface::class, GoogleSheetRepository::class);
         $this->app->singleton(EncryptedIdService::class);
+        $this->app->singleton(MailConfigService::class);
     }
 
     public function boot(): void
