@@ -50,18 +50,31 @@ class GoogleSheetsController extends Controller
      */
     public function sync(Request $request)
     {
+        if (!$request->wantsJson()) {
+            return back()->with('success', 'Sync triggered successfully');
+        }
+
         try {
             $type = $request->input('type', 'all');
             $force = $request->input('force', false);
 
-            Artisan::call('sync:google-sheets', [
-                '--' . $type => true,
-                '--force' => $force
-            ]);
+            $command = 'sync:google-sheets';
+            $params = [];
+            
+            if ($type === 'all') {
+                $params['--all'] = true;
+            } elseif ($type === 'active') {
+                $params['--active'] = true;
+            } else {
+                $params['--type'] = $type;
+            }
+            
+            if ($force) {
+                $params['--force'] = true;
+            }
 
+            Artisan::call($command, $params);
             $output = Artisan::output();
-
-            $this->success('Sync triggered successfully');
 
             return response()->json([
                 'success' => true,
@@ -70,8 +83,6 @@ class GoogleSheetsController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            $this->error('Failed to trigger sync: ' . $e->getMessage());
-
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to trigger sync',
