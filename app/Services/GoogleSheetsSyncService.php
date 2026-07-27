@@ -231,13 +231,19 @@ class GoogleSheetsSyncService
                 'timestamp' => Carbon::now()->toDateTimeString()
             ]);
 
+            Log::info('Google Sheets API Response', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+                'headers' => $response->headers()
+            ]);
+
             if ($response->successful()) {
                 return $response->json();
             }
 
             return [
                 'success' => false,
-                'error' => 'API Error: ' . $response->status()
+                'error' => 'API Error: ' . $response->status() . ' - ' . $response->body()
             ];
 
         } catch (\Exception $e) {
