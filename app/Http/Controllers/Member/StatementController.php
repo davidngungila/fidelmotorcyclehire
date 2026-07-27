@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Member;
 use App\Contracts\GoogleSheetRepositoryInterface;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\Transaction;
 use App\Traits\FlashMessages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -95,6 +96,27 @@ class StatementController extends Controller
         $toDate = $request->input('to', date('Y-m-d'));
 
         $raw = $this->repository->getMemberStatements($memberNumber, $type);
+
+        // Add database transactions for savings statements
+        if ($type === 'savings') {
+            $dbTransactions = Transaction::byMemberCode($memberNumber)
+                ->whereBetween('date', [$fromDate, $toDate])
+                ->orderBy('date', 'desc')
+                ->get()
+                ->map(function ($transaction) {
+                    return [
+                        'date' => $transaction->date->format('Y-m-d'),
+                        'type' => $transaction->transaction_type,
+                        'description' => $transaction->reference_no ?? 'Imported Transaction',
+                        'amount' => (float) $transaction->amount,
+                        'balance_after' => null,
+                        'source' => 'database'
+                    ];
+                })
+                ->toArray();
+            
+            $raw = array_merge($raw, $dbTransactions);
+        }
 
         $rows = $this->filterByDateRange($raw, $fromDate, $toDate, $type);
         $headers = self::TYPE_HEADERS[$type];
