@@ -89,6 +89,33 @@ class NotificationController extends Controller
         ));
     }
 
+    public function markAllRead(Request $request): RedirectResponse
+    {
+        Gate::authorize('member-only');
+
+        $user = Auth::user();
+        $memberNumber = $user->member_number;
+
+        $allIds = array_column($this->buildNotifications($memberNumber), 'id');
+        $readNotifications = array_unique($allIds);
+        
+        Session::put('read_notifications', $readNotifications);
+        
+        $this->success('All notifications marked as read.');
+
+        ActivityLog::create([
+            'user_id' => $user->id,
+            'subject_type' => 'notification',
+            'subject_id' => null,
+            'description' => 'Member marked all notifications as read',
+            'properties' => ['member_number' => $memberNumber, 'count' => count($allIds)],
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return redirect()->back();
+    }
+
     public function markRead(Request $request, string $id): RedirectResponse
     {
         Gate::authorize('member-only');
