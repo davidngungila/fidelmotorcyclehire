@@ -17,7 +17,16 @@ class RoleMiddleware
         $user = $request->user();
         $roleList = is_array($roles[0]) ? $roles[0] : $roles;
 
-        if (! $user->hasRole($roleList)) {
+        // Check both roles relationship and role field
+        $hasRole = false;
+        foreach ($roleList as $role) {
+            if ($user->hasRole($role) || $user->role === $role) {
+                $hasRole = true;
+                break;
+            }
+        }
+
+        if (! $hasRole) {
             abort(403);
         }
 
