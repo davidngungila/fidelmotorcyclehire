@@ -96,21 +96,9 @@ class TransactionController extends Controller
             'file' => 'required|mimes:xlsx,xls,csv|max:10240',
         ]);
 
-        try {
-            $import = new TransactionsImport();
-            Excel::import($import, $request->file('file'));
+        Excel::import(new TransactionsImport, $request->file('file'));
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Transactions imported successfully',
-                'imported' => $import->getImportedCount() ?? 0,
-                'skipped' => $import->getSkippedCount() ?? 0
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
-        }
+        $this->success('Transactions imported successfully.');
+        return redirect()->route('admin.transactions.index');
     }
 }

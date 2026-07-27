@@ -130,67 +130,6 @@
       </div>
     @endif
   </div>
-</div>
-
-<script>
-function transactionsList() {
-  return {
-    searchQuery: '',
-    importing: false,
-    
-    submitSearch() {
-      this.$refs.searchForm.submit();
-    },
-    
-    async importTransactions() {
-      const fileInput = this.$refs.fileInput;
-      if (!fileInput.files.length) {
-        alert('Please select a file');
-        return;
-      }
-      
-      this.importing = true;
-      const formData = new FormData();
-      formData.append('file', fileInput.files[0]);
-      formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
-      
-      try {
-        // Show progress modal
-        window.dispatchEvent(new CustomEvent('show-import-progress', {
-          detail: { step: 'Uploading file...', total: 0, processed: 0 }
-        }));
-        
-        const response = await fetch('{{ route('admin.transactions.import') }}', {
-          method: 'POST',
-          body: formData
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          // Show success modal
-          window.dispatchEvent(new CustomEvent('show-import-success', {
-            detail: { success: data.imported || 0, skipped: data.skipped || 0 }
-          }));
-          
-          // Close import modal
-          window.dispatchEvent(new CustomEvent('close-import-modal'));
-        } else {
-          alert('Import failed: ' + (data.message || 'Unknown error'));
-          window.dispatchEvent(new CustomEvent('hide-import-progress'));
-        }
-      } catch (error) {
-        alert('Import failed: ' + error.message);
-        window.dispatchEvent(new CustomEvent('hide-import-progress'));
-      } finally {
-        this.importing = false;
-      }
-    }
-  }
-}
-</script>
-
-@endsection
 
 <!-- Import Modal -->
 <div x-data="{ show: false }" @open-import-modal.window="show = true" @close-import-modal.window="show = false"
@@ -209,11 +148,11 @@ function transactionsList() {
       <p class="text-gray-500 dark:text-gray-400 text-sm">Upload an Excel file with transactions data</p>
     </div>
 
-    <form method="POST" action="{{ route('admin.transactions.import') }}" enctype="multipart/form-data" class="space-y-4" @submit.prevent="importTransactions">
+    <form method="POST" action="{{ route('admin.transactions.import') }}" enctype="multipart/form-data" class="space-y-4">
       @csrf
       <div>
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Excel File</label>
-        <input type="file" name="file" accept=".xlsx,.xls,.csv" required x-ref="fileInput"
+        <input type="file" name="file" accept=".xlsx,.xls,.csv" required
                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
       </div>
       <div class="flex gap-3">
@@ -221,79 +160,13 @@ function transactionsList() {
                 class="flex-1 px-4 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-xl transition-all">
           Cancel
         </button>
-        <button type="submit" :disabled="importing"
-                class="flex-1 px-4 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-          <span x-show="!importing">Import</span>
-          <span x-show="importing">Importing...</span>
+        <button type="submit"
+                class="flex-1 px-4 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl transition-all">
+          Import
         </button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- Import Progress Modal -->
-<div x-data="{ show: false, currentStep: '', totalRows: 0, processedRows: 0 }" 
-     @show-import-progress.window="show = true; $el.dataset.step = $event.detail.step; $el.dataset.total = $event.detail.total; $el.dataset.processed = $event.detail.processed"
-     @hide-import-progress.window="show = false"
-     x-show="show" x-transition:enter="transition ease-out duration-200"
-     x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-     x-transition:leave="transition ease-in duration-150"
-     x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-     class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
-  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 max-w-md w-full">
-    <div class="text-center mb-6">
-      <div class="w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-2xl flex items-center justify-center">
-        <i class="fa-solid fa-spinner fa-spin text-2xl text-blue-600"></i>
-      </div>
-      <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Importing Transactions</h3>
-      <p class="text-gray-500 dark:text-gray-400 text-sm" x-text="currentStep || 'Processing...'"></p>
-    </div>
-
-    <div class="mb-4">
-      <div class="flex justify-between text-sm mb-2">
-        <span class="text-gray-600 dark:text-gray-400">Progress</span>
-        <span class="font-semibold text-gray-900 dark:text-white" x-text="processedRows + ' / ' + totalRows"></span>
-      </div>
-      <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-        <div class="bg-blue-600 h-3 rounded-full transition-all duration-300" 
-             :style="'width: ' + (totalRows > 0 ? (processedRows / totalRows * 100) : 0) + '%'"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Import Success Modal -->
-<div x-data="{ show: false, successCount: 0, skippedCount: 0 }" 
-     @show-import-success.window="show = true; $el.dataset.success = $event.detail.success; $el.dataset.skipped = $event.detail.skipped"
-     @close-import-success.window="show = false"
-     x-show="show" x-transition:enter="transition ease-out duration-200"
-     x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-     x-transition:leave="transition ease-in duration-150"
-     x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-     class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
-  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 max-w-md w-full">
-    <div class="text-center mb-6">
-      <div class="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-2xl flex items-center justify-center">
-        <i class="fa-solid fa-check text-2xl text-green-600"></i>
-      </div>
-      <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Import Complete</h3>
-      <p class="text-gray-500 dark:text-gray-400 text-sm">Transactions have been imported successfully</p>
-    </div>
-
-    <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-4 mb-6">
-      <div class="flex justify-between items-center mb-2">
-        <span class="text-gray-600 dark:text-gray-400">Successfully Imported</span>
-        <span class="font-bold text-green-600" x-text="successCount"></span>
-      </div>
-      <div class="flex justify-between items-center">
-        <span class="text-gray-600 dark:text-gray-400">Skipped (Invalid Data)</span>
-        <span class="font-bold text-orange-600" x-text="skippedCount"></span>
-      </div>
-    </div>
-
-    <button type="button" @click="$dispatch('close-import-success'); window.location.reload();"
-            class="w-full px-4 py-3 bg-green-600 hover:bg-green-500 text-white font-semibold rounded-xl transition-all">
-      Done
-    </button>
-  </div>
-</div>
+@endsection
