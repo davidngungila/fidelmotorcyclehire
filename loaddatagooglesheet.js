@@ -11,32 +11,30 @@
 // ============================================================================
 
 // ============================================================================
-// CONFIGURATION
+// SYNC_CONFIGURATION
 // ============================================================================
-if (typeof CONFIG === 'undefined') {
-    var CONFIG = {
-        // Google Sheet ID
-        sheetId: "1BTEPceHVgfQe4SRdDmRO_3bV6k8jA_2lWCqglDfiPwU",
-        
-        // Laravel API Configuration
-        apiUrl: "https://portal.feedtancmg.org/api/v1",
-        
-        // Sheet Names
-        customerDetailsSheet: "customerdetails",
-        savingBalancesSheet: "savingbalances",
-        transactionsSheet: "Transactions",
-        savingPlansSheet: "Saving Plans",
-        
-        // Data Ranges
-        startRow: 2,
-        
-        // Email Notifications
-        adminEmail: "ecolishe@gmail.com",
-        
-        // Auto-sync settings
-        syncIntervalHours: 6
-    };
-}
+const GS_SYNC_CONFIG = {
+    // Google Sheet ID
+    sheetId: "1BTEPceHVgfQe4SRdDmRO_3bV6k8jA_2lWCqglDfiPwU",
+    
+    // Laravel API Configuration
+    apiUrl: "https://portal.feedtancmg.org/api/v1",
+    
+    // Sheet Names
+    customerDetailsSheet: "customerdetails",
+    savingBalancesSheet: "savingbalances",
+    transactionsSheet: "Transactions",
+    savingPlansSheet: "Saving Plans",
+    
+    // Data Ranges
+    startRow: 2,
+    
+    // Email Notifications
+    adminEmail: "ecolishe@gmail.com",
+    
+    // Auto-sync settings
+    syncIntervalHours: 6
+};
 
 // ============================================================================
 // MAIN MENU FUNCTIONS
@@ -219,8 +217,8 @@ function syncSavingPlansOnly() {
  */
 function getCustomerProfiles() {
     try {
-        const ss = SpreadsheetApp.openById(CONFIG.sheetId);
-        const sheet = ss.getSheetByName(CONFIG.customerDetailsSheet);
+        const ss = SpreadsheetApp.openById(GS_SYNC_CONFIG.sheetId);
+        const sheet = ss.getSheetByName(GS_SYNC_CONFIG.customerDetailsSheet);
         
         if (!sheet) {
             Logger.log('Customer details sheet not found');
@@ -230,12 +228,12 @@ function getCustomerProfiles() {
         const lastRow = sheet.getLastRow();
         const lastCol = sheet.getLastColumn();
         
-        if (lastRow < CONFIG.startRow) {
+        if (lastRow < GS_SYNC_CONFIG.startRow) {
             return [];
         }
         
         const headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
-        const data = sheet.getRange(CONFIG.startRow, 1, lastRow - CONFIG.startRow + 1, lastCol).getValues();
+        const data = sheet.getRange(GS_SYNC_CONFIG.startRow, 1, lastRow - GS_SYNC_CONFIG.startRow + 1, lastCol).getValues();
         
         const customers = [];
         
@@ -272,8 +270,8 @@ function getCustomerProfiles() {
  */
 function getSavingPlans() {
     try {
-        const ss = SpreadsheetApp.openById(CONFIG.sheetId);
-        const sheet = ss.getSheetByName(CONFIG.savingPlansSheet);
+        const ss = SpreadsheetApp.openById(GS_SYNC_CONFIG.sheetId);
+        const sheet = ss.getSheetByName(GS_SYNC_CONFIG.savingPlansSheet);
         
         if (!sheet) {
             Logger.log('Saving Plans sheet not found');
@@ -316,8 +314,8 @@ function getSavingPlans() {
  */
 function getSavingBalances() {
     try {
-        const ss = SpreadsheetApp.openById(CONFIG.sheetId);
-        const sheet = ss.getSheetByName(CONFIG.savingBalancesSheet);
+        const ss = SpreadsheetApp.openById(GS_SYNC_CONFIG.sheetId);
+        const sheet = ss.getSheetByName(GS_SYNC_CONFIG.savingBalancesSheet);
         
         if (!sheet) {
             Logger.log('Saving balances sheet not found');
@@ -397,8 +395,8 @@ function getSavingBalances() {
  */
 function getTransactions() {
     try {
-        const ss = SpreadsheetApp.openById(CONFIG.sheetId);
-        const sheet = ss.getSheetByName(CONFIG.transactionsSheet);
+        const ss = SpreadsheetApp.openById(GS_SYNC_CONFIG.sheetId);
+        const sheet = ss.getSheetByName(GS_SYNC_CONFIG.transactionsSheet);
         
         if (!sheet) {
             Logger.log('Transactions sheet not found');
@@ -538,7 +536,7 @@ function sendToLaravel(endpoint, payload) {
             muteHttpExceptions: true
         };
         
-        const url = CONFIG.apiUrl + endpoint;
+        const url = GS_SYNC_CONFIG.apiUrl + endpoint;
         const response = UrlFetchApp.fetch(url, options);
         const responseData = JSON.parse(response.getContentText());
         
@@ -574,12 +572,12 @@ function setupAutoSync() {
         // Create new trigger
         ScriptApp.newTrigger('autoSync')
             .timeBased()
-            .everyHours(CONFIG.syncIntervalHours)
+            .everyHours(GS_SYNC_CONFIG.syncIntervalHours)
             .create();
         
         const ui = SpreadsheetApp.getUi();
         ui.alert('✅ Auto-Sync Setup Complete', 
-            `Auto-sync will run every ${CONFIG.syncIntervalHours} hours.\n\n` +
+            `Auto-sync will run every ${GS_SYNC_CONFIG.syncIntervalHours} hours.\n\n` +
             'Next sync will run automatically.', 
             ui.ButtonSet.OK);
         
@@ -699,7 +697,7 @@ function formatDateForAPI(dateValue) {
  */
 function logSyncResults(type, results, duration) {
     try {
-        const ss = SpreadsheetApp.openById(CONFIG.sheetId);
+        const ss = SpreadsheetApp.openById(GS_SYNC_CONFIG.sheetId);
         let logSheet = ss.getSheetByName('SyncLogs');
         
         if (!logSheet) {
@@ -765,7 +763,7 @@ function sendSyncNotification(type, results, duration) {
         `;
         
         GmailApp.sendEmail(
-            CONFIG.adminEmail,
+            GS_SYNC_CONFIG.adminEmail,
             subject,
             '',
             { htmlBody: body }
@@ -793,7 +791,7 @@ function sendErrorNotification(error) {
         `;
         
         GmailApp.sendEmail(
-            CONFIG.adminEmail,
+            GS_SYNC_CONFIG.adminEmail,
             subject,
             '',
             { htmlBody: body }
@@ -809,7 +807,7 @@ function sendErrorNotification(error) {
  */
 function viewSyncStatus() {
     try {
-        const ss = SpreadsheetApp.openById(CONFIG.sheetId);
+        const ss = SpreadsheetApp.openById(GS_SYNC_CONFIG.sheetId);
         const logSheet = ss.getSheetByName('SyncLogs');
         
         if (!logSheet || logSheet.getLastRow() < 2) {
@@ -843,7 +841,7 @@ function viewSyncStatus() {
  */
 function showDashboard() {
     try {
-        const ss = SpreadsheetApp.openById(CONFIG.sheetId);
+        const ss = SpreadsheetApp.openById(GS_SYNC_CONFIG.sheetId);
         const logSheet = ss.getSheetByName('SyncLogs');
         
         let stats = '';
@@ -868,7 +866,7 @@ function showDashboard() {
                    `   Type: ${lastSync[1]}\n` +
                    `   Status: ${lastSync[7]}\n` +
                    `   Duration: ${lastSync[6]} seconds\n\n` +
-                   `⏰ Next Auto-Sync: ${new Date(Date.now() + CONFIG.syncIntervalHours * 3600000).toLocaleString()}`;
+                   `⏰ Next Auto-Sync: ${new Date(Date.now() + GS_SYNC_CONFIG.syncIntervalHours * 3600000).toLocaleString()}`;
         } else {
             stats = '📊 No sync data available yet.\n\n' +
                    'Run your first sync from the 📤 Sync to Laravel menu.';
@@ -896,7 +894,7 @@ function doPost(e) {
         const apiKey = params.api_key;
         
         // Verify API key
-        if (apiKey !== CONFIG.apiKey) {
+        if (apiKey !== GS_SYNC_CONFIG.apiKey) {
             return ContentService.createTextOutput(JSON.stringify({
                 success: false,
                 error: 'Invalid API key'
@@ -958,7 +956,7 @@ function setupAllTriggers() {
         // Setup auto-sync
         ScriptApp.newTrigger('autoSync')
             .timeBased()
-            .everyHours(CONFIG.syncIntervalHours)
+            .everyHours(GS_SYNC_CONFIG.syncIntervalHours)
             .create();
         
         // Setup on-open trigger
@@ -984,9 +982,9 @@ function setupAllTriggers() {
 
 // Log startup
 Logger.log('FeedTan CMG Sync Script loaded at ' + new Date().toISOString());
-Logger.log('Sheet ID: ' + CONFIG.sheetId);
-Logger.log('API URL: ' + CONFIG.apiUrl);
-Logger.log('Auto-sync interval: ' + CONFIG.syncIntervalHours + ' hours');
+Logger.log('Sheet ID: ' + GS_SYNC_CONFIG.sheetId);
+Logger.log('API URL: ' + GS_SYNC_CONFIG.apiUrl);
+Logger.log('Auto-sync interval: ' + GS_SYNC_CONFIG.syncIntervalHours + ' hours');
 
 // ============================================================================
 // END OF SCRIPT
