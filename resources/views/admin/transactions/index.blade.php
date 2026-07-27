@@ -132,6 +132,8 @@
   </div>
 </div>
 
+@endsection
+
 <!-- Import Modal -->
 <div x-data="{ show: false }" @open-import-modal.window="show = true" @close-import-modal.window="show = false"
      x-show="show" x-transition:enter="transition ease-out duration-200"
@@ -295,5 +297,3 @@ function transactionsList() {
   }
 }
 </script>
-
-@endsection
