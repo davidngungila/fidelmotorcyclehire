@@ -30,6 +30,7 @@ use App\Http\Controllers\Member\SwfController as MemberSwfController;
 use App\Http\Controllers\Member\InvestmentController as MemberInvestmentController;
 use App\Http\Controllers\Member\StatementController as MemberStatementController;
 use App\Http\Controllers\Member\NotificationController as MemberNotificationController;
+use App\Http\Controllers\Member\SavingPlanController as MemberSavingPlanController;
 
 Route::get('/', function () {
     if (auth()->check()) {
@@ -162,6 +163,8 @@ Route::prefix('member')->middleware(['auth', 'role:member', 'member.isolation'])
     Route::get('/loans/{encryptedLoanNumber}', [MemberLoanController::class, 'show'])->name('loans.show');
 
     Route::get('/savings', [MemberSavingController::class, 'index'])->name('savings.index');
+
+    Route::get('/saving-plan', [MemberSavingPlanController::class, 'index'])->name('saving-plan.index');
 
     Route::get('/deposits', [MemberDepositController::class, 'index'])->name('deposits.index');
     Route::get('/deposits/{encryptedCertificateNumber}', [MemberDepositController::class, 'show'])->name('deposits.show');

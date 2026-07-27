@@ -95,6 +95,13 @@
         <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">My Savings</span>
       </a>
 
+      <a href="{{ route('member.saving-plan.index') }}"
+         class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-primary-200 hover:text-white transition-all duration-150
+                {{ request()->routeIs('member.saving-plan.*') ? 'active' : '' }}">
+        <i class="fa-solid fa-chart-line w-4 text-center flex-shrink-0"></i>
+        <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Saving Plan</span>
+      </a>
+
       <a href="{{ route('member.deposits.index') }}"
          class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-primary-200 hover:text-white transition-all duration-150
                 {{ request()->routeIs('member.deposits.*') ? 'active' : '' }}">
