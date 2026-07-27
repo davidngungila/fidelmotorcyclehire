@@ -219,7 +219,7 @@ class MemberController extends Controller
         return view('admin.members.show', [
             'member' => $member,
             'memberNumber' => $memberNumber,
-            'encryptedMemberNumber' => $encryptedMemberNumber,
+            'encryptedMemberNumber' => $this->encryptedIdService->encrypt($memberNumber),
             'loans' => $loans,
             'savings' => $savings,
             'deposits' => $deposits,
