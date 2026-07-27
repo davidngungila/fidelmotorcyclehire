@@ -178,6 +178,52 @@ class MemberController extends Controller
             // For imported members, try to get data from Google Sheets if available
             $loans = $this->googleSheetRepository->getMemberLoans($memberNumber);
             $savings = $this->googleSheetRepository->getMemberSavings($memberNumber);
+            
+            // Merge database transactions with Google Sheets savings
+            $dbTransactions = \App\Models\Transaction::byMemberCode($memberNumber)
+                ->orderBy('date', 'asc')
+                ->get()
+                ->map(function ($transaction) {
+                    return [
+                        'date' => $transaction->date->format('Y-m-d'),
+                        'type' => $transaction->transaction_type,
+                        'amount' => (float) $transaction->amount,
+                        'reference' => $transaction->reference_no ?? '',
+                        'balance_after' => null,
+                        'source' => 'database'
+                    ];
+                })
+                ->toArray();
+
+            // Merge transactions
+            $googleTransactions = $savings['transactions'] ?? [];
+            $allTransactions = array_merge($googleTransactions, $dbTransactions);
+
+            // Sort by date ascending for balance calculation
+            usort($allTransactions, static fn($a, $b): int => strtotime($a['date'] ?? '') <=> strtotime($b['date'] ?? ''));
+
+            // Calculate running balance
+            $currentBalance = 0;
+            foreach ($allTransactions as &$transaction) {
+                $type = strtolower($transaction['type'] ?? '');
+                $isCredit = $type === 'deposit' || $type === 'flexi-deposit' || $type === 'rda-deposit' || $type === 'opening balance' || $type === 'interest';
+                
+                if ($isCredit) {
+                    $currentBalance += (float) ($transaction['amount'] ?? 0);
+                } else {
+                    $currentBalance -= (float) ($transaction['amount'] ?? 0);
+                }
+                
+                $transaction['balance_after'] = $currentBalance;
+            }
+
+            // Sort by date descending for display
+            usort($allTransactions, static fn($a, $b): int => strtotime($b['date'] ?? '') <=> strtotime($a['date'] ?? ''));
+
+            $savings['transactions'] = $allTransactions;
+            $savings['running_balance'] = $currentBalance;
+            $savings['balance'] = $currentBalance;
+            
             $deposits = $this->googleSheetRepository->getMemberDeposits($memberNumber);
             $swf = $this->googleSheetRepository->getMemberSwf($memberNumber);
             $investments = $this->googleSheetRepository->getMemberInvestments($memberNumber);
@@ -200,6 +246,52 @@ class MemberController extends Controller
 
             $loans = $this->googleSheetRepository->getMemberLoans($memberNumber);
             $savings = $this->googleSheetRepository->getMemberSavings($memberNumber);
+            
+            // Merge database transactions with Google Sheets savings
+            $dbTransactions = \App\Models\Transaction::byMemberCode($memberNumber)
+                ->orderBy('date', 'asc')
+                ->get()
+                ->map(function ($transaction) {
+                    return [
+                        'date' => $transaction->date->format('Y-m-d'),
+                        'type' => $transaction->transaction_type,
+                        'amount' => (float) $transaction->amount,
+                        'reference' => $transaction->reference_no ?? '',
+                        'balance_after' => null,
+                        'source' => 'database'
+                    ];
+                })
+                ->toArray();
+
+            // Merge transactions
+            $googleTransactions = $savings['transactions'] ?? [];
+            $allTransactions = array_merge($googleTransactions, $dbTransactions);
+
+            // Sort by date ascending for balance calculation
+            usort($allTransactions, static fn($a, $b): int => strtotime($a['date'] ?? '') <=> strtotime($b['date'] ?? ''));
+
+            // Calculate running balance
+            $currentBalance = 0;
+            foreach ($allTransactions as &$transaction) {
+                $type = strtolower($transaction['type'] ?? '');
+                $isCredit = $type === 'deposit' || $type === 'flexi-deposit' || $type === 'rda-deposit' || $type === 'opening balance' || $type === 'interest';
+                
+                if ($isCredit) {
+                    $currentBalance += (float) ($transaction['amount'] ?? 0);
+                } else {
+                    $currentBalance -= (float) ($transaction['amount'] ?? 0);
+                }
+                
+                $transaction['balance_after'] = $currentBalance;
+            }
+
+            // Sort by date descending for display
+            usort($allTransactions, static fn($a, $b): int => strtotime($b['date'] ?? '') <=> strtotime($a['date'] ?? ''));
+
+            $savings['transactions'] = $allTransactions;
+            $savings['running_balance'] = $currentBalance;
+            $savings['balance'] = $currentBalance;
+            
             $deposits = $this->googleSheetRepository->getMemberDeposits($memberNumber);
             $swf = $this->googleSheetRepository->getMemberSwf($memberNumber);
             $investments = $this->googleSheetRepository->getMemberInvestments($memberNumber);
