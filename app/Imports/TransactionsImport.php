@@ -5,11 +5,23 @@ namespace App\Imports;
 use App\Models\Transaction;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\WithBatchInserts;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
 
-class TransactionsImport implements ToModel, WithHeadingRow
+class TransactionsImport implements ToModel, WithHeadingRow, WithBatchInserts, WithChunkReading
 {
     private $importedCount = 0;
     private $skippedCount = 0;
+
+    public function batchSize(): int
+    {
+        return 500;
+    }
+
+    public function chunkSize(): int
+    {
+        return 500;
+    }
 
     /**
     * @param array $row
@@ -18,8 +30,12 @@ class TransactionsImport implements ToModel, WithHeadingRow
     */
     public function model(array $row)
     {
-        // Log the row for debugging
-        \Log::info('Processing row', ['row' => $row]);
+        // Skip completely empty rows early to save memory
+        if (empty(array_filter($row, function($value) {
+            return $value !== null && $value !== '';
+        }))) {
+            return null;
+        }
         
         // Map Excel column names to database field names
         $membercode = $row['customerid'] ?? $row['membercode'] ?? null;
@@ -30,20 +46,11 @@ class TransactionsImport implements ToModel, WithHeadingRow
         
         // Skip rows with missing required fields
         if (empty($date) || empty($membercode) || empty($transactionType) || empty($amount)) {
-            \Log::warning('Skipping row - missing required fields', [
-                'date' => $date,
-                'membercode' => $membercode,
-                'transaction_type' => $transactionType,
-                'amount' => $amount
-            ]);
-            $this->skippedCount++;
             return null;
         }
 
         // Skip rows with formula values (starting with '=')
         if (is_string($date) && strpos($date, '=') === 0) {
-            \Log::warning('Skipping row - formula in date', ['date' => $date]);
-            $this->skippedCount++;
             return null;
         }
 
@@ -56,19 +63,10 @@ class TransactionsImport implements ToModel, WithHeadingRow
             }
         } catch (\Exception $e) {
             // Skip rows with unparseable dates
-            \Log::warning('Skipping row - invalid date', ['date' => $date, 'error' => $e->getMessage()]);
-            $this->skippedCount++;
             return null;
         }
 
         $this->importedCount++;
-        
-        \Log::info('Importing transaction', [
-            'date' => $date,
-            'membercode' => $membercode,
-            'transaction_type' => $transactionType,
-            'amount' => $amount
-        ]);
         
         return new Transaction([
             'date' => $date,
