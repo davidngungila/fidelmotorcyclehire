@@ -15,13 +15,11 @@ use Carbon\Carbon;
 class GoogleSheetsSyncService
 {
     protected $apiUrl;
-    protected $apiKey;
     protected $batchSize = 100;
 
     public function __construct()
     {
         $this->apiUrl = config('services.google_sheets.api_url');
-        $this->apiKey = config('services.google_sheets.api_key');
         $this->batchSize = config('services.google_sheets.batch_size', 100);
     }
 
@@ -225,7 +223,6 @@ class GoogleSheetsSyncService
     {
         try {
             $response = Http::withHeaders([
-                'X-API-Key' => $this->apiKey,
                 'Accept' => 'application/json'
             ])->post($this->apiUrl, [
                 'action' => $action,
