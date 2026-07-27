@@ -33,4 +33,28 @@ class Transaction extends Model
     {
         return $query->whereBetween('date', [$startDate, $endDate]);
     }
+
+    public function scopeWithRunningBalance($query, $memberCode)
+    {
+        return $query->byMemberCode($memberCode)
+            ->orderBy('date', 'asc')
+            ->get()
+            ->map(function ($transaction, $index) {
+                static $runningBalance = 0;
+                
+                // Calculate running balance
+                if (in_array($transaction->transaction_type, ['deposit', 'Flexi-Deposit', 'RDA-Deposit', 'Opening Balance'])) {
+                    $runningBalance += (float) $transaction->amount;
+                } elseif (in_array($transaction->transaction_type, ['withdrawal', 'Withdrawal'])) {
+                    $runningBalance -= (float) $transaction->amount;
+                }
+                
+                $transaction->balance_after = $runningBalance;
+                $transaction->running_balance = $runningBalance;
+                
+                return $transaction;
+            })
+            ->sortByDesc('date')
+            ->values();
+    }
 }

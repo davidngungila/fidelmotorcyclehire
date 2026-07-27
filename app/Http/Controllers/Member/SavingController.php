@@ -38,9 +38,9 @@ class SavingController extends Controller
         // Get transactions from Google Sheets
         $googleTransactions = $savings['transactions'] ?? [];
 
-        // Get transactions from database
+        // Get transactions from database with running balance
         $dbTransactions = Transaction::byMemberCode($memberNumber)
-            ->orderBy('date', 'desc')
+            ->orderBy('date', 'asc')
             ->get()
             ->map(function ($transaction) {
                 return [
@@ -57,7 +57,26 @@ class SavingController extends Controller
         // Merge transactions from both sources
         $allTransactions = array_merge($googleTransactions, $dbTransactions);
 
-        // Sort by date
+        // Sort by date ascending for balance calculation
+        usort($allTransactions, static fn($a, $b): int => strtotime($a['date'] ?? '') <=> strtotime($b['date'] ?? ''));
+
+        // Calculate running balance
+        $currentBalance = 0;
+        foreach ($allTransactions as &$transaction) {
+            // Determine if this is a credit or debit
+            $type = strtolower($transaction['type'] ?? '');
+            $isCredit = $type === 'deposit' || $type === 'flexi-deposit' || $type === 'rda-deposit' || $type === 'opening balance' || $type === 'interest';
+            
+            if ($isCredit) {
+                $currentBalance += (float) ($transaction['amount'] ?? 0);
+            } else {
+                $currentBalance -= (float) ($transaction['amount'] ?? 0);
+            }
+            
+            $transaction['balance_after'] = $currentBalance;
+        }
+
+        // Sort by date descending for display
         usort($allTransactions, static fn($a, $b): int => strtotime($b['date'] ?? '') <=> strtotime($a['date'] ?? ''));
 
         $transactions = $allTransactions;
@@ -89,6 +108,9 @@ class SavingController extends Controller
         $totalDeposited = array_sum(array_column($deposits, 'amount'));
         $totalWithdrawn = abs(array_sum(array_column($withdrawals, 'amount')));
 
+        // Update running balance to the latest calculated balance
+        $runningBalance = $currentBalance;
+
         ActivityLog::create([
             'user_id' => $user->id,
             'subject_type' => 'savings',
@@ -97,6 +119,7 @@ class SavingController extends Controller
             'properties' => [
                 'member_number' => $memberNumber,
                 'balance' => $balance,
+                'running_balance' => $runningBalance,
                 'transaction_count' => count($transactions),
             ],
             'ip_address' => $request->ip(),
