@@ -56,13 +56,16 @@ class TransactionController extends Controller
         return redirect()->route('admin.transactions.index');
     }
 
-    public function edit(Transaction $transaction)
+    public function edit($id)
     {
+        $transaction = Transaction::findOrFail($id);
         return view('admin.transactions.edit', compact('transaction'));
     }
 
-    public function update(Request $request, Transaction $transaction)
+    public function update(Request $request, $id)
     {
+        $transaction = Transaction::findOrFail($id);
+        
         $validated = $request->validate([
             'date' => 'required|date',
             'membercode' => 'required|string|max:50',
@@ -77,8 +80,9 @@ class TransactionController extends Controller
         return redirect()->route('admin.transactions.index');
     }
 
-    public function destroy(Transaction $transaction)
+    public function destroy($id)
     {
+        $transaction = Transaction::findOrFail($id);
         $transaction->delete();
 
         $this->success('Transaction deleted successfully.');
