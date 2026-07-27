@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Member;
 use App\Contracts\GoogleSheetRepositoryInterface;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\Transaction;
 use App\Traits\FlashMessages;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -38,8 +39,51 @@ class DashboardController extends Controller
         $swf = $this->repository->getMemberSwf($memberNumber);
         $investments = $this->repository->getMemberInvestments($memberNumber);
 
+        // Get database transactions
+        $dbTransactions = Transaction::byMemberCode($memberNumber)
+            ->orderBy('date', 'asc')
+            ->get()
+            ->map(function ($transaction) {
+                return [
+                    'date' => $transaction->date->format('Y-m-d'),
+                    'type' => $transaction->transaction_type,
+                    'amount' => (float) $transaction->amount,
+                    'reference' => $transaction->reference_no ?? '',
+                    'balance_after' => null, // Will be calculated
+                    'source' => 'database'
+                ];
+            })
+            ->toArray();
+
+        // Merge Google Sheets transactions with database transactions
+        $googleTransactions = $savings['transactions'] ?? [];
+        $allTransactions = array_merge($googleTransactions, $dbTransactions);
+
+        // Sort by date ascending for balance calculation
+        usort($allTransactions, static fn($a, $b): int => strtotime($a['date'] ?? '') <=> strtotime($b['date'] ?? ''));
+
+        // Calculate running balance from all transactions
+        $currentBalance = 0;
+        foreach ($allTransactions as &$transaction) {
+            $type = strtolower($transaction['type'] ?? '');
+            $isCredit = $type === 'deposit' || $type === 'flexi-deposit' || $type === 'rda-deposit' || $type === 'opening balance' || $type === 'interest';
+            
+            if ($isCredit) {
+                $currentBalance += (float) ($transaction['amount'] ?? 0);
+            } else {
+                $currentBalance -= (float) ($transaction['amount'] ?? 0);
+            }
+            
+            $transaction['balance_after'] = $currentBalance;
+        }
+
+        // Update savings with calculated balance
+        $savings['transactions'] = $allTransactions;
+        $savings['running_balance'] = $currentBalance;
+        $savings['balance'] = $currentBalance;
+
         $loanBalance = collect($loans)->sum('outstanding_balance');
-        $savingsBalance = $savings['running_balance'] ?? $savings['balance'] ?? 0;
+        $savingsBalance = $currentBalance;
         $depositBalance = collect($deposits)->sum('current_value');
         $swfBalance = $swf['current_balance'] ?? 0;
         $investmentBalance = collect($investments)->sum('current_value');
@@ -105,18 +149,22 @@ class DashboardController extends Controller
             }
         }
 
+        // Include database transactions in recent transactions
         if (!empty($savings['transactions']) && is_array($savings['transactions'])) {
             foreach ($savings['transactions'] as $txn) {
                 $typeLabel = match (strtolower($txn['type'] ?? '')) {
                     'deposit' => 'Saving Deposit',
                     'withdrawal' => 'Saving Withdrawal',
                     'interest' => 'Savings Interest',
+                    'flexi-deposit' => 'Flexi Deposit',
+                    'rda-deposit' => 'RDA Deposit',
+                    'opening balance' => 'Opening Balance',
                     default => 'Saving ' . ($txn['type'] ?? 'Transaction'),
                 };
                 $transactions[] = [
                     'date' => $txn['date'],
                     'type' => $typeLabel,
-                    'description' => $txn['description'] ?? 'Savings transaction',
+                    'description' => $txn['reference'] ?? ($txn['description'] ?? 'Savings transaction'),
                     'amount' => (float) $txn['amount'],
                     'balance_after' => (float) ($txn['balance_after'] ?? 0),
                     'sort_date' => strtotime($txn['date']),
@@ -179,10 +227,27 @@ class DashboardController extends Controller
         }
 
         $currentBalance = (float) ($savings['running_balance'] ?? $savings['balance'] ?? 0);
+        
+        // Calculate actual growth from transaction history
         if (!empty($savings['transactions']) && is_array($savings['transactions'])) {
             $sorted = $savings['transactions'];
             usort($sorted, static fn($a, $b): int => strtotime($a['date'] ?? '') <=> strtotime($b['date'] ?? ''));
-            $startBalance = count($sorted) > 0 ? (float) ($sorted[0]['balance_after'] ?? 0) : 0;
+            
+            // Get balance at 6 months ago
+            $sixMonthsAgo = (clone $today)->modify('-6 months')->format('Y-m-d');
+            $startBalance = 0;
+            
+            foreach ($sorted as $txn) {
+                if (strtotime($txn['date'] ?? '') >= strtotime($sixMonthsAgo)) {
+                    $startBalance = (float) ($txn['balance_after'] ?? 0);
+                    break;
+                }
+            }
+            
+            // If no transaction found in 6 months, use first transaction balance
+            if ($startBalance === 0 && !empty($sorted)) {
+                $startBalance = (float) ($sorted[0]['balance_after'] ?? 0);
+            }
         } else {
             $startBalance = max(0, $currentBalance - 50000);
         }
