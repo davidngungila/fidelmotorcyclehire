@@ -157,6 +157,7 @@ class MemberController extends Controller
                 'occupation' => $dbMember->occupation,
                 'employer' => $dbMember->employer,
                 'residential_address' => $dbMember->residential_address,
+                'photo' => $dbMember->photo,
                 'member_type' => $dbMember->member_type,
                 'marital_status' => $dbMember->marital_status,
                 'bank_name' => $dbMember->bank_name,
