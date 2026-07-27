@@ -13,50 +13,21 @@
 <div x-data="savingsList()" class="space-y-6">
 
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-    <div class="flex flex-col sm:flex-row sm:items-center gap-3 flex-1 max-w-3xl">
-      <div class="relative" x-data="{ dropdownOpen: false }">
-        <button @click="dropdownOpen = !dropdownOpen" 
-                @click.outside="dropdownOpen = false"
-                class="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-          <i class="fa-solid fa-filter"></i>
-          <span>View</span>
-          <i class="fa-solid fa-chevron-down text-xs"></i>
-        </button>
-        <div x-show="dropdownOpen" x-transition:enter="transition ease-out duration-100"
-             x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
-             x-transition:leave="transition ease-in duration-75"
-             x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-             class="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
-          <a href="{{ route('admin.savings.index') }}" 
-             class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-lg">
-            <i class="fa-solid fa-piggy-bank mr-2"></i> Savings
+    <form method="GET" action="{{ route('admin.savings.index') }}" class="flex-1 max-w-2xl" x-ref="searchForm">
+      <div class="relative">
+        <i class="fa-solid fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-primary-400"></i>
+        <input type="text" name="q" value="{{ $searchQuery ?? '' }}"
+               placeholder="Search by member #, name, branch..."
+               class="form-input pl-9 py-2.5 text-sm"
+               x-model="searchQuery"
+               @input.debounce.400ms="submitSearch"/>
+        @if($searchQuery)
+          <a href="{{ route('admin.savings.index') }}" class="absolute right-3 top-1/2 -translate-y-1/2 text-primary-400 hover:text-primary-600">
+            <i class="fa-solid fa-xmark text-xs"></i>
           </a>
-          <a href="{{ route('admin.transactions.index') }}" 
-             class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-            <i class="fa-solid fa-exchange-alt mr-2"></i> Transactions
-          </a>
-          <a href="{{ route('admin.saving-plans.index') }}" 
-             class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-b-lg">
-            <i class="fa-solid fa-bullseye mr-2"></i> Saving Plans
-          </a>
-        </div>
+        @endif
       </div>
-      <form method="GET" action="{{ route('admin.savings.index') }}" class="flex-1" x-ref="searchForm">
-        <div class="relative">
-          <i class="fa-solid fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-primary-400"></i>
-          <input type="text" name="q" value="{{ $searchQuery ?? '' }}"
-                 placeholder="Search by member #, name, branch..."
-                 class="form-input pl-9 py-2.5 text-sm"
-                 x-model="searchQuery"
-                 @input.debounce.400ms="submitSearch"/>
-          @if($searchQuery)
-            <a href="{{ route('admin.savings.index') }}" class="absolute right-3 top-1/2 -translate-y-1/2 text-primary-400 hover:text-primary-600">
-              <i class="fa-solid fa-xmark text-xs"></i>
-            </a>
-          @endif
-        </div>
-      </form>
-    </div>
+    </form>
   </div>
 
   <div class="glass p-5">

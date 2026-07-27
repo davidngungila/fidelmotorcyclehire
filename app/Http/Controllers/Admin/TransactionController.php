@@ -1,165 +1,104 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Controllers\Admin;
 
-use App\Contracts\GoogleSheetRepositoryInterface;
 use App\Http\Controllers\Controller;
-use App\Models\ActivityLog;
-use App\Services\AdminDashboardService;
-use App\Services\EncryptedIdService;
-use App\Services\MemberService;
+use App\Models\Transaction;
 use App\Traits\FlashMessages;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\TransactionsExport;
+use App\Imports\TransactionsImport;
 
 class TransactionController extends Controller
 {
     use FlashMessages;
 
-    public function __construct(
-        protected GoogleSheetRepositoryInterface $googleSheetRepository,
-        protected MemberService $memberService,
-        protected AdminDashboardService $dashboardService,
-        protected EncryptedIdService $encryptedIdService,
-    ) {
-    }
-
     public function index(Request $request)
     {
-        $perPage = (int) $request->input('per_page', 15);
-        $sortColumn = $request->input('sort', 'date');
-        $sortDirection = $request->input('sort_direction', 'desc');
-        $searchQuery = $request->input('q', '');
+        $query = Transaction::query();
 
-        $allTransactions = $this->googleSheetRepository->getAllTransactions();
-        $allMembers = $this->googleSheetRepository->getAllMembers();
-
-        // Filter by search query
-        if ($searchQuery !== '') {
-            $searchQueryLower = strtolower($searchQuery);
-            $allTransactions = array_filter($allTransactions, function ($txn) use ($searchQueryLower) {
-                $memberCode = strtolower((string) ($txn['membercode'] ?? ''));
-                $txnType = strtolower((string) ($txn['transactiontype'] ?? ''));
-                $refNo = strtolower((string) ($txn['referenceno'] ?? ''));
-                
-                return str_contains($memberCode, $searchQueryLower) ||
-                       str_contains($txnType, $searchQueryLower) ||
-                       str_contains($refNo, $searchQueryLower);
-            });
+        if ($request->filled('membercode')) {
+            $query->byMemberCode($request->membercode);
         }
 
-        // Sort transactions
-        usort($allTransactions, function ($a, $b) use ($sortColumn, $sortDirection) {
-            $aVal = $a[$sortColumn] ?? '';
-            $bVal = $b[$sortColumn] ?? '';
-            
-            if ($sortColumn === 'amount') {
-                $aVal = (float) $aVal;
-                $bVal = (float) $bVal;
-            }
-            
-            $cmp = $aVal <=> $bVal;
-            return $sortDirection === 'asc' ? $cmp : -$cmp;
-        });
-
-        // Add member names to transactions
-        $memberMap = [];
-        foreach ($allMembers as $member) {
-            $memberNo = strtoupper($member['member_number'] ?? $member['MemberNumber'] ?? '');
-            if ($memberNo) {
-                $memberMap[$memberNo] = $member['name'] ?? $member['Name'] ?? 'Unknown';
-            }
+        if ($request->filled('transaction_type')) {
+            $query->byTransactionType($request->transaction_type);
         }
 
-        foreach ($allTransactions as &$txn) {
-            $memberCode = strtoupper($txn['membercode'] ?? '');
-            $txn['member_name'] = $memberMap[$memberCode] ?? 'Unknown';
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->byDateRange($request->start_date, $request->end_date);
         }
 
-        // Paginate
-        $currentPage = (int) $request->input('page', 1);
-        $total = count($allTransactions);
-        $transactions = array_slice($allTransactions, ($currentPage - 1) * $perPage, $perPage);
+        $transactions = $query->orderBy('date', 'desc')->paginate(25);
 
-        return view('admin.transactions.index', [
-            'transactions' => $transactions,
-            'total' => $total,
-            'perPage' => $perPage,
-            'currentPage' => $currentPage,
-            'sortColumn' => $sortColumn,
-            'sortDirection' => $sortDirection,
-            'searchQuery' => $searchQuery,
-            'memberService' => $this->memberService,
-        ]);
-    }
-
-    public function show(Request $request, string $encryptedId)
-    {
-        $memberCode = $this->encryptedIdService->decrypt($encryptedId);
-        
-        if (! Gate::allows('admin')) {
-            abort(403);
-        }
-
-        $transactions = $this->googleSheetRepository->getMemberTransactions($memberCode);
-        $member = $this->googleSheetRepository->getMemberByNumber($memberCode);
-
-        if (! $member) {
-            $this->error('Member not found');
-            return redirect()->route('admin.transactions.index');
-        }
-
-        // Log the activity
-        ActivityLog::create([
-            'user_id' => Auth::id(),
-            'action' => 'view',
-            'subject' => 'transactions',
-            'subject_id' => $memberCode,
-            'description' => "Viewed transactions for member {$memberCode}",
-        ]);
-
-        return view('admin.transactions.show', [
-            'transactions' => $transactions,
-            'member' => $member,
-            'memberCode' => $memberCode,
-        ]);
+        return view('admin.transactions.index', compact('transactions'));
     }
 
     public function create()
     {
-        $allMembers = $this->googleSheetRepository->getAllMembers();
-        
-        return view('admin.transactions.create', [
-            'members' => $allMembers,
-        ]);
+        return view('admin.transactions.create');
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'date' => 'required|date',
-            'membercode' => 'required|string',
-            'transactiontype' => 'required|string|in:Deposit,Withdrawal,Interest',
-            'referenceno' => 'required|string',
-            'amount' => 'required|numeric',
+            'membercode' => 'required|string|max:50',
+            'transaction_type' => 'required|string|max:50',
+            'reference_no' => 'nullable|string|max:100',
+            'amount' => 'required|numeric|min:0',
         ]);
 
-        // Log the activity
-        ActivityLog::create([
-            'user_id' => Auth::id(),
-            'action' => 'create',
-            'subject' => 'transaction',
-            'subject_id' => $validated['referenceno'],
-            'description' => "Created new transaction: {$validated['transactiontype']} for member {$validated['membercode']}",
+        Transaction::create($validated);
+
+        $this->success('Transaction created successfully.');
+        return redirect()->route('admin.transactions.index');
+    }
+
+    public function edit(Transaction $transaction)
+    {
+        return view('admin.transactions.edit', compact('transaction'));
+    }
+
+    public function update(Request $request, Transaction $transaction)
+    {
+        $validated = $request->validate([
+            'date' => 'required|date',
+            'membercode' => 'required|string|max:50',
+            'transaction_type' => 'required|string|max:50',
+            'reference_no' => 'nullable|string|max:100',
+            'amount' => 'required|numeric|min:0',
         ]);
 
-        // For now, just show success message
-        // In production, this would append to Google Sheets
-        $this->success('Transaction recorded successfully. Note: This is a demo - actual Google Sheets integration would be needed for persistent storage.');
-        
+        $transaction->update($validated);
+
+        $this->success('Transaction updated successfully.');
+        return redirect()->route('admin.transactions.index');
+    }
+
+    public function destroy(Transaction $transaction)
+    {
+        $transaction->delete();
+
+        $this->success('Transaction deleted successfully.');
+        return redirect()->route('admin.transactions.index');
+    }
+
+    public function export()
+    {
+        return Excel::download(new TransactionsExport, 'transactions.xlsx');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:10240',
+        ]);
+
+        Excel::import(new TransactionsImport, $request->file('file'));
+
+        $this->success('Transactions imported successfully.');
         return redirect()->route('admin.transactions.index');
     }
 }

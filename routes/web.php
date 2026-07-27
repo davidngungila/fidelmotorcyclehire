@@ -21,8 +21,6 @@ use App\Http\Controllers\Admin\RoleController as AdminRoleController;
 use App\Http\Controllers\Admin\PermissionController as AdminPermissionController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\ShareController as AdminShareController;
-use App\Http\Controllers\Admin\TransactionController as AdminTransactionController;
-use App\Http\Controllers\Admin\SavingPlanController as AdminSavingPlanController;
 use App\Http\Controllers\Member\DashboardController as MemberDashboardController;
 use App\Http\Controllers\Member\ProfileController as MemberProfileController;
 use App\Http\Controllers\Member\LoanController as MemberLoanController;
@@ -93,14 +91,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/shares', [AdminShareController::class, 'index'])->name('shares.index');
     Route::get('/shares/{encryptedMemberNumber}', [AdminShareController::class, 'show'])->name('shares.show');
 
-    Route::get('/transactions', [AdminTransactionController::class, 'index'])->name('transactions.index');
-    Route::get('/transactions/create', [AdminTransactionController::class, 'create'])->name('transactions.create');
-    Route::post('/transactions', [AdminTransactionController::class, 'store'])->name('transactions.store');
-    Route::get('/transactions/{encryptedMemberCode}', [AdminTransactionController::class, 'show'])->name('transactions.show');
-
-    Route::get('/saving-plans', [AdminSavingPlanController::class, 'index'])->name('saving-plans.index');
-    Route::get('/saving-plans/{encryptedMemberId}', [AdminSavingPlanController::class, 'show'])->name('saving-plans.show');
-
     Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
     Route::post('/reports/generate', [AdminReportController::class, 'generate'])->name('reports.generate');
 
@@ -117,6 +107,12 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
 
     Route::get('/google-sheets', [AdminGoogleSheetsController::class, 'index'])->name('google-sheets.index');
     Route::post('/google-sheets/sync', [AdminGoogleSheetsController::class, 'sync'])->name('google-sheets.sync');
+    Route::get('/google-sheets/status', [AdminGoogleSheetsController::class, 'status'])->name('google-sheets.status');
+    Route::get('/google-sheets/logs', [AdminGoogleSheetsController::class, 'logs'])->name('google-sheets.logs');
+    Route::get('/google-sheets/customers', [AdminGoogleSheetsController::class, 'customers'])->name('google-sheets.customers');
+    Route::get('/google-sheets/customers/{customerId}', [AdminGoogleSheetsController::class, 'customer'])->name('google-sheets.customer');
+    Route::get('/google-sheets/summary', [AdminGoogleSheetsController::class, 'summary'])->name('google-sheets.summary');
+    Route::post('/google-sheets/manual-sync', [AdminGoogleSheetsController::class, 'manualSync'])->name('google-sheets.manual-sync');
 
     Route::get('/activity-logs', [AdminActivityLogController::class, 'index'])->name('activity-logs.index');
 

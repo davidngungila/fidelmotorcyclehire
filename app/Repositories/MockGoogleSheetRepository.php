@@ -237,35 +237,6 @@ class MockGoogleSheetRepository implements GoogleSheetRepositoryInterface
         ],
     ];
 
-    protected const TRANSACTIONS = [
-        ['date' => '2024-10-15', 'membercode' => 'M001', 'transactiontype' => 'Deposit', 'referenceno' => 'TXN-001', 'amount' => 30000],
-        ['date' => '2024-10-15', 'membercode' => 'M002', 'transactiontype' => 'Deposit', 'referenceno' => 'TXN-002', 'amount' => 50000],
-        ['date' => '2024-10-15', 'membercode' => 'M003', 'transactiontype' => 'Deposit', 'referenceno' => 'TXN-003', 'amount' => 20000],
-        ['date' => '2024-10-14', 'membercode' => 'M001', 'transactiontype' => 'Withdrawal', 'referenceno' => 'TXN-004', 'amount' => -5000],
-        ['date' => '2024-10-14', 'membercode' => 'M004', 'transactiontype' => 'Deposit', 'referenceno' => 'TXN-005', 'amount' => 15000],
-        ['date' => '2024-10-13', 'membercode' => 'M005', 'transactiontype' => 'Deposit', 'referenceno' => 'TXN-006', 'amount' => 80000],
-        ['date' => '2024-10-13', 'membercode' => 'M007', 'transactiontype' => 'Deposit', 'referenceno' => 'TXN-007', 'amount' => 70000],
-        ['date' => '2024-10-12', 'membercode' => 'M008', 'transactiontype' => 'Deposit', 'referenceno' => 'TXN-008', 'amount' => 45000],
-        ['date' => '2024-10-12', 'membercode' => 'M009', 'transactiontype' => 'Deposit', 'referenceno' => 'TXN-009', 'amount' => 25000],
-        ['date' => '2024-10-11', 'membercode' => 'M010', 'transactiontype' => 'Deposit', 'referenceno' => 'TXN-010', 'amount' => 30000],
-        ['date' => '2024-10-10', 'membercode' => 'M001', 'transactiontype' => 'Interest', 'referenceno' => 'TXN-011', 'amount' => 3400],
-        ['date' => '2024-10-10', 'membercode' => 'M002', 'transactiontype' => 'Interest', 'referenceno' => 'TXN-012', 'amount' => 5200],
-        ['date' => '2024-10-09', 'membercode' => 'M003', 'transactiontype' => 'Deposit', 'referenceno' => 'TXN-013', 'amount' => 20000],
-        ['date' => '2024-10-09', 'membercode' => 'M004', 'transactiontype' => 'Withdrawal', 'referenceno' => 'TXN-014', 'amount' => -10000],
-        ['date' => '2024-10-08', 'membercode' => 'M005', 'transactiontype' => 'Deposit', 'referenceno' => 'TXN-015', 'amount' => 60000],
-    ];
-
-    protected const SAVING_PLANS = [
-        ['name' => 'Emergency Fund', 'memberid' => 'M001', 'membership' => 'Active', 'monthly_goal' => 10000, 'goal' => 120000],
-        ['name' => 'Education Fund', 'memberid' => 'M001', 'membership' => 'Active', 'monthly_goal' => 15000, 'goal' => 180000],
-        ['name' => 'Retirement Plan', 'memberid' => 'M002', 'membership' => 'Active', 'monthly_goal' => 20000, 'goal' => 240000],
-        ['name' => 'Home Purchase', 'memberid' => 'M003', 'membership' => 'Active', 'monthly_goal' => 25000, 'goal' => 300000],
-        ['name' => 'Business Capital', 'memberid' => 'M005', 'membership' => 'Active', 'monthly_goal' => 30000, 'goal' => 360000],
-        ['name' => 'Travel Fund', 'memberid' => 'M007', 'membership' => 'Active', 'monthly_goal' => 8000, 'goal' => 96000],
-        ['name' => 'Medical Fund', 'memberid' => 'M008', 'membership' => 'Active', 'monthly_goal' => 5000, 'goal' => 60000],
-        ['name' => 'Car Purchase', 'memberid' => 'M009', 'membership' => 'Active', 'monthly_goal' => 12000, 'goal' => 144000],
-    ];
-
     protected const STATEMENT_TYPES = ['savings', 'loans', 'deposits', 'swf', 'investments'];
 
     public function getSheetData(string $sheetName, ?string $range = null): array
@@ -278,8 +249,6 @@ class MockGoogleSheetRepository implements GoogleSheetRepositoryInterface
             'swf', 'social_welfare' => $this->flattenNested(self::SWF),
             'investments', 'investment' => $this->flattenNested(self::INVESTMENTS),
             'shares', 'share' => $this->flattenNested(self::SHARES),
-            'transactions', 'transaction' => self::TRANSACTIONS,
-            'saving_plans', 'saving_plan', 'savingplans' => self::SAVING_PLANS,
             default => [],
         };
     }
@@ -353,30 +322,6 @@ class MockGoogleSheetRepository implements GoogleSheetRepositoryInterface
         $memberNumber = strtoupper(trim($memberNumber));
 
         return self::SHARES[$memberNumber] ?? [];
-    }
-
-    public function getMemberTransactions(string $memberNumber): array
-    {
-        $memberNumber = strtoupper(trim($memberNumber));
-
-        return array_values(array_filter(self::TRANSACTIONS, static fn(array $txn): bool => strtoupper(trim((string) ($txn['membercode'] ?? ''))) === $memberNumber));
-    }
-
-    public function getMemberSavingPlans(string $memberNumber): array
-    {
-        $memberNumber = strtoupper(trim($memberNumber));
-
-        return array_values(array_filter(self::SAVING_PLANS, static fn(array $plan): bool => strtoupper(trim((string) ($plan['memberid'] ?? ''))) === $memberNumber));
-    }
-
-    public function getAllTransactions(): array
-    {
-        return self::TRANSACTIONS;
-    }
-
-    public function getAllSavingPlans(): array
-    {
-        return self::SAVING_PLANS;
     }
 
     public function getMemberStatements(string $memberNumber, string $type): array

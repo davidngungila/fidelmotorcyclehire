@@ -24,14 +24,6 @@ interface GoogleSheetRepositoryInterface
 
     public function getMemberShares(string $memberNumber): array;
 
-    public function getMemberTransactions(string $memberNumber): array;
-
-    public function getMemberSavingPlans(string $memberNumber): array;
-
-    public function getAllTransactions(): array;
-
-    public function getAllSavingPlans(): array;
-
     public function getMemberStatements(string $memberNumber, string $type): array;
 
     public function getDashboardTotals(): array;

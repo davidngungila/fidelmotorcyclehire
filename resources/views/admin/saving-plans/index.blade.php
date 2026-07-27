@@ -1,57 +1,52 @@
 @extends('layouts.admin')
 
-@section('breadcrumb', 'Members › Saving Plans')
+@section('breadcrumb', 'Saving Plans \u203A List')
 @section('page_title', 'Saving Plans Management')
-
-@php
-  $fmt = fn($n) => number_format((float)$n, 2) . ' TSh';
-  $fmtInt = fn($n) => number_format((int)$n);
-@endphp
 
 @section('content')
 
 <div x-data="savingPlansList()" class="space-y-6">
 
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-    <div class="flex flex-col sm:flex-row sm:items-center gap-3 flex-1 max-w-3xl">
-      <form method="GET" action="{{ route('admin.saving-plans.index') }}" class="flex-1" x-ref="searchForm">
+    <div class="flex flex-col sm:flex-row sm:items-center gap-3 flex-1 max-w-2xl">
+      <form method="GET" action="{{ route('admin.saving-plans.index') }}" class="flex-1">
         <div class="relative">
           <i class="fa-solid fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-primary-400"></i>
-          <input type="text" name="q" value="{{ $searchQuery ?? '' }}"
-                 placeholder="Search by plan name, member ID, membership..."
-                 class="form-input pl-9 py-2.5 text-sm"
-                 x-model="searchQuery"
-                 @input.debounce.400ms="submitSearch"/>
-          @if($searchQuery)
-            <a href="{{ route('admin.saving-plans.index') }}" class="absolute right-3 top-1/2 -translate-y-1/2 text-primary-400 hover:text-primary-600">
-              <i class="fa-solid fa-xmark text-xs"></i>
-            </a>
-          @endif
+          <input type="text" name="memberid" value="{{ request('memberid') }}"
+                 placeholder="Search by member ID..."
+                 class="form-input pl-9 py-2.5 text-sm">
         </div>
       </form>
+      <form method="GET" action="{{ route('admin.saving-plans.index') }}" class="flex-1">
+        <select name="membership" class="form-input py-2.5 px-3 text-sm">
+          <option value="">All Memberships</option>
+          <option value="individual" {{ request('membership') == 'individual' ? 'selected' : '' }}>Individual</option>
+          <option value="corporate" {{ request('membership') == 'corporate' ? 'selected' : '' }}>Corporate</option>
+          <option value="group" {{ request('membership') == 'group' ? 'selected' : '' }}>Group</option>
+        </select>
+      </form>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <a href="{{ route('admin.saving-plans.create') }}"
+         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95 whitespace-nowrap">
+        <i class="fa-solid fa-plus text-[13px]"></i> New Saving Plan
+      </a>
     </div>
   </div>
 
   <div class="glass p-5">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
-      <div class="flex items-center gap-3 flex-wrap">
-        <span class="text-xs font-semibold text-primary-600 dark:text-primary-400">
-          <i class="fa-solid fa-piggy-bank mr-1.5"></i> {{ $total }} Saving Plans
-        </span>
-        @if($searchQuery)
-          <span class="badge badge-blue text-[10px]">Search: {{ $searchQuery }}</span>
-        @endif
-      </div>
       <div class="flex items-center gap-3">
-        <label class="flex items-center gap-2 text-xs text-primary-600 dark:text-primary-400">
-          Per page:
-          <select name="per_page" class="form-input py-1.5 px-2 w-20 text-xs" @change="changePerPage($el.value)">
-            <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10</option>
-            <option value="15" {{ $perPage == 15 ? 'selected' : '' }}>15</option>
-            <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25</option>
-            <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50</option>
-          </select>
-        </label>
+        <span class="text-xs font-semibold text-primary-600 dark:text-primary-400">
+          <i class="fa-solid fa-list-check mr-1.5"></i> {{ $savingPlans->total() }} Saving Plans Found
+        </span>
+        @if(request('memberid'))
+          <span class="badge badge-blue text-[10px]">Member: {{ request('memberid') }}</span>
+        @endif
+        @if(request('membership'))
+          <span class="badge badge-green text-[10px]">Membership: {{ request('membership') }}</span>
+        @endif
       </div>
     </div>
 
@@ -60,83 +55,68 @@
         <thead>
           <tr>
             <th class="w-12">#</th>
-            <th class="cursor-pointer select-none" @click="sortBy('name')">
-              Plan Name
-              <i class="fa-solid ml-1.5 text-[10px] {{ $memberService->getSortDirectionIcon($sortColumn, 'name', $sortDirection) }}"></i>
-            </th>
-            <th class="cursor-pointer select-none" @click="sortBy('memberid')">
-              Member ID
-              <i class="fa-solid ml-1.5 text-[10px] {{ $memberService->getSortDirectionIcon($sortColumn, 'memberid', $sortDirection) }}"></i>
-            </th>
-            <th>Member Name</th>
-            <th class="cursor-pointer select-none" @click="sortBy('membership')">
-              Membership
-              <i class="fa-solid ml-1.5 text-[10px] {{ $memberService->getSortDirectionIcon($sortColumn, 'membership', $sortDirection) }}"></i>
-            </th>
-            <th class="text-right cursor-pointer select-none" @click="sortBy('monthly_goal')">
-              Monthly Goal
-              <i class="fa-solid ml-1.5 text-[10px] {{ $memberService->getSortDirectionIcon($sortColumn, 'monthly_goal', $sortDirection) }}"></i>
-            </th>
-            <th class="text-right cursor-pointer select-none" @click="sortBy('goal')">
-              Total Goal
-              <i class="fa-solid ml-1.5 text-[10px] {{ $memberService->getSortDirectionIcon($sortColumn, 'goal', $sortDirection) }}"></i>
-            </th>
-            <th class="text-right">Progress</th>
+            <th>Name</th>
+            <th>Member ID</th>
+            <th>Membership</th>
+            <th class="text-right">Monthly Goal</th>
+            <th class="text-right">Goal</th>
+            <th class="text-right">Actions</th>
           </tr>
         </thead>
         <tbody>
-          @foreach($plans as $index => $plan)
-            <tr class="group">
-              <td class="text-xs text-gray-500">{{ ($currentPage - 1) * $perPage + $index + 1 }}</td>
-              <td class="text-sm font-medium">{{ $plan['name'] ?? '-' }}</td>
+          @forelse($savingPlans as $index => $savingPlan)
+            <tr>
+              <td>{{ ($savingPlans->currentPage() - 1) * $savingPlans->perPage() + $index + 1 }}</td>
               <td>
-                <a href="{{ route('admin.saving-plans.show', encryptId($plan['memberid'] ?? '')) }}" 
-                   class="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">
-                  {{ $plan['memberid'] ?? '-' }}
-                </a>
+                <span class="font-semibold text-primary-600">{{ $savingPlan->name }}</span>
               </td>
-              <td class="text-sm">{{ $plan['member_name'] ?? 'Unknown' }}</td>
+              <td>{{ $savingPlan->memberid }}</td>
               <td>
-                <span class="badge @if(strtolower($plan['membership'] ?? '') === 'active') badge-green @else badge-yellow @endif text-[10px]">
-                  {{ $plan['membership'] ?? '-' }}
-                </span>
+                @php
+                  $membershipColors = [
+                    'individual' => 'bg-blue-100 text-blue-700',
+                    'corporate' => 'bg-purple-100 text-purple-700',
+                    'group' => 'bg-orange-100 text-orange-700',
+                  ];
+                  $color = $membershipColors[$savingPlan->membership] ?? 'bg-gray-100 text-gray-700';
+                @endphp
+                <span class="badge {{ $color }} text-[10px]">{{ ucfirst($savingPlan->membership) }}</span>
               </td>
-              <td class="text-sm font-semibold text-right">{{ $fmt($plan['monthly_goal'] ?? 0) }}</td>
-              <td class="text-sm font-semibold text-right">{{ $fmt($plan['goal'] ?? 0) }}</td>
+              <td class="text-right font-semibold">{{ number_format($savingPlan->monthly_goal, 2) }}</td>
+              <td class="text-right font-semibold">{{ number_format($savingPlan->goal, 2) }}</td>
               <td class="text-right">
                 <div class="flex items-center justify-end gap-2">
-                  <div class="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div class="h-full bg-green-500 rounded-full" style="width: 0%"></div>
-                  </div>
-                  <span class="text-xs text-gray-500">0%</span>
+                  <a href="{{ route('admin.saving-plans.edit', $savingPlan->id) }}"
+                     class="w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center transition-all active:scale-95">
+                    <i class="fa-solid fa-pen text-xs"></i>
+                  </a>
+                  <form method="POST" action="{{ route('admin.saving-plans.destroy', $savingPlan->id) }}" class="inline">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit"
+                            class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center transition-all active:scale-95"
+                            onclick="return confirm('Are you sure you want to delete this saving plan?')">
+                      <i class="fa-solid fa-trash text-xs"></i>
+                    </button>
+                  </form>
                 </div>
               </td>
             </tr>
-          @endforeach
+          @empty
+            <tr>
+              <td colspan="7" class="text-center py-12 text-gray-500">
+                <i class="fa-solid fa-inbox text-4xl mb-3 block"></i>
+                <p>No saving plans found</p>
+              </td>
+            </tr>
+          @endforelse
         </tbody>
       </table>
     </div>
 
-    @if($total > $perPage)
-      <div class="flex items-center justify-between mt-5 pt-4 border-t border-gray-100 dark:border-gray-700">
-        <div class="text-xs text-gray-500">
-          Showing {{ ($currentPage - 1) * $perPage + 1 }} to {{ min($currentPage * $perPage, $total) }} of {{ $total }} plans
-        </div>
-        <div class="flex items-center gap-2">
-          @if($currentPage > 1)
-            <a href="{{ route('admin.saving-plans.index', ['page' => $currentPage - 1, 'q' => $searchQuery, 'per_page' => $perPage, 'sort' => $sortColumn, 'sort_direction' => $sortDirection]) }}" 
-               class="px-3 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-              <i class="fa-solid fa-chevron-left"></i>
-            </a>
-          @endif
-          <span class="text-xs font-medium text-gray-700">{{ $currentPage }}</span>
-          @if($currentPage * $perPage < $total)
-            <a href="{{ route('admin.saving-plans.index', ['page' => $currentPage + 1, 'q' => $searchQuery, 'per_page' => $perPage, 'sort' => $sortColumn, 'sort_direction' => $sortDirection]) }}" 
-               class="px-3 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-              <i class="fa-solid fa-chevron-right"></i>
-            </a>
-          @endif
-        </div>
+    @if($savingPlans->hasPages())
+      <div class="mt-6">
+        {{ $savingPlans->appends(request()->query())->links() }}
       </div>
     @endif
   </div>
@@ -145,27 +125,9 @@
 <script>
 function savingPlansList() {
   return {
-    searchQuery: '{{ $searchQuery ?? '' }}',
-    sortColumn: '{{ $sortColumn }}',
-    sortDirection: '{{ $sortDirection }}',
-    
+    searchQuery: '',
     submitSearch() {
       this.$refs.searchForm.submit();
-    },
-    
-    sortBy(column) {
-      const newDirection = this.sortColumn === column && this.sortDirection === 'asc' ? 'desc' : 'asc';
-      const url = new URL(window.location.href);
-      url.searchParams.set('sort', column);
-      url.searchParams.set('sort_direction', newDirection);
-      window.location.href = url.toString();
-    },
-    
-    changePerPage(perPage) {
-      const url = new URL(window.location.href);
-      url.searchParams.set('per_page', perPage);
-      url.searchParams.set('page', '1');
-      window.location.href = url.toString();
     }
   }
 }

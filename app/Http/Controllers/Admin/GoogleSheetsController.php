@@ -5,133 +5,287 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\GoogleSheetsSyncRequest;
-use App\Models\ActivityLog;
-use App\Models\GoogleSheetsConfig;
-use App\Services\GoogleSheetService;
+use App\Models\CustomerProfile;
+use App\Models\SavingBalance;
+use App\Models\Transaction;
+use App\Models\SyncLog;
+use App\Services\GoogleSheetsSyncService;
 use App\Traits\FlashMessages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Artisan;
+use Carbon\Carbon;
 
 class GoogleSheetsController extends Controller
 {
     use FlashMessages;
 
-    public function __construct(
-        protected ?GoogleSheetService $googleSheetService = null,
-    ) {
+    protected $syncService;
+
+    public function __construct(GoogleSheetsSyncService $syncService)
+    {
+        $this->syncService = $syncService;
     }
 
+    /**
+     * Display Google Sheets dashboard
+     */
     public function index(Request $request)
     {
-        $config = GoogleSheetsConfig::first();
-
-        if (! $config) {
-            $config = GoogleSheetsConfig::create([
-                'spreadsheet_id' => '',
-                'sheet_names' => ['Members', 'Loans', 'Savings', 'Deposits', 'SWF', 'Investments', 'Transactions'],
-                'last_sync_at' => null,
-                'is_active' => true,
-                'service_account_json' => null,
-            ]);
-        }
-
-        $sampleSheets = [
-            ['name' => 'Members', 'icon' => 'fa-users', 'rows' => 247, 'color' => 'primary'],
-            ['name' => 'Loans', 'icon' => 'fa-hand-holding-dollar', 'rows' => 134, 'color' => 'orange'],
-            ['name' => 'Savings', 'icon' => 'fa-piggy-bank', 'rows' => 245, 'color' => 'blue'],
-            ['name' => 'Deposits', 'icon' => 'fa-money-bill-trend-up', 'rows' => 89, 'color' => 'purple'],
-            ['name' => 'SWF', 'icon' => 'fa-shield-halved', 'rows' => 240, 'color' => 'pink'],
-            ['name' => 'Investments', 'icon' => 'fa-chart-line', 'rows' => 67, 'color' => 'lime'],
-            ['name' => 'Transactions', 'icon' => 'fa-receipt', 'rows' => 1892, 'color' => 'indigo'],
+        $data = [
+            'total_customers' => CustomerProfile::count(),
+            'active_customers' => CustomerProfile::where('account_status', 'Active')->count(),
+            'total_balance' => SavingBalance::sum('total_balance'),
+            'last_sync' => SyncLog::latest()->first(),
+            'sync_logs' => SyncLog::latest()->limit(10)->get(),
+            'sync_stats' => $this->getSyncStats(),
+            'account_breakdown' => $this->getAccountBreakdown()
         ];
 
-        ActivityLog::create([
-            'user_id' => Auth::id(),
-            'description' => 'Admin viewed Google Sheets integration page',
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-            'properties' => [
-                'config_id' => $config->id,
-                'is_active' => $config->is_active,
-            ],
-        ]);
+        return view('admin.google-sheets.index', $data);
+    }
 
-        return view('admin.google-sheets.index', [
-            'config' => $config,
-            'sampleSheets' => $sampleSheets,
-            'spreadsheetId' => $config->spreadsheet_id,
-            'sheetNames' => $config->sheet_names,
-            'lastSyncAt' => $config->last_sync_at,
-            'isActive' => $config->is_active,
+    /**
+     * Trigger manual sync
+     */
+    public function sync(Request $request)
+    {
+        try {
+            $type = $request->input('type', 'all');
+            $force = $request->input('force', false);
+
+            Artisan::call('sync:google-sheets', [
+                '--' . $type => true,
+                '--force' => $force
+            ]);
+
+            $output = Artisan::output();
+
+            $this->success('Sync triggered successfully');
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Sync triggered successfully',
+                'output' => $output
+            ]);
+
+        } catch (\Exception $e) {
+            $this->error('Failed to trigger sync: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to trigger sync',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get sync status
+     */
+    public function status()
+    {
+        $lastSync = SyncLog::latest()->first();
+        $isRunning = $lastSync && $lastSync->status === 'running';
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'last_sync' => $lastSync,
+                'is_running' => $isRunning,
+                'next_sync' => now()->addHours(6)->toDateTimeString(),
+                'sync_schedule' => 'Every 6 hours'
+            ]
         ]);
     }
 
-    public function sync(GoogleSheetsSyncRequest $request)
+    /**
+     * Get sync logs
+     */
+    public function logs(Request $request)
     {
-        $config = GoogleSheetsConfig::first();
+        $limit = $request->input('limit', 50);
+        $type = $request->input('type');
+        $status = $request->input('status');
 
-        if (! $config) {
-            $config = GoogleSheetsConfig::create([
-                'spreadsheet_id' => $request->input('spreadsheet_id', ''),
-                'sheet_names' => ['Members', 'Loans', 'Savings', 'Deposits', 'SWF', 'Investments', 'Transactions'],
-                'is_active' => true,
-            ]);
+        $query = SyncLog::query();
+
+        if ($type) {
+            $query->where('sync_type', $type);
         }
 
-        $rowsProcessed = 0;
-        $syncErrors = [];
+        if ($status) {
+            $query->where('status', $status);
+        }
 
+        $logs = $query->latest()->limit($limit)->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $logs
+        ]);
+    }
+
+    /**
+     * Get customers data
+     */
+    public function customers(Request $request)
+    {
+        $query = CustomerProfile::with(['savingBalance', 'transactions' => function($q) {
+            $q->latest()->limit(5);
+        }]);
+
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('customer_id', 'LIKE', "%{$search}%")
+                  ->orWhere('customer_name', 'LIKE', "%{$search}%")
+                  ->orWhere('email_address', 'LIKE', "%{$search}%")
+                  ->orWhere('phone_number', 'LIKE', "%{$search}%");
+            });
+        }
+
+        if ($request->has('status')) {
+            $query->where('account_status', $request->status);
+        }
+
+        if ($request->has('member_type')) {
+            $query->where('member_type', $request->member_type);
+        }
+
+        $customers = $query->paginate($request->input('per_page', 20));
+
+        return response()->json([
+            'success' => true,
+            'data' => $customers
+        ]);
+    }
+
+    /**
+     * Get customer details
+     */
+    public function customer($customerId)
+    {
+        $customer = CustomerProfile::with(['savingBalance', 'transactions', 'savingPlan'])
+            ->where('customer_id', $customerId)
+            ->first();
+
+        if (!$customer) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Customer not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $customer
+        ]);
+    }
+
+    /**
+     * Get dashboard summary
+     */
+    public function summary()
+    {
+        $summary = [
+            'total_customers' => CustomerProfile::count(),
+            'active_customers' => CustomerProfile::where('account_status', 'Active')->count(),
+            'total_balance' => SavingBalance::sum('total_balance'),
+            'account_breakdown' => $this->getAccountBreakdown(),
+            'transactions_summary' => [
+                'today' => Transaction::whereDate('date', today())->count(),
+                'this_week' => Transaction::whereBetween('date', [now()->startOfWeek(), now()])->count(),
+                'this_month' => Transaction::whereMonth('date', now()->month)->count(),
+                'total_amount' => Transaction::sum('amount')
+            ],
+            'savings_goals' => [
+                'total_goal' => SavingBalance::sum('overall_saving_goal'),
+                'total_saved' => SavingBalance::sum('total_saved'),
+                'achievement_rate' => $this->getOverallAchievementRate()
+            ],
+            'sync_stats' => $this->getSyncStats()
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data' => $summary
+        ]);
+    }
+
+    /**
+     * Manual sync from uploaded data
+     */
+    public function manualSync(Request $request)
+    {
         try {
-            if ($this->googleSheetService !== null && method_exists($this->googleSheetService, 'syncAll')) {
-                $result = $this->googleSheetService->syncAll();
-                $rowsProcessed = $result['rows_processed'] ?? 0;
-                $syncErrors = $result['errors'] ?? [];
+            $data = $request->all();
+            $result = $this->syncService->manualSync($data);
+
+            if ($result['success']) {
+                $this->success('Manual sync completed successfully');
             } else {
-                $rowsProcessed = rand(2500, 4500);
+                $this->error('Manual sync failed: ' . $result['error']);
             }
 
-            $config->update([
-                'last_sync_at' => now(),
-                'is_active' => true,
-            ]);
+            return response()->json($result);
 
-            ActivityLog::create([
-                'user_id' => Auth::id(),
-                'description' => 'Admin synced Google Sheets data',
-                'subject_type' => 'google_sheets',
-                'subject_id' => (string) $config->id,
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-                'properties' => [
-                    'rows_processed' => $rowsProcessed,
-                    'spreadsheet_id' => $config->spreadsheet_id,
-                    'errors_count' => count($syncErrors),
-                ],
-            ]);
+        } catch (\Exception $e) {
+            $this->error('Manual sync failed: ' . $e->getMessage());
 
-            if (count($syncErrors) > 0) {
-                $this->warning("Synced with warnings! Processed {$rowsProcessed} rows. " . count($syncErrors) . ' issue(s) found.');
-            } else {
-                $this->success("Synced successfully! Processed {$rowsProcessed} rows.");
-            }
-        } catch (\Throwable $e) {
-            ActivityLog::create([
-                'user_id' => Auth::id(),
-                'description' => 'Google Sheets sync failed',
-                'subject_type' => 'google_sheets',
-                'subject_id' => (string) $config->id,
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-                'properties' => [
-                    'error_message' => $e->getMessage(),
-                    'error_class' => get_class($e),
-                ],
-            ]);
-
-            $this->error('Sync failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
         }
+    }
 
-        return redirect()->route('admin.google-sheets.index');
+    /**
+     * Get account breakdown
+     */
+    protected function getAccountBreakdown()
+    {
+        return [
+            'flexi' => SavingBalance::sum('flexi_balance'),
+            'rda' => SavingBalance::sum('rda_balance'),
+            'emergency' => SavingBalance::sum('emergency_balance'),
+            'business' => SavingBalance::sum('business_balance'),
+            'total' => SavingBalance::sum('total_balance')
+        ];
+    }
+
+    /**
+     * Get sync statistics
+     */
+    protected function getSyncStats()
+    {
+        $today = SyncLog::whereDate('created_at', today());
+        $thisWeek = SyncLog::whereBetween('created_at', [now()->startOfWeek(), now()]);
+        $thisMonth = SyncLog::whereMonth('created_at', now()->month);
+        $total = SyncLog::count();
+
+        return [
+            'today' => $today->count(),
+            'today_success' => $today->where('status', 'completed')->count(),
+            'today_failed' => $today->where('status', 'failed')->count(),
+            'this_week' => $thisWeek->count(),
+            'this_month' => $thisMonth->count(),
+            'total' => $total,
+            'success_rate' => $total > 0 ? round(($thisMonth->where('status', 'completed')->count() / $total) * 100, 2) : 0
+        ];
+    }
+
+    /**
+     * Get overall achievement rate
+     */
+    protected function getOverallAchievementRate()
+    {
+        $totalGoal = SavingBalance::sum('overall_saving_goal');
+        $totalSaved = SavingBalance::sum('total_saved');
+        
+        if ($totalGoal > 0) {
+            return round(($totalSaved / $totalGoal) * 100, 2);
+        }
+        return 0;
     }
 }

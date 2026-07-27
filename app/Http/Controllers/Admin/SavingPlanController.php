@@ -1,130 +1,80 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Controllers\Admin;
 
-use App\Contracts\GoogleSheetRepositoryInterface;
 use App\Http\Controllers\Controller;
-use App\Models\ActivityLog;
-use App\Services\AdminDashboardService;
-use App\Services\EncryptedIdService;
-use App\Services\MemberService;
+use App\Models\SavingPlan;
 use App\Traits\FlashMessages;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
 
 class SavingPlanController extends Controller
 {
     use FlashMessages;
 
-    public function __construct(
-        protected GoogleSheetRepositoryInterface $googleSheetRepository,
-        protected MemberService $memberService,
-        protected AdminDashboardService $dashboardService,
-        protected EncryptedIdService $encryptedIdService,
-    ) {
-    }
-
     public function index(Request $request)
     {
-        $perPage = (int) $request->input('per_page', 15);
-        $sortColumn = $request->input('sort', 'name');
-        $sortDirection = $request->input('sort_direction', 'asc');
-        $searchQuery = $request->input('q', '');
+        $query = SavingPlan::query();
 
-        $allPlans = $this->googleSheetRepository->getAllSavingPlans();
-        $allMembers = $this->googleSheetRepository->getAllMembers();
-
-        // Filter by search query
-        if ($searchQuery !== '') {
-            $searchQueryLower = strtolower($searchQuery);
-            $allPlans = array_filter($allPlans, function ($plan) use ($searchQueryLower) {
-                $name = strtolower((string) ($plan['name'] ?? ''));
-                $memberId = strtolower((string) ($plan['memberid'] ?? ''));
-                $membership = strtolower((string) ($plan['membership'] ?? ''));
-                
-                return str_contains($name, $searchQueryLower) ||
-                       str_contains($memberId, $searchQueryLower) ||
-                       str_contains($membership, $searchQueryLower);
-            });
+        if ($request->filled('memberid')) {
+            $query->byMemberId($request->memberid);
         }
 
-        // Sort plans
-        usort($allPlans, function ($a, $b) use ($sortColumn, $sortDirection) {
-            $aVal = $a[$sortColumn] ?? '';
-            $bVal = $b[$sortColumn] ?? '';
-            
-            if ($sortColumn === 'monthly_goal' || $sortColumn === 'goal') {
-                $aVal = (float) $aVal;
-                $bVal = (float) $bVal;
-            }
-            
-            $cmp = $aVal <=> $bVal;
-            return $sortDirection === 'asc' ? $cmp : -$cmp;
-        });
-
-        // Add member names to plans
-        $memberMap = [];
-        foreach ($allMembers as $member) {
-            $memberNo = strtoupper($member['member_number'] ?? $member['MemberNumber'] ?? '');
-            if ($memberNo) {
-                $memberMap[$memberNo] = $member['name'] ?? $member['Name'] ?? 'Unknown';
-            }
+        if ($request->filled('membership')) {
+            $query->byMembership($request->membership);
         }
 
-        foreach ($allPlans as &$plan) {
-            $memberId = strtoupper($plan['memberid'] ?? '');
-            $plan['member_name'] = $memberMap[$memberId] ?? 'Unknown';
-        }
+        $savingPlans = $query->orderBy('created_at', 'desc')->paginate(25);
 
-        // Paginate
-        $currentPage = (int) $request->input('page', 1);
-        $total = count($allPlans);
-        $plans = array_slice($allPlans, ($currentPage - 1) * $perPage, $perPage);
-
-        return view('admin.saving-plans.index', [
-            'plans' => $plans,
-            'total' => $total,
-            'perPage' => $perPage,
-            'currentPage' => $currentPage,
-            'sortColumn' => $sortColumn,
-            'sortDirection' => $sortDirection,
-            'searchQuery' => $searchQuery,
-            'memberService' => $this->memberService,
-        ]);
+        return view('admin.saving-plans.index', compact('savingPlans'));
     }
 
-    public function show(Request $request, string $encryptedId)
+    public function create()
     {
-        $memberId = $this->encryptedIdService->decrypt($encryptedId);
-        
-        if (! Gate::allows('admin')) {
-            abort(403);
-        }
+        return view('admin.saving-plans.create');
+    }
 
-        $plans = $this->googleSheetRepository->getMemberSavingPlans($memberId);
-        $member = $this->googleSheetRepository->getMemberByNumber($memberId);
-
-        if (! $member) {
-            $this->error('Member not found');
-            return redirect()->route('admin.saving-plans.index');
-        }
-
-        // Log the activity
-        ActivityLog::create([
-            'user_id' => Auth::id(),
-            'action' => 'view',
-            'subject' => 'saving_plans',
-            'subject_id' => $memberId,
-            'description' => "Viewed saving plans for member {$memberId}",
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'memberid' => 'required|string|max:50',
+            'membership' => 'required|string|max:50',
+            'monthly_goal' => 'required|numeric|min:0',
+            'goal' => 'required|numeric|min:0',
         ]);
 
-        return view('admin.saving-plans.show', [
-            'plans' => $plans,
-            'member' => $member,
-            'memberId' => $memberId,
+        SavingPlan::create($validated);
+
+        $this->success('Saving plan created successfully.');
+        return redirect()->route('admin.saving-plans.index');
+    }
+
+    public function edit(SavingPlan $savingPlan)
+    {
+        return view('admin.saving-plans.edit', compact('savingPlan'));
+    }
+
+    public function update(Request $request, SavingPlan $savingPlan)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'memberid' => 'required|string|max:50',
+            'membership' => 'required|string|max:50',
+            'monthly_goal' => 'required|numeric|min:0',
+            'goal' => 'required|numeric|min:0',
         ]);
+
+        $savingPlan->update($validated);
+
+        $this->success('Saving plan updated successfully.');
+        return redirect()->route('admin.saving-plans.index');
+    }
+
+    public function destroy(SavingPlan $savingPlan)
+    {
+        $savingPlan->delete();
+
+        $this->success('Saving plan deleted successfully.');
+        return redirect()->route('admin.saving-plans.index');
     }
 }
