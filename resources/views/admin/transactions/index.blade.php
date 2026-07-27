@@ -132,6 +132,64 @@
   </div>
 </div>
 
+<script>
+function transactionsList() {
+  return {
+    searchQuery: '',
+    importing: false,
+    
+    submitSearch() {
+      this.$refs.searchForm.submit();
+    },
+    
+    async importTransactions() {
+      const fileInput = this.$refs.fileInput;
+      if (!fileInput.files.length) {
+        alert('Please select a file');
+        return;
+      }
+      
+      this.importing = true;
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+      formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
+      
+      try {
+        // Show progress modal
+        window.dispatchEvent(new CustomEvent('show-import-progress', {
+          detail: { step: 'Uploading file...', total: 0, processed: 0 }
+        }));
+        
+        const response = await fetch('{{ route('admin.transactions.import') }}', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          // Show success modal
+          window.dispatchEvent(new CustomEvent('show-import-success', {
+            detail: { success: data.imported || 0, skipped: data.skipped || 0 }
+          }));
+          
+          // Close import modal
+          window.dispatchEvent(new CustomEvent('close-import-modal'));
+        } else {
+          alert('Import failed: ' + (data.message || 'Unknown error'));
+          window.dispatchEvent(new CustomEvent('hide-import-progress'));
+        }
+      } catch (error) {
+        alert('Import failed: ' + error.message);
+        window.dispatchEvent(new CustomEvent('hide-import-progress'));
+      } finally {
+        this.importing = false;
+      }
+    }
+  }
+}
+</script>
+
 @endsection
 
 <!-- Import Modal -->
@@ -239,61 +297,3 @@
     </button>
   </div>
 </div>
-
-<script>
-function transactionsList() {
-  return {
-    searchQuery: '',
-    importing: false,
-    
-    submitSearch() {
-      this.$refs.searchForm.submit();
-    },
-    
-    async importTransactions() {
-      const fileInput = this.$refs.fileInput;
-      if (!fileInput.files.length) {
-        alert('Please select a file');
-        return;
-      }
-      
-      this.importing = true;
-      const formData = new FormData();
-      formData.append('file', fileInput.files[0]);
-      formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
-      
-      try {
-        // Show progress modal
-        window.dispatchEvent(new CustomEvent('show-import-progress', {
-          detail: { step: 'Uploading file...', total: 0, processed: 0 }
-        }));
-        
-        const response = await fetch('{{ route('admin.transactions.import') }}', {
-          method: 'POST',
-          body: formData
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          // Show success modal
-          window.dispatchEvent(new CustomEvent('show-import-success', {
-            detail: { success: data.imported || 0, skipped: data.skipped || 0 }
-          }));
-          
-          // Close import modal
-          window.dispatchEvent(new CustomEvent('close-import-modal'));
-        } else {
-          alert('Import failed: ' + (data.message || 'Unknown error'));
-          window.dispatchEvent(new CustomEvent('hide-import-progress'));
-        }
-      } catch (error) {
-        alert('Import failed: ' + error.message);
-        window.dispatchEvent(new CustomEvent('hide-import-progress'));
-      } finally {
-        this.importing = false;
-      }
-    }
-  }
-}
-</script>
