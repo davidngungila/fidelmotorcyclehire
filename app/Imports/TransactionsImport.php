@@ -15,8 +15,20 @@ class TransactionsImport implements ToModel, WithHeadingRow
     */
     public function model(array $row)
     {
+        // Skip rows with invalid dates (formulas, empty, or non-date values)
+        if (empty($row['date']) || is_string($row['date']) && strpos($row['date'], '=') === 0) {
+            return null;
+        }
+
+        try {
+            $date = \Carbon\Carbon::parse($row['date']);
+        } catch (\Exception $e) {
+            // Skip rows with unparseable dates
+            return null;
+        }
+
         return new Transaction([
-            'date' => \Carbon\Carbon::parse($row['date']),
+            'date' => $date,
             'membercode' => $row['membercode'],
             'transaction_type' => $row['transaction_type'],
             'reference_no' => $row['reference_no'] ?? null,
