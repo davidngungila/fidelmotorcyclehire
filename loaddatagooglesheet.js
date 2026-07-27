@@ -13,28 +13,30 @@
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
-const CONFIG = {
-    // Google Sheet ID
-    sheetId: "1BTEPceHVgfQe4SRdDmRO_3bV6k8jA_2lWCqglDfiPwU",
-    
-    // Laravel API Configuration
-    apiUrl: "https://portal.feedtancmg.org/api/v1",
-    
-    // Sheet Names
-    customerDetailsSheet: "customerdetails",
-    savingBalancesSheet: "savingbalances",
-    transactionsSheet: "Transactions",
-    savingPlansSheet: "Saving Plans",
-    
-    // Data Ranges
-    startRow: 2,
-    
-    // Email Notifications
-    adminEmail: "ecolishe@gmail.com",
-    
-    // Auto-sync settings
-    syncIntervalHours: 6
-};
+if (typeof CONFIG === 'undefined') {
+    var CONFIG = {
+        // Google Sheet ID
+        sheetId: "1BTEPceHVgfQe4SRdDmRO_3bV6k8jA_2lWCqglDfiPwU",
+        
+        // Laravel API Configuration
+        apiUrl: "https://portal.feedtancmg.org/api/v1",
+        
+        // Sheet Names
+        customerDetailsSheet: "customerdetails",
+        savingBalancesSheet: "savingbalances",
+        transactionsSheet: "Transactions",
+        savingPlansSheet: "Saving Plans",
+        
+        // Data Ranges
+        startRow: 2,
+        
+        // Email Notifications
+        adminEmail: "ecolishe@gmail.com",
+        
+        // Auto-sync settings
+        syncIntervalHours: 6
+    };
+}
 
 // ============================================================================
 // MAIN MENU FUNCTIONS
