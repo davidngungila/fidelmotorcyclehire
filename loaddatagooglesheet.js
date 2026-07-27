@@ -959,20 +959,18 @@ function setupAllTriggers() {
             .everyHours(GS_SYNC_CONFIG.syncIntervalHours)
             .create();
         
-        // Setup on-open trigger
-        ScriptApp.newTrigger('onOpen')
-            .onOpen()
-            .create();
+        // Note: onOpen trigger is automatically created when you install the script
+        // No need to manually create it
         
         Logger.log('All triggers setup complete');
         SpreadsheetApp.getUi().alert('✅ All Triggers Setup Complete', 
             'Auto-sync will run every 6 hours.\n\n' +
             'The menu will appear when you open the sheet.', 
-            ui.ButtonSet.OK);
+            SpreadsheetApp.getUi().ButtonSet.OK);
         
     } catch (error) {
         Logger.log('Error setting up triggers: ' + error.message);
-        SpreadsheetApp.getUi().alert('❌ Error', 'Error setting up triggers: ' + error.message, ui.ButtonSet.OK);
+        SpreadsheetApp.getUi().alert('❌ Error', 'Error setting up triggers: ' + error.message, SpreadsheetApp.getUi().ButtonSet.OK);
     }
 }
 
