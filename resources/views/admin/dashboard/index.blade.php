@@ -110,21 +110,21 @@
       </div>
     </div>
 
-    <div class="stat-card glass" style="background: linear-gradient(135deg, rgba(236,72,153,0.15), rgba(219,39,119,0.05));">
-      <div class="bg-blob bg-pink-400"></div>
+    <div class="stat-card glass" style="background: linear-gradient(135deg, rgba(6,182,212,0.15), rgba(8,145,178,0.05));">
+      <div class="bg-blob bg-cyan-400"></div>
       <div class="flex items-start justify-between relative z-10">
-        <div class="icon-wrap bg-pink-100 text-pink-600 dark:bg-pink-900/40 dark:text-pink-400">
-          <i class="fa-solid fa-shield-halved"></i>
+        <div class="icon-wrap bg-cyan-100 text-cyan-600 dark:bg-cyan-900/40 dark:text-cyan-400">
+          <i class="fa-solid fa-arrow-right-arrow-left"></i>
         </div>
-        <span class="text-[10px] font-semibold badge badge-yellow">+1.9%</span>
+        <span class="text-[10px] font-semibold badge badge-blue">+8.2%</span>
       </div>
       <div class="mt-4 relative z-10">
-        <p class="text-[11px] font-semibold uppercase tracking-wider text-pink-600 dark:text-pink-400">Total SWF</p>
+        <p class="text-[11px] font-semibold uppercase tracking-wider text-cyan-600 dark:text-cyan-400">Total Transactions</p>
         <p class="text-2xl font-bold mt-1 text-primary-900 dark:text-white"
            x-data="{ val: 0 }"
-           x-init="animateCounter($el, {{ $totals['total_swf_raw'] ?? 0 }}, true)"
-           x-text="formatMoney(val)">
-          {{ $totals['total_swf'] ?? '0.00 TSh' }}
+           x-init="animateCounter($el, {{ $transactionStats['total_transactions'] ?? 0 }})"
+           x-text="formatInt(val)">
+          {{ $fmtInt($transactionStats['total_transactions'] ?? 0) }}
         </p>
       </div>
     </div>
@@ -265,63 +265,56 @@
       </div>
     </div>
 
-    <div class="space-y-6">
-      <div class="glass p-5">
-        <h3 class="font-bold text-primary-900 dark:text-white text-sm mb-4">Quick Actions</h3>
-        <div class="grid grid-cols-2 gap-3">
-          <a href="{{ route('admin.users.create') }}" class="flex flex-col items-center gap-2 p-4 rounded-xl bg-primary-50 hover:bg-primary-100 dark:bg-primary-900/30 dark:hover:bg-primary-900/50 transition-colors group">
-            <div class="w-10 h-10 rounded-xl bg-primary-500 text-white flex items-center justify-center group-hover:scale-105 transition-transform">
-              <i class="fa-solid fa-user-plus text-sm"></i>
-            </div>
-            <span class="text-[11px] font-bold text-primary-700 dark:text-primary-300 text-center">New Member</span>
-          </a>
-          <a href="{{ route('admin.loans.index') }}" class="flex flex-col items-center gap-2 p-4 rounded-xl bg-orange-50 hover:bg-orange-100 dark:bg-orange-900/30 dark:hover:bg-orange-900/50 transition-colors group">
-            <div class="w-10 h-10 rounded-xl bg-orange-500 text-white flex items-center justify-center group-hover:scale-105 transition-transform">
-              <i class="fa-solid fa-hand-holding-dollar text-sm"></i>
-            </div>
-            <span class="text-[11px] font-bold text-orange-700 dark:text-orange-300 text-center">New Loan</span>
-          </a>
-          <a href="{{ route('admin.deposits.index') }}" class="flex flex-col items-center gap-2 p-4 rounded-xl bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/30 dark:hover:bg-purple-900/50 transition-colors group">
-            <div class="w-10 h-10 rounded-xl bg-purple-500 text-white flex items-center justify-center group-hover:scale-105 transition-transform">
-              <i class="fa-solid fa-money-bill-trend-up text-sm"></i>
-            </div>
-            <span class="text-[11px] font-bold text-purple-700 dark:text-purple-300 text-center">New Deposit</span>
-          </a>
-          <a href="{{ route('admin.reports.index') }}" class="flex flex-col items-center gap-2 p-4 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 transition-colors group">
-            <div class="w-10 h-10 rounded-xl bg-blue-500 text-white flex items-center justify-center group-hover:scale-105 transition-transform">
-              <i class="fa-solid fa-file-lines text-sm"></i>
-            </div>
-            <span class="text-[11px] font-bold text-blue-700 dark:text-blue-300 text-center">Reports</span>
-          </a>
+    <div class="glass p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="font-bold text-primary-900 dark:text-white">Recent Transactions</h3>
+          <p class="text-xs text-primary-500 dark:text-primary-400 mt-0.5">Latest 10 transactions</p>
         </div>
+        <a href="{{ route('admin.transactions.index') }}" class="text-xs font-bold text-primary-600 dark:text-primary-400 hover:text-primary-500 transition-colors">
+          View All <i class="fa-solid fa-arrow-right ml-1 text-[10px]"></i>
+        </a>
       </div>
 
-      <div class="glass p-5">
-        <h3 class="font-bold text-primary-900 dark:text-white text-sm mb-4">Portfolio Summary</h3>
-        <div class="space-y-4">
-          <div>
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="text-xs text-primary-600 dark:text-primary-400">Loan to Savings Ratio</span>
-              <span class="text-xs font-bold text-primary-900 dark:text-white">{{ $totals['loan_to_savings_ratio'] ?? 'N/A' }}</span>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-fill" style="width: 62%; background: linear-gradient(90deg, #f59e0b, #f97316);"></div>
-            </div>
-          </div>
-          <div>
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="text-xs text-primary-600 dark:text-primary-400">Portfolio Allocation</span>
-              <span class="text-xs font-bold text-primary-900 dark:text-white">Balanced</span>
-            </div>
-            <div class="flex h-2.5 rounded-full overflow-hidden bg-primary-100 dark:bg-primary-900/40">
-              <div class="bg-pink-500" style="width: 35%;" title="Savings"></div>
-              <div class="bg-orange-500" style="width: 28%;" title="Loans"></div>
-              <div class="bg-purple-500" style="width: 18%;" title="Deposits"></div>
-              <div class="bg-lime-500" style="width: 12%;" title="Investments"></div>
-              <div class="bg-blue-500" style="width: 7%;" title="SWF"></div>
-            </div>
-          </div>
-        </div>
+      <div class="overflow-x-auto -webkit-scrollbar [&::-webkit-scrollbar]:hidden">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Member</th>
+              <th>Type</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            @forelse($recentTransactions ?? [] as $transaction)
+              @php
+                $typeColors = [
+                  'deposit' => 'bg-green-100 text-green-700',
+                  'withdrawal' => 'bg-red-100 text-red-700',
+                  'transfer' => 'bg-blue-100 text-blue-700',
+                ];
+                $color = $typeColors[$transaction['transaction_type']] ?? 'bg-gray-100 text-gray-700';
+                $isCredit = in_array($transaction['transaction_type'], ['deposit']);
+              @endphp
+              <tr>
+                <td class="text-xs text-primary-600 dark:text-primary-400">{{ $transaction['date'] }}</td>
+                <td class="font-mono text-xs font-semibold text-primary-900 dark:text-white">{{ $transaction['membercode'] }}</td>
+                <td><span class="badge {{ $color }} text-[10px]">{{ ucfirst($transaction['transaction_type']) }}</span></td>
+                <td class="text-right font-semibold {{ $isCredit ? 'text-green-600' : 'text-red-600' }}">
+                  {{ $isCredit ? '+' : '-' }}{{ number_format($transaction['amount'], 2) }}
+                </td>
+              </tr>
+            @empty
+              <tr>
+                <td colspan="4" class="text-center py-8 text-primary-500 dark:text-primary-400 text-xs">
+                  <i class="fa-solid fa-receipt text-2xl mb-2 block opacity-40"></i>
+                  No transactions found
+                </td>
+              </tr>
+            @endforelse
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

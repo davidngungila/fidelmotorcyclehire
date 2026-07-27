@@ -63,6 +63,30 @@ class DashboardController extends Controller
         
         $recentMembers = array_slice($allMembers, 0, 5);
 
+        // Get recent transactions from database
+        $recentTransactions = \App\Models\Transaction::orderBy('date', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function($transaction) {
+                return [
+                    'id' => $transaction->id,
+                    'date' => $transaction->date->format('Y-m-d'),
+                    'membercode' => $transaction->membercode,
+                    'transaction_type' => $transaction->transaction_type,
+                    'reference_no' => $transaction->reference_no,
+                    'amount' => (float) $transaction->amount,
+                ];
+            })
+            ->toArray();
+
+        // Get transaction statistics
+        $transactionStats = [
+            'total_transactions' => \App\Models\Transaction::count(),
+            'total_deposits' => \App\Models\Transaction::where('transaction_type', 'deposit')->sum('amount'),
+            'total_withdrawals' => \App\Models\Transaction::where('transaction_type', 'withdrawal')->sum('amount'),
+            'total_transfers' => \App\Models\Transaction::where('transaction_type', 'transfer')->sum('amount'),
+        ];
+
         // Update totals to include database members
         $dbMemberCount = \App\Models\Member::count();
         $totals['total_members'] = ($totals['total_members'] ?? 0) + $dbMemberCount;
@@ -73,6 +97,9 @@ class DashboardController extends Controller
                 'last_sync' => $lastSync['last_sync_at'] ?? 'Never',
                 'google_sheet_status' => $lastSync['status'] ?? 'unknown',
                 'db_member_count' => $dbMemberCount,
+                'db_transaction_count' => $transactionStats['total_transactions'],
+                'total_deposits' => $transactionStats['total_deposits'],
+                'total_withdrawals' => $transactionStats['total_withdrawals'],
             ]
         ));
 
@@ -91,6 +118,8 @@ class DashboardController extends Controller
             'totals' => $formattedTotals,
             'rawTotals' => $totals,
             'recentMembers' => $recentMembers,
+            'recentTransactions' => $recentTransactions,
+            'transactionStats' => $transactionStats,
             'searchResults' => $searchResults,
             'searchQuery' => $request->input('q'),
             'lastSync' => $lastSync,
