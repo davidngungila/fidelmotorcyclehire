@@ -172,8 +172,15 @@ class MemberController extends Controller
                 'emergency_contact_relationship' => $dbMember->emergency_contact_relationship,
                 'registration_fee' => $dbMember->registration_fee,
                 'notes' => $dbMember->notes,
-                'photo' => $dbMember->photo,
             ];
+            
+            // Try to get photo from User table if not in Member table
+            if (empty($member['photo'])) {
+                $user = \App\Models\User::where('member_number', $memberNumber)->first();
+                if ($user && $user->photo) {
+                    $member['photo'] = $user->photo;
+                }
+            }
             
             // For imported members, try to get data from Google Sheets if available
             $loans = $this->googleSheetRepository->getMemberLoans($memberNumber);
