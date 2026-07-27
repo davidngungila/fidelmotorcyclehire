@@ -21,25 +21,42 @@ class TransactionsImport implements ToModel, WithHeadingRow
         // Log the row for debugging
         \Log::info('Processing row', ['row' => $row]);
         
+        // Map Excel column names to database field names
+        $membercode = $row['customerid'] ?? $row['membercode'] ?? null;
+        $transactionType = $row['transactiontype'] ?? $row['transaction_type'] ?? null;
+        $referenceNo = $row['referenceno'] ?? $row['reference_no'] ?? null;
+        $date = $row['date'] ?? null;
+        $amount = $row['amount'] ?? null;
+        
         // Skip rows with missing required fields
-        if (empty($row['date']) || empty($row['membercode']) || empty($row['transaction_type']) || empty($row['amount'])) {
-            \Log::warning('Skipping row - missing required fields', ['row' => $row]);
+        if (empty($date) || empty($membercode) || empty($transactionType) || empty($amount)) {
+            \Log::warning('Skipping row - missing required fields', [
+                'date' => $date,
+                'membercode' => $membercode,
+                'transaction_type' => $transactionType,
+                'amount' => $amount
+            ]);
             $this->skippedCount++;
             return null;
         }
 
         // Skip rows with formula values (starting with '=')
-        if (is_string($row['date']) && strpos($row['date'], '=') === 0) {
-            \Log::warning('Skipping row - formula in date', ['row' => $row]);
+        if (is_string($date) && strpos($date, '=') === 0) {
+            \Log::warning('Skipping row - formula in date', ['date' => $date]);
             $this->skippedCount++;
             return null;
         }
 
         try {
-            $date = \Carbon\Carbon::parse($row['date']);
+            // Handle Excel serial date format (numbers like 46229)
+            if (is_numeric($date)) {
+                $date = \Carbon\Carbon::createFromFormat('Y-m-d', \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($date)->format('Y-m-d'));
+            } else {
+                $date = \Carbon\Carbon::parse($date);
+            }
         } catch (\Exception $e) {
             // Skip rows with unparseable dates
-            \Log::warning('Skipping row - invalid date', ['row' => $row, 'error' => $e->getMessage()]);
+            \Log::warning('Skipping row - invalid date', ['date' => $date, 'error' => $e->getMessage()]);
             $this->skippedCount++;
             return null;
         }
@@ -48,17 +65,17 @@ class TransactionsImport implements ToModel, WithHeadingRow
         
         \Log::info('Importing transaction', [
             'date' => $date,
-            'membercode' => $row['membercode'],
-            'transaction_type' => $row['transaction_type'],
-            'amount' => $row['amount']
+            'membercode' => $membercode,
+            'transaction_type' => $transactionType,
+            'amount' => $amount
         ]);
         
         return new Transaction([
             'date' => $date,
-            'membercode' => $row['membercode'],
-            'transaction_type' => $row['transaction_type'],
-            'reference_no' => $row['reference_no'] ?? null,
-            'amount' => $row['amount'],
+            'membercode' => $membercode,
+            'transaction_type' => $transactionType,
+            'reference_no' => $referenceNo,
+            'amount' => $amount,
         ]);
     }
 
