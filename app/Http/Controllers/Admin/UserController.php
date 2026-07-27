@@ -247,34 +247,46 @@ class UserController extends Controller
 
     public function resetPassword(Request $request, string $encryptedId)
     {
-        $id = (int) $this->encryptedIdService->decrypt($encryptedId);
-        
-        $user = User::findOrFail($id);
-        
-        // Generate a random password
-        $newPassword = strtoupper(substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 8));
-        
-        $user->password = Hash::make($newPassword);
-        $user->save();
+        try {
+            $id = (int) $this->encryptedIdService->decrypt($encryptedId);
+            
+            $user = User::findOrFail($id);
+            
+            // Generate a random password
+            $newPassword = strtoupper(substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 8));
+            
+            $user->password = Hash::make($newPassword);
+            $user->save();
 
-        ActivityLog::create([
-            'user_id' => Auth::id(),
-            'subject_type' => 'user',
-            'subject_id' => $user->id,
-            'description' => "Admin reset password for user: {$user->name}",
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-            'properties' => [
-                'user_email' => $user->email,
-                'reset_by' => Auth::id(),
-            ],
-        ]);
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'subject_type' => 'user',
+                'subject_id' => $user->id,
+                'description' => "Admin reset password for user: {$user->name}",
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'properties' => [
+                    'user_email' => $user->email,
+                    'reset_by' => Auth::id(),
+                ],
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Password reset successfully',
-            'new_password' => $newPassword,
-            'user_name' => $user->name,
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Password reset successfully',
+                'new_password' => $newPassword,
+                'user_name' => $user->name,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Password reset failed: ' . $e->getMessage(), [
+                'exception' => $e,
+                'encrypted_id' => $encryptedId,
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to reset password: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 }

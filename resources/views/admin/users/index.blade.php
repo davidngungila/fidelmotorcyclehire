@@ -142,15 +142,18 @@
               </td>
               <td class="text-right whitespace-nowrap">
                 <div class="flex items-center justify-end gap-2">
-                  <button @click="openConfirmModal({{ $user->id }}, '{{ addslashes($user->name) }}')"
+                  @php
+                    $encryptedId = app(\App\Services\EncryptedIdService::class)->encrypt($user->id);
+                  @endphp
+                  <button @click="openConfirmModal('{{ $encryptedId }}', '{{ addslashes($user->name) }}')"
                           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 text-amber-700 dark:text-amber-300 text-[11px] font-bold transition-colors border border-amber-200 dark:border-amber-800/40">
                     <i class="fa-solid fa-key text-[10px]"></i> Reset Password
                   </button>
-                  <a href="{{ route('admin.users.edit', $user->id) }}"
+                  <a href="{{ route('admin.users.edit', $encryptedId) }}"
                      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-[11px] font-bold transition-colors">
                     <i class="fa-solid fa-pen-to-square text-[10px]"></i> Edit
                   </a>
-                  <form method="POST" action="{{ route('admin.users.destroy', $user->id) }}"
+                  <form method="POST" action="{{ route('admin.users.destroy', $encryptedId) }}"
                         class="inline"
                         x-data
                         @submit.prevent="confirmDelete($el, '{{ addslashes($user->name) }}')">
