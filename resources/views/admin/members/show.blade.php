@@ -57,13 +57,18 @@
               } else {
                   $photoPath = asset('storage/' . $memberPhoto);
               }
+              // Debug: Log the photo path
+              \Log::info('Member photo display', ['member' => $memberNumber, 'photo' => $memberPhoto, 'path' => $photoPath]);
             @endphp
-            <img src="{{ $photoPath }}" alt="{{ $memberName }}" class="w-full h-full object-cover rounded-2xl" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"/>
+            <img src="{{ $photoPath }}" alt="{{ $memberName }}" class="w-full h-full object-cover rounded-2xl" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'; console.log('Image failed to load: {{ $photoPath }}');"/>
             <svg class="w-14 h-14 opacity-80 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
               <circle cx="12" cy="7" r="4"/>
             </svg>
           @else
+            @php
+              \Log::info('Member photo is null or empty', ['member' => $memberNumber]);
+            @endphp
             <svg class="w-14 h-14 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
               <circle cx="12" cy="7" r="4"/>
