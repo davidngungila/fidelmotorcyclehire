@@ -104,26 +104,30 @@ class GoogleSheetsController extends Controller
      */
     public function logs(Request $request)
     {
-        $limit = $request->input('limit', 50);
-        $type = $request->input('type');
-        $status = $request->input('status');
+        if ($request->wantsJson()) {
+            $limit = $request->input('limit', 50);
+            $type = $request->input('type');
+            $status = $request->input('status');
 
-        $query = SyncLog::query();
+            $query = SyncLog::query();
 
-        if ($type) {
-            $query->where('sync_type', $type);
+            if ($type) {
+                $query->where('sync_type', $type);
+            }
+
+            if ($status) {
+                $query->where('status', $status);
+            }
+
+            $logs = $query->latest()->limit($limit)->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $logs
+            ]);
         }
 
-        if ($status) {
-            $query->where('status', $status);
-        }
-
-        $logs = $query->latest()->limit($limit)->get();
-
-        return response()->json([
-            'success' => true,
-            'data' => $logs
-        ]);
+        return view('admin.google-sheets.logs');
     }
 
     /**
@@ -131,34 +135,38 @@ class GoogleSheetsController extends Controller
      */
     public function customers(Request $request)
     {
-        $query = CustomerProfile::with(['savingBalance', 'transactions' => function($q) {
-            $q->latest()->limit(5);
-        }]);
+        if ($request->wantsJson()) {
+            $query = CustomerProfile::with(['savingBalance', 'transactions' => function($q) {
+                $q->latest()->limit(5);
+            }]);
 
-        if ($request->has('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('customer_id', 'LIKE', "%{$search}%")
-                  ->orWhere('customer_name', 'LIKE', "%{$search}%")
-                  ->orWhere('email_address', 'LIKE', "%{$search}%")
-                  ->orWhere('phone_number', 'LIKE', "%{$search}%");
-            });
+            if ($request->has('search')) {
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('customer_id', 'LIKE', "%{$search}%")
+                      ->orWhere('customer_name', 'LIKE', "%{$search}%")
+                      ->orWhere('email_address', 'LIKE', "%{$search}%")
+                      ->orWhere('phone_number', 'LIKE', "%{$search}%");
+                });
+            }
+
+            if ($request->has('status')) {
+                $query->where('account_status', $request->status);
+            }
+
+            if ($request->has('member_type')) {
+                $query->where('member_type', $request->member_type);
+            }
+
+            $customers = $query->paginate($request->input('per_page', 20));
+
+            return response()->json([
+                'success' => true,
+                'data' => $customers
+            ]);
         }
 
-        if ($request->has('status')) {
-            $query->where('account_status', $request->status);
-        }
-
-        if ($request->has('member_type')) {
-            $query->where('member_type', $request->member_type);
-        }
-
-        $customers = $query->paginate($request->input('per_page', 20));
-
-        return response()->json([
-            'success' => true,
-            'data' => $customers
-        ]);
+        return view('admin.google-sheets.customers');
     }
 
     /**
