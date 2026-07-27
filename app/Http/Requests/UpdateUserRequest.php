@@ -20,9 +20,15 @@ class UpdateUserRequest extends FormRequest
         if ($userId) {
             try {
                 $decryptedId = app(\App\Services\EncryptedIdService::class)->decrypt($userId);
+                \Log::info('UpdateUserRequest ID decryption', [
+                    'encrypted_id' => $userId,
+                    'decrypted_id' => $decryptedId,
+                    'is_numeric' => is_numeric($decryptedId)
+                ]);
                 if ($decryptedId && is_numeric($decryptedId)) {
                     $userId = (int) $decryptedId;
                 } else {
+                    \Log::warning('Decrypted ID is not numeric or null', ['decrypted_id' => $decryptedId]);
                     $userId = null;
                 }
             } catch (\Exception $e) {
@@ -32,7 +38,11 @@ class UpdateUserRequest extends FormRequest
                 ]);
                 $userId = null;
             }
+        } else {
+            \Log::warning('No encrypted ID found in route');
         }
+        
+        \Log::info('UpdateUserRequest validation rules', ['user_id' => $userId]);
         
         return [
             'name' => ['required'],
