@@ -18,14 +18,19 @@ class TransactionsImport implements ToModel, WithHeadingRow
     */
     public function model(array $row)
     {
+        // Log the row for debugging
+        \Log::info('Processing row', ['row' => $row]);
+        
         // Skip rows with missing required fields
         if (empty($row['date']) || empty($row['membercode']) || empty($row['transaction_type']) || empty($row['amount'])) {
+            \Log::warning('Skipping row - missing required fields', ['row' => $row]);
             $this->skippedCount++;
             return null;
         }
 
         // Skip rows with formula values (starting with '=')
         if (is_string($row['date']) && strpos($row['date'], '=') === 0) {
+            \Log::warning('Skipping row - formula in date', ['row' => $row]);
             $this->skippedCount++;
             return null;
         }
@@ -34,11 +39,19 @@ class TransactionsImport implements ToModel, WithHeadingRow
             $date = \Carbon\Carbon::parse($row['date']);
         } catch (\Exception $e) {
             // Skip rows with unparseable dates
+            \Log::warning('Skipping row - invalid date', ['row' => $row, 'error' => $e->getMessage()]);
             $this->skippedCount++;
             return null;
         }
 
         $this->importedCount++;
+        
+        \Log::info('Importing transaction', [
+            'date' => $date,
+            'membercode' => $row['membercode'],
+            'transaction_type' => $row['transaction_type'],
+            'amount' => $row['amount']
+        ]);
         
         return new Transaction([
             'date' => $date,
