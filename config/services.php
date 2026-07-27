@@ -37,7 +37,6 @@ return [
 
     'google_sheets' => [
         'api_url' => env('GOOGLE_SHEETS_API_URL'),
-        'api_key' => env('GOOGLE_SHEETS_API_KEY'),
         'sheet_id' => env('GOOGLE_SHEETS_SHEET_ID'),
         'batch_size' => env('GOOGLE_SHEETS_BATCH_SIZE', 100),
         'sync_interval' => env('GOOGLE_SHEETS_SYNC_INTERVAL', 360),

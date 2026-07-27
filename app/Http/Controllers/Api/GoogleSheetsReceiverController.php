@@ -15,11 +15,6 @@ class GoogleSheetsReceiverController extends Controller
 {
     public function syncFullData(Request $request)
     {
-        $apiKey = $request->header('X-API-Key');
-        if ($apiKey !== config('services.google_sheets.api_key')) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
         DB::beginTransaction();
 
         try {
