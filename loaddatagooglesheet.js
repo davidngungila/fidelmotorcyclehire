@@ -526,6 +526,10 @@ function sendSavingPlansToLaravel(plans) {
  */
 function sendToLaravel(endpoint, payload) {
     try {
+        if (!endpoint) {
+            throw new Error('Endpoint is undefined');
+        }
+        
         const options = {
             method: 'post',
             headers: {
@@ -537,8 +541,13 @@ function sendToLaravel(endpoint, payload) {
         };
         
         const url = GS_SYNC_CONFIG.apiUrl + endpoint;
+        Logger.log('Sending to Laravel: ' + url);
+        
         const response = UrlFetchApp.fetch(url, options);
-        const responseData = JSON.parse(response.getContentText());
+        const responseText = response.getContentText();
+        Logger.log('Response: ' + responseText);
+        
+        const responseData = JSON.parse(responseText);
         
         if (!responseData.success) {
             throw new Error(responseData.message || 'API request failed');
@@ -548,6 +557,7 @@ function sendToLaravel(endpoint, payload) {
         
     } catch (error) {
         Logger.log('API request error: ' + error.message);
+        Logger.log('Endpoint: ' + endpoint);
         throw error;
     }
 }
