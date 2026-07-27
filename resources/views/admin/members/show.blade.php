@@ -51,9 +51,18 @@
         <div class="w-28 h-28 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 text-white flex items-center justify-center text-4xl font-bold shadow-xl ring-4 ring-white dark:ring-primary-900/40 overflow-hidden">
           @if($memberPhoto)
             @php
-              $photoPath = str_starts_with($memberPhoto, 'http') ? $memberPhoto : (str_starts_with($memberPhoto, 'storage/') ? asset($memberPhoto) : asset('storage/' . $memberPhoto));
+              // Handle various photo path formats
+              if (str_starts_with($memberPhoto, 'http://') || str_starts_with($memberPhoto, 'https://')) {
+                  $photoPath = $memberPhoto;
+              } elseif (str_starts_with($memberPhoto, '/')) {
+                  $photoPath = $memberPhoto;
+              } elseif (str_starts_with($memberPhoto, 'storage/')) {
+                  $photoPath = asset($memberPhoto);
+              } else {
+                  $photoPath = asset('storage/' . $memberPhoto);
+              }
             @endphp
-            <img src="{{ $photoPath }}" alt="{{ $memberName }}" class="w-full h-full object-cover rounded-2xl" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"/>
+            <img src="{{ $photoPath }}" alt="{{ $memberName }}" class="w-full h-full object-cover rounded-2xl" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'; console.log('Image failed to load: {{ $photoPath }}');"/>
             <svg class="w-14 h-14 opacity-80 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
               <circle cx="12" cy="7" r="4"/>
