@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Member;
 use App\Contracts\GoogleSheetRepositoryInterface;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\Transaction;
 use App\Traits\FlashMessages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -34,7 +35,32 @@ class SavingController extends Controller
         $interestEarned = (float) ($savings['interest_earned'] ?? 0);
         $runningBalance = (float) ($savings['running_balance'] ?? 0);
 
-        $transactions = $savings['transactions'] ?? [];
+        // Get transactions from Google Sheets
+        $googleTransactions = $savings['transactions'] ?? [];
+
+        // Get transactions from database
+        $dbTransactions = Transaction::byMemberCode($memberNumber)
+            ->orderBy('date', 'desc')
+            ->get()
+            ->map(function ($transaction) {
+                return [
+                    'date' => $transaction->date->format('Y-m-d'),
+                    'type' => $transaction->transaction_type,
+                    'amount' => (float) $transaction->amount,
+                    'reference' => $transaction->reference_no ?? '',
+                    'balance_after' => null, // Will be calculated
+                    'source' => 'database'
+                ];
+            })
+            ->toArray();
+
+        // Merge transactions from both sources
+        $allTransactions = array_merge($googleTransactions, $dbTransactions);
+
+        // Sort by date
+        usort($allTransactions, static fn($a, $b): int => strtotime($b['date'] ?? '') <=> strtotime($a['date'] ?? ''));
+
+        $transactions = $allTransactions;
 
         $deposits = array_values(array_filter($transactions, static function (array $t): bool {
             $type = strtolower($t['type'] ?? '');
@@ -59,8 +85,6 @@ class SavingController extends Controller
                 'balance_after' => (float) ($t['balance_after'] ?? 0),
             ]);
         }, $transactions);
-
-        usort($ledger, static fn($a, $b): int => strtotime($b['date'] ?? '') <=> strtotime($a['date'] ?? ''));
 
         $totalDeposited = array_sum(array_column($deposits, 'amount'));
         $totalWithdrawn = abs(array_sum(array_column($withdrawals, 'amount')));
