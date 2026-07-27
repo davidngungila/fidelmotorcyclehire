@@ -240,6 +240,7 @@
                 $memberNo = $member['member_number'] ?? ($member['MemberNumber'] ?? 'FTN-00000');
                 $memberName = $member['name'] ?? ($member['Name'] ?? 'Unknown');
                 $memberBranch = $member['branch'] ?? ($member['Branch'] ?? '-');
+                $encryptedMemberNo = app(\App\Services\EncryptedIdService::class)->encrypt($memberNo);
               @endphp
               <tr>
                 <td class="font-mono text-xs font-semibold text-primary-600 dark:text-primary-400">{{ $memberNo }}</td>
@@ -247,7 +248,7 @@
                 <td class="text-primary-600 dark:text-primary-400 text-xs">{{ $memberBranch }}</td>
                 <td><span class="badge {{ $statusBadge['class'] }}">{{ $statusBadge['label'] }}</span></td>
                 <td class="text-right">
-                  <a href="{{ route('admin.members.show', $memberNo) }}" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-[11px] font-bold transition-colors">
+                  <a href="{{ route('admin.members.show', $encryptedMemberNo) }}" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-[11px] font-bold transition-colors">
                     <i class="fa-solid fa-eye text-[10px]"></i> Profile
                   </a>
                 </td>
