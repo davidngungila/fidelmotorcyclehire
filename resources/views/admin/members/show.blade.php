@@ -48,9 +48,16 @@
 
     <div class="flex flex-col md:flex-row md:items-start gap-6 relative z-10">
       <div class="flex-shrink-0">
-        <div class="w-28 h-28 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 text-white flex items-center justify-center text-4xl font-bold shadow-xl ring-4 ring-white dark:ring-primary-900/40">
+        <div class="w-28 h-28 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 text-white flex items-center justify-center text-4xl font-bold shadow-xl ring-4 ring-white dark:ring-primary-900/40 overflow-hidden">
           @if($memberPhoto)
-            <img src="{{ asset('storage/' . $memberPhoto) }}" alt="{{ $memberName }}" class="w-full h-full object-cover rounded-2xl"/>
+            @php
+              $photoPath = str_starts_with($memberPhoto, 'http') ? $memberPhoto : (str_starts_with($memberPhoto, 'storage/') ? asset($memberPhoto) : asset('storage/' . $memberPhoto));
+            @endphp
+            <img src="{{ $photoPath }}" alt="{{ $memberName }}" class="w-full h-full object-cover rounded-2xl" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"/>
+            <svg class="w-14 h-14 opacity-80 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
           @else
             <svg class="w-14 h-14 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -495,6 +502,7 @@
               <tr>
                 <th>Date</th>
                 <th>Type</th>
+                <th>Description</th>
                 <th>Reference</th>
                 <th class="text-right">Amount</th>
                 <th class="text-right">Balance</th>
@@ -505,6 +513,7 @@
                 @php
                   $cDate = $contrib['date'] ?? ($contrib['Date'] ?? '-');
                   $cType = $contrib['type'] ?? ($contrib['Type'] ?? 'Contribution');
+                  $cDesc = $contrib['description'] ?? ($contrib['Description'] ?? 'SWF Contribution');
                   $cRef = $contrib['reference'] ?? ($contrib['Reference'] ?? '-');
                   $cAmount = $contrib['amount'] ?? ($contrib['Amount'] ?? 0);
                   $cBalance = $contrib['balance'] ?? ($contrib['Balance'] ?? 0);
@@ -512,13 +521,14 @@
                 <tr>
                   <td class="text-xs font-mono text-primary-700 dark:text-primary-300">{{ $cDate }}</td>
                   <td><span class="badge badge-blue">{{ ucfirst((string)$cType) }}</span></td>
+                  <td class="text-xs text-primary-700 dark:text-primary-300">{{ $cDesc }}</td>
                   <td class="text-xs font-mono text-primary-700 dark:text-primary-300">{{ $cRef }}</td>
                   <td class="text-right text-xs font-bold text-green-600 dark:text-green-400">+{{ $fmt($cAmount) }}</td>
                   <td class="text-right text-xs font-bold text-primary-900 dark:text-white">{{ $fmt($cBalance) }}</td>
                 </tr>
               @empty
                 <tr>
-                  <td colspan="5" class="text-center py-12 text-primary-500 dark:text-primary-400">
+                  <td colspan="6" class="text-center py-12 text-primary-500 dark:text-primary-400">
                     <i class="fa-solid fa-shield-halved text-3xl mb-3 block opacity-30"></i>
                     <p class="text-sm font-semibold mb-1">No SWF contributions yet</p>
                     <p class="text-xs">Social Welfare Fund contribution history</p>
