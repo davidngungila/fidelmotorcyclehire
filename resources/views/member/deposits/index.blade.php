@@ -1,7 +1,7 @@
 @extends('layouts.member')
 
-@section('breadcrumb', 'My Deposits')
-@section('page_title', 'My Deposits')
+@section('breadcrumb', 'My Saving Plan')
+@section('page_title', 'My Saving Plan')
 
 @php
     function fmtTshDep($val): string {
