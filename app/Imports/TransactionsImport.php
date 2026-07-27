@@ -15,8 +15,13 @@ class TransactionsImport implements ToModel, WithHeadingRow
     */
     public function model(array $row)
     {
-        // Skip rows with invalid dates (formulas, empty, or non-date values)
-        if (empty($row['date']) || is_string($row['date']) && strpos($row['date'], '=') === 0) {
+        // Skip rows with missing required fields
+        if (empty($row['date']) || empty($row['membercode']) || empty($row['transaction_type']) || empty($row['amount'])) {
+            return null;
+        }
+
+        // Skip rows with formula values (starting with '=')
+        if (is_string($row['date']) && strpos($row['date'], '=') === 0) {
             return null;
         }
 
