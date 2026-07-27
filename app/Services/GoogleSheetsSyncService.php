@@ -222,6 +222,31 @@ class GoogleSheetsSyncService
     protected function callGoogleSheetsApi($action, $params = [])
     {
         try {
+            // Try GET request first with parameters in query string
+            $url = $this->apiUrl . '?' . http_build_query([
+                'action' => $action,
+                'type' => $params['type'] ?? 'all',
+                'force' => $params['force'] ?? false,
+                'source' => 'laravel_admin',
+                'timestamp' => Carbon::now()->toDateTimeString()
+            ]);
+
+            $response = Http::withHeaders([
+                'Accept' => 'application/json'
+            ])->get($url);
+
+            Log::info('Google Sheets API Response', [
+                'url' => $url,
+                'status' => $response->status(),
+                'body' => substr($response->body(), 0, 500),
+                'headers' => $response->headers()
+            ]);
+
+            if ($response->successful()) {
+                return $response->json();
+            }
+
+            // If GET fails, try POST
             $response = Http::withHeaders([
                 'Accept' => 'application/json'
             ])->post($this->apiUrl, [
@@ -231,9 +256,9 @@ class GoogleSheetsSyncService
                 'timestamp' => Carbon::now()->toDateTimeString()
             ]);
 
-            Log::info('Google Sheets API Response', [
+            Log::info('Google Sheets API POST Response', [
                 'status' => $response->status(),
-                'body' => $response->body(),
+                'body' => substr($response->body(), 0, 500),
                 'headers' => $response->headers()
             ]);
 
@@ -243,7 +268,7 @@ class GoogleSheetsSyncService
 
             return [
                 'success' => false,
-                'error' => 'API Error: ' . $response->status() . ' - ' . $response->body()
+                'error' => 'API Error: ' . $response->status() . ' - ' . substr($response->body(), 0, 200)
             ];
 
         } catch (\Exception $e) {
