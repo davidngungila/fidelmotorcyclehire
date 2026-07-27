@@ -530,9 +530,18 @@ class GoogleSheetRepository implements GoogleSheetRepositoryInterface
             throw new InvalidArgumentException('Member number cannot exceed 500 characters.');
         }
 
-        // Allow encrypted strings (base64-like with special chars) or regular member numbers
-        if (! preg_match('/^[A-Za-z0-9_\-+\/=]+$/', $memberNumber)) {
-            throw new InvalidArgumentException('Member number contains invalid characters.');
+        // For regular member numbers (shorter), be more permissive
+        // For encrypted IDs (longer), allow base64-like characters
+        if (strlen($memberNumber) <= 10) {
+            // Regular member number - allow alphanumeric and common separators
+            if (! preg_match('/^[A-Za-z0-9\-]+$/', $memberNumber)) {
+                throw new InvalidArgumentException('Member number contains invalid characters. Only alphanumeric and hyphen are allowed for member numbers.');
+            }
+        } else {
+            // Encrypted ID - allow base64-like characters
+            if (! preg_match('/^[A-Za-z0-9_\-+\/=]+$/', $memberNumber)) {
+                throw new InvalidArgumentException('Member number contains invalid characters. Only alphanumeric, underscore, hyphen, plus, slash, and equals are allowed.');
+            }
         }
 
         return $memberNumber;

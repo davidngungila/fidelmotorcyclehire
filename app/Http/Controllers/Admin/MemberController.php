@@ -123,9 +123,19 @@ class MemberController extends Controller
         ]);
     }
 
-    public function show(Request $request, string $encryptedMemberNumber)
+    public function show(Request $request, string $memberNumber)
     {
-        $memberNumber = $this->encryptedIdService->decrypt($encryptedMemberNumber);
+        // Check if the member number is encrypted or plain
+        $isEncrypted = strlen($memberNumber) > 10; // Encrypted IDs are typically longer
+        
+        if ($isEncrypted) {
+            try {
+                $memberNumber = $this->encryptedIdService->decrypt($memberNumber);
+            } catch (\Exception $e) {
+                // If decryption fails, treat as plain member number
+                $memberNumber = $request->route('memberNumber');
+            }
+        }
         
         Gate::authorize('view-member-data', $memberNumber);
 

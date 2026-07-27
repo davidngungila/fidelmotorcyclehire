@@ -69,7 +69,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/members', [AdminMemberController::class, 'index'])->name('members.index');
     Route::get('/members/template', [AdminMemberController::class, 'downloadTemplate'])->name('members.template');
     Route::get('/members/import/{jobId}/progress', [AdminMemberController::class, 'importProgress'])->name('members.import-progress');
-    Route::get('/members/{encryptedMemberNumber}', [AdminMemberController::class, 'show'])->name('members.show');
+    Route::get('/members/{memberNumber}', [AdminMemberController::class, 'show'])->name('members.show');
     Route::get('/members/{encryptedMemberNumber}/loans', [AdminMemberController::class, 'loans'])->name('members.loans');
     Route::get('/members/{encryptedMemberNumber}/savings', [AdminMemberController::class, 'savings'])->name('members.savings');
     Route::post('/members/import', [AdminMemberController::class, 'import'])->name('members.import');
