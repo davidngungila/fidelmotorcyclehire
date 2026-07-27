@@ -79,6 +79,22 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/savings', [AdminSavingController::class, 'index'])->name('savings.index');
     Route::get('/savings/{encryptedMemberNumber}', [AdminSavingController::class, 'show'])->name('savings.show');
 
+    Route::get('/saving-plans', [App\Http\Controllers\Admin\SavingPlanController::class, 'index'])->name('saving-plans.index');
+    Route::get('/saving-plans/create', [App\Http\Controllers\Admin\SavingPlanController::class, 'create'])->name('saving-plans.create');
+    Route::post('/saving-plans', [App\Http\Controllers\Admin\SavingPlanController::class, 'store'])->name('saving-plans.store');
+    Route::get('/saving-plans/{id}/edit', [App\Http\Controllers\Admin\SavingPlanController::class, 'edit'])->name('saving-plans.edit');
+    Route::put('/saving-plans/{id}', [App\Http\Controllers\Admin\SavingPlanController::class, 'update'])->name('saving-plans.update');
+    Route::delete('/saving-plans/{id}', [App\Http\Controllers\Admin\SavingPlanController::class, 'destroy'])->name('saving-plans.destroy');
+
+    Route::get('/transactions', [App\Http\Controllers\Admin\TransactionController::class, 'index'])->name('transactions.index');
+    Route::get('/transactions/create', [App\Http\Controllers\Admin\TransactionController::class, 'create'])->name('transactions.create');
+    Route::post('/transactions', [App\Http\Controllers\Admin\TransactionController::class, 'store'])->name('transactions.store');
+    Route::get('/transactions/{id}/edit', [App\Http\Controllers\Admin\TransactionController::class, 'edit'])->name('transactions.edit');
+    Route::put('/transactions/{id}', [App\Http\Controllers\Admin\TransactionController::class, 'update'])->name('transactions.update');
+    Route::delete('/transactions/{id}', [App\Http\Controllers\Admin\TransactionController::class, 'destroy'])->name('transactions.destroy');
+    Route::get('/transactions/export', [App\Http\Controllers\Admin\TransactionController::class, 'export'])->name('transactions.export');
+    Route::post('/transactions/import', [App\Http\Controllers\Admin\TransactionController::class, 'import'])->name('transactions.import');
+
     Route::get('/deposits', [AdminDepositController::class, 'index'])->name('deposits.index');
     Route::get('/deposits/{encryptedCertificateNumber}', [AdminDepositController::class, 'show'])->name('deposits.show');
 
