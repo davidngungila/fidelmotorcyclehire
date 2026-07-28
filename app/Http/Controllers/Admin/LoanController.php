@@ -20,7 +20,6 @@ class LoanController extends Controller
     use FlashMessages;
 
     public function __construct(
-        protected GoogleSheetRepositoryInterface $googleSheetRepository,
         protected MemberService $memberService,
         protected AdminDashboardService $dashboardService,
         protected EncryptedIdService $encryptedIdService,
@@ -35,67 +34,55 @@ class LoanController extends Controller
         $statusFilter = $request->input('status', '');
         $searchQuery = $request->input('q', '');
 
-        $allMembers = $this->googleSheetRepository->getAllMembers();
-        $memberMap = [];
-        foreach ($allMembers as $m) {
-            $memberNo = $m['member_number'] ?? ($m['MemberNumber'] ?? null);
-            if ($memberNo) {
-                $memberMap[$memberNo] = $m;
-            }
-        }
-
+        // Get all loans from database
         $loans = [];
-        foreach ($allMembers as $member) {
-            $memberNo = $member['member_number'] ?? ($member['MemberNumber'] ?? null);
-            if (! $memberNo) {
-                continue;
-            }
-            $memberLoans = $this->googleSheetRepository->getMemberLoans($memberNo);
-            foreach ($memberLoans as $loan) {
-                $loan['member_name'] = $member['name'] ?? ($member['Name'] ?? 'Unknown');
-                $loan['member_number'] = $memberNo;
-                $loan['member_phone'] = $member['phone'] ?? ($member['Phone'] ?? '-');
-                $loan['member_branch'] = $member['branch'] ?? ($member['Branch'] ?? '-');
-                $loan['encrypted_id'] = $this->encryptedIdService->encrypt($loan['loan_number'] ?? $loan['LoanNumber'] ?? '');
-                $loans[] = $loan;
-            }
-        }
-
-        // Merge with database loans information
         try {
             $dbLoans = \App\Models\LoanInformation::all();
             foreach ($dbLoans as $dbLoan) {
-                $memberNo = $dbLoan->customer_id;
-                if (isset($memberMap[$memberNo])) {
-                    $member = $memberMap[$memberNo];
-                    $loan = [
-                        'loan_number' => $dbLoan->loan_id,
-                        'loan_product' => $dbLoan->loan_type,
-                        'loan_amount' => (float) $dbLoan->loan_amount,
-                        'outstanding_balance' => (float) $dbLoan->outstanding_balance,
-                        'paid_amount' => (float) $dbLoan->total_paid,
-                        'installment' => (float) $dbLoan->monthly_installment,
-                        'status' => $dbLoan->loan_status,
-                        'maturity_date' => $dbLoan->loan_maturity_date ? $dbLoan->loan_maturity_date->format('Y-m-d') : null,
-                        'disbursement_date' => $dbLoan->loan_start_date ? $dbLoan->loan_start_date->format('Y-m-d') : null,
-                        'member_name' => $member['name'] ?? ($member['Name'] ?? 'Unknown'),
-                        'member_number' => $memberNo,
-                        'member_phone' => $member['phone'] ?? ($member['Phone'] ?? '-'),
-                        'member_branch' => $member['branch'] ?? ($member['Branch'] ?? '-'),
-                        'interest_rate' => (float) $dbLoan->interest_rate_pm,
-                        'duration' => $dbLoan->duration_months,
-                        'total_payable' => (float) $dbLoan->total_payable,
-                        'number_of_paid_installments' => $dbLoan->number_of_paid_installments,
-                        'number_of_unpaid_installments' => $dbLoan->number_of_unpaid_installments,
-                        'source' => 'database',
-                        'encrypted_id' => $this->encryptedIdService->encrypt($dbLoan->loan_id),
-                        'user_id' => $dbLoan->user_id,
-                    ];
-                    $loans[] = $loan;
+                // Get user information
+                $user = null;
+                if ($dbLoan->user_id) {
+                    $user = \App\Models\User::find($dbLoan->user_id);
                 }
+                
+                // Fallback to customer_id if user not found
+                if (!$user && $dbLoan->customer_id) {
+                    $user = \App\Models\User::where('member_number', $dbLoan->customer_id)->first();
+                }
+                
+                $memberName = $user ? $user->name : 'Unknown';
+                $memberNo = $user ? $user->member_number : ($dbLoan->customer_id ?? 'Unknown');
+                $memberPhone = $user ? $user->phone : '-';
+                $memberBranch = '-';
+                
+                $loan = [
+                    'loan_number' => $dbLoan->loan_id,
+                    'loan_product' => $dbLoan->loan_type,
+                    'loan_amount' => (float) $dbLoan->loan_amount,
+                    'outstanding_balance' => (float) $dbLoan->outstanding_balance,
+                    'paid_amount' => (float) $dbLoan->total_paid,
+                    'installment' => (float) $dbLoan->monthly_installment,
+                    'status' => $dbLoan->loan_status,
+                    'maturity_date' => $dbLoan->loan_maturity_date ? $dbLoan->loan_maturity_date->format('Y-m-d') : null,
+                    'disbursement_date' => $dbLoan->loan_start_date ? $dbLoan->loan_start_date->format('Y-m-d') : null,
+                    'member_name' => $memberName,
+                    'member_number' => $memberNo,
+                    'member_phone' => $memberPhone,
+                    'member_branch' => $memberBranch,
+                    'interest_rate' => (float) $dbLoan->interest_rate_pm,
+                    'duration' => $dbLoan->duration_months,
+                    'total_payable' => (float) $dbLoan->total_payable,
+                    'number_of_paid_installments' => $dbLoan->number_of_paid_installments,
+                    'number_of_unpaid_installments' => $dbLoan->number_of_unpaid_installments,
+                    'source' => 'database',
+                    'encrypted_id' => $this->encryptedIdService->encrypt($dbLoan->loan_id),
+                    'user_id' => $dbLoan->user_id,
+                ];
+                $loans[] = $loan;
             }
         } catch (\Illuminate\Database\QueryException $e) {
-            // Table doesn't exist yet, skip database loans
+            // Table doesn't exist yet, return empty array
+            $loans = [];
         }
 
         if (! empty($searchQuery)) {
@@ -161,46 +148,43 @@ class LoanController extends Controller
         
         Gate::authorize('admin-only');
 
-        $allMembers = $this->googleSheetRepository->getAllMembers();
-        $loan = null;
-        $member = null;
-
-        foreach ($allMembers as $m) {
-            $memberNo = $m['member_number'] ?? ($m['MemberNumber'] ?? null);
-            if (! $memberNo) {
-                continue;
-            }
-            $memberLoans = $this->googleSheetRepository->getMemberLoans($memberNo);
-            foreach ($memberLoans as $l) {
-                $currentLoanNo = $l['loan_number'] ?? ($l['LoanNumber'] ?? null);
-                if ($currentLoanNo === $loanNumber) {
-                    $loan = $l;
-                    $member = $m;
-                    break 2;
-                }
-            }
-        }
-
+        // Get loan from database
+        $loan = \App\Models\LoanInformation::where('loan_id', $loanNumber)->first();
+        
         if (! $loan) {
             $this->error("Loan {$loanNumber} not found.");
-
             return redirect()->route('admin.loans.index');
         }
 
-        $loanAmount = (float) ($loan['loan_amount'] ?? ($loan['LoanAmount'] ?? 0));
-        $paidAmount = (float) ($loan['paid_amount'] ?? ($loan['PaidAmount'] ?? 0));
-        $outstanding = (float) ($loan['outstanding_balance'] ?? ($loan['OutstandingBalance'] ?? 0));
+        // Get user information
+        $user = null;
+        if ($loan->user_id) {
+            $user = \App\Models\User::find($loan->user_id);
+        }
+        
+        // Fallback to customer_id if user not found
+        if (!$user && $loan->customer_id) {
+            $user = \App\Models\User::where('member_number', $loan->customer_id)->first();
+        }
+
+        $memberName = $user ? $user->name : 'Unknown';
+        $memberNo = $user ? $user->member_number : ($loan->customer_id ?? 'Unknown');
+        $memberPhone = $user ? $user->phone : '-';
+        $memberBranch = '-';
+
+        $loanAmount = (float) $loan->loan_amount;
+        $paidAmount = (float) $loan->total_paid;
+        $outstanding = (float) $loan->outstanding_balance;
         $progress = $loanAmount > 0 ? min(($paidAmount / $loanAmount) * 100, 100) : 0;
 
-        $installment = (float) ($loan['installment'] ?? ($loan['Installment'] ?? 0));
-        $interestRate = (float) ($loan['interest_rate'] ?? ($loan['InterestRate'] ?? 0));
-        $disbursementDate = $loan['disbursement_date'] ?? ($loan['DisbursementDate'] ?? '-');
-        $maturityDate = $loan['maturity_date'] ?? ($loan['MaturityDate'] ?? '-');
+        $installment = (float) $loan->monthly_installment;
+        $interestRate = (float) $loan->interest_rate_pm;
+        $disbursementDate = $loan->loan_start_date ? $loan->loan_start_date->format('Y-m-d') : '-';
+        $maturityDate = $loan->loan_maturity_date ? $loan->loan_maturity_date->format('Y-m-d') : '-';
 
         $repaymentSchedule = [];
-        $months = 0;
-        if ($installment > 0 && $loanAmount > 0) {
-            $months = (int) ceil($loanAmount / $installment);
+        $months = $loan->duration_months ?? 0;
+        if ($installment > 0 && $loanAmount > 0 && $months > 0) {
             $balance = $loanAmount;
             $startDate = $disbursementDate !== '-' ? $disbursementDate : date('Y-m-01');
             for ($i = 1; $i <= $months; $i++) {
@@ -252,7 +236,7 @@ class LoanController extends Controller
                     'debit' => 0,
                     'credit' => $loanAmount,
                     'balance' => $loanAmount,
-                    'description' => "Loan disbursed - {$loan['loan_product']}",
+                    'description' => "Loan disbursed - {$loan->loan_type}",
                 ],
             ],
             array_map(static fn ($h) => [
@@ -274,16 +258,31 @@ class LoanController extends Controller
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
             'properties' => [
-                'member_number' => $member['member_number'] ?? ($member['MemberNumber'] ?? null),
-                'member_name' => $member['name'] ?? ($member['Name'] ?? null),
-                'loan_product' => $loan['loan_product'] ?? null,
+                'member_number' => $memberNo,
+                'member_name' => $memberName,
+                'loan_product' => $loan->loan_type,
             ],
         ]);
 
         return view('admin.loans.show', [
-            'loan' => $loan,
+            'loan' => [
+                'loan_number' => $loan->loan_id,
+                'loan_product' => $loan->loan_type,
+                'loan_amount' => $loanAmount,
+                'outstanding_balance' => $outstanding,
+                'paid_amount' => $paidAmount,
+                'installment' => $installment,
+                'status' => $loan->loan_status,
+                'maturity_date' => $maturityDate,
+                'disbursement_date' => $disbursementDate,
+            ],
             'loanNumber' => $loanNumber,
-            'member' => $member,
+            'member' => [
+                'name' => $memberName,
+                'member_number' => $memberNo,
+                'phone' => $memberPhone,
+                'branch' => $memberBranch,
+            ],
             'progress' => $progress,
             'loanAmount' => $loanAmount,
             'paidAmount' => $paidAmount,

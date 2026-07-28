@@ -236,39 +236,70 @@ class MemberController extends Controller
             $investments = $this->googleSheetRepository->getMemberInvestments($memberNumber);
             
             // Get loan payments and loans information from database
-            $loanPayments = $this->googleSheetRepository->getLoanPayments($memberNumber);
-            $loansInformation = $this->googleSheetRepository->getLoansInformation($memberNumber);
-            
-            // Merge loans information with Google Sheets loans
-            $googleLoans = $this->googleSheetRepository->getMemberLoans($memberNumber);
-            $allLoans = [];
-            
-            // Add Google Sheets loans
-            foreach ($googleLoans as $googleLoan) {
-                $googleLoan['source'] = 'google_sheets';
-                $allLoans[] = $googleLoan;
+            $loanPayments = [];
+            $loansInformation = [];
+            try {
+                $user = \App\Models\User::where('member_number', $memberNumber)->first();
+                if ($user) {
+                    $loanPayments = \App\Models\LoanPayment::byUserId($user->id)
+                        ->orderBy('payment_date', 'desc')
+                        ->get()
+                        ->map(function ($payment) {
+                            return [
+                                'loan_id' => $payment->loan_id,
+                                'customer_id' => $payment->customer_id,
+                                'payment_amount' => (float) $payment->payment_amount,
+                                'payment_date' => $payment->payment_date ? $payment->payment_date->format('Y-m-d') : null,
+                                'payment_method' => $payment->payment_method,
+                                'reference_number' => $payment->reference_number,
+                                'principal_amount' => (float) $payment->principal_amount,
+                            ];
+                        })
+                        ->toArray();
+                    
+                    $loansInformation = \App\Models\LoanInformation::byUserId($user->id)
+                        ->orderBy('loan_start_date', 'desc')
+                        ->get()
+                        ->map(function ($loan) {
+                            return [
+                                'loan_id' => $loan->loan_id,
+                                'customer_id' => $loan->customer_id,
+                                'loan_type' => $loan->loan_type,
+                                'loan_amount' => (float) $loan->loan_amount,
+                                'nature' => $loan->nature,
+                                'interest_rate_pm' => (float) $loan->interest_rate_pm,
+                                'duration_months' => $loan->duration_months,
+                                'loan_start_date' => $loan->loan_start_date ? $loan->loan_start_date->format('Y-m-d') : null,
+                                'loan_maturity_date' => $loan->loan_maturity_date ? $loan->loan_maturity_date->format('Y-m-d') : null,
+                                'total_payable' => (float) $loan->total_payable,
+                                'monthly_installment' => (float) $loan->monthly_installment,
+                                'monthly_principal' => (float) $loan->monthly_principal,
+                                'principal_paid_to_date' => (float) $loan->principal_paid_to_date,
+                                'termination_fee' => (float) $loan->termination_fee,
+                                'total_paid' => (float) $loan->total_paid,
+                                'outstanding_balance' => (float) $loan->outstanding_balance,
+                                'loan_status' => $loan->loan_status,
+                                'loan_guarantor' => $loan->loan_guarantor,
+                                'number_of_paid_installments' => $loan->number_of_paid_installments,
+                                'number_of_unpaid_installments' => $loan->number_of_unpaid_installments,
+                                'this_month_loan_status' => $loan->this_month_loan_status,
+                                'balance_after_payment' => (float) $loan->balance_after_payment,
+                                'loan_agreement_ref_no' => $loan->loan_agreement_ref_no,
+                            ];
+                        })
+                        ->toArray();
+                }
+            } catch (\Illuminate\Database\QueryException $e) {
+                // Table doesn't exist yet
             }
             
-            // Add database loans information
-            foreach ($loansInformation as $dbLoan) {
-                $dbLoan['source'] = 'database';
-                $dbLoan['loan_number'] = $dbLoan['loan_id'];
-                $dbLoan['loan_product'] = $dbLoan['loan_type'];
-                $dbLoan['disbursement_date'] = $dbLoan['loan_start_date'];
-                $dbLoan['maturity_date'] = $dbLoan['loan_maturity_date'];
-                $dbLoan['paid_amount'] = $dbLoan['total_paid'];
-                $dbLoan['installment'] = $dbLoan['monthly_installment'];
-                $allLoans[] = $dbLoan;
-            }
-            
-            $loans = $allLoans;
+            $loans = $loansInformation;
         } else {
-            // Fall back to Google Sheets
+            // Fall back to Google Sheets for member info
             $member = $this->googleSheetRepository->getMemberByNumber($memberNumber);
 
             if (! $member) {
                 $this->error("Member {$memberNumber} not found.");
-
                 return redirect()->route('admin.members.index');
             }
 
@@ -279,7 +310,47 @@ class MemberController extends Controller
                 $member['photo'] = $member['Photo'];
             }
 
-            $loans = $this->googleSheetRepository->getMemberLoans($memberNumber);
+            // Get loans from database instead of Google Sheets
+            $loans = [];
+            try {
+                $user = \App\Models\User::where('member_number', $memberNumber)->first();
+                if ($user) {
+                    $loans = \App\Models\LoanInformation::byUserId($user->id)
+                        ->orderBy('loan_start_date', 'desc')
+                        ->get()
+                        ->map(function ($loan) {
+                            return [
+                                'loan_id' => $loan->loan_id,
+                                'customer_id' => $loan->customer_id,
+                                'loan_type' => $loan->loan_type,
+                                'loan_amount' => (float) $loan->loan_amount,
+                                'nature' => $loan->nature,
+                                'interest_rate_pm' => (float) $loan->interest_rate_pm,
+                                'duration_months' => $loan->duration_months,
+                                'loan_start_date' => $loan->loan_start_date ? $loan->loan_start_date->format('Y-m-d') : null,
+                                'loan_maturity_date' => $loan->loan_maturity_date ? $loan->loan_maturity_date->format('Y-m-d') : null,
+                                'total_payable' => (float) $loan->total_payable,
+                                'monthly_installment' => (float) $loan->monthly_installment,
+                                'monthly_principal' => (float) $loan->monthly_principal,
+                                'principal_paid_to_date' => (float) $loan->principal_paid_to_date,
+                                'termination_fee' => (float) $loan->termination_fee,
+                                'total_paid' => (float) $loan->total_paid,
+                                'outstanding_balance' => (float) $loan->outstanding_balance,
+                                'loan_status' => $loan->loan_status,
+                                'loan_guarantor' => $loan->loan_guarantor,
+                                'number_of_paid_installments' => $loan->number_of_paid_installments,
+                                'number_of_unpaid_installments' => $loan->number_of_unpaid_installments,
+                                'this_month_loan_status' => $loan->this_month_loan_status,
+                                'balance_after_payment' => (float) $loan->balance_after_payment,
+                                'loan_agreement_ref_no' => $loan->loan_agreement_ref_no,
+                            ];
+                        })
+                        ->toArray();
+                }
+            } catch (\Illuminate\Database\QueryException $e) {
+                // Table doesn't exist yet
+            }
+            
             $savings = $this->googleSheetRepository->getMemberSavings($memberNumber);
             
             // Merge database transactions with Google Sheets savings
