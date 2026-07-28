@@ -291,4 +291,82 @@ class LoanController extends Controller
             'dashboardService' => $this->dashboardService,
         ]);
     }
+
+    public function importLoanPayments(Request $request)
+    {
+        Gate::authorize('admin-only');
+
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv',
+        ]);
+
+        $file = $request->file('file');
+        $import = new \App\Imports\LoanPaymentsImport();
+
+        try {
+            \Maatwebsite\Excel\Facades\Excel::import($import, $file);
+            
+            $importedCount = $import->getImportedCount();
+            $skippedCount = $import->getSkippedCount();
+
+            $this->success("Loan payments imported successfully. Imported: {$importedCount} records.");
+
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'subject_type' => 'loan_payment',
+                'subject_id' => null,
+                'description' => 'Admin imported loan payments',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'properties' => [
+                    'imported_count' => $importedCount,
+                    'skipped_count' => $skippedCount,
+                ],
+            ]);
+
+            return redirect()->back();
+        } catch (\Exception $e) {
+            $this->error('Error importing loan payments: ' . $e->getMessage());
+            return redirect()->back();
+        }
+    }
+
+    public function importLoansInformation(Request $request)
+    {
+        Gate::authorize('admin-only');
+
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv',
+        ]);
+
+        $file = $request->file('file');
+        $import = new \App\Imports\LoansInformationImport();
+
+        try {
+            \Maatwebsite\Excel\Facades\Excel::import($import, $file);
+            
+            $importedCount = $import->getImportedCount();
+            $skippedCount = $import->getSkippedCount();
+
+            $this->success("Loans information imported successfully. Imported: {$importedCount} records.");
+
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'subject_type' => 'loans_information',
+                'subject_id' => null,
+                'description' => 'Admin imported loans information',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'properties' => [
+                    'imported_count' => $importedCount,
+                    'skipped_count' => $skippedCount,
+                ],
+            ]);
+
+            return redirect()->back();
+        } catch (\Exception $e) {
+            $this->error('Error importing loans information: ' . $e->getMessage());
+            return redirect()->back();
+        }
+    }
 }
