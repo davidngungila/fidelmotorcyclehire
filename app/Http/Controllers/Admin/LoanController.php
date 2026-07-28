@@ -61,34 +61,38 @@ class LoanController extends Controller
         }
 
         // Merge with database loans information
-        $dbLoans = \App\Models\LoanInformation::all();
-        foreach ($dbLoans as $dbLoan) {
-            $memberNo = $dbLoan->customer_id;
-            if (isset($memberMap[$memberNo])) {
-                $member = $memberMap[$memberNo];
-                $loan = [
-                    'loan_number' => $dbLoan->loan_id,
-                    'loan_product' => $dbLoan->loan_type,
-                    'loan_amount' => (float) $dbLoan->loan_amount,
-                    'outstanding_balance' => (float) $dbLoan->outstanding_balance,
-                    'paid_amount' => (float) $dbLoan->total_paid,
-                    'installment' => (float) $dbLoan->monthly_installment,
-                    'status' => $dbLoan->loan_status,
-                    'maturity_date' => $dbLoan->loan_maturity_date ? $dbLoan->loan_maturity_date->format('Y-m-d') : null,
-                    'disbursement_date' => $dbLoan->loan_start_date ? $dbLoan->loan_start_date->format('Y-m-d') : null,
-                    'member_name' => $member['name'] ?? ($member['Name'] ?? 'Unknown'),
-                    'member_number' => $memberNo,
-                    'member_phone' => $member['phone'] ?? ($member['Phone'] ?? '-'),
-                    'member_branch' => $member['branch'] ?? ($member['Branch'] ?? '-'),
-                    'interest_rate' => (float) $dbLoan->interest_rate_pm,
-                    'duration' => $dbLoan->duration_months,
-                    'total_payable' => (float) $dbLoan->total_payable,
-                    'number_of_paid_installments' => $dbLoan->number_of_paid_installments,
-                    'number_of_unpaid_installments' => $dbLoan->number_of_unpaid_installments,
-                    'source' => 'database',
-                ];
-                $loans[] = $loan;
+        try {
+            $dbLoans = \App\Models\LoanInformation::all();
+            foreach ($dbLoans as $dbLoan) {
+                $memberNo = $dbLoan->customer_id;
+                if (isset($memberMap[$memberNo])) {
+                    $member = $memberMap[$memberNo];
+                    $loan = [
+                        'loan_number' => $dbLoan->loan_id,
+                        'loan_product' => $dbLoan->loan_type,
+                        'loan_amount' => (float) $dbLoan->loan_amount,
+                        'outstanding_balance' => (float) $dbLoan->outstanding_balance,
+                        'paid_amount' => (float) $dbLoan->total_paid,
+                        'installment' => (float) $dbLoan->monthly_installment,
+                        'status' => $dbLoan->loan_status,
+                        'maturity_date' => $dbLoan->loan_maturity_date ? $dbLoan->loan_maturity_date->format('Y-m-d') : null,
+                        'disbursement_date' => $dbLoan->loan_start_date ? $dbLoan->loan_start_date->format('Y-m-d') : null,
+                        'member_name' => $member['name'] ?? ($member['Name'] ?? 'Unknown'),
+                        'member_number' => $memberNo,
+                        'member_phone' => $member['phone'] ?? ($member['Phone'] ?? '-'),
+                        'member_branch' => $member['branch'] ?? ($member['Branch'] ?? '-'),
+                        'interest_rate' => (float) $dbLoan->interest_rate_pm,
+                        'duration' => $dbLoan->duration_months,
+                        'total_payable' => (float) $dbLoan->total_payable,
+                        'number_of_paid_installments' => $dbLoan->number_of_paid_installments,
+                        'number_of_unpaid_installments' => $dbLoan->number_of_unpaid_installments,
+                        'source' => 'database',
+                    ];
+                    $loans[] = $loan;
+                }
             }
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Table doesn't exist yet, skip database loans
         }
 
         if (! empty($searchQuery)) {

@@ -641,32 +641,38 @@ class GoogleSheetRepository implements GoogleSheetRepositoryInterface
     {
         $memberNumber = $this->validateMemberNumber($memberNumber);
         
-        // Get from database
-        $payments = \App\Models\LoanPayment::byCustomerId($memberNumber)
-            ->orderBy('payment_date', 'desc')
-            ->get()
-            ->map(function ($payment) {
-                return [
-                    'loan_id' => $payment->loan_id,
-                    'customer_id' => $payment->customer_id,
-                    'payment_amount' => (float) $payment->payment_amount,
-                    'payment_date' => $payment->payment_date ? $payment->payment_date->format('Y-m-d') : null,
-                    'payment_method' => $payment->payment_method,
-                    'reference_number' => $payment->reference_number,
-                    'principal_amount' => (float) $payment->principal_amount,
-                ];
-            })
-            ->toArray();
+        try {
+            // Get from database
+            $payments = \App\Models\LoanPayment::byCustomerId($memberNumber)
+                ->orderBy('payment_date', 'desc')
+                ->get()
+                ->map(function ($payment) {
+                    return [
+                        'loan_id' => $payment->loan_id,
+                        'customer_id' => $payment->customer_id,
+                        'payment_amount' => (float) $payment->payment_amount,
+                        'payment_date' => $payment->payment_date ? $payment->payment_date->format('Y-m-d') : null,
+                        'payment_method' => $payment->payment_method,
+                        'reference_number' => $payment->reference_number,
+                        'principal_amount' => (float) $payment->principal_amount,
+                    ];
+                })
+                ->toArray();
 
-        return $payments;
+            return $payments;
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Table doesn't exist yet, return empty array
+            return [];
+        }
     }
 
     public function getLoansInformation(string $memberNumber): array
     {
         $memberNumber = $this->validateMemberNumber($memberNumber);
         
-        // Get from database
-        $loans = \App\Models\LoanInformation::byCustomerId($memberNumber)
+        try {
+            // Get from database
+            $loans = \App\Models\LoanInformation::byCustomerId($memberNumber)
             ->orderBy('loan_start_date', 'desc')
             ->get()
             ->map(function ($loan) {
@@ -698,6 +704,10 @@ class GoogleSheetRepository implements GoogleSheetRepositoryInterface
             })
             ->toArray();
 
-        return $loans;
+            return $loans;
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Table doesn't exist yet, return empty array
+            return [];
+        }
     }
 }
