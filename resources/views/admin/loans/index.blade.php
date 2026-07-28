@@ -238,6 +238,66 @@
       </div>
     @endif
   </div>
+
+  <!-- Import Loan Payments Modal -->
+  <div x-show="showImportModal === 'loan-payments'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" style="display: none;">
+    <div x-show="showImportModal === 'loan-payments'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg mx-4" style="display: none;">
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-bold text-primary-900 dark:text-white">Import Loan Payments</h3>
+          <button @click="closeImportModal()" class="text-primary-400 hover:text-primary-600 dark:text-primary-500 dark:hover:text-primary-300">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+        <form method="POST" action="{{ route('admin.loans.import-loan-payments') }}" enctype="multipart/form-data">
+          @csrf
+          <div class="mb-4">
+            <label class="block text-sm font-semibold text-primary-700 dark:text-primary-300 mb-2">Select Excel File</label>
+            <input type="file" name="file" accept=".xlsx,.xls,.csv" required class="form-input w-full">
+            <p class="text-xs text-primary-500 dark:text-primary-400 mt-1">Supported formats: .xlsx, .xls, .csv</p>
+          </div>
+          <div class="flex items-center gap-3 justify-end">
+            <button type="button" @click="closeImportModal()" class="px-4 py-2 rounded-lg text-sm font-bold text-primary-700 dark:text-primary-300 bg-primary-50 hover:bg-primary-100 dark:bg-primary-900/30 dark:hover:bg-primary-900/50 transition-colors">
+              Cancel
+            </button>
+            <button type="submit" class="px-4 py-2 rounded-lg text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+              <i class="fa-solid fa-upload mr-1.5"></i> Import
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import Loans Information Modal -->
+  <div x-show="showImportModal === 'loans-information'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" style="display: none;">
+    <div x-show="showImportModal === 'loans-information'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg mx-4" style="display: none;">
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-bold text-primary-900 dark:text-white">Import Loans Information</h3>
+          <button @click="closeImportModal()" class="text-primary-400 hover:text-primary-600 dark:text-primary-500 dark:hover:text-primary-300">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+        <form method="POST" action="{{ route('admin.loans.import-loans-information') }}" enctype="multipart/form-data">
+          @csrf
+          <div class="mb-4">
+            <label class="block text-sm font-semibold text-primary-700 dark:text-primary-300 mb-2">Select Excel File</label>
+            <input type="file" name="file" accept=".xlsx,.xls,.csv" required class="form-input w-full">
+            <p class="text-xs text-primary-500 dark:text-primary-400 mt-1">Supported formats: .xlsx, .xls, .csv</p>
+          </div>
+          <div class="flex items-center gap-3 justify-end">
+            <button type="button" @click="closeImportModal()" class="px-4 py-2 rounded-lg text-sm font-bold text-primary-700 dark:text-primary-300 bg-primary-50 hover:bg-primary-100 dark:bg-primary-900/30 dark:hover:bg-primary-900/50 transition-colors">
+              Cancel
+            </button>
+            <button type="submit" class="px-4 py-2 rounded-lg text-sm font-bold text-white bg-green-600 hover:bg-green-700 transition-colors">
+              <i class="fa-solid fa-upload mr-1.5"></i> Import
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
 
 @endsection
@@ -277,63 +337,3 @@
   }
 </script>
 @endpush
-
-<!-- Import Loan Payments Modal -->
-<div x-show="showImportModal === 'loan-payments'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" style="display: none;">
-  <div x-show="showImportModal === 'loan-payments'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg mx-4" style="display: none;">
-    <div class="p-6">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-bold text-primary-900 dark:text-white">Import Loan Payments</h3>
-        <button @click="closeImportModal()" class="text-primary-400 hover:text-primary-600 dark:text-primary-500 dark:hover:text-primary-300">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
-      </div>
-      <form method="POST" action="{{ route('admin.loans.import-loan-payments') }}" enctype="multipart/form-data">
-        @csrf
-        <div class="mb-4">
-          <label class="block text-sm font-semibold text-primary-700 dark:text-primary-300 mb-2">Select Excel File</label>
-          <input type="file" name="file" accept=".xlsx,.xls,.csv" required class="form-input w-full">
-          <p class="text-xs text-primary-500 dark:text-primary-400 mt-1">Supported formats: .xlsx, .xls, .csv</p>
-        </div>
-        <div class="flex items-center gap-3 justify-end">
-          <button type="button" @click="closeImportModal()" class="px-4 py-2 rounded-lg text-sm font-bold text-primary-700 dark:text-primary-300 bg-primary-50 hover:bg-primary-100 dark:bg-primary-900/30 dark:hover:bg-primary-900/50 transition-colors">
-            Cancel
-          </button>
-          <button type="submit" class="px-4 py-2 rounded-lg text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors">
-            <i class="fa-solid fa-upload mr-1.5"></i> Import
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<!-- Import Loans Information Modal -->
-<div x-show="showImportModal === 'loans-information'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" style="display: none;">
-  <div x-show="showImportModal === 'loans-information'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg mx-4" style="display: none;">
-    <div class="p-6">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-bold text-primary-900 dark:text-white">Import Loans Information</h3>
-        <button @click="closeImportModal()" class="text-primary-400 hover:text-primary-600 dark:text-primary-500 dark:hover:text-primary-300">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
-      </div>
-      <form method="POST" action="{{ route('admin.loans.import-loans-information') }}" enctype="multipart/form-data">
-        @csrf
-        <div class="mb-4">
-          <label class="block text-sm font-semibold text-primary-700 dark:text-primary-300 mb-2">Select Excel File</label>
-          <input type="file" name="file" accept=".xlsx,.xls,.csv" required class="form-input w-full">
-          <p class="text-xs text-primary-500 dark:text-primary-400 mt-1">Supported formats: .xlsx, .xls, .csv</p>
-        </div>
-        <div class="flex items-center gap-3 justify-end">
-          <button type="button" @click="closeImportModal()" class="px-4 py-2 rounded-lg text-sm font-bold text-primary-700 dark:text-primary-300 bg-primary-50 hover:bg-primary-100 dark:bg-primary-900/30 dark:hover:bg-primary-900/50 transition-colors">
-            Cancel
-          </button>
-          <button type="submit" class="px-4 py-2 rounded-lg text-sm font-bold text-white bg-green-600 hover:bg-green-700 transition-colors">
-            <i class="fa-solid fa-upload mr-1.5"></i> Import
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
