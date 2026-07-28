@@ -10,7 +10,35 @@
 
 @section('content')
 
-<div x-data="loansList()" class="space-y-6">
+<div x-data="{
+  searchQuery: @json($searchQuery ?? ''),
+  showImportModal: null,
+  sortBy(column) {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('sort') === column) {
+      params.set('sort_direction', params.get('sort_direction') === 'asc' ? 'desc' : 'asc');
+    } else {
+      params.set('sort', column);
+      params.set('sort_direction', 'asc');
+    }
+    window.location.href = window.location.pathname + '?' + params.toString();
+  },
+  changePerPage(value) {
+    const params = new URLSearchParams(window.location.search);
+    params.set('per_page', value);
+    params.delete('page');
+    window.location.href = window.location.pathname + '?' + params.toString();
+  },
+  submitSearch() {
+    this.$refs.searchForm.submit();
+  },
+  submitFilter() {
+    this.$refs.filterForm.submit();
+  },
+  closeImportModal() {
+    this.showImportModal = null;
+  }
+}" class="space-y-6">
 
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div class="flex flex-col sm:flex-row sm:items-center gap-3 flex-1 max-w-3xl">
@@ -241,41 +269,6 @@
 </div>
 
 @endsection
-
-@push('scripts')
-<script>
-  function loansList() {
-    return {
-      searchQuery: @json($searchQuery ?? ''),
-      sortBy(column) {
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('sort') === column) {
-          params.set('sort_direction', params.get('sort_direction') === 'asc' ? 'desc' : 'asc');
-        } else {
-          params.set('sort', column);
-          params.set('sort_direction', 'asc');
-        }
-        window.location.href = window.location.pathname + '?' + params.toString();
-      },
-      changePerPage(value) {
-        const params = new URLSearchParams(window.location.search);
-        params.set('per_page', value);
-        params.delete('page');
-        window.location.href = window.location.pathname + '?' + params.toString();
-      },
-      submitSearch() {
-        this.$refs.searchForm.submit();
-      },
-      submitFilter() {
-        this.$refs.filterForm.submit();
-      },
-      showImportModal: null,
-      closeImportModal() {
-        this.showImportModal = null;
-      }
-    };
-  }
-</script>
 
 <!-- Import Loan Payments Modal -->
 <div x-show="showImportModal === 'loan-payments'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" style="display: none;">
