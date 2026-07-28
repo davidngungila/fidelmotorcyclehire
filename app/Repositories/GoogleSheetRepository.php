@@ -636,4 +636,68 @@ class GoogleSheetRepository implements GoogleSheetRepositoryInterface
 
         return $result;
     }
+
+    public function getLoanPayments(string $memberNumber): array
+    {
+        $memberNumber = $this->validateMemberNumber($memberNumber);
+        
+        // Get from database
+        $payments = \App\Models\LoanPayment::byCustomerId($memberNumber)
+            ->orderBy('payment_date', 'desc')
+            ->get()
+            ->map(function ($payment) {
+                return [
+                    'loan_id' => $payment->loan_id,
+                    'customer_id' => $payment->customer_id,
+                    'payment_amount' => (float) $payment->payment_amount,
+                    'payment_date' => $payment->payment_date ? $payment->payment_date->format('Y-m-d') : null,
+                    'payment_method' => $payment->payment_method,
+                    'reference_number' => $payment->reference_number,
+                    'principal_amount' => (float) $payment->principal_amount,
+                ];
+            })
+            ->toArray();
+
+        return $payments;
+    }
+
+    public function getLoansInformation(string $memberNumber): array
+    {
+        $memberNumber = $this->validateMemberNumber($memberNumber);
+        
+        // Get from database
+        $loans = \App\Models\LoanInformation::byCustomerId($memberNumber)
+            ->orderBy('loan_start_date', 'desc')
+            ->get()
+            ->map(function ($loan) {
+                return [
+                    'loan_id' => $loan->loan_id,
+                    'customer_id' => $loan->customer_id,
+                    'loan_type' => $loan->loan_type,
+                    'loan_amount' => (float) $loan->loan_amount,
+                    'nature' => $loan->nature,
+                    'interest_rate_pm' => (float) $loan->interest_rate_pm,
+                    'duration_months' => $loan->duration_months,
+                    'loan_start_date' => $loan->loan_start_date ? $loan->loan_start_date->format('Y-m-d') : null,
+                    'loan_maturity_date' => $loan->loan_maturity_date ? $loan->loan_maturity_date->format('Y-m-d') : null,
+                    'total_payable' => (float) $loan->total_payable,
+                    'monthly_installment' => (float) $loan->monthly_installment,
+                    'monthly_principal' => (float) $loan->monthly_principal,
+                    'principal_paid_to_date' => (float) $loan->principal_paid_to_date,
+                    'termination_fee' => (float) $loan->termination_fee,
+                    'total_paid' => (float) $loan->total_paid,
+                    'outstanding_balance' => (float) $loan->outstanding_balance,
+                    'loan_status' => $loan->loan_status,
+                    'loan_guarantor' => $loan->loan_guarantor,
+                    'number_of_paid_installments' => $loan->number_of_paid_installments,
+                    'number_of_unpaid_installments' => $loan->number_of_unpaid_installments,
+                    'this_month_loan_status' => $loan->this_month_loan_status,
+                    'balance_after_payment' => (float) $loan->balance_after_payment,
+                    'loan_agreement_ref_no' => $loan->loan_agreement_ref_no,
+                ];
+            })
+            ->toArray();
+
+        return $loans;
+    }
 }

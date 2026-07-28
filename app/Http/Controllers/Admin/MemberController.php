@@ -234,6 +234,34 @@ class MemberController extends Controller
             $deposits = $this->googleSheetRepository->getMemberDeposits($memberNumber);
             $swf = $this->googleSheetRepository->getMemberSwf($memberNumber);
             $investments = $this->googleSheetRepository->getMemberInvestments($memberNumber);
+            
+            // Get loan payments and loans information from database
+            $loanPayments = $this->googleSheetRepository->getLoanPayments($memberNumber);
+            $loansInformation = $this->googleSheetRepository->getLoansInformation($memberNumber);
+            
+            // Merge loans information with Google Sheets loans
+            $googleLoans = $this->googleSheetRepository->getMemberLoans($memberNumber);
+            $allLoans = [];
+            
+            // Add Google Sheets loans
+            foreach ($googleLoans as $googleLoan) {
+                $googleLoan['source'] = 'google_sheets';
+                $allLoans[] = $googleLoan;
+            }
+            
+            // Add database loans information
+            foreach ($loansInformation as $dbLoan) {
+                $dbLoan['source'] = 'database';
+                $dbLoan['loan_number'] = $dbLoan['loan_id'];
+                $dbLoan['loan_product'] = $dbLoan['loan_type'];
+                $dbLoan['disbursement_date'] = $dbLoan['loan_start_date'];
+                $dbLoan['maturity_date'] = $dbLoan['loan_maturity_date'];
+                $dbLoan['paid_amount'] = $dbLoan['total_paid'];
+                $dbLoan['installment'] = $dbLoan['monthly_installment'];
+                $allLoans[] = $dbLoan;
+            }
+            
+            $loans = $allLoans;
         } else {
             // Fall back to Google Sheets
             $member = $this->googleSheetRepository->getMemberByNumber($memberNumber);
@@ -302,6 +330,34 @@ class MemberController extends Controller
             $deposits = $this->googleSheetRepository->getMemberDeposits($memberNumber);
             $swf = $this->googleSheetRepository->getMemberSwf($memberNumber);
             $investments = $this->googleSheetRepository->getMemberInvestments($memberNumber);
+            
+            // Get loan payments and loans information from database
+            $loanPayments = $this->googleSheetRepository->getLoanPayments($memberNumber);
+            $loansInformation = $this->googleSheetRepository->getLoansInformation($memberNumber);
+            
+            // Merge loans information with Google Sheets loans
+            $googleLoans = $this->googleSheetRepository->getMemberLoans($memberNumber);
+            $allLoans = [];
+            
+            // Add Google Sheets loans
+            foreach ($googleLoans as $googleLoan) {
+                $googleLoan['source'] = 'google_sheets';
+                $allLoans[] = $googleLoan;
+            }
+            
+            // Add database loans information
+            foreach ($loansInformation as $dbLoan) {
+                $dbLoan['source'] = 'database';
+                $dbLoan['loan_number'] = $dbLoan['loan_id'];
+                $dbLoan['loan_product'] = $dbLoan['loan_type'];
+                $dbLoan['disbursement_date'] = $dbLoan['loan_start_date'];
+                $dbLoan['maturity_date'] = $dbLoan['loan_maturity_date'];
+                $dbLoan['paid_amount'] = $dbLoan['total_paid'];
+                $dbLoan['installment'] = $dbLoan['monthly_installment'];
+                $allLoans[] = $dbLoan;
+            }
+            
+            $loans = $allLoans;
         }
 
         ActivityLog::create([
