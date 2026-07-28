@@ -8,6 +8,7 @@ class LoanPayment extends Model
 {
     protected $fillable = [
         'loan_id',
+        'user_id',
         'customer_id',
         'payment_amount',
         'payment_date',
@@ -22,6 +23,11 @@ class LoanPayment extends Model
         'payment_date' => 'date',
     ];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function scopeByLoanId($query, $loanId)
     {
         return $query->where('loan_id', $loanId);
@@ -30,5 +36,10 @@ class LoanPayment extends Model
     public function scopeByCustomerId($query, $customerId)
     {
         return $query->where('customer_id', $customerId);
+    }
+
+    public function scopeByUserId($query, $userId)
+    {
+        return $query->where('user_id', $userId);
     }
 }

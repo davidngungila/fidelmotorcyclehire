@@ -642,13 +642,20 @@ class GoogleSheetRepository implements GoogleSheetRepositoryInterface
         $memberNumber = $this->validateMemberNumber($memberNumber);
         
         try {
-            // Get from database
-            $payments = \App\Models\LoanPayment::byCustomerId($memberNumber)
+            // Get user_id from member_number
+            $user = \App\Models\User::where('member_number', $memberNumber)->first();
+            if (!$user) {
+                return [];
+            }
+            
+            // Get from database by user_id
+            $payments = \App\Models\LoanPayment::byUserId($user->id)
                 ->orderBy('payment_date', 'desc')
                 ->get()
                 ->map(function ($payment) {
                     return [
                         'loan_id' => $payment->loan_id,
+                        'user_id' => $payment->user_id,
                         'customer_id' => $payment->customer_id,
                         'payment_amount' => (float) $payment->payment_amount,
                         'payment_date' => $payment->payment_date ? $payment->payment_date->format('Y-m-d') : null,
@@ -671,8 +678,14 @@ class GoogleSheetRepository implements GoogleSheetRepositoryInterface
         $memberNumber = $this->validateMemberNumber($memberNumber);
         
         try {
-            // Get from database
-            $loans = \App\Models\LoanInformation::byCustomerId($memberNumber)
+            // Get user_id from member_number
+            $user = \App\Models\User::where('member_number', $memberNumber)->first();
+            if (!$user) {
+                return [];
+            }
+            
+            // Get from database by user_id
+            $loans = \App\Models\LoanInformation::byUserId($user->id)
             ->orderBy('loan_start_date', 'desc')
             ->get()
             ->map(function ($loan) {

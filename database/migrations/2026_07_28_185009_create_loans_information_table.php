@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('loans_information', function (Blueprint $table) {
             $table->id();
             $table->string('loan_id');
-            $table->string('customer_id');
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->string('customer_id')->nullable();
             $table->string('loan_type');
             $table->decimal('loan_amount', 15, 2);
             $table->string('nature')->nullable();
@@ -39,8 +40,11 @@ return new class extends Migration
             $table->timestamps();
             
             $table->index('loan_id');
+            $table->index('user_id');
             $table->index('customer_id');
             $table->index('loan_status');
+            
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
         });
     }
 

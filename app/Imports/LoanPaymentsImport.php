@@ -68,10 +68,20 @@ class LoanPaymentsImport implements ToModel, WithHeadingRow, WithBatchInserts, W
             return null;
         }
 
+        // Look up user_id from customer_id (member_number)
+        $userId = null;
+        if (!empty($customerId)) {
+            $user = \App\Models\User::where('member_number', $customerId)->first();
+            if ($user) {
+                $userId = $user->id;
+            }
+        }
+
         $this->importedCount++;
         
         return new LoanPayment([
             'loan_id' => $loanId,
+            'user_id' => $userId,
             'customer_id' => $customerId,
             'payment_amount' => $paymentAmount,
             'payment_date' => $paymentDate,

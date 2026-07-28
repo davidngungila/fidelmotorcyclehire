@@ -89,6 +89,7 @@ class LoanController extends Controller
                         'number_of_unpaid_installments' => $dbLoan->number_of_unpaid_installments,
                         'source' => 'database',
                         'encrypted_id' => $this->encryptedIdService->encrypt($dbLoan->loan_id),
+                        'user_id' => $dbLoan->user_id,
                     ];
                     $loans[] = $loan;
                 }

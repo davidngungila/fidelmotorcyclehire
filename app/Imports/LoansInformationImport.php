@@ -88,10 +88,20 @@ class LoansInformationImport implements ToModel, WithHeadingRow, WithBatchInsert
             // Continue with null dates if parsing fails
         }
 
+        // Look up user_id from customer_id (member_number)
+        $userId = null;
+        if (!empty($customerId)) {
+            $user = \App\Models\User::where('member_number', $customerId)->first();
+            if ($user) {
+                $userId = $user->id;
+            }
+        }
+
         $this->importedCount++;
         
         return new LoanInformation([
             'loan_id' => $loanId,
+            'user_id' => $userId,
             'customer_id' => $customerId,
             'loan_type' => $loanType,
             'loan_amount' => $loanAmount,
