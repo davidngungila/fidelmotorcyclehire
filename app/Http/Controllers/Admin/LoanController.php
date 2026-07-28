@@ -56,6 +56,7 @@ class LoanController extends Controller
                 $loan['member_number'] = $memberNo;
                 $loan['member_phone'] = $member['phone'] ?? ($member['Phone'] ?? '-');
                 $loan['member_branch'] = $member['branch'] ?? ($member['Branch'] ?? '-');
+                $loan['encrypted_id'] = $this->encryptedIdService->encrypt($loan['loan_number'] ?? $loan['LoanNumber'] ?? '');
                 $loans[] = $loan;
             }
         }
@@ -87,6 +88,7 @@ class LoanController extends Controller
                         'number_of_paid_installments' => $dbLoan->number_of_paid_installments,
                         'number_of_unpaid_installments' => $dbLoan->number_of_unpaid_installments,
                         'source' => 'database',
+                        'encrypted_id' => $this->encryptedIdService->encrypt($dbLoan->loan_id),
                     ];
                     $loans[] = $loan;
                 }
