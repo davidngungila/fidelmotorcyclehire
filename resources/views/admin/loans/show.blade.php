@@ -235,6 +235,11 @@
           Repayment Schedule
           <span class="badge badge-blue ml-2">{{ count($repaymentSchedule) }} Installments</span>
         </h3>
+        @if($loan['status'] === 'active' || $loan['status'] === 'disbursed')
+        <button @click="showPaymentModal = true" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white text-xs font-medium transition-colors">
+          <i class="fa-solid fa-plus text-[10px]"></i> Record Payment
+        </button>
+        @endif
       </div>
 
       <div class="overflow-x-auto -webkit-scrollbar [&::-webkit-scrollbar]:hidden rounded-xl">
@@ -429,6 +434,71 @@
     </div>
   </div>
 
+  <!-- Record Payment Modal -->
+  <div x-show="showPaymentModal" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display: none;">
+    <div class="absolute inset-0 bg-black/50" @click="showPaymentModal = false"></div>
+    <div class="relative bg-white dark:bg-dark-card rounded-xl shadow-2xl w-full max-w-md p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-bold text-primary-900 dark:text-white text-lg">Record Payment</h3>
+        <button @click="showPaymentModal = false" class="text-primary-400 hover:text-primary-600 dark:hover:text-primary-300">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <form method="POST" action="{{ route('admin.loans.recordPayment', encryptId($loanNumber)) }}">
+        @csrf
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Amount (TSh) *</label>
+            <input type="number" name="amount" required min="0" step="0.01" 
+                   placeholder="Enter payment amount"
+                   class="form-input py-2.5 px-4">
+            @error('amount')
+              <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Payment Date *</label>
+            <input type="date" name="payment_date" required value="{{ date('Y-m-d') }}"
+                   class="form-input py-2.5 px-4">
+            @error('payment_date')
+              <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Payment Method *</label>
+            <select name="payment_method" required class="form-input py-2.5 px-4">
+              <option value="">Select method</option>
+              <option value="cash">Cash</option>
+              <option value="bank_transfer">Bank Transfer</option>
+              <option value="mobile_money">Mobile Money</option>
+              <option value="cheque">Cheque</option>
+            </select>
+            @error('payment_method')
+              <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Notes</label>
+            <textarea name="notes" rows="2"
+                      placeholder="Additional notes (optional)"
+                      class="form-input py-2.5 px-4"></textarea>
+            @error('notes')
+              <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+          </div>
+        </div>
+        <div class="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <button type="button" @click="showPaymentModal = false" class="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-semibold transition-colors">
+            Cancel
+          </button>
+          <button type="submit" class="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold transition-colors">
+            Record Payment
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
 </div>
 
 @endsection
@@ -438,6 +508,7 @@
   function loanShow() {
     return {
       activeTab: 'overview',
+      showPaymentModal: false,
       tabs: [
         { id: 'overview', label: 'Overview', icon: 'fa-solid fa-circle-info' },
         { id: 'schedule', label: 'Repayment Schedule', icon: 'fa-solid fa-calendar-days' },

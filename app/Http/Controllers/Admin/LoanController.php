@@ -441,6 +441,94 @@ class LoanController extends Controller
         return redirect()->back();
     }
 
+    public function recordPayment(Request $request, string $encryptedLoanNumber)
+    {
+        try {
+            $loanNumber = $this->encryptedIdService->decrypt($encryptedLoanNumber);
+        } catch (\Exception $e) {
+            $this->error('Invalid loan number.');
+            return redirect()->route('admin.loans.index');
+        }
+
+        Gate::authorize('admin-only');
+
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0',
+            'payment_date' => 'required|date',
+            'payment_method' => 'required|in:cash,bank_transfer,mobile_money,cheque',
+            'notes' => 'nullable|string',
+        ]);
+
+        $loan = Loan::where('loan_number', $loanNumber)->first();
+
+        if (!$loan) {
+            $this->error("Loan {$loanNumber} not found.");
+            return redirect()->route('admin.loans.index');
+        }
+
+        $paymentAmount = (float) $validated['amount'];
+        
+        // Update loan balance and amount paid
+        $loan->update([
+            'amount_paid' => $loan->amount_paid + $paymentAmount,
+            'balance' => max(0, $loan->balance - $paymentAmount),
+        ]);
+
+        // Update repayment schedule status
+        $this->updateRepaymentScheduleStatus($loan, $paymentAmount, $validated['payment_date']);
+
+        // Create loan payment record
+        \App\Models\LoanPayment::create([
+            'loan_id' => $loan->id,
+            'payment_number' => 'PAY-' . date('Ymd') . '-' . str_pad((string) rand(1, 9999), 4, '0', STR_PAD_LEFT),
+            'payment_date' => $validated['payment_date'],
+            'amount' => $paymentAmount,
+            'payment_method' => $validated['payment_method'],
+            'notes' => $validated['notes'] ?? null,
+            'status' => 'completed',
+        ]);
+
+        // Check if loan is fully paid
+        if ($loan->balance <= 0) {
+            $loan->update(['status' => 'paid']);
+        }
+
+        $this->success('Payment recorded successfully.');
+
+        return redirect()->back();
+    }
+
+    private function updateRepaymentScheduleStatus(Loan $loan, float $paymentAmount, string $paymentDate)
+    {
+        $schedules = $loan->repaymentSchedules()->where('status', 'pending')->orderBy('installment_number')->get();
+        
+        $remainingAmount = $paymentAmount;
+        
+        foreach ($schedules as $schedule) {
+            if ($remainingAmount <= 0) break;
+            
+            $scheduleAmount = (float) $schedule->total_amount;
+            
+            if ($remainingAmount >= $scheduleAmount) {
+                // Full payment for this installment
+                $schedule->update([
+                    'status' => 'paid',
+                    'amount_paid' => $scheduleAmount,
+                    'paid_date' => $paymentDate,
+                ]);
+                $remainingAmount -= $scheduleAmount;
+            } else {
+                // Partial payment
+                $schedule->update([
+                    'status' => 'partial',
+                    'amount_paid' => $remainingAmount,
+                    'paid_date' => $paymentDate,
+                ]);
+                $remainingAmount = 0;
+            }
+        }
+    }
+
     public function importLoanPayments(Request $request)
     {
         Gate::authorize('admin-only');

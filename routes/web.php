@@ -80,6 +80,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/loans/create', [AdminLoanController::class, 'create'])->name('loans.create');
     Route::post('/loans', [AdminLoanController::class, 'store'])->name('loans.store');
     Route::get('/loans/{encryptedLoanNumber}', [AdminLoanController::class, 'show'])->name('loans.show');
+    Route::post('/loans/{encryptedLoanNumber}/recordPayment', [AdminLoanController::class, 'recordPayment'])->name('loans.recordPayment');
     Route::get('/loans/{id}/edit', [AdminLoanController::class, 'edit'])->name('loans.edit');
     Route::put('/loans/{id}', [AdminLoanController::class, 'update'])->name('loans.update');
     Route::delete('/loans/{id}', [AdminLoanController::class, 'destroy'])->name('loans.destroy');
