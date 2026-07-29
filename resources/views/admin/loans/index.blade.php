@@ -158,10 +158,25 @@
                 </div>
               </td>
               <td class="text-right whitespace-nowrap">
-                <a href="{{ route('admin.loans.show', $encryptedId) }}"
-                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-[11px] font-bold transition-colors">
-                  <i class="fa-solid fa-eye text-[10px]"></i> View
-                </a>
+                <div class="flex items-center justify-end gap-2">
+                  @if($loan->status === 'pending')
+                  <form method="POST" action="{{ route('admin.loans.approve', $loan->id) }}" onsubmit="return confirm('Are you sure you want to approve this loan?');">
+                    @csrf
+                    <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white text-[11px] font-bold transition-colors">
+                      <i class="fa-solid fa-check text-[10px]"></i> Approve
+                    </button>
+                  </form>
+                  @elseif($loan->status === 'approved')
+                  <a href="{{ route('admin.loans.show', $encryptedId) }}#tab-overview"
+                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold transition-colors">
+                    <i class="fa-solid fa-hand-holding-dollar text-[10px]"></i> Disburse
+                  </a>
+                  @endif
+                  <a href="{{ route('admin.loans.show', $encryptedId) }}"
+                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-[11px] font-bold transition-colors">
+                    <i class="fa-solid fa-eye text-[10px]"></i> View
+                  </a>
+                </div>
               </td>
             </tr>
           @empty
