@@ -291,7 +291,7 @@
         </h3>
       </div>
 
-      @if($loan['status'] === 'active' || $loan['status'] === 'disbursed')
+      @if(in_array($loan['status'], ['approved', 'disbursed', 'active']))
       <form method="POST" action="{{ route('admin.loans.recordPayment', encryptId($loanNumber)) }}">
         @csrf
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -344,7 +344,7 @@
       @else
       <div class="text-center py-8">
         <i class="fa-solid fa-circle-xmark text-4xl text-gray-400 mb-3 block"></i>
-        <p class="text-sm font-semibold text-gray-600 dark:text-gray-400">Payment recording is only available for active or disbursed loans</p>
+        <p class="text-sm font-semibold text-gray-600 dark:text-gray-400">Payment recording is only available for approved, disbursed, or active loans</p>
       </div>
       @endif
     </div>
