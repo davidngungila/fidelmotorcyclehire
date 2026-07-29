@@ -104,7 +104,8 @@
     </div>
 
     <div class="flex items-center gap-3">
-      <input type="checkbox" name="auto_renew" id="auto_renew" {{ old('auto_renew', $product->auto_renew) ? 'checked' : '' }} class="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+      <input type="hidden" name="auto_renew" value="0">
+      <input type="checkbox" name="auto_renew" id="auto_renew" value="1" {{ old('auto_renew', $product->auto_renew) ? 'checked' : '' }} class="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
       <label for="auto_renew" class="text-sm text-gray-700 dark:text-gray-300">Auto-renew investment</label>
     </div>
 
