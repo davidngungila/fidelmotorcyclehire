@@ -12,12 +12,6 @@
             <h1 class="text-xl lg:text-2xl font-bold text-primary-900 dark:text-white">Loan Repayments</h1>
             <p class="text-sm text-primary-600 dark:text-primary-400 mt-1">Track and manage loan repayment transactions</p>
         </div>
-        <div class="flex items-center gap-3">
-            <button class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors">
-                <i class="fa-solid fa-plus text-xs"></i>
-                Record Payment
-            </button>
-        </div>
     </div>
 
     <!-- Stats Cards -->
