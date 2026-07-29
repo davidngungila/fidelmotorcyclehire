@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@push('styles')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@endpush
+
 @section('layout_content')
 
 <div class="flex h-screen overflow-hidden" x-data="{ loading: false }">
@@ -522,5 +526,62 @@
     </main>
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    @if(session()->has('success'))
+      Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: '{{ session()->get('success') }}',
+        confirmButtonColor: '#059669',
+        timer: 3000,
+        timerProgressBar: true
+      });
+    @endif
+
+    @if(session()->has('error'))
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: '{{ session()->get('error') }}',
+        confirmButtonColor: '#dc2626',
+        timer: 5000,
+        timerProgressBar: true
+      });
+    @endif
+
+    @if(session()->has('warning'))
+      Swal.fire({
+        icon: 'warning',
+        title: 'Warning',
+        text: '{{ session()->get('warning') }}',
+        confirmButtonColor: '#d97706',
+        timer: 4000,
+        timerProgressBar: true
+      });
+    @endif
+
+    @if(session()->has('info'))
+      Swal.fire({
+        icon: 'info',
+        title: 'Information',
+        text: '{{ session()->get('info') }}',
+        confirmButtonColor: '#2563eb',
+        timer: 3000,
+        timerProgressBar: true
+      });
+    @endif
+
+    @if($errors->any())
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        html: '<ul class="text-left">' + @foreach($errors->all() as $error) '<li>{{ $error }}</li>' @endforeach + '</ul>',
+        confirmButtonColor: '#dc2626'
+      });
+    @endif
+  });
+</script>
 
 @endsection
