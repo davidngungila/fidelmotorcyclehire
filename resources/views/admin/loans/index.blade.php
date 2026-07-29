@@ -121,7 +121,7 @@
               $status = $dashboardService->loanStatusBadge($loan->status ?? null);
               $progress = $amount > 0 ? min(($paid / $amount) * 100, 100) : 0;
               $rowNum = ($loans->currentPage() - 1) * $loans->perPage() + $index + 1;
-              $encryptedId = \App\Services\EncryptedIdService::encrypt($loan->loan_number);
+              $encryptedId = @encryptId($loan->loan_number);
             @endphp
             <tr class="group">
               <td class="text-xs text-primary-400 dark:text-primary-500 font-mono">{{ $rowNum }}.</td>
