@@ -269,7 +269,7 @@
         </div>
       </div>
 
-      <form method="POST" action="{{ route('admin.loans.disburse', $loan['id']) }}">
+      <form method="POST" action="{{ route('admin.loans.disburse', $loan['id']) }}" id="disburseForm">
         @csrf
         <div class="space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -324,7 +324,7 @@
             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Remarks</label>
             <textarea name="remarks" rows="2" placeholder="Additional notes (optional)" class="form-input py-2.5 px-4"></textarea>
           </div>
-          <button type="submit" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-colors">
+          <button type="button" onclick="confirmDisburse()" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-colors">
             <i class="fa-solid fa-hand-holding-dollar text-xs"></i> Disburse Loan
           </button>
         </div>
@@ -646,6 +646,23 @@
     }).then((result) => {
       if (result.isConfirmed) {
         document.getElementById('approveForm').submit();
+      }
+    });
+  }
+
+  function confirmDisburse() {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'Do you want to disburse this loan?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#2563eb',
+      cancelButtonColor: '#dc2626',
+      confirmButtonText: 'Yes, disburse it!',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        document.getElementById('disburseForm').submit();
       }
     });
   }
