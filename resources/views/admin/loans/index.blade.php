@@ -18,7 +18,7 @@
         <div class="relative">
           <i class="fa-solid fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-primary-400"></i>
           <input type="text" name="q" value="{{ $searchQuery ?? '' }}"
-                 placeholder="Search by loan #, member #, name, product..."
+                 placeholder="Search by loan #, member #, name, purpose..."
                  class="form-input pl-9 py-2.5 text-sm"
                  x-model="searchQuery"
                  @input.debounce.400ms="submitSearch"/>
@@ -45,6 +45,9 @@
         </div>
       </form>
     </div>
+    <a href="{{ route('admin.loans.create') }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold transition-colors">
+      <i class="fa-solid fa-plus text-xs"></i> Create Loan
+    </a>
   </div>
 
   <div class="glass p-5">

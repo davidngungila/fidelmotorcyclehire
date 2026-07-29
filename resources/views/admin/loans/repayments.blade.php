@@ -25,30 +25,30 @@
         <div class="bg-white dark:bg-dark-card rounded-xl p-5 shadow-sm border border-primary-100 dark:border-primary-800">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-xs text-primary-600 dark:text-primary-400 font-medium">Today</p>
-                    <p class="text-2xl font-bold text-primary-900 dark:text-white mt-1">TZS 2.5M</p>
+                    <p class="text-xs text-primary-600 dark:text-primary-400 font-medium">Active Loans</p>
+                    <p class="text-2xl font-bold text-primary-900 dark:text-white mt-1">{{ $loans->count() }}</p>
                 </div>
                 <div class="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                    <i class="fa-solid fa-calendar-day text-green-600 dark:text-green-400"></i>
+                    <i class="fa-solid fa-check text-green-600 dark:text-green-400"></i>
                 </div>
             </div>
         </div>
         <div class="bg-white dark:bg-dark-card rounded-xl p-5 shadow-sm border border-primary-100 dark:border-primary-800">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-xs text-primary-600 dark:text-primary-400 font-medium">This Week</p>
-                    <p class="text-2xl font-bold text-primary-900 dark:text-white mt-1">TZS 15M</p>
+                    <p class="text-xs text-primary-600 dark:text-primary-400 font-medium">Total Due</p>
+                    <p class="text-2xl font-bold text-primary-900 dark:text-white mt-1">{{ number_format($loans->sum('balance'), 0) }} TSh</p>
                 </div>
                 <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                    <i class="fa-solid fa-calendar-week text-blue-600 dark:text-blue-400"></i>
+                    <i class="fa-solid fa-money-bill text-blue-600 dark:text-blue-400"></i>
                 </div>
             </div>
         </div>
         <div class="bg-white dark:bg-dark-card rounded-xl p-5 shadow-sm border border-primary-100 dark:border-primary-800">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-xs text-primary-600 dark:text-primary-400 font-medium">This Month</p>
-                    <p class="text-2xl font-bold text-primary-900 dark:text-white mt-1">TZS 45M</p>
+                    <p class="text-xs text-primary-600 dark:text-primary-400 font-medium">Total Paid</p>
+                    <p class="text-2xl font-bold text-primary-900 dark:text-white mt-1">{{ number_format($loans->sum('amount_paid'), 0) }} TSh</p>
                 </div>
                 <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
                     <i class="fa-solid fa-calendar text-purple-600 dark:text-purple-400"></i>
@@ -58,8 +58,8 @@
         <div class="bg-white dark:bg-dark-card rounded-xl p-5 shadow-sm border border-primary-100 dark:border-primary-800">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-xs text-primary-600 dark:text-primary-400 font-medium">Overdue</p>
-                    <p class="text-2xl font-bold text-primary-900 dark:text-white mt-1">TZS 8M</p>
+                    <p class="text-xs text-primary-600 dark:text-primary-400 font-medium">Defaulted</p>
+                    <p class="text-2xl font-bold text-primary-900 dark:text-white mt-1">{{ $loans->where('status', 'defaulted')->count() }}</p>
                 </div>
                 <div class="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
                     <i class="fa-solid fa-triangle-exclamation text-red-600 dark:text-red-400"></i>
@@ -91,54 +91,53 @@
             <table class="w-full">
                 <thead>
                     <tr class="bg-primary-50 dark:bg-primary-900/20">
-                        <th class="text-left px-4 py-3 text-xs font-semibold text-primary-600 dark:text-primary-400">Payment ID</th>
-                        <th class="text-left px-4 py-3 text-xs font-semibold text-primary-600 dark:text-primary-400">Loan ID</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold text-primary-600 dark:text-primary-400">Loan Number</th>
                         <th class="text-left px-4 py-3 text-xs font-semibold text-primary-600 dark:text-primary-400">Member</th>
-                        <th class="text-left px-4 py-3 text-xs font-semibold text-primary-600 dark:text-primary-400">Amount</th>
-                        <th class="text-left px-4 py-3 text-xs font-semibold text-primary-600 dark:text-primary-400">Method</th>
-                        <th class="text-left px-4 py-3 text-xs font-semibold text-primary-600 dark:text-primary-400">Date</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold text-primary-600 dark:text-primary-400">Purpose</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold text-primary-600 dark:text-primary-400">Balance</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold text-primary-600 dark:text-primary-400">Paid</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold text-primary-600 dark:text-primary-400">Status</th>
+                        <th class="text-left px-4 py-3 text-xs font-semibold text-primary-600 dark:text-primary-400">Disbursement Date</th>
                         <th class="text-right px-4 py-3 text-xs font-semibold text-primary-600 dark:text-primary-400">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="border-b border-primary-100 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/10 transition-colors">
-                        <td class="px-4 py-3 text-sm font-medium text-primary-900 dark:text-white">PAY-001234</td>
-                        <td class="px-4 py-3 text-sm text-primary-700 dark:text-primary-300">LN-0001</td>
-                        <td class="px-4 py-3 text-sm text-primary-700 dark:text-primary-300">John Mwangi</td>
-                        <td class="px-4 py-3 text-sm font-medium text-primary-900 dark:text-white">TZS 250,000</td>
-                        <td class="px-4 py-3 text-sm text-primary-700 dark:text-primary-300">Bank Transfer</td>
-                        <td class="px-4 py-3 text-sm text-primary-600 dark:text-primary-400">2024-07-28</td>
-                        <td class="px-4 py-3 text-right">
-                            <button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-xs font-medium transition-colors">
-                                <i class="fa-solid fa-eye text-[10px]"></i> View
-                            </button>
-                        </td>
-                    </tr>
-                    <tr class="border-b border-primary-100 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/10 transition-colors">
-                        <td class="px-4 py-3 text-sm font-medium text-primary-900 dark:text-white">PAY-001235</td>
-                        <td class="px-4 py-3 text-sm text-primary-700 dark:text-primary-300">LN-0002</td>
-                        <td class="px-4 py-3 text-sm text-primary-700 dark:text-primary-300">Sarah Kamau</td>
-                        <td class="px-4 py-3 text-sm font-medium text-primary-900 dark:text-white">TZS 150,000</td>
-                        <td class="px-4 py-3 text-sm text-primary-700 dark:text-primary-300">Mobile Money</td>
-                        <td class="px-4 py-3 text-sm text-primary-600 dark:text-primary-400">2024-07-28</td>
-                        <td class="px-4 py-3 text-right">
-                            <button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-xs font-medium transition-colors">
-                                <i class="fa-solid fa-eye text-[10px]"></i> View
-                            </button>
-                        </td>
-                    </tr>
+                    @forelse($loans as $loan)
+                        <tr class="border-b border-primary-100 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/10 transition-colors">
+                            <td class="px-4 py-3 text-sm font-medium text-primary-900 dark:text-white">{{ $loan->loan_number }}</td>
+                            <td class="px-4 py-3 text-sm text-primary-700 dark:text-primary-300">{{ $loan->user->name ?? 'Unknown' }}</td>
+                            <td class="px-4 py-3 text-sm text-primary-700 dark:text-primary-300">{{ ucfirst($loan->purpose) }}</td>
+                            <td class="px-4 py-3 text-sm font-medium text-primary-900 dark:text-white">{{ number_format($loan->balance, 0) }} TSh</td>
+                            <td class="px-4 py-3 text-sm font-medium text-primary-900 dark:text-white">{{ number_format($loan->amount_paid, 0) }} TSh</td>
+                            <td class="px-4 py-3">
+                                @php
+                                    $status = $dashboardService->loanStatusBadge($loan->status);
+                                @endphp
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {{ $status['class'] }}">{{ $status['label'] }}</span>
+                            </td>
+                            <td class="px-4 py-3 text-sm text-primary-600 dark:text-primary-400">{{ $loan->disbursement_date ? $loan->disbursement_date->format('Y-m-d') : '-' }}</td>
+                            <td class="px-4 py-3 text-right">
+                                <a href="{{ route('admin.loans.show', encrypt($loan->loan_number)) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-xs font-medium transition-colors">
+                                    <i class="fa-solid fa-eye text-[10px]"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="8" class="px-4 py-8 text-center text-primary-600 dark:text-primary-400">
+                                No active loans found
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
+        @if($loans->hasPages())
         <div class="p-4 border-t border-primary-100 dark:border-primary-800 flex items-center justify-between">
-            <p class="text-xs text-primary-600 dark:text-primary-400">Showing 1-2 of 156 payments</p>
-            <div class="flex items-center gap-2">
-                <button class="px-3 py-1.5 rounded-lg border border-primary-200 dark:border-primary-700 text-xs font-medium text-primary-700 dark:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Previous</button>
-                <button class="px-3 py-1.5 rounded-lg bg-primary-600 text-white text-xs font-medium">1</button>
-                <button class="px-3 py-1.5 rounded-lg border border-primary-200 dark:border-primary-700 text-xs font-medium text-primary-700 dark:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">2</button>
-                <button class="px-3 py-1.5 rounded-lg border border-primary-200 dark:border-primary-700 text-xs font-medium text-primary-700 dark:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Next</button>
-            </div>
+            <p class="text-xs text-primary-600 dark:text-primary-400">Showing {{ $loans->firstItem() }}-{{ $loans->lastItem() }} of {{ $loans->total() }} loans</p>
+            {{ $loans->links() }}
         </div>
+        @endif
     </div>
 </div>
 @endsection
