@@ -13,10 +13,10 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Member *</label>
-          <select name="user_id" required class="form-input py-2.5 px-4">
+          <select name="user_id" id="user_id" required class="form-input py-2.5 px-4" onchange="updateMemberNumber()">
             <option value="">Select a member</option>
             @foreach(\App\Models\User::where('role', 'member')->get() as $member)
-              <option value="{{ $member->id }}" {{ old('user_id') == $member->id ? 'selected' : '' }}>
+              <option value="{{ $member->id }}" data-member-number="{{ $member->member_number }}" {{ old('user_id') == $member->id ? 'selected' : '' }}>
                 {{ $member->name }} ({{ $member->member_number }})
               </option>
             @endforeach
@@ -27,10 +27,10 @@
         </div>
 
         <div>
-          <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Member Number *</label>
-          <input type="text" name="member_number" value="{{ old('member_number') }}" required
-                 placeholder="Enter member number"
-                 class="form-input py-2.5 px-4">
+          <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Member Number</label>
+          <input type="text" name="member_number" id="member_number" value="{{ old('member_number') }}"
+                 placeholder="Auto-filled from member selection"
+                 class="form-input py-2.5 px-4" readonly>
           @error('member_number')
             <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
           @enderror
@@ -143,5 +143,24 @@
     </form>
   </div>
 </div>
+
+<script>
+function updateMemberNumber() {
+  const select = document.getElementById('user_id');
+  const memberNumberInput = document.getElementById('member_number');
+  const selectedOption = select.options[select.selectedIndex];
+  
+  if (selectedOption && selectedOption.value) {
+    memberNumberInput.value = selectedOption.getAttribute('data-member-number') || '';
+  } else {
+    memberNumberInput.value = '';
+  }
+}
+
+// Auto-fill on page load if a member is already selected
+document.addEventListener('DOMContentLoaded', function() {
+  updateMemberNumber();
+});
+</script>
 
 @endsection
