@@ -74,12 +74,33 @@
         <p class="text-primary-500 text-[10px] font-bold uppercase tracking-widest px-3 pt-4 pb-1">Members Management</p>
       </div>
 
-      <a href="{{ route('admin.members.index') }}"
-         class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-primary-200 hover:text-white transition-all duration-150
-                {{ request()->routeIs('admin.members.*') ? 'active' : '' }}">
-        <i class="fa-solid fa-users w-4 text-center flex-shrink-0"></i>
-        <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Members</span>
-      </a>
+      <div x-data="{ open: {{ request()->routeIs('admin.members.*') ? 'true' : 'false' }} }" class="sidebar-dropdown">
+        <button @click="open = !open"
+                class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-primary-200 hover:text-white transition-all duration-150
+                       {{ request()->routeIs('admin.members.*') ? 'active' : '' }}">
+          <i class="fa-solid fa-users w-4 text-center flex-shrink-0"></i>
+          <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap flex-1 text-left">Members</span>
+          <i x-show="!sidebarCollapsed" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'" class="fa-solid text-[10px] transition-transform"></i>
+        </button>
+        <div x-show="open" x-transition class="mt-1 space-y-0.5 pl-6">
+          <a href="{{ route('admin.members.index') }}"
+             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
+                    {{ request()->routeIs('admin.members.index') ? 'active' : '' }}">
+            <i class="fa-solid fa-list w-4 text-center flex-shrink-0"></i>
+            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">All Members</span>
+          </a>
+          <a href="{{ route('admin.members.index') }}?status=active"
+             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150">
+            <i class="fa-solid fa-user-check w-4 text-center flex-shrink-0"></i>
+            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Active Members</span>
+          </a>
+          <a href="{{ route('admin.members.index') }}?status=inactive"
+             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150">
+            <i class="fa-solid fa-user-xmark w-4 text-center flex-shrink-0"></i>
+            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Inactive Members</span>
+          </a>
+        </div>
+      </div>
 
       <div x-data="{ open: {{ request()->routeIs('admin.loans.*') ? 'true' : 'false' }} }" class="sidebar-dropdown">
         <button @click="open = !open"
@@ -111,10 +132,10 @@
         </div>
       </div>
 
-      <div x-data="{ open: {{ request()->routeIs('admin.savings.*') || request()->routeIs('admin.deposits.*') || request()->routeIs('admin.saving-plans.*') ? 'true' : 'false' }} }" class="sidebar-dropdown">
+      <div x-data="{ open: {{ request()->routeIs('admin.savings.*') || request()->routeIs('admin.deposits.*') || request()->routeIs('admin.saving-plans.*') || request()->routeIs('admin.transactions.*') ? 'true' : 'false' }} }" class="sidebar-dropdown">
         <button @click="open = !open"
                 class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-primary-200 hover:text-white transition-all duration-150
-                       {{ request()->routeIs('admin.savings.*') || request()->routeIs('admin.deposits.*') || request()->routeIs('admin.saving-plans.*') ? 'active' : '' }}">
+                       {{ request()->routeIs('admin.savings.*') || request()->routeIs('admin.deposits.*') || request()->routeIs('admin.saving-plans.*') || request()->routeIs('admin.transactions.*') ? 'active' : '' }}">
           <i class="fa-solid fa-piggy-bank w-4 text-center flex-shrink-0"></i>
           <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap flex-1 text-left">Savings & Deposits</span>
           <i x-show="!sidebarCollapsed" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'" class="fa-solid text-[10px] transition-transform"></i>
@@ -138,6 +159,12 @@
             <i class="fa-solid fa-bullseye w-4 text-center flex-shrink-0"></i>
             <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Saving Plan</span>
           </a>
+          <a href="{{ route('admin.transactions.index') }}"
+             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
+                    {{ request()->routeIs('admin.transactions.*') ? 'active' : '' }}">
+            <i class="fa-solid fa-receipt w-4 text-center flex-shrink-0"></i>
+            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Transactions</span>
+          </a>
           <a href="{{ route('admin.statements.index') }}"
              class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
                     {{ request()->routeIs('admin.statements.*') ? 'active' : '' }}">
@@ -147,19 +174,61 @@
         </div>
       </div>
 
-      <a href="{{ route('admin.swf.index') }}"
-         class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-primary-200 hover:text-white transition-all duration-150
-                {{ request()->routeIs('admin.swf.*') ? 'active' : '' }}">
-        <i class="fa-solid fa-shield-halved w-4 text-center flex-shrink-0"></i>
-        <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">SWF</span>
-      </a>
+      <div x-data="{ open: {{ request()->routeIs('admin.swf.*') ? 'true' : 'false' }} }" class="sidebar-dropdown">
+        <button @click="open = !open"
+                class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-primary-200 hover:text-white transition-all duration-150
+                       {{ request()->routeIs('admin.swf.*') ? 'active' : '' }}">
+          <i class="fa-solid fa-shield-halved w-4 text-center flex-shrink-0"></i>
+          <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap flex-1 text-left">SWF</span>
+          <i x-show="!sidebarCollapsed" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'" class="fa-solid text-[10px] transition-transform"></i>
+        </button>
+        <div x-show="open" x-transition class="mt-1 space-y-0.5 pl-6">
+          <a href="{{ route('admin.swf.index') }}"
+             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
+                    {{ request()->routeIs('admin.swf.index') ? 'active' : '' }}">
+            <i class="fa-solid fa-list w-4 text-center flex-shrink-0"></i>
+            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">All SWF</span>
+          </a>
+          <a href="{{ route('admin.swf.index') }}?status=active"
+             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150">
+            <i class="fa-solid fa-user-check w-4 text-center flex-shrink-0"></i>
+            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Active SWF</span>
+          </a>
+          <a href="{{ route('admin.swf.index') }}?status=matured"
+             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150">
+            <i class="fa-solid fa-calendar-check w-4 text-center flex-shrink-0"></i>
+            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Matured SWF</span>
+          </a>
+        </div>
+      </div>
 
-      <a href="{{ route('admin.investments.index') }}"
-         class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-primary-200 hover:text-white transition-all duration-150
-                {{ request()->routeIs('admin.investments.*') ? 'active' : '' }}">
-        <i class="fa-solid fa-chart-line w-4 text-center flex-shrink-0"></i>
-        <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Investments</span>
-      </a>
+      <div x-data="{ open: {{ request()->routeIs('admin.investments.*') ? 'true' : 'false' }} }" class="sidebar-dropdown">
+        <button @click="open = !open"
+                class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-primary-200 hover:text-white transition-all duration-150
+                       {{ request()->routeIs('admin.investments.*') ? 'active' : '' }}">
+          <i class="fa-solid fa-chart-line w-4 text-center flex-shrink-0"></i>
+          <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap flex-1 text-left">Investments</span>
+          <i x-show="!sidebarCollapsed" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'" class="fa-solid text-[10px] transition-transform"></i>
+        </button>
+        <div x-show="open" x-transition class="mt-1 space-y-0.5 pl-6">
+          <a href="{{ route('admin.investments.index') }}"
+             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
+                    {{ request()->routeIs('admin.investments.index') ? 'active' : '' }}">
+            <i class="fa-solid fa-list w-4 text-center flex-shrink-0"></i>
+            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">All Investments</span>
+          </a>
+          <a href="{{ route('admin.investments.index') }}?status=active"
+             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150">
+            <i class="fa-solid fa-chart-line w-4 text-center flex-shrink-0"></i>
+            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Active Investments</span>
+          </a>
+          <a href="{{ route('admin.investments.index') }}?status=matured"
+             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150">
+            <i class="fa-solid fa-calendar-check w-4 text-center flex-shrink-0"></i>
+            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Matured Investments</span>
+          </a>
+        </div>
+      </div>
 
       <a href="{{ route('admin.shares.index') }}"
          class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-primary-200 hover:text-white transition-all duration-150
@@ -199,18 +268,6 @@
                     {{ request()->routeIs('admin.google-sheets.customers') ? 'active' : '' }}">
             <i class="fa-solid fa-users w-4 text-center flex-shrink-0"></i>
             <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Customers</span>
-          </a>
-          <a href="{{ route('admin.saving-plans.index') }}"
-             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
-                    {{ request()->routeIs('admin.saving-plans.*') ? 'active' : '' }}">
-            <i class="fa-solid fa-bullseye w-4 text-center flex-shrink-0"></i>
-            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Saving Plans</span>
-          </a>
-          <a href="{{ route('admin.transactions.index') }}"
-             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
-                    {{ request()->routeIs('admin.transactions.*') ? 'active' : '' }}">
-            <i class="fa-solid fa-receipt w-4 text-center flex-shrink-0"></i>
-            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Transactions</span>
           </a>
           <a href="{{ route('admin.google-sheets.logs') }}"
              class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
