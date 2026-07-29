@@ -7,7 +7,10 @@
 @section('content')
 <div class="max-w-4xl mx-auto">
   <div class="glass p-6">
-    <form method="POST" action="{{ route('admin.loan-products.update', $loanProduct->id) }}">
+    @php
+      $encryptedId = @encryptId($loanProduct->id);
+    @endphp
+    <form method="POST" action="{{ route('admin.loan-products.update', $encryptedId) }}">
       @csrf
       @method('PUT')
 

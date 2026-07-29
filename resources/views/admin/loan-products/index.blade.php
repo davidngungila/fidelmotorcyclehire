@@ -101,6 +101,9 @@
                 </thead>
                 <tbody>
                     @forelse($loanProducts as $product)
+                        @php
+                            $encryptedId = @encryptId($product->id);
+                        @endphp
                         <tr class="border-b border-primary-100 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/10 transition-colors">
                             <td class="px-4 py-3 text-sm font-medium text-primary-900 dark:text-white">{{ $product->name }}</td>
                             <td class="px-4 py-3 text-sm text-primary-700 dark:text-primary-300 font-mono">{{ $product->code }}</td>
@@ -116,19 +119,16 @@
                             </td>
                             <td class="px-4 py-3 text-right">
                                 <div class="flex items-center justify-end gap-2">
-                                    <a href="{{ route('admin.loan-products.show', $product->id) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-xs font-medium transition-colors">
-                                        <i class="fa-solid fa-eye text-[10px]"></i> View
-                                    </a>
-                                    <a href="{{ route('admin.loan-products.edit', $product->id) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/40 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-300 text-xs font-medium transition-colors">
+                                    <a href="{{ route('admin.loan-products.edit', $encryptedId) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/40 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-300 text-xs font-medium transition-colors">
                                         <i class="fa-solid fa-pen text-[10px]"></i> Edit
                                     </a>
-                                    <form method="POST" action="{{ route('admin.loan-products.destroy', $product->id) }}" onsubmit="return confirm('Are you sure you want to delete this loan product?');">
+                                    <form method="POST" action="{{ route('admin.loan-products.destroy', $encryptedId) }}" id="deleteForm-{{ $product->id }}" class="hidden">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-100 hover:bg-red-200 dark:bg-red-900/40 dark:hover:bg-red-900/60 text-red-700 dark:text-red-300 text-xs font-medium transition-colors">
-                                            <i class="fa-solid fa-trash text-[10px]"></i> Delete
-                                        </button>
                                     </form>
+                                    <button type="button" onclick="confirmDelete({{ $product->id }})" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-100 hover:bg-red-200 dark:bg-red-900/40 dark:hover:bg-red-900/60 text-red-700 dark:text-red-300 text-xs font-medium transition-colors">
+                                        <i class="fa-solid fa-trash text-[10px]"></i> Delete
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -152,4 +152,26 @@
         @endif
     </div>
 </div>
+
+@push('scripts')
+<script>
+  function confirmDelete(productId) {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'Do you want to delete this loan product?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        document.getElementById('deleteForm-' + productId).submit();
+      }
+    });
+  }
+</script>
+@endpush
+
 @endsection

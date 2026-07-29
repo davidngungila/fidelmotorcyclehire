@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\LoanProduct;
+use App\Services\EncryptedIdService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Auth;
@@ -11,6 +12,11 @@ use App\Models\ActivityLog;
 
 class LoanProductController extends Controller
 {
+    public function __construct(
+        protected EncryptedIdService $encryptedIdService,
+    ) {
+    }
+
     public function index(Request $request)
     {
         Gate::authorize('admin-only');
@@ -87,20 +93,16 @@ class LoanProductController extends Controller
             ->with('success', 'Loan product created successfully.');
     }
 
-    public function show($id)
+    public function edit($encryptedId)
     {
         Gate::authorize('admin-only');
 
-        $loanProduct = LoanProduct::with('loans')->findOrFail($id);
-
-        return view('admin.loan-products.show', [
-            'loanProduct' => $loanProduct,
-        ]);
-    }
-
-    public function edit($id)
-    {
-        Gate::authorize('admin-only');
+        try {
+            $id = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            return redirect()->route('admin.loan-products.index')
+                ->with('error', 'Invalid loan product ID.');
+        }
 
         $loanProduct = LoanProduct::findOrFail($id);
 
@@ -109,9 +111,16 @@ class LoanProductController extends Controller
         ]);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $encryptedId)
     {
         Gate::authorize('admin-only');
+
+        try {
+            $id = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            return redirect()->route('admin.loan-products.index')
+                ->with('error', 'Invalid loan product ID.');
+        }
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -145,9 +154,16 @@ class LoanProductController extends Controller
             ->with('success', 'Loan product updated successfully.');
     }
 
-    public function destroy($id)
+    public function destroy($encryptedId)
     {
         Gate::authorize('admin-only');
+
+        try {
+            $id = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            return redirect()->route('admin.loan-products.index')
+                ->with('error', 'Invalid loan product ID.');
+        }
 
         $loanProduct = LoanProduct::findOrFail($id);
         $loanProductName = $loanProduct->name;
