@@ -148,8 +148,11 @@ class LoanController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        // Generate loan number
-        $validated['loan_number'] = 'LOAN-' . date('Ymd') . '-' . str_pad((string) rand(1, 9999), 4, '0', STR_PAD_LEFT);
+        // Generate sequential loan number
+        $today = date('Ymd');
+        $loanCountToday = Loan::where('loan_number', 'like', 'LN' . $today . '%')->count();
+        $sequentialNumber = str_pad((string) ($loanCountToday + 1), 4, '0', STR_PAD_LEFT);
+        $validated['loan_number'] = 'LN' . $today . $sequentialNumber;
         $validated['status'] = 'pending';
 
         $loan = Loan::create($validated);
@@ -442,9 +445,12 @@ class LoanController extends Controller
         $totalDeductions = $processingFee + $insuranceFee + $otherDeductions;
         $netAmountPaid = $loan->principal_amount - $totalDeductions;
 
-        // Create disbursement record
+        // Create disbursement record with sequential number
+        $today = date('Ymd');
+        $disbursementCountToday = \App\Models\LoanDisbursement::where('disbursement_number', 'like', 'LND' . $today . '%')->count();
+        $sequentialNumber = str_pad((string) ($disbursementCountToday + 1), 4, '0', STR_PAD_LEFT);
         \App\Models\LoanDisbursement::create([
-            'disbursement_number' => 'LND-' . date('Y') . '-' . str_pad((string) rand(1, 9999), 4, '0', STR_PAD_LEFT),
+            'disbursement_number' => 'LND' . $today . $sequentialNumber,
             'loan_id' => $loan->id,
             'loan_number' => $loan->loan_number,
             'member_number' => $loan->member_number,
@@ -526,14 +532,17 @@ class LoanController extends Controller
         // Update repayment schedule status
         $this->updateRepaymentScheduleStatus($loan, $paymentAmount, $validated['payment_date']);
 
-        // Create loan payment record
+        // Create loan payment record with sequential reference number
+        $today = date('Ymd');
+        $paymentCountToday = \App\Models\LoanPayment::where('reference_number', 'like', 'PAY' . $today . '%')->count();
+        $sequentialNumber = str_pad((string) ($paymentCountToday + 1), 4, '0', STR_PAD_LEFT);
         \App\Models\LoanPayment::create([
             'loan_id' => $loan->id,
             'customer_id' => $loan->member_number,
             'payment_amount' => $paymentAmount,
             'payment_date' => $validated['payment_date'],
             'payment_method' => $validated['payment_method'],
-            'reference_number' => 'PAY-' . date('Ymd') . '-' . str_pad((string) rand(1, 9999), 4, '0', STR_PAD_LEFT),
+            'reference_number' => 'PAY' . $today . $sequentialNumber,
             'principal_amount' => $paymentAmount,
         ]);
 
