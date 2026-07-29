@@ -134,6 +134,7 @@ class LoanController extends Controller
         Gate::authorize('admin-only');
 
         $validated = $request->validate([
+            'loan_product_id' => 'nullable|exists:loan_products,id',
             'user_id' => 'required|exists:users,id',
             'member_number' => 'required|string|max:50',
             'principal_amount' => 'required|numeric|min:0',

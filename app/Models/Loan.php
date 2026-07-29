@@ -13,6 +13,7 @@ class Loan extends Model
         'user_id',
         'member_number',
         'loan_number',
+        'loan_product_id',
         'principal_amount',
         'interest_rate',
         'term_months',

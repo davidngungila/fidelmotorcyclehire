@@ -12,6 +12,31 @@
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
+          <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Loan Product *</label>
+          <select name="loan_product_id" id="loan_product_id" required class="form-input py-2.5 px-4" onchange="updateLoanDetails()">
+            <option value="">Select a loan product</option>
+            @foreach(\App\Models\LoanProduct::active()->get() as $product)
+              <option value="{{ $product->id }}" 
+                      data-min-amount="{{ $product->min_amount }}"
+                      data-max-amount="{{ $product->max_amount }}"
+                      data-interest-rate="{{ $product->interest_rate }}"
+                      data-min-term="{{ $product->min_term_months }}"
+                      data-max-term="{{ $product->max_term_months }}"
+                      data-processing-fee="{{ $product->processing_fee }}"
+                      data-late-fee="{{ $product->late_fee }}"
+                      data-interest-type="{{ $product->interest_type }}"
+                      data-repayment-frequency="{{ $product->repayment_frequency }}"
+                      {{ old('loan_product_id') == $product->id ? 'selected' : '' }}>
+                {{ $product->name }} ({{ $product->code }})
+              </option>
+            @endforeach
+          </select>
+          @error('loan_product_id')
+            <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
+          @enderror
+        </div>
+
+        <div>
           <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Member *</label>
           <select name="user_id" id="user_id" required class="form-input py-2.5 px-4" onchange="updateMemberNumber()">
             <option value="">Select a member</option>
@@ -38,7 +63,7 @@
 
         <div>
           <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Principal Amount (TSh) *</label>
-          <input type="number" name="principal_amount" value="{{ old('principal_amount') }}" required min="0" step="0.01"
+          <input type="number" name="principal_amount" id="principal_amount" value="{{ old('principal_amount') }}" required min="0" step="0.01"
                  placeholder="Enter loan amount"
                  class="form-input py-2.5 px-4">
           @error('principal_amount')
@@ -48,8 +73,8 @@
 
         <div>
           <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Interest Rate (%) *</label>
-          <input type="number" name="interest_rate" value="{{ old('interest_rate', 0) }}" required min="0" max="100" step="0.01"
-                 placeholder="Enter interest rate"
+          <input type="number" name="interest_rate" id="interest_rate" value="{{ old('interest_rate') }}" required min="0" max="100" step="0.01"
+                 placeholder="Auto-filled from product"
                  class="form-input py-2.5 px-4">
           @error('interest_rate')
             <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
@@ -58,8 +83,8 @@
 
         <div>
           <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Term (Months) *</label>
-          <input type="number" name="term_months" value="{{ old('term_months') }}" required min="1"
-                 placeholder="Enter loan term in months"
+          <input type="number" name="term_months" id="term_months" value="{{ old('term_months') }}" required min="1"
+                 placeholder="Auto-filled from product"
                  class="form-input py-2.5 px-4">
           @error('term_months')
             <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
@@ -157,9 +182,36 @@ function updateMemberNumber() {
   }
 }
 
-// Auto-fill on page load if a member is already selected
+function updateLoanDetails() {
+  const select = document.getElementById('loan_product_id');
+  const selectedOption = select.options[select.selectedIndex];
+  
+  if (selectedOption && selectedOption.value) {
+    document.getElementById('interest_rate').value = selectedOption.getAttribute('data-interest-rate') || '';
+    document.getElementById('term_months').value = selectedOption.getAttribute('data-min-term') || '';
+    
+    const minAmount = selectedOption.getAttribute('data-min-amount');
+    const maxAmount = selectedOption.getAttribute('data-max-amount');
+    const principalAmountInput = document.getElementById('principal_amount');
+    
+    if (principalAmountInput.value === '' || parseFloat(principalAmountInput.value) < parseFloat(minAmount)) {
+      principalAmountInput.value = minAmount;
+    }
+    principalAmountInput.min = minAmount;
+    principalAmountInput.max = maxAmount;
+  } else {
+    document.getElementById('interest_rate').value = '';
+    document.getElementById('term_months').value = '';
+    document.getElementById('principal_amount').value = '';
+    document.getElementById('principal_amount').min = 0;
+    document.getElementById('principal_amount').max = '';
+  }
+}
+
+// Auto-fill on page load if product or member is pre-selected
 document.addEventListener('DOMContentLoaded', function() {
   updateMemberNumber();
+  updateLoanDetails();
 });
 </script>
 
