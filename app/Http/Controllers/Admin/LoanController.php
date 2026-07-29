@@ -176,7 +176,7 @@ class LoanController extends Controller
         }
 
         $balance = $principal;
-        $startDate = $loan->application_date;
+        $startDate = $loan->application_date ? $loan->application_date->format('Y-m-d') : date('Y-m-d');
 
         for ($i = 1; $i <= $termMonths; $i++) {
             $dueDate = date('Y-m-d', strtotime("+{$i} month", strtotime($startDate)));
