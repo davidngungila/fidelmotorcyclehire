@@ -16,7 +16,7 @@
           <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Member *</label>
           <select name="user_id" required class="form-input py-2.5 px-4">
             <option value="">Select a member</option>
-            @foreach(\App\Models\User::where('is_member', true)->get() as $member)
+            @foreach(\App\Models\User::where('role', 'member')->get() as $member)
               <option value="{{ $member->id }}" {{ old('user_id', $loan->user_id) == $member->id ? 'selected' : '' }}>
                 {{ $member->name }} ({{ $member->member_number }})
               </option>
