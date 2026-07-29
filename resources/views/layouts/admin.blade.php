@@ -541,6 +541,51 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    @if(session()->has('flash'))
+      @php
+        $flash = session()->get('flash');
+        $level = $flash['level'] ?? 'info';
+        $message = $flash['message'] ?? '';
+      @endphp
+      @if($level === 'success')
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: '{{ $message }}',
+          confirmButtonColor: '#059669',
+          timer: 3000,
+          timerProgressBar: true
+        });
+      @elseif($level === 'error')
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: '{{ $message }}',
+          confirmButtonColor: '#dc2626',
+          timer: 5000,
+          timerProgressBar: true
+        });
+      @elseif($level === 'warning')
+        Swal.fire({
+          icon: 'warning',
+          title: 'Warning',
+          text: '{{ $message }}',
+          confirmButtonColor: '#d97706',
+          timer: 4000,
+          timerProgressBar: true
+        });
+      @elseif($level === 'info')
+        Swal.fire({
+          icon: 'info',
+          title: 'Information',
+          text: '{{ $message }}',
+          confirmButtonColor: '#2563eb',
+          timer: 3000,
+          timerProgressBar: true
+        });
+      @endif
+    @endif
+
     @if(session()->has('success'))
       Swal.fire({
         icon: 'success',
