@@ -160,11 +160,21 @@ class LoanController extends Controller
 
     public function show(Request $request, string $encryptedLoanNumber)
     {
-        $loanNumber = $this->encryptedIdService->decrypt($encryptedLoanNumber);
+        try {
+            $loanNumber = $this->encryptedIdService->decrypt($encryptedLoanNumber);
+        } catch (\Exception $e) {
+            $this->error('Invalid loan number.');
+            return redirect()->route('admin.loans.index');
+        }
         
         Gate::authorize('admin-only');
 
-        $loan = Loan::with('user')->where('loan_number', $loanNumber)->firstOrFail();
+        $loan = Loan::with('user')->where('loan_number', $loanNumber)->first();
+
+        if (!$loan) {
+            $this->error("Loan {$loanNumber} not found.");
+            return redirect()->route('admin.loans.index');
+        }
 
         $loanAmount = (float) $loan->principal_amount;
         $paidAmount = (float) $loan->amount_paid;
