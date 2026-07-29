@@ -133,9 +133,9 @@
             <i class="fa-solid fa-money-bill-transfer w-4 text-center flex-shrink-0"></i>
             <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Loan Repayments</span>
           </a>
-          <a href="{{ route('admin.products.index') }}"
+          <a href="{{ route('admin.loan-products.index') }}"
              class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
-                    {{ request()->routeIs('admin.products.*') ? 'active' : '' }}">
+                    {{ request()->routeIs('admin.loan-products.*') ? 'active' : '' }}">
             <i class="fa-solid fa-box w-4 text-center flex-shrink-0"></i>
             <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Loan Products</span>
           </a>

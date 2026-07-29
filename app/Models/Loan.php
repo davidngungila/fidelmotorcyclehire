@@ -65,6 +65,11 @@ class Loan extends Model
         return $this->hasMany(LoanRepaymentSchedule::class);
     }
 
+    public function loanProduct()
+    {
+        return $this->belongsTo(LoanProduct::class);
+    }
+
     public function scopeByMemberNumber($query, $memberNumber)
     {
         return $query->where('member_number', $memberNumber);
