@@ -202,15 +202,21 @@
         </div>
       </div>
 
-      <div x-data="{ open: {{ request()->routeIs('admin.investments.*') ? 'true' : 'false' }} }" class="sidebar-dropdown">
+      <div x-data="{ open: {{ request()->routeIs('admin.investments.*') || request()->routeIs('admin.investment-products.*') ? 'true' : 'false' }} }" class="sidebar-dropdown">
         <button @click="open = !open"
                 class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-primary-200 hover:text-white transition-all duration-150
-                       {{ request()->routeIs('admin.investments.*') ? 'active' : '' }}">
+                       {{ request()->routeIs('admin.investments.*') || request()->routeIs('admin.investment-products.*') ? 'active' : '' }}">
           <i class="fa-solid fa-chart-line w-4 text-center flex-shrink-0"></i>
           <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap flex-1 text-left">Investments</span>
           <i x-show="!sidebarCollapsed" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'" class="fa-solid text-[10px] transition-transform"></i>
         </button>
         <div x-show="open" x-transition class="mt-1 space-y-0.5 pl-6">
+          <a href="{{ route('admin.investment-products.index') }}"
+             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
+                    {{ request()->routeIs('admin.investment-products.*') ? 'active' : '' }}">
+            <i class="fa-solid fa-box-open w-4 text-center flex-shrink-0"></i>
+            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Investment Products</span>
+          </a>
           <a href="{{ route('admin.investments.index') }}"
              class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
                     {{ request()->routeIs('admin.investments.index') ? 'active' : '' }}">

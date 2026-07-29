@@ -120,6 +120,13 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/investments', [AdminInvestmentController::class, 'index'])->name('investments.index');
     Route::get('/investments/{encryptedMemberNumber}', [AdminInvestmentController::class, 'show'])->name('investments.show');
 
+    Route::get('/investment-products', [App\Http\Controllers\Admin\InvestmentProductController::class, 'index'])->name('investment-products.index');
+    Route::get('/investment-products/create', [App\Http\Controllers\Admin\InvestmentProductController::class, 'create'])->name('investment-products.create');
+    Route::post('/investment-products', [App\Http\Controllers\Admin\InvestmentProductController::class, 'store'])->name('investment-products.store');
+    Route::get('/investment-products/{id}/edit', [App\Http\Controllers\Admin\InvestmentProductController::class, 'edit'])->name('investment-products.edit');
+    Route::put('/investment-products/{id}', [App\Http\Controllers\Admin\InvestmentProductController::class, 'update'])->name('investment-products.update');
+    Route::delete('/investment-products/{id}', [App\Http\Controllers\Admin\InvestmentProductController::class, 'destroy'])->name('investment-products.destroy');
+
     Route::get('/shares', [AdminShareController::class, 'index'])->name('shares.index');
     Route::get('/shares/{encryptedMemberNumber}', [AdminShareController::class, 'show'])->name('shares.show');
 
