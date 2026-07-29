@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Contracts\GoogleSheetRepositoryInterface;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\Loan;
 use App\Services\AdminDashboardService;
 use App\Services\EncryptedIdService;
 use App\Services\MemberService;
@@ -30,7 +30,12 @@ class LoanController extends Controller
     {
         Gate::authorize('admin-only');
 
+        $query = Loan::with('user')->pending();
+
+        $loans = $query->orderBy('application_date', 'desc')->paginate(15);
+
         return view('admin.loans.applications', [
+            'loans' => $loans,
             'dashboardService' => $this->dashboardService,
         ]);
     }
@@ -39,93 +44,48 @@ class LoanController extends Controller
     {
         Gate::authorize('admin-only');
 
+        $query = Loan::with('user')->active();
+
+        $loans = $query->orderBy('disbursement_date', 'desc')->paginate(15);
+
         return view('admin.loans.repayments', [
+            'loans' => $loans,
             'dashboardService' => $this->dashboardService,
         ]);
     }
 
     public function index(Request $request)
     {
+        Gate::authorize('admin-only');
+
         $perPage = (int) $request->input('per_page', 15);
-        $sortColumn = $request->input('sort', 'loan_number');
-        $sortDirection = $request->input('sort_direction', 'asc');
+        $sortColumn = $request->input('sort', 'application_date');
+        $sortDirection = $request->input('sort_direction', 'desc');
         $statusFilter = $request->input('status', '');
         $searchQuery = $request->input('q', '');
 
-        // Get all loans from database
-        $loans = [];
-        try {
-            $dbLoans = \App\Models\LoanInformation::all();
-            foreach ($dbLoans as $dbLoan) {
-                // Get user information
-                $user = null;
-                if ($dbLoan->user_id) {
-                    $user = \App\Models\User::find($dbLoan->user_id);
-                }
-                
-                // Fallback to customer_id if user not found
-                if (!$user && $dbLoan->customer_id) {
-                    $user = \App\Models\User::where('member_number', $dbLoan->customer_id)->first();
-                }
-                
-                $memberName = $user ? $user->name : 'Unknown';
-                $memberNo = $user ? $user->member_number : ($dbLoan->customer_id ?? 'Unknown');
-                $memberPhone = $user ? $user->phone : '-';
-                $memberBranch = '-';
-                
-                $loan = [
-                    'loan_number' => $dbLoan->loan_id,
-                    'loan_product' => $dbLoan->loan_type,
-                    'loan_amount' => (float) $dbLoan->loan_amount,
-                    'outstanding_balance' => (float) $dbLoan->outstanding_balance,
-                    'paid_amount' => (float) $dbLoan->total_paid,
-                    'installment' => (float) $dbLoan->monthly_installment,
-                    'status' => $dbLoan->loan_status,
-                    'maturity_date' => $dbLoan->loan_maturity_date ? $dbLoan->loan_maturity_date->format('Y-m-d') : null,
-                    'disbursement_date' => $dbLoan->loan_start_date ? $dbLoan->loan_start_date->format('Y-m-d') : null,
-                    'member_name' => $memberName,
-                    'member_number' => $memberNo,
-                    'member_phone' => $memberPhone,
-                    'member_branch' => $memberBranch,
-                    'interest_rate' => (float) $dbLoan->interest_rate_pm,
-                    'duration' => $dbLoan->duration_months,
-                    'total_payable' => (float) $dbLoan->total_payable,
-                    'number_of_paid_installments' => $dbLoan->number_of_paid_installments,
-                    'number_of_unpaid_installments' => $dbLoan->number_of_unpaid_installments,
-                    'source' => 'database',
-                    'encrypted_id' => $this->encryptedIdService->encrypt($dbLoan->loan_id),
-                    'user_id' => $dbLoan->user_id,
-                ];
-                $loans[] = $loan;
-            }
-        } catch (\Illuminate\Database\QueryException $e) {
-            // Table doesn't exist yet, return empty array
-            $loans = [];
+        $query = Loan::with('user');
+
+        // Search
+        if (!empty($searchQuery)) {
+            $query->where('loan_number', 'like', '%' . $searchQuery . '%')
+                  ->orWhere('member_number', 'like', '%' . $searchQuery . '%')
+                  ->orWhereHas('user', function ($q) use ($searchQuery) {
+                      $q->where('name', 'like', '%' . $searchQuery . '%');
+                  });
         }
 
-        if (! empty($searchQuery)) {
-            $loans = array_values(array_filter($loans, static function ($loan) use ($searchQuery): bool {
-                $query = strtolower(trim($searchQuery));
-                $haystack = strtolower(implode(' ', [
-                    $loan['loan_number'] ?? '',
-                    $loan['loan_product'] ?? '',
-                    $loan['member_number'] ?? '',
-                    $loan['member_name'] ?? '',
-                    $loan['member_phone'] ?? '',
-                ]));
-
-                return str_contains($haystack, $query);
-            }));
+        // Filter by status
+        if (!empty($statusFilter)) {
+            $query->where('status', $statusFilter);
         }
 
-        if (! empty($statusFilter)) {
-            $loans = $this->memberService->filterByStatus($loans, $statusFilter);
-        }
+        // Sort
+        $query->orderBy($sortColumn, $sortDirection);
 
-        $loans = $this->memberService->sort($loans, $sortColumn, $sortDirection);
-        $paginated = $this->memberService->paginateArray($loans, $perPage);
+        $loans = $query->paginate($perPage);
 
-        $paginated->appends([
+        $loans->appends([
             'q' => $searchQuery,
             'status' => $statusFilter,
             'per_page' => $perPage,
@@ -144,12 +104,12 @@ class LoanController extends Controller
                 'per_page' => $perPage,
                 'sort' => $sortColumn,
                 'sort_direction' => $sortDirection,
-                'total_count' => count($loans),
+                'total_count' => $loans->total(),
             ],
         ]);
 
         return view('admin.loans.index', [
-            'loans' => $paginated,
+            'loans' => $loans,
             'searchQuery' => $searchQuery,
             'statusFilter' => $statusFilter,
             'perPage' => $perPage,
@@ -160,48 +120,64 @@ class LoanController extends Controller
         ]);
     }
 
+    public function create(Request $request)
+    {
+        Gate::authorize('admin-only');
+
+        return view('admin.loans.create', [
+            'dashboardService' => $this->dashboardService,
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        Gate::authorize('admin-only');
+
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'member_number' => 'required|string|max:50',
+            'principal_amount' => 'required|numeric|min:0',
+            'interest_rate' => 'required|numeric|min:0|max:100',
+            'term_months' => 'required|integer|min:1',
+            'application_date' => 'required|date',
+            'purpose' => 'required|in:business,education,agriculture,personal,emergency,other',
+            'purpose_description' => 'nullable|string',
+            'collateral' => 'nullable|string',
+            'guarantor' => 'nullable|string',
+            'notes' => 'nullable|string',
+        ]);
+
+        // Generate loan number
+        $validated['loan_number'] = 'LOAN-' . date('Ymd') . '-' . str_pad((string) rand(1, 9999), 4, '0', STR_PAD_LEFT);
+        $validated['status'] = 'pending';
+
+        Loan::create($validated);
+
+        $this->success('Loan application created successfully.');
+
+        return redirect()->route('admin.loans.index');
+    }
+
     public function show(Request $request, string $encryptedLoanNumber)
     {
         $loanNumber = $this->encryptedIdService->decrypt($encryptedLoanNumber);
         
         Gate::authorize('admin-only');
 
-        // Get loan from database
-        $loan = \App\Models\LoanInformation::where('loan_id', $loanNumber)->first();
-        
-        if (! $loan) {
-            $this->error("Loan {$loanNumber} not found.");
-            return redirect()->route('admin.loans.index');
-        }
+        $loan = Loan::with('user')->where('loan_number', $loanNumber)->firstOrFail();
 
-        // Get user information
-        $user = null;
-        if ($loan->user_id) {
-            $user = \App\Models\User::find($loan->user_id);
-        }
-        
-        // Fallback to customer_id if user not found
-        if (!$user && $loan->customer_id) {
-            $user = \App\Models\User::where('member_number', $loan->customer_id)->first();
-        }
-
-        $memberName = $user ? $user->name : 'Unknown';
-        $memberNo = $user ? $user->member_number : ($loan->customer_id ?? 'Unknown');
-        $memberPhone = $user ? $user->phone : '-';
-        $memberBranch = '-';
-
-        $loanAmount = (float) $loan->loan_amount;
-        $paidAmount = (float) $loan->total_paid;
-        $outstanding = (float) $loan->outstanding_balance;
+        $loanAmount = (float) $loan->principal_amount;
+        $paidAmount = (float) $loan->amount_paid;
+        $outstanding = (float) $loan->balance;
         $progress = $loanAmount > 0 ? min(($paidAmount / $loanAmount) * 100, 100) : 0;
 
-        $installment = (float) $loan->monthly_installment;
-        $interestRate = (float) $loan->interest_rate_pm;
-        $disbursementDate = $loan->loan_start_date ? $loan->loan_start_date->format('Y-m-d') : '-';
-        $maturityDate = $loan->loan_maturity_date ? $loan->loan_maturity_date->format('Y-m-d') : '-';
+        $installment = (float) $loan->monthly_payment;
+        $interestRate = (float) $loan->interest_rate;
+        $disbursementDate = $loan->disbursement_date ? $loan->disbursement_date->format('Y-m-d') : '-';
+        $maturityDate = $loan->maturity_date ? $loan->maturity_date->format('Y-m-d') : '-';
 
         $repaymentSchedule = [];
-        $months = $loan->duration_months ?? 0;
+        $months = $loan->term_months;
         if ($installment > 0 && $loanAmount > 0 && $months > 0) {
             $balance = $loanAmount;
             $startDate = $disbursementDate !== '-' ? $disbursementDate : date('Y-m-01');
@@ -224,7 +200,7 @@ class LoanController extends Controller
         }
 
         $repaymentHistory = [];
-        if ($paidAmount > 0 && ! empty($repaymentSchedule)) {
+        if ($paidAmount > 0 && !empty($repaymentSchedule)) {
             $paidCount = (int) floor($paidAmount / $installment);
             $paidCount = min($paidCount, count($repaymentSchedule));
             for ($i = 0; $i < $paidCount; $i++) {
@@ -254,7 +230,7 @@ class LoanController extends Controller
                     'debit' => 0,
                     'credit' => $loanAmount,
                     'balance' => $loanAmount,
-                    'description' => "Loan disbursed - {$loan->loan_type}",
+                    'description' => "Loan disbursed",
                 ],
             ],
             array_map(static fn ($h) => [
@@ -271,35 +247,35 @@ class LoanController extends Controller
         ActivityLog::create([
             'user_id' => Auth::id(),
             'subject_type' => 'loan',
-            'subject_id' => null,
+            'subject_id' => $loan->id,
             'description' => "Admin viewed loan {$loanNumber}",
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
             'properties' => [
-                'member_number' => $memberNo,
-                'member_name' => $memberName,
-                'loan_product' => $loan->loan_type,
+                'member_number' => $loan->member_number,
+                'member_name' => $loan->user->name ?? 'Unknown',
+                'loan_amount' => $loanAmount,
             ],
         ]);
 
         return view('admin.loans.show', [
             'loan' => [
-                'loan_number' => $loan->loan_id,
-                'loan_product' => $loan->loan_type,
+                'loan_number' => $loan->loan_number,
+                'loan_product' => ucfirst($loan->purpose),
                 'loan_amount' => $loanAmount,
                 'outstanding_balance' => $outstanding,
                 'paid_amount' => $paidAmount,
                 'installment' => $installment,
-                'status' => $loan->loan_status,
+                'status' => $loan->status,
                 'maturity_date' => $maturityDate,
                 'disbursement_date' => $disbursementDate,
             ],
             'loanNumber' => $loanNumber,
             'member' => [
-                'name' => $memberName,
-                'member_number' => $memberNo,
-                'phone' => $memberPhone,
-                'branch' => $memberBranch,
+                'name' => $loan->user->name ?? 'Unknown',
+                'member_number' => $loan->member_number,
+                'phone' => $loan->user->phone ?? '-',
+                'branch' => '-',
             ],
             'progress' => $progress,
             'loanAmount' => $loanAmount,
@@ -314,6 +290,107 @@ class LoanController extends Controller
             'loanStatement' => $loanStatement,
             'dashboardService' => $this->dashboardService,
         ]);
+    }
+
+    public function edit(Request $request, $id)
+    {
+        Gate::authorize('admin-only');
+
+        $loan = Loan::findOrFail($id);
+
+        return view('admin.loans.edit', [
+            'loan' => $loan,
+            'dashboardService' => $this->dashboardService,
+        ]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        Gate::authorize('admin-only');
+
+        $loan = Loan::findOrFail($id);
+
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'member_number' => 'required|string|max:50',
+            'principal_amount' => 'required|numeric|min:0',
+            'interest_rate' => 'required|numeric|min:0|max:100',
+            'term_months' => 'required|integer|min:1',
+            'application_date' => 'required|date',
+            'approval_date' => 'nullable|date',
+            'disbursement_date' => 'nullable|date',
+            'maturity_date' => 'nullable|date',
+            'monthly_payment' => 'nullable|numeric|min:0',
+            'total_amount_due' => 'nullable|numeric|min:0',
+            'amount_paid' => 'nullable|numeric|min:0',
+            'balance' => 'nullable|numeric|min:0',
+            'status' => 'required|in:pending,approved,disbursed,active,paid,defaulted,rejected',
+            'purpose' => 'required|in:business,education,agriculture,personal,emergency,other',
+            'purpose_description' => 'nullable|string',
+            'collateral' => 'nullable|string',
+            'guarantor' => 'nullable|string',
+            'notes' => 'nullable|string',
+        ]);
+
+        $loan->update($validated);
+
+        $this->success('Loan updated successfully.');
+
+        return redirect()->route('admin.loans.index');
+    }
+
+    public function destroy(Request $request, $id)
+    {
+        Gate::authorize('admin-only');
+
+        $loan = Loan::findOrFail($id);
+        $loan->delete();
+
+        $this->success('Loan deleted successfully.');
+
+        return redirect()->route('admin.loans.index');
+    }
+
+    public function approve(Request $request, $id)
+    {
+        Gate::authorize('admin-only');
+
+        $loan = Loan::findOrFail($id);
+        $loan->update([
+            'status' => 'approved',
+            'approval_date' => now(),
+        ]);
+
+        $this->success('Loan approved successfully.');
+
+        return redirect()->back();
+    }
+
+    public function disburse(Request $request, $id)
+    {
+        Gate::authorize('admin-only');
+
+        $loan = Loan::findOrFail($id);
+        
+        $validated = $request->validate([
+            'disbursement_date' => 'required|date',
+            'maturity_date' => 'required|date',
+            'monthly_payment' => 'required|numeric|min:0',
+            'total_amount_due' => 'required|numeric|min:0',
+        ]);
+
+        $loan->update([
+            'status' => 'disbursed',
+            'disbursement_date' => $validated['disbursement_date'],
+            'maturity_date' => $validated['maturity_date'],
+            'monthly_payment' => $validated['monthly_payment'],
+            'total_amount_due' => $validated['total_amount_due'],
+            'balance' => $validated['total_amount_due'],
+        ]);
+
+        $this->success('Loan disbursed successfully.');
+
+        return redirect()->back();
     }
 
     public function importLoanPayments(Request $request)
