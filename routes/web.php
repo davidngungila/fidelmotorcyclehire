@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\MemberController as AdminMemberController;
 use App\Http\Controllers\Admin\LoanController as AdminLoanController;
+use App\Http\Controllers\Admin\LoanProductController as AdminLoanProductController;
 use App\Http\Controllers\Admin\SavingController as AdminSavingController;
 use App\Http\Controllers\Admin\DepositController as AdminDepositController;
 use App\Http\Controllers\Admin\SwfController as AdminSwfController;
@@ -89,13 +90,13 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::post('/loans/import-loan-payments', [AdminLoanController::class, 'importLoanPayments'])->name('loans.import-loan-payments');
     Route::post('/loans/import-loans-information', [AdminLoanController::class, 'importLoansInformation'])->name('loans.import-loans-information');
 
-    Route::get('/loan-products', [Admin\LoanProductController::class, 'index'])->name('loan-products.index');
-    Route::get('/loan-products/create', [Admin\LoanProductController::class, 'create'])->name('loan-products.create');
-    Route::post('/loan-products', [Admin\LoanProductController::class, 'store'])->name('loan-products.store');
-    Route::get('/loan-products/{id}', [Admin\LoanProductController::class, 'show'])->name('loan-products.show');
-    Route::get('/loan-products/{id}/edit', [Admin\LoanProductController::class, 'edit'])->name('loan-products.edit');
-    Route::put('/loan-products/{id}', [Admin\LoanProductController::class, 'update'])->name('loan-products.update');
-    Route::delete('/loan-products/{id}', [Admin\LoanProductController::class, 'destroy'])->name('loan-products.destroy');
+    Route::get('/loan-products', [AdminLoanProductController::class, 'index'])->name('loan-products.index');
+    Route::get('/loan-products/create', [AdminLoanProductController::class, 'create'])->name('loan-products.create');
+    Route::post('/loan-products', [AdminLoanProductController::class, 'store'])->name('loan-products.store');
+    Route::get('/loan-products/{id}', [AdminLoanProductController::class, 'show'])->name('loan-products.show');
+    Route::get('/loan-products/{id}/edit', [AdminLoanProductController::class, 'edit'])->name('loan-products.edit');
+    Route::put('/loan-products/{id}', [AdminLoanProductController::class, 'update'])->name('loan-products.update');
+    Route::delete('/loan-products/{id}', [AdminLoanProductController::class, 'destroy'])->name('loan-products.destroy');
 
     Route::get('/savings', [AdminSavingController::class, 'index'])->name('savings.index');
     Route::get('/savings/{encryptedMemberNumber}', [AdminSavingController::class, 'show'])->name('savings.show');
