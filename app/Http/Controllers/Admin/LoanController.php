@@ -423,9 +423,49 @@ class LoanController extends Controller
         
         $validated = $request->validate([
             'disbursement_date' => 'required|date',
+            'disbursement_method' => 'required|in:bank_transfer,mobile_money,cash,cheque',
+            'account_wallet' => 'required|string',
             'maturity_date' => 'required|date',
+            'first_repayment_date' => 'nullable|date',
             'monthly_payment' => 'required|numeric|min:0',
             'total_amount_due' => 'required|numeric|min:0',
+            'processing_fee' => 'nullable|numeric|min:0',
+            'insurance_fee' => 'nullable|numeric|min:0',
+            'other_deductions' => 'nullable|numeric|min:0',
+            'remarks' => 'nullable|string',
+        ]);
+
+        $processingFee = $validated['processing_fee'] ?? 0;
+        $insuranceFee = $validated['insurance_fee'] ?? 0;
+        $otherDeductions = $validated['other_deductions'] ?? 0;
+        $totalDeductions = $processingFee + $insuranceFee + $otherDeductions;
+        $netAmountPaid = $loan->principal_amount - $totalDeductions;
+
+        // Create disbursement record
+        \App\Models\LoanDisbursement::create([
+            'disbursement_number' => 'LND-' . date('Y') . '-' . str_pad((string) rand(1, 9999), 4, '0', STR_PAD_LEFT),
+            'loan_id' => $loan->id,
+            'loan_number' => $loan->loan_number,
+            'member_number' => $loan->member_number,
+            'member_name' => $loan->user->name ?? 'Unknown',
+            'loan_product' => $loan->loanProduct->name ?? 'Unknown',
+            'approved_amount' => $loan->principal_amount,
+            'disbursed_amount' => $loan->principal_amount,
+            'disbursement_date' => $validated['disbursement_date'],
+            'disbursement_method' => $validated['disbursement_method'],
+            'account_wallet' => $validated['account_wallet'],
+            'interest_rate' => $loan->interest_rate,
+            'repayment_period' => $loan->term_months,
+            'first_repayment_date' => $validated['first_repayment_date'] ?? null,
+            'maturity_date' => $validated['maturity_date'],
+            'processing_fee' => $processingFee,
+            'insurance_fee' => $insuranceFee,
+            'other_deductions' => $otherDeductions,
+            'net_amount_paid' => $netAmountPaid,
+            'disbursed_by' => Auth::id(),
+            'approved_by' => $loan->approval_date ? Auth::id() : null,
+            'status' => 'disbursed',
+            'remarks' => $validated['remarks'] ?? null,
         ]);
 
         $loan->update([
@@ -435,6 +475,13 @@ class LoanController extends Controller
             'monthly_payment' => $validated['monthly_payment'],
             'total_amount_due' => $validated['total_amount_due'],
             'balance' => $validated['total_amount_due'],
+        ]);
+
+        ActivityLog::create([
+            'user_id' => Auth::id(),
+            'description' => 'Admin disbursed loan: ' . $loan->loan_number,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
         ]);
 
         $this->success('Loan disbursed successfully.');
