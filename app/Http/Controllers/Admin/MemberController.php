@@ -168,58 +168,138 @@ class MemberController extends Controller
                 }
             }
             
-            // For imported members, try to get data from Google Sheets if available
-            $loans = $this->googleSheetRepository->getMemberLoans($memberNumber);
-            $savings = $this->googleSheetRepository->getMemberSavings($memberNumber);
-            
-            // Merge database transactions with Google Sheets savings
-            $dbTransactions = \App\Models\Transaction::byMemberCode($memberNumber)
-                ->orderBy('date', 'asc')
-                ->get()
-                ->map(function ($transaction) {
-                    return [
-                        'date' => $transaction->date->format('Y-m-d'),
-                        'type' => $transaction->transaction_type,
-                        'amount' => (float) $transaction->amount,
-                        'reference' => $transaction->reference_no ?? '',
-                        'balance_after' => null,
+            // Get loans from database
+            $loans = [];
+            try {
+                $dbLoans = \App\Models\LoanInformation::where('customer_id', $memberNumber)
+                    ->orWhere('user_id', function($query) use ($memberNumber) {
+                        $query->select('id')->from('users')->where('member_number', $memberNumber);
+                    })
+                    ->get();
+                
+                foreach ($dbLoans as $dbLoan) {
+                    $user = \App\Models\User::find($dbLoan->user_id);
+                    $loans[] = [
+                        'loan_number' => $dbLoan->loan_number,
+                        'loan_product' => $dbLoan->loan_product,
+                        'loan_amount' => (float) $dbLoan->loan_amount,
+                        'status' => $dbLoan->status,
+                        'member_name' => $user ? $user->name : 'Unknown',
+                        'member_number' => $memberNumber,
                         'source' => 'database'
                     ];
-                })
-                ->toArray();
-
-            // Merge transactions
-            $googleTransactions = $savings['transactions'] ?? [];
-            $allTransactions = array_merge($googleTransactions, $dbTransactions);
-
-            // Sort by date ascending for balance calculation
-            usort($allTransactions, static fn($a, $b): int => strtotime($a['date'] ?? '') <=> strtotime($b['date'] ?? ''));
-
-            // Calculate running balance
-            $currentBalance = 0;
-            foreach ($allTransactions as &$transaction) {
-                $type = strtolower($transaction['type'] ?? '');
-                $isCredit = $type === 'deposit' || $type === 'flexi-deposit' || $type === 'rda-deposit' || $type === 'opening balance' || $type === 'interest';
-                
-                if ($isCredit) {
-                    $currentBalance += (float) ($transaction['amount'] ?? 0);
-                } else {
-                    $currentBalance -= (float) ($transaction['amount'] ?? 0);
                 }
-                
-                $transaction['balance_after'] = $currentBalance;
+            } catch (\Exception $e) {
+                // Table might not exist, skip loans
             }
-
-            // Sort by date descending for display
-            usort($allTransactions, static fn($a, $b): int => strtotime($b['date'] ?? '') <=> strtotime($a['date'] ?? ''));
-
-            $savings['transactions'] = $allTransactions;
-            $savings['running_balance'] = $currentBalance;
-            $savings['balance'] = $currentBalance;
             
-            $deposits = $this->googleSheetRepository->getMemberDeposits($memberNumber);
-            $swf = $this->googleSheetRepository->getMemberSwf($memberNumber);
-            $investments = $this->googleSheetRepository->getMemberInvestments($memberNumber);
+            // Get savings from database
+            $savings = [
+                'balance' => 0,
+                'running_balance' => 0,
+                'transactions' => []
+            ];
+            
+            try {
+                $dbTransactions = \App\Models\Transaction::byMemberCode($memberNumber)
+                    ->orderBy('date', 'asc')
+                    ->get()
+                    ->map(function ($transaction) {
+                        return [
+                            'date' => $transaction->date->format('Y-m-d'),
+                            'type' => $transaction->transaction_type,
+                            'amount' => (float) $transaction->amount,
+                            'reference' => $transaction->reference_no ?? '',
+                            'balance_after' => null,
+                            'source' => 'database'
+                        ];
+                    })
+                    ->toArray();
+
+                // Calculate running balance
+                $currentBalance = 0;
+                foreach ($dbTransactions as &$transaction) {
+                    $type = strtolower($transaction['type'] ?? '');
+                    $isCredit = $type === 'deposit' || $type === 'flexi-deposit' || $type === 'rda-deposit' || $type === 'opening balance' || $type === 'interest';
+                    
+                    if ($isCredit) {
+                        $currentBalance += (float) ($transaction['amount'] ?? 0);
+                    } else {
+                        $currentBalance -= (float) ($transaction['amount'] ?? 0);
+                    }
+                    
+                    $transaction['balance_after'] = $currentBalance;
+                }
+
+                // Sort by date descending for display
+                usort($dbTransactions, static fn($a, $b): int => strtotime($b['date'] ?? '') <=> strtotime($a['date'] ?? ''));
+
+                $savings['transactions'] = $dbTransactions;
+                $savings['running_balance'] = $currentBalance;
+                $savings['balance'] = $currentBalance;
+            } catch (\Exception $e) {
+                // Table might not exist, skip transactions
+            }
+            
+            // Get deposits from database
+            $deposits = [];
+            try {
+                $dbDeposits = \App\Models\Deposit::where('member_number', $memberNumber)
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+                
+                foreach ($dbDeposits as $dbDeposit) {
+                    $deposits[] = [
+                        'certificate_number' => $dbDeposit->certificate_number,
+                        'deposit_amount' => (float) $dbDeposit->deposit_amount,
+                        'deposit_date' => $dbDeposit->deposit_date ? $dbDeposit->deposit_date->format('Y-m-d') : null,
+                        'maturity_date' => $dbDeposit->maturity_date ? $dbDeposit->maturity_date->format('Y-m-d') : null,
+                        'interest_rate' => (float) $dbDeposit->interest_rate,
+                        'status' => $dbDeposit->status,
+                        'source' => 'database'
+                    ];
+                }
+            } catch (\Exception $e) {
+                // Table might not exist, skip deposits
+            }
+            
+            // Get SWF from database
+            $swf = [];
+            try {
+                $dbSwf = \App\Models\Swf::where('member_number', $memberNumber)
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+                
+                foreach ($dbSwf as $dbSwfItem) {
+                    $swf[] = [
+                        'amount' => (float) $dbSwfItem->amount,
+                        'date' => $dbSwfItem->date ? $dbSwfItem->date->format('Y-m-d') : null,
+                        'status' => $dbSwfItem->status,
+                        'source' => 'database'
+                    ];
+                }
+            } catch (\Exception $e) {
+                // Table might not exist, skip SWF
+            }
+            
+            // Get investments from database
+            $investments = [];
+            try {
+                $dbInvestments = \App\Models\Investment::where('member_number', $memberNumber)
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+                
+                foreach ($dbInvestments as $dbInvestment) {
+                    $investments[] = [
+                        'amount' => (float) $dbInvestment->amount,
+                        'date' => $dbInvestment->date ? $dbInvestment->date->format('Y-m-d') : null,
+                        'status' => $dbInvestment->status,
+                        'source' => 'database'
+                    ];
+                }
+            } catch (\Exception $e) {
+                // Table might not exist, skip investments
+            }
             
             // Get loan payments and loans information from database
             $loanPayments = [];
