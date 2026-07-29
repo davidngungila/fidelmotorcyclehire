@@ -84,12 +84,23 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/savings', [AdminSavingController::class, 'index'])->name('savings.index');
     Route::get('/savings/{encryptedMemberNumber}', [AdminSavingController::class, 'show'])->name('savings.show');
 
+    Route::get('/products', [App\Http\Controllers\Admin\ProductController::class, 'index'])->name('products.index');
+    Route::get('/products/create', [App\Http\Controllers\Admin\ProductController::class, 'create'])->name('products.create');
+    Route::post('/products', [App\Http\Controllers\Admin\ProductController::class, 'store'])->name('products.store');
+    Route::get('/products/{id}/edit', [App\Http\Controllers\Admin\ProductController::class, 'edit'])->name('products.edit');
+    Route::put('/products/{id}', [App\Http\Controllers\Admin\ProductController::class, 'update'])->name('products.update');
+    Route::delete('/products/{id}', [App\Http\Controllers\Admin\ProductController::class, 'destroy'])->name('products.destroy');
+
     Route::get('/saving-plans', [App\Http\Controllers\Admin\SavingPlanController::class, 'index'])->name('saving-plans.index');
     Route::get('/saving-plans/create', [App\Http\Controllers\Admin\SavingPlanController::class, 'create'])->name('saving-plans.create');
     Route::post('/saving-plans', [App\Http\Controllers\Admin\SavingPlanController::class, 'store'])->name('saving-plans.store');
     Route::get('/saving-plans/{id}/edit', [App\Http\Controllers\Admin\SavingPlanController::class, 'edit'])->name('saving-plans.edit');
     Route::put('/saving-plans/{id}', [App\Http\Controllers\Admin\SavingPlanController::class, 'update'])->name('saving-plans.update');
     Route::delete('/saving-plans/{id}', [App\Http\Controllers\Admin\SavingPlanController::class, 'destroy'])->name('saving-plans.destroy');
+
+    Route::get('/statements', [App\Http\Controllers\Admin\StatementController::class, 'index'])->name('statements.index');
+    Route::get('/statements/{id}', [App\Http\Controllers\Admin\StatementController::class, 'show'])->name('statements.show');
+    Route::get('/statements/{id}/download', [App\Http\Controllers\Admin\StatementController::class, 'download'])->name('statements.download');
 
     Route::get('/transactions', [App\Http\Controllers\Admin\TransactionController::class, 'index'])->name('transactions.index');
     Route::get('/transactions/create', [App\Http\Controllers\Admin\TransactionController::class, 'create'])->name('transactions.create');
