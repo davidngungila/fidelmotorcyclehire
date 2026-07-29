@@ -192,80 +192,6 @@
             <span class="badge {{ $statusBadge['class'] }}">{{ $statusBadge['label'] }}</span>
           </div>
         </div>
-
-        @if($loan['status'] === 'pending')
-        <div class="mt-6 pt-6 border-t border-primary-100 dark:border-primary-900/50">
-          <form method="POST" action="{{ route('admin.loans.approve', $loan['id']) }}" onsubmit="return confirm('Are you sure you want to approve this loan?');">
-            @csrf
-            <button type="submit" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-bold transition-colors">
-              <i class="fa-solid fa-check text-xs"></i> Approve Loan
-            </button>
-          </form>
-        </div>
-        @elseif($loan['status'] === 'approved')
-        <div class="mt-6 pt-6 border-t border-primary-100 dark:border-primary-900/50">
-          <form method="POST" action="{{ route('admin.loans.disburse', $loan['id']) }}">
-            @csrf
-            <div class="space-y-4">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Disbursement Date *</label>
-                  <input type="date" name="disbursement_date" required value="{{ date('Y-m-d') }}" class="form-input py-2.5 px-4">
-                </div>
-                <div>
-                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Disbursement Method *</label>
-                  <select name="disbursement_method" required class="form-input py-2.5 px-4">
-                    <option value="">Select method</option>
-                    <option value="bank_transfer">Bank Transfer</option>
-                    <option value="mobile_money">Mobile Money</option>
-                    <option value="cash">Cash</option>
-                    <option value="cheque">Cheque</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Account/Wallet *</label>
-                  <input type="text" name="account_wallet" required placeholder="Enter account or wallet number" class="form-input py-2.5 px-4">
-                </div>
-                <div>
-                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Maturity Date *</label>
-                  <input type="date" name="maturity_date" required class="form-input py-2.5 px-4">
-                </div>
-                <div>
-                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">First Repayment Date</label>
-                  <input type="date" name="first_repayment_date" class="form-input py-2.5 px-4">
-                </div>
-                <div>
-                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Monthly Payment (TSh) *</label>
-                  <input type="number" name="monthly_payment" required min="0" step="0.01" value="{{ $installment }}" class="form-input py-2.5 px-4">
-                </div>
-                <div>
-                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Total Amount Due (TSh) *</label>
-                  <input type="number" name="total_amount_due" required min="0" step="0.01" value="{{ $loanAmount }}" class="form-input py-2.5 px-4">
-                </div>
-                <div>
-                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Processing Fee (TSh)</label>
-                  <input type="number" name="processing_fee" min="0" step="0.01" value="0" class="form-input py-2.5 px-4">
-                </div>
-                <div>
-                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Insurance Fee (TSh)</label>
-                  <input type="number" name="insurance_fee" min="0" step="0.01" value="0" class="form-input py-2.5 px-4">
-                </div>
-                <div>
-                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Other Deductions (TSh)</label>
-                  <input type="number" name="other_deductions" min="0" step="0.01" value="0" class="form-input py-2.5 px-4">
-                </div>
-              </div>
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Remarks</label>
-                <textarea name="remarks" rows="2" placeholder="Additional notes (optional)" class="form-input py-2.5 px-4"></textarea>
-              </div>
-              <button type="submit" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-colors">
-                <i class="fa-solid fa-hand-holding-dollar text-xs"></i> Disburse Loan
-              </button>
-            </div>
-          </form>
-        </div>
-        @endif
       </div>
 
       <div class="glass p-6">
@@ -298,6 +224,136 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <div x-show="activeTab === 'processing'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
+    <div class="glass p-6">
+      <div class="flex items-center justify-between mb-5">
+        <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
+          <i class="fa-solid fa-gears text-blue-500 text-xs"></i>
+          Loan Processing
+        </h3>
+        <span class="badge {{ $statusBadge['class'] }}">{{ $statusBadge['label'] }}</span>
+      </div>
+
+      @if($loan['status'] === 'pending')
+      <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-5 mb-6">
+        <div class="flex items-start gap-3">
+          <div class="w-10 h-10 rounded-lg bg-yellow-100 dark:bg-yellow-900/40 flex items-center justify-center flex-shrink-0">
+            <i class="fa-solid fa-clock text-yellow-600 dark:text-yellow-400"></i>
+          </div>
+          <div class="flex-1">
+            <h4 class="font-bold text-yellow-800 dark:text-yellow-300 text-sm mb-1">Loan Pending Approval</h4>
+            <p class="text-xs text-yellow-700 dark:text-yellow-400">This loan application is waiting for approval. Review the details and approve if all requirements are met.</p>
+          </div>
+        </div>
+      </div>
+
+      <form method="POST" action="{{ route('admin.loans.approve', $loan['id']) }}" onsubmit="return confirm('Are you sure you want to approve this loan?');">
+        @csrf
+        <button type="submit" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-bold transition-colors">
+          <i class="fa-solid fa-check text-xs"></i> Approve Loan
+        </button>
+      </form>
+      @elseif($loan['status'] === 'approved')
+      <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-5 mb-6">
+        <div class="flex items-start gap-3">
+          <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center flex-shrink-0">
+            <i class="fa-solid fa-hand-holding-dollar text-blue-600 dark:text-blue-400"></i>
+          </div>
+          <div class="flex-1">
+            <h4 class="font-bold text-blue-800 dark:text-blue-300 text-sm mb-1">Loan Approved - Ready for Disbursement</h4>
+            <p class="text-xs text-blue-700 dark:text-blue-400">This loan has been approved and is ready for disbursement. Complete the disbursement form below to release funds.</p>
+          </div>
+        </div>
+      </div>
+
+      <form method="POST" action="{{ route('admin.loans.disburse', $loan['id']) }}">
+        @csrf
+        <div class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Disbursement Date *</label>
+              <input type="date" name="disbursement_date" required value="{{ date('Y-m-d') }}" class="form-input py-2.5 px-4">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Disbursement Method *</label>
+              <select name="disbursement_method" required class="form-input py-2.5 px-4">
+                <option value="">Select method</option>
+                <option value="bank_transfer">Bank Transfer</option>
+                <option value="mobile_money">Mobile Money</option>
+                <option value="cash">Cash</option>
+                <option value="cheque">Cheque</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Account/Wallet *</label>
+              <input type="text" name="account_wallet" required placeholder="Enter account or wallet number" class="form-input py-2.5 px-4">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Maturity Date *</label>
+              <input type="date" name="maturity_date" required class="form-input py-2.5 px-4">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">First Repayment Date</label>
+              <input type="date" name="first_repayment_date" class="form-input py-2.5 px-4">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Monthly Payment (TSh) *</label>
+              <input type="number" name="monthly_payment" required min="0" step="0.01" value="{{ $installment }}" class="form-input py-2.5 px-4">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Total Amount Due (TSh) *</label>
+              <input type="number" name="total_amount_due" required min="0" step="0.01" value="{{ $loanAmount }}" class="form-input py-2.5 px-4">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Processing Fee (TSh)</label>
+              <input type="number" name="processing_fee" min="0" step="0.01" value="0" class="form-input py-2.5 px-4">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Insurance Fee (TSh)</label>
+              <input type="number" name="insurance_fee" min="0" step="0.01" value="0" class="form-input py-2.5 px-4">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Other Deductions (TSh)</label>
+              <input type="number" name="other_deductions" min="0" step="0.01" value="0" class="form-input py-2.5 px-4">
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Remarks</label>
+            <textarea name="remarks" rows="2" placeholder="Additional notes (optional)" class="form-input py-2.5 px-4"></textarea>
+          </div>
+          <button type="submit" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-colors">
+            <i class="fa-solid fa-hand-holding-dollar text-xs"></i> Disburse Loan
+          </button>
+        </div>
+      </form>
+      @elseif($loan['status'] === 'disbursed' || $loan['status'] === 'active')
+      <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-5">
+        <div class="flex items-start gap-3">
+          <div class="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/40 flex items-center justify-center flex-shrink-0">
+            <i class="fa-solid fa-circle-check text-green-600 dark:text-green-400"></i>
+          </div>
+          <div class="flex-1">
+            <h4 class="font-bold text-green-800 dark:text-green-300 text-sm mb-1">Loan Disbursed</h4>
+            <p class="text-xs text-green-700 dark:text-green-400">This loan has been successfully disbursed and is now active. The borrower can start making repayments.</p>
+          </div>
+        </div>
+      </div>
+      @else
+      <div class="bg-gray-50 dark:bg-gray-900/20 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
+        <div class="flex items-start gap-3">
+          <div class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-900/40 flex items-center justify-center flex-shrink-0">
+            <i class="fa-solid fa-info-circle text-gray-600 dark:text-gray-400"></i>
+          </div>
+          <div class="flex-1">
+            <h4 class="font-bold text-gray-800 dark:text-gray-300 text-sm mb-1">Loan Status: {{ ucfirst($loan['status']) }}</h4>
+            <p class="text-xs text-gray-700 dark:text-gray-400">This loan is currently in {{ ucfirst($loan['status']) }} status. No processing actions are available at this time.</p>
+          </div>
+        </div>
+      </div>
+      @endif
     </div>
   </div>
 
@@ -582,6 +638,7 @@
       activeTab: 'overview',
       tabs: [
         { id: 'overview', label: 'Overview', icon: 'fa-solid fa-circle-info' },
+        { id: 'processing', label: 'Loan Processing', icon: 'fa-solid fa-gears' },
         { id: 'schedule', label: 'Repayment Schedule', icon: 'fa-solid fa-calendar-days' },
         { id: 'record', label: 'Record Payment', icon: 'fa-solid fa-money-bill-transfer' },
         { id: 'history', label: 'Repayment History', icon: 'fa-solid fa-clock-rotate-left' },
