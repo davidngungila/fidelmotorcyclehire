@@ -241,61 +241,67 @@ class MemberController extends Controller
                 // Table might not exist, skip transactions
             }
             
-            // Get deposits from database
+            // Get deposits from database (model may not exist yet)
             $deposits = [];
             try {
-                $dbDeposits = \App\Models\Deposit::where('member_number', $memberNumber)
-                    ->orderBy('created_at', 'desc')
-                    ->get();
-                
-                foreach ($dbDeposits as $dbDeposit) {
-                    $deposits[] = [
-                        'certificate_number' => $dbDeposit->certificate_number,
-                        'deposit_amount' => (float) $dbDeposit->deposit_amount,
-                        'deposit_date' => $dbDeposit->deposit_date ? $dbDeposit->deposit_date->format('Y-m-d') : null,
-                        'maturity_date' => $dbDeposit->maturity_date ? $dbDeposit->maturity_date->format('Y-m-d') : null,
-                        'interest_rate' => (float) $dbDeposit->interest_rate,
-                        'status' => $dbDeposit->status,
-                        'source' => 'database'
-                    ];
+                if (class_exists('\App\Models\Deposit')) {
+                    $dbDeposits = \App\Models\Deposit::where('member_number', $memberNumber)
+                        ->orderBy('created_at', 'desc')
+                        ->get();
+                    
+                    foreach ($dbDeposits as $dbDeposit) {
+                        $deposits[] = [
+                            'certificate_number' => $dbDeposit->certificate_number,
+                            'deposit_amount' => (float) $dbDeposit->deposit_amount,
+                            'deposit_date' => $dbDeposit->deposit_date ? $dbDeposit->deposit_date->format('Y-m-d') : null,
+                            'maturity_date' => $dbDeposit->maturity_date ? $dbDeposit->maturity_date->format('Y-m-d') : null,
+                            'interest_rate' => (float) $dbDeposit->interest_rate,
+                            'status' => $dbDeposit->status,
+                            'source' => 'database'
+                        ];
+                    }
                 }
             } catch (\Exception $e) {
                 // Table might not exist, skip deposits
             }
             
-            // Get SWF from database
+            // Get SWF from database (model may not exist yet)
             $swf = [];
             try {
-                $dbSwf = \App\Models\Swf::where('member_number', $memberNumber)
-                    ->orderBy('created_at', 'desc')
-                    ->get();
-                
-                foreach ($dbSwf as $dbSwfItem) {
-                    $swf[] = [
-                        'amount' => (float) $dbSwfItem->amount,
-                        'date' => $dbSwfItem->date ? $dbSwfItem->date->format('Y-m-d') : null,
-                        'status' => $dbSwfItem->status,
-                        'source' => 'database'
-                    ];
+                if (class_exists('\App\Models\Swf')) {
+                    $dbSwf = \App\Models\Swf::where('member_number', $memberNumber)
+                        ->orderBy('created_at', 'desc')
+                        ->get();
+                    
+                    foreach ($dbSwf as $dbSwfItem) {
+                        $swf[] = [
+                            'amount' => (float) $dbSwfItem->amount,
+                            'date' => $dbSwfItem->date ? $dbSwfItem->date->format('Y-m-d') : null,
+                            'status' => $dbSwfItem->status,
+                            'source' => 'database'
+                        ];
+                    }
                 }
             } catch (\Exception $e) {
                 // Table might not exist, skip SWF
             }
             
-            // Get investments from database
+            // Get investments from database (model may not exist yet)
             $investments = [];
             try {
-                $dbInvestments = \App\Models\Investment::where('member_number', $memberNumber)
-                    ->orderBy('created_at', 'desc')
-                    ->get();
-                
-                foreach ($dbInvestments as $dbInvestment) {
-                    $investments[] = [
-                        'amount' => (float) $dbInvestment->amount,
-                        'date' => $dbInvestment->date ? $dbInvestment->date->format('Y-m-d') : null,
-                        'status' => $dbInvestment->status,
-                        'source' => 'database'
-                    ];
+                if (class_exists('\App\Models\Investment')) {
+                    $dbInvestments = \App\Models\Investment::where('member_number', $memberNumber)
+                        ->orderBy('created_at', 'desc')
+                        ->get();
+                    
+                    foreach ($dbInvestments as $dbInvestment) {
+                        $investments[] = [
+                            'amount' => (float) $dbInvestment->amount,
+                            'date' => $dbInvestment->date ? $dbInvestment->date->format('Y-m-d') : null,
+                            'status' => $dbInvestment->status,
+                            'source' => 'database'
+                        ];
+                    }
                 }
             } catch (\Exception $e) {
                 // Table might not exist, skip investments
