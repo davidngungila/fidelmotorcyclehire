@@ -34,10 +34,13 @@
         <div class="flex items-center gap-2">
           <select name="status" class="form-input py-2.5 px-3 text-sm w-auto" @change="submitFilter()">
             <option value="">All Statuses</option>
-            <option value="active" {{ ($statusFilter ?? '') === 'active' ? 'selected' : '' }}>Active</option>
-            <option value="settled" {{ ($statusFilter ?? '') === 'settled' ? 'selected' : '' }}>Settled</option>
-            <option value="defaulted" {{ ($statusFilter ?? '') === 'defaulted' ? 'selected' : '' }}>Defaulted</option>
             <option value="pending" {{ ($statusFilter ?? '') === 'pending' ? 'selected' : '' }}>Pending</option>
+            <option value="approved" {{ ($statusFilter ?? '') === 'approved' ? 'selected' : '' }}>Approved</option>
+            <option value="disbursed" {{ ($statusFilter ?? '') === 'disbursed' ? 'selected' : '' }}>Disbursed</option>
+            <option value="active" {{ ($statusFilter ?? '') === 'active' ? 'selected' : '' }}>Active</option>
+            <option value="paid" {{ ($statusFilter ?? '') === 'paid' ? 'selected' : '' }}>Paid</option>
+            <option value="defaulted" {{ ($statusFilter ?? '') === 'defaulted' ? 'selected' : '' }}>Defaulted</option>
+            <option value="rejected" {{ ($statusFilter ?? '') === 'rejected' ? 'selected' : '' }}>Rejected</option>
           </select>
         </div>
       </form>
@@ -84,17 +87,17 @@
               Member
               <i class="fa-solid ml-1.5 text-[10px] {{ $memberService->getSortDirectionIcon($sortColumn, 'member_number', $sortDirection) }}"></i>
             </th>
-            <th class="cursor-pointer select-none" @click="sortBy('loan_product')">
-              Product
-              <i class="fa-solid ml-1.5 text-[10px] {{ $memberService->getSortDirectionIcon($sortColumn, 'loan_product', $sortDirection) }}"></i>
+            <th class="cursor-pointer select-none" @click="sortBy('purpose')">
+              Purpose
+              <i class="fa-solid ml-1.5 text-[10px] {{ $memberService->getSortDirectionIcon($sortColumn, 'purpose', $sortDirection) }}"></i>
             </th>
-            <th class="text-right cursor-pointer select-none" @click="sortBy('loan_amount')">
+            <th class="text-right cursor-pointer select-none" @click="sortBy('principal_amount')">
               Amount
-              <i class="fa-solid ml-1.5 text-[10px] {{ $memberService->getSortDirectionIcon($sortColumn, 'loan_amount', $sortDirection) }}"></i>
+              <i class="fa-solid ml-1.5 text-[10px] {{ $memberService->getSortDirectionIcon($sortColumn, 'principal_amount', $sortDirection) }}"></i>
             </th>
-            <th class="text-right cursor-pointer select-none" @click="sortBy('outstanding_balance')">
-              Outstanding
-              <i class="fa-solid ml-1.5 text-[10px] {{ $memberService->getSortDirectionIcon($sortColumn, 'outstanding_balance', $sortDirection) }}"></i>
+            <th class="text-right cursor-pointer select-none" @click="sortBy('balance')">
+              Balance
+              <i class="fa-solid ml-1.5 text-[10px] {{ $memberService->getSortDirectionIcon($sortColumn, 'balance', $sortDirection) }}"></i>
             </th>
             <th class="text-right">Paid</th>
             <th>Status</th>
@@ -105,16 +108,17 @@
         <tbody>
           @forelse($loans as $index => $loan)
             @php
-              $loanNo = $loan['loan_number'] ?? ($loan['LoanNumber'] ?? '-');
-              $memberNo = $loan['member_number'] ?? '-';
-              $memberName = $loan['member_name'] ?? 'Unknown';
-              $product = $loan['loan_product'] ?? ($loan['LoanProduct'] ?? '-');
-              $amount = $loan['loan_amount'] ?? ($loan['LoanAmount'] ?? 0);
-              $outstanding = $loan['outstanding_balance'] ?? ($loan['OutstandingBalance'] ?? 0);
-              $paid = $loan['paid_amount'] ?? ($loan['PaidAmount'] ?? 0);
-              $status = $dashboardService->loanStatusBadge($loan['status'] ?? ($loan['Status'] ?? null));
+              $loanNo = $loan->loan_number ?? '-';
+              $memberNo = $loan->member_number ?? '-';
+              $memberName = $loan->user->name ?? 'Unknown';
+              $product = ucfirst($loan->purpose ?? '-');
+              $amount = $loan->principal_amount ?? 0;
+              $outstanding = $loan->balance ?? 0;
+              $paid = $loan->amount_paid ?? 0;
+              $status = $dashboardService->loanStatusBadge($loan->status ?? null);
               $progress = $amount > 0 ? min(($paid / $amount) * 100, 100) : 0;
               $rowNum = ($loans->currentPage() - 1) * $loans->perPage() + $index + 1;
+              $encryptedId = $loan->loan_number ? encrypt($loan->loan_number) : encrypt($loan->id);
             @endphp
             <tr class="group">
               <td class="text-xs text-primary-400 dark:text-primary-500 font-mono">{{ $rowNum }}.</td>
@@ -151,7 +155,7 @@
                 </div>
               </td>
               <td class="text-right whitespace-nowrap">
-                <a href="{{ route('admin.loans.show', $loan['encrypted_id'] ?? encryptId($loanNo)) }}"
+                <a href="{{ route('admin.loans.show', $encryptedId) }}"
                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-[11px] font-bold transition-colors">
                   <i class="fa-solid fa-eye text-[10px]"></i> View
                 </a>
