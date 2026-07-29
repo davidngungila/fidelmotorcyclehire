@@ -60,6 +60,11 @@ class Loan extends Model
         return $this->hasOne(LoanInformation::class);
     }
 
+    public function repaymentSchedules()
+    {
+        return $this->hasMany(LoanRepaymentSchedule::class);
+    }
+
     public function scopeByMemberNumber($query, $memberNumber)
     {
         return $query->where('member_number', $memberNumber);

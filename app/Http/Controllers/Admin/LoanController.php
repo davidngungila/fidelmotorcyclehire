@@ -151,11 +151,59 @@ class LoanController extends Controller
         $validated['loan_number'] = 'LOAN-' . date('Ymd') . '-' . str_pad((string) rand(1, 9999), 4, '0', STR_PAD_LEFT);
         $validated['status'] = 'pending';
 
-        Loan::create($validated);
+        $loan = Loan::create($validated);
+
+        // Create repayment schedule
+        $this->createRepaymentSchedule($loan);
 
         $this->success('Loan application created successfully.');
 
         return redirect()->route('admin.loans.index');
+    }
+
+    private function createRepaymentSchedule(Loan $loan)
+    {
+        $principal = (float) $loan->principal_amount;
+        $interestRate = (float) $loan->interest_rate;
+        $termMonths = (int) $loan->term_months;
+        
+        // Calculate monthly payment using amortization formula
+        if ($interestRate > 0) {
+            $monthlyRate = $interestRate / 100 / 12;
+            $monthlyPayment = $principal * ($monthlyRate * pow(1 + $monthlyRate, $termMonths)) / (pow(1 + $monthlyRate, $termMonths) - 1);
+        } else {
+            $monthlyPayment = $principal / $termMonths;
+        }
+
+        $balance = $principal;
+        $startDate = $loan->application_date;
+
+        for ($i = 1; $i <= $termMonths; $i++) {
+            $dueDate = date('Y-m-d', strtotime("+{$i} month", strtotime($startDate)));
+            
+            $interestPortion = $balance * ($interestRate / 100 / 12);
+            $principalPortion = $monthlyPayment - $interestPortion;
+            $balance = max(0, $balance - $principalPortion);
+
+            \App\Models\LoanRepaymentSchedule::create([
+                'loan_id' => $loan->id,
+                'installment_number' => $i,
+                'due_date' => $dueDate,
+                'principal_amount' => $principalPortion,
+                'interest_amount' => $interestPortion,
+                'total_amount' => $monthlyPayment,
+                'balance_after' => $balance,
+                'status' => 'pending',
+                'amount_paid' => 0,
+            ]);
+        }
+
+        // Update loan with calculated monthly payment
+        $loan->update([
+            'monthly_payment' => $monthlyPayment,
+            'total_amount_due' => $monthlyPayment * $termMonths,
+            'balance' => $principal,
+        ]);
     }
 
     public function show(Request $request, string $encryptedLoanNumber)
@@ -169,7 +217,7 @@ class LoanController extends Controller
         
         Gate::authorize('admin-only');
 
-        $loan = Loan::with('user')->where('loan_number', $loanNumber)->first();
+        $loan = Loan::with(['user', 'repaymentSchedules'])->where('loan_number', $loanNumber)->first();
 
         if (!$loan) {
             $this->error("Loan {$loanNumber} not found.");
@@ -186,28 +234,18 @@ class LoanController extends Controller
         $disbursementDate = $loan->disbursement_date ? $loan->disbursement_date->format('Y-m-d') : '-';
         $maturityDate = $loan->maturity_date ? $loan->maturity_date->format('Y-m-d') : '-';
 
-        $repaymentSchedule = [];
-        $months = $loan->term_months;
-        if ($installment > 0 && $loanAmount > 0 && $months > 0) {
-            $balance = $loanAmount;
-            $startDate = $disbursementDate !== '-' ? $disbursementDate : date('Y-m-01');
-            for ($i = 1; $i <= $months; $i++) {
-                $paymentDate = date('Y-m-d', strtotime("+{$i} month", strtotime($startDate)));
-                $interestPortion = $balance * ($interestRate / 100 / 12);
-                $principalPortion = $installment - $interestPortion;
-                $balance = max(0, $balance - $principalPortion);
-                $status = $paidAmount >= ($i * $installment) ? 'Paid' : 'Pending';
-                $repaymentSchedule[] = [
-                    'installment_no' => $i,
-                    'due_date' => $paymentDate,
-                    'amount' => $installment,
-                    'principal' => $principalPortion,
-                    'interest' => $interestPortion,
-                    'balance_after' => $balance,
-                    'status' => $status,
-                ];
-            }
-        }
+        // Load repayment schedule from database
+        $repaymentSchedule = $loan->repaymentSchedules->map(function ($schedule) {
+            return [
+                'installment_no' => $schedule->installment_number,
+                'due_date' => $schedule->due_date->format('Y-m-d'),
+                'amount' => (float) $schedule->total_amount,
+                'principal' => (float) $schedule->principal_amount,
+                'interest' => (float) $schedule->interest_amount,
+                'balance_after' => (float) $schedule->balance_after,
+                'status' => ucfirst($schedule->status),
+            ];
+        })->toArray();
 
         $repaymentHistory = [];
         if ($paidAmount > 0 && !empty($repaymentSchedule)) {
