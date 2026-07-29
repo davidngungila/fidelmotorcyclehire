@@ -81,12 +81,35 @@
         <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Members</span>
       </a>
 
-      <a href="{{ route('admin.loans.index') }}"
-         class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-primary-200 hover:text-white transition-all duration-150
-                {{ request()->routeIs('admin.loans.*') ? 'active' : '' }}">
-        <i class="fa-solid fa-hand-holding-dollar w-4 text-center flex-shrink-0"></i>
-        <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Loans</span>
-      </a>
+      <div x-data="{ open: {{ request()->routeIs('admin.loans.*') ? 'true' : 'false' }} }" class="sidebar-dropdown">
+        <button @click="open = !open"
+                class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-primary-200 hover:text-white transition-all duration-150
+                       {{ request()->routeIs('admin.loans.*') ? 'active' : '' }}">
+          <i class="fa-solid fa-hand-holding-dollar w-4 text-center flex-shrink-0"></i>
+          <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap flex-1 text-left">Loans</span>
+          <i x-show="!sidebarCollapsed" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'" class="fa-solid text-[10px] transition-transform"></i>
+        </button>
+        <div x-show="open" x-transition class="mt-1 space-y-0.5 pl-6">
+          <a href="{{ route('admin.loans.applications') }}"
+             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
+                    {{ request()->routeIs('admin.loans.applications') ? 'active' : '' }}">
+            <i class="fa-solid fa-file-signature w-4 text-center flex-shrink-0"></i>
+            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Loan Applications</span>
+          </a>
+          <a href="{{ route('admin.loans.index') }}"
+             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
+                    {{ request()->routeIs('admin.loans.index') ? 'active' : '' }}">
+            <i class="fa-solid fa-list-check w-4 text-center flex-shrink-0"></i>
+            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Active Loans</span>
+          </a>
+          <a href="{{ route('admin.loans.repayments') }}"
+             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
+                    {{ request()->routeIs('admin.loans.repayments') ? 'active' : '' }}">
+            <i class="fa-solid fa-money-bill-transfer w-4 text-center flex-shrink-0"></i>
+            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Loan Repayments</span>
+          </a>
+        </div>
+      </div>
 
       <a href="{{ route('admin.savings.index') }}"
          class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-primary-200 hover:text-white transition-all duration-150

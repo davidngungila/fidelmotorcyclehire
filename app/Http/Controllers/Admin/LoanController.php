@@ -26,6 +26,24 @@ class LoanController extends Controller
     ) {
     }
 
+    public function applications(Request $request)
+    {
+        Gate::authorize('admin-only');
+
+        return view('admin.loans.applications', [
+            'dashboardService' => $this->dashboardService,
+        ]);
+    }
+
+    public function repayments(Request $request)
+    {
+        Gate::authorize('admin-only');
+
+        return view('admin.loans.repayments', [
+            'dashboardService' => $this->dashboardService,
+        ]);
+    }
+
     public function index(Request $request)
     {
         $perPage = (int) $request->input('per_page', 15);

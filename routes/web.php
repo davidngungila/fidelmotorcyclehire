@@ -74,7 +74,9 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/members/{encryptedMemberNumber}/savings', [AdminMemberController::class, 'savings'])->name('members.savings');
     Route::post('/members/import', [AdminMemberController::class, 'import'])->name('members.import');
 
+    Route::get('/loans/applications', [AdminLoanController::class, 'applications'])->name('loans.applications');
     Route::get('/loans', [AdminLoanController::class, 'index'])->name('loans.index');
+    Route::get('/loans/repayments', [AdminLoanController::class, 'repayments'])->name('loans.repayments');
     Route::get('/loans/{encryptedLoanNumber}', [AdminLoanController::class, 'show'])->name('loans.show');
     Route::post('/loans/import-loan-payments', [AdminLoanController::class, 'importLoanPayments'])->name('loans.import-loan-payments');
     Route::post('/loans/import-loans-information', [AdminLoanController::class, 'importLoansInformation'])->name('loans.import-loans-information');
