@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Contracts\GoogleSheetRepositoryInterface;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\Investment;
+use App\Models\InvestmentProduct;
 use App\Services\AdminDashboardService;
 use App\Services\EncryptedIdService;
 use App\Services\MemberService;
@@ -20,7 +21,6 @@ class InvestmentController extends Controller
     use FlashMessages;
 
     public function __construct(
-        protected GoogleSheetRepositoryInterface $googleSheetRepository,
         protected MemberService $memberService,
         protected AdminDashboardService $dashboardService,
         protected EncryptedIdService $encryptedIdService,
@@ -29,54 +29,38 @@ class InvestmentController extends Controller
 
     public function index(Request $request)
     {
+        Gate::authorize('admin-only');
+
         $perPage = (int) $request->input('per_page', 15);
-        $sortColumn = $request->input('sort', 'member_number');
-        $sortDirection = $request->input('sort_direction', 'asc');
+        $sortColumn = $request->input('sort', 'investment_date');
+        $sortDirection = $request->input('sort_direction', 'desc');
         $searchQuery = $request->input('q', '');
+        $statusFilter = $request->input('status', '');
 
-        $allMembers = $this->googleSheetRepository->getAllMembers();
+        $query = Investment::with(['user', 'investmentProduct']);
 
-        $investmentsList = [];
-        foreach ($allMembers as $member) {
-            $memberNo = $member['member_number'] ?? ($member['MemberNumber'] ?? null);
-            if (! $memberNo) {
-                continue;
-            }
-            $investments = $this->googleSheetRepository->getMemberInvestments($memberNo);
-            foreach ($investments as $inv) {
-                $investmentsList[] = [
-                    'member_number' => $memberNo,
-                    'member_name' => $member['name'] ?? ($member['Name'] ?? 'Unknown'),
-                    'member_branch' => $member['branch'] ?? ($member['Branch'] ?? '-'),
-                    'product' => $inv['product'] ?? ($inv['Product'] ?? '-'),
-                    'amount_invested' => (float) ($inv['amount_invested'] ?? ($inv['AmountInvested'] ?? 0)),
-                    'units' => (float) ($inv['units'] ?? ($inv['Units'] ?? 0)),
-                    'current_value' => (float) ($inv['current_value'] ?? ($inv['CurrentValue'] ?? 0)),
-                    'profit_earned' => (float) ($inv['profit_earned'] ?? ($inv['ProfitEarned'] ?? 0)),
-                    'return_rate' => (float) ($inv['return_rate'] ?? ($inv['ReturnRate'] ?? 0)),
-                ];
-            }
+        // Search
+        if (!empty($searchQuery)) {
+            $query->where('investment_number', 'like', '%' . $searchQuery . '%')
+                  ->orWhere('member_number', 'like', '%' . $searchQuery . '%')
+                  ->orWhereHas('user', function ($q) use ($searchQuery) {
+                      $q->where('name', 'like', '%' . $searchQuery . '%');
+                  });
         }
 
-        if (! empty($searchQuery)) {
-            $investmentsList = array_values(array_filter($investmentsList, static function ($i) use ($searchQuery): bool {
-                $query = strtolower(trim($searchQuery));
-                $haystack = strtolower(implode(' ', [
-                    $i['product'] ?? '',
-                    $i['member_number'] ?? '',
-                    $i['member_name'] ?? '',
-                    $i['member_branch'] ?? '',
-                ]));
-
-                return str_contains($haystack, $query);
-            }));
+        // Filter by status
+        if (!empty($statusFilter)) {
+            $query->where('status', $statusFilter);
         }
 
-        $investmentsList = $this->memberService->sort($investmentsList, $sortColumn, $sortDirection);
-        $paginated = $this->memberService->paginateArray($investmentsList, $perPage);
+        // Sort
+        $query->orderBy($sortColumn, $sortDirection);
 
-        $paginated->appends([
+        $investments = $query->paginate($perPage);
+
+        $investments->appends([
             'q' => $searchQuery,
+            'status' => $statusFilter,
             'per_page' => $perPage,
             'sort' => $sortColumn,
             'sort_direction' => $sortDirection,
@@ -89,16 +73,18 @@ class InvestmentController extends Controller
             'user_agent' => $request->userAgent(),
             'properties' => [
                 'search_query' => $searchQuery,
+                'status_filter' => $statusFilter,
                 'per_page' => $perPage,
                 'sort' => $sortColumn,
                 'sort_direction' => $sortDirection,
-                'total_count' => count($investmentsList),
+                'total_count' => $investments->total(),
             ],
         ]);
 
         return view('admin.investments.index', [
-            'investments' => $paginated,
+            'investments' => $investments,
             'searchQuery' => $searchQuery,
+            'statusFilter' => $statusFilter,
             'perPage' => $perPage,
             'sortColumn' => $sortColumn,
             'sortDirection' => $sortDirection,
@@ -109,51 +95,27 @@ class InvestmentController extends Controller
 
     public function show(Request $request, string $encryptedMemberNumber)
     {
-        $memberNumber = $this->encryptedIdService->decrypt($encryptedMemberNumber);
-        
         Gate::authorize('admin-only');
 
-        $member = $this->googleSheetRepository->getMemberByNumber($memberNumber);
+        $memberNumber = $this->encryptedIdService->decrypt($encryptedMemberNumber);
 
-        if (! $member) {
-            $this->error("Member {$memberNumber} not found.");
+        $investments = Investment::with(['user', 'investmentProduct'])
+            ->where('member_number', $memberNumber)
+            ->orderBy('investment_date', 'desc')
+            ->get();
 
+        if ($investments->isEmpty()) {
+            $this->error("No investments found for member {$memberNumber}");
             return redirect()->route('admin.investments.index');
         }
 
-        $investments = $this->googleSheetRepository->getMemberInvestments($memberNumber);
-
-        $totalInvested = 0;
-        $totalCurrentValue = 0;
-        $totalProfit = 0;
-
-        foreach ($investments as $inv) {
-            $invested = (float) ($inv['amount_invested'] ?? ($inv['AmountInvested'] ?? 0));
-            $current = (float) ($inv['current_value'] ?? ($inv['CurrentValue'] ?? 0));
-            $totalInvested += $invested;
-            $totalCurrentValue += $current;
-            $totalProfit += ($current - $invested);
-        }
-
-        $overallReturn = $totalInvested > 0 ? (($totalCurrentValue - $totalInvested) / $totalInvested) * 100 : 0;
-
-        $allHistory = [];
-        foreach ($investments as $inv) {
-            $product = $inv['product'] ?? ($inv['Product'] ?? 'Unknown');
-            $history = $inv['history'] ?? ($inv['History'] ?? []);
-            foreach ($history as $h) {
-                $allHistory[] = array_merge($h, [
-                    'product' => $product,
-                ]);
-            }
-        }
-
-        usort($allHistory, static function ($a, $b): int {
-            $dateA = $a['date'] ?? '';
-            $dateB = $b['date'] ?? '';
-
-            return strcmp($dateB, $dateA);
+        $user = $investments->first()->user;
+        $totalInvested = $investments->sum('amount');
+        $totalCurrentValue = $investments->sum(function ($inv) {
+            return $inv->actual_return ?? $inv->expected_return ?? 0;
         });
+        $totalProfit = $totalCurrentValue - $totalInvested;
+        $overallReturn = $totalInvested > 0 ? (($totalCurrentValue - $totalInvested) / $totalInvested) * 100 : 0;
 
         ActivityLog::create([
             'user_id' => Auth::id(),
@@ -163,21 +125,25 @@ class InvestmentController extends Controller
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
             'properties' => [
-                'member_name' => $member['name'] ?? null,
+                'member_name' => $user->name ?? null,
                 'total_invested' => $totalInvested,
-                'investment_count' => count($investments),
+                'investment_count' => $investments->count(),
             ],
         ]);
 
         return view('admin.investments.show', [
-            'member' => $member,
+            'member' => [
+                'name' => $user->name ?? 'Unknown',
+                'member_number' => $memberNumber,
+                'email' => $user->email ?? null,
+            ],
             'memberNumber' => $memberNumber,
             'investments' => $investments,
             'totalInvested' => $totalInvested,
             'totalCurrentValue' => $totalCurrentValue,
             'totalProfit' => $totalProfit,
             'overallReturn' => $overallReturn,
-            'allHistory' => $allHistory,
+            'allHistory' => [],
             'dashboardService' => $this->dashboardService,
         ]);
     }
