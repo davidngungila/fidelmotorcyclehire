@@ -195,7 +195,7 @@
 
         @if($loan['status'] === 'pending')
         <div class="mt-6 pt-6 border-t border-primary-100 dark:border-primary-900/50">
-          <form method="POST" action="{{ route('admin.loans.approve', $loan->id) }}" onsubmit="return confirm('Are you sure you want to approve this loan?');">
+          <form method="POST" action="{{ route('admin.loans.approve', $loan['id']) }}" onsubmit="return confirm('Are you sure you want to approve this loan?');">
             @csrf
             <button type="submit" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-bold transition-colors">
               <i class="fa-solid fa-check text-xs"></i> Approve Loan
@@ -204,7 +204,7 @@
         </div>
         @elseif($loan['status'] === 'approved')
         <div class="mt-6 pt-6 border-t border-primary-100 dark:border-primary-900/50">
-          <form method="POST" action="{{ route('admin.loans.disburse', $loan->id) }}">
+          <form method="POST" action="{{ route('admin.loans.disburse', $loan['id']) }}">
             @csrf
             <div class="space-y-4">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

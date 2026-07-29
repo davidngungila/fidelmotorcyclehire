@@ -309,6 +309,7 @@ class LoanController extends Controller
 
         return view('admin.loans.show', [
             'loan' => [
+                'id' => $loan->id,
                 'loan_number' => $loan->loan_number,
                 'loan_product' => ucfirst($loan->purpose),
                 'loan_amount' => $loanAmount,
