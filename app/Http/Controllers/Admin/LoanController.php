@@ -529,7 +529,6 @@ class LoanController extends Controller
         // Create loan payment record
         \App\Models\LoanPayment::create([
             'loan_id' => $loan->id,
-            'user_id' => $loan->user_id,
             'customer_id' => $loan->member_number,
             'payment_amount' => $paymentAmount,
             'payment_date' => $validated['payment_date'],
