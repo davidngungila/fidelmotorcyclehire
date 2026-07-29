@@ -117,7 +117,7 @@
                             </td>
                             <td class="px-4 py-3 text-sm text-primary-600 dark:text-primary-400">{{ $loan->disbursement_date ? $loan->disbursement_date->format('Y-m-d') : '-' }}</td>
                             <td class="px-4 py-3 text-right">
-                                <a href="{{ route('admin.loans.show', encrypt($loan->loan_number)) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-xs font-medium transition-colors">
+                                <a href="{{ route('admin.loans.show', \App\Services\EncryptedIdService::encrypt($loan->loan_number)) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-xs font-medium transition-colors">
                                     <i class="fa-solid fa-eye text-[10px]"></i> View
                                 </a>
                             </td>
