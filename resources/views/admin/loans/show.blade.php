@@ -250,12 +250,12 @@
         </div>
       </div>
 
-      <form method="POST" action="{{ route('admin.loans.approve', $loan['id']) }}" onsubmit="return confirm('Are you sure you want to approve this loan?');">
+      <form method="POST" action="{{ route('admin.loans.approve', $loan['id']) }}" id="approveForm" class="hidden">
         @csrf
-        <button type="submit" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-bold transition-colors">
-          <i class="fa-solid fa-check text-xs"></i> Approve Loan
-        </button>
       </form>
+      <button type="button" onclick="confirmApprove()" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-bold transition-colors">
+        <i class="fa-solid fa-check text-xs"></i> Approve Loan
+      </button>
       @elseif($loan['status'] === 'approved')
       <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-5 mb-6">
         <div class="flex items-start gap-3">
@@ -630,6 +630,27 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+  function confirmApprove() {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'Do you want to approve this loan?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#059669',
+      cancelButtonColor: '#dc2626',
+      confirmButtonText: 'Yes, approve it!',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        document.getElementById('approveForm').submit();
+      }
+    });
+  }
+</script>
+@endpush
 
 @push('scripts')
 <script>
