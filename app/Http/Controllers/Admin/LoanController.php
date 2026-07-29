@@ -529,12 +529,13 @@ class LoanController extends Controller
         // Create loan payment record
         \App\Models\LoanPayment::create([
             'loan_id' => $loan->id,
-            'payment_number' => 'PAY-' . date('Ymd') . '-' . str_pad((string) rand(1, 9999), 4, '0', STR_PAD_LEFT),
+            'user_id' => $loan->user_id,
+            'customer_id' => $loan->member_number,
+            'payment_amount' => $paymentAmount,
             'payment_date' => $validated['payment_date'],
-            'amount' => $paymentAmount,
             'payment_method' => $validated['payment_method'],
-            'notes' => $validated['notes'] ?? null,
-            'status' => 'completed',
+            'reference_number' => 'PAY-' . date('Ymd') . '-' . str_pad((string) rand(1, 9999), 4, '0', STR_PAD_LEFT),
+            'principal_amount' => $paymentAmount,
         ]);
 
         // Check if loan is fully paid
