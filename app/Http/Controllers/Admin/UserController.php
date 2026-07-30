@@ -163,20 +163,43 @@ class UserController extends Controller
 
     public function storeContactInfo(StoreContactInfoRequest $request, $userId)
     {
-        $validated = $request->validated();
-        
-        $profile = MemberProfile::where('user_id', $userId)->firstOrFail();
-        $profile->update($validated);
+        try {
+            $validated = $request->validated();
+            
+            $profile = MemberProfile::where('user_id', $userId)->firstOrFail();
+            $profile->update($validated);
 
-        ActivityLog::create([
-            'user_id' => Auth::id(),
-            'description' => 'Admin saved contact info for member: ' . $profile->full_name,
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'description' => 'Admin saved contact info for member: ' . $profile->full_name,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
 
-        $this->success('Contact information saved successfully.');
-        return response()->json(['success' => true]);
+            $this->success('Contact information saved successfully.');
+            return response()->json(['success' => true]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Member profile not found. Please complete the Basic Information tab first.'
+            ], 404);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Database error: ' . $e->getMessage()
+            ], 500);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function storeMembershipDetails(StoreMembershipDetailsRequest $request, $userId)

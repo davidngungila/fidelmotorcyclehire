@@ -563,6 +563,35 @@ function memberCreateForm() {
           body: formData
         });
         
+        const contentType = response.headers.get('content-type');
+        
+        if (!response.ok) {
+          if (contentType && contentType.includes('application/json')) {
+            const data = await response.json();
+            let errorMessage = 'Failed to save contact information.';
+            if (data.errors) {
+              const errorMessages = Object.values(data.errors).flat();
+              errorMessage = errorMessages.join('\n');
+            } else if (data.message) {
+              errorMessage = data.message;
+            }
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: errorMessage
+            });
+          } else {
+            const text = await response.text();
+            console.error('Server returned HTML instead of JSON:', text);
+            Swal.fire({
+              icon: 'error',
+              title: 'Server Error',
+              text: 'Please check the form for validation errors.'
+            });
+          }
+          return;
+        }
+        
         const data = await response.json();
         
         if (data.success) {
@@ -575,12 +604,26 @@ function memberCreateForm() {
             showConfirmButton: false
           });
           this.currentTab = 3;
+        } else {
+          let errorMessage = 'Failed to save contact information.';
+          if (data.errors) {
+            const errorMessages = Object.values(data.errors).flat();
+            errorMessage = errorMessages.join('\n');
+          } else if (data.message) {
+            errorMessage = data.message;
+          }
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: errorMessage
+          });
         }
       } catch (error) {
+        console.error('Error:', error);
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: 'Failed to save contact information.'
+          text: error.message || 'Failed to save contact information.'
         });
       }
     },
