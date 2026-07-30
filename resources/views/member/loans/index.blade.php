@@ -29,7 +29,7 @@
             <h2 class="text-lg font-bold text-primary-900 dark:text-white">My Loans</h2>
             <p class="text-sm text-primary-600 dark:text-primary-400">View and manage your loan accounts</p>
         </div>
-        <a href="{{ route('loans.create') }}"
+        <a href="{{ route('member.loans.create') }}"
            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white text-sm font-bold shadow-lg shadow-primary-500/20 hover:shadow-primary-500/30 transition-all">
             <i class="fa-solid fa-plus text-xs"></i> Apply for Loan
         </a>
