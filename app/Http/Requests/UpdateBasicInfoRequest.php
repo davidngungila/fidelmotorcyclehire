@@ -36,17 +36,17 @@ class UpdateBasicInfoRequest extends FormRequest
         }
 
         return [
-            'member_type_id' => 'sometimes|required|exists:member_types,id',
-            'first_name' => 'sometimes|required|string|max:255',
+            'member_type_id' => 'nullable|exists:member_types,id',
+            'first_name' => 'nullable|string|max:255',
             'middle_name' => 'nullable|string|max:255',
-            'last_name' => 'sometimes|required|string|max:255',
-            'email_address' => 'sometimes|required|email|max:255|unique:users,email,' . $userId,
-            'gender' => 'sometimes|required|in:male,female,other',
+            'last_name' => 'nullable|string|max:255',
+            'email_address' => 'nullable|email|max:255|unique:users,email,' . $userId,
+            'gender' => 'nullable|in:male,female,other',
             'date_of_birth' => 'nullable|date|before:today',
             'national_id' => 'nullable|string|max:50|unique:member_profiles,national_id,' . $profileId,
             'passport_driving_license' => 'nullable|string|max:50',
-            'registration_date' => 'sometimes|required|date',
-            'status' => 'sometimes|required|in:active,pending,suspended',
+            'registration_date' => 'nullable|date',
+            'status' => 'nullable|in:active,pending,suspended',
             'profile_photo' => 'nullable|image|max:5120',
         ];
     }
