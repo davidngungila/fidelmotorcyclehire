@@ -18,11 +18,11 @@
         <div class="flex items-center justify-between mb-6">
             <div>
                 <h2 class="text-2xl font-bold text-primary-900 dark:text-white">{{ $savingPlan->name }}</h2>
-                <p class="text-sm text-primary-500 dark:text-primary-400 mt-1">Membership: {{ $savingPlan->membership ?? $savingPlan->memberid }}</p>
+                <p class="text-sm text-primary-500 dark:text-primary-400 mt-1">Membership: {{ ucfirst($savingPlan->membership) }}</p>
             </div>
             <div class="text-right">
                 <p class="text-sm text-primary-500 dark:text-primary-400">Target Date</p>
-                <p class="text-lg font-bold text-primary-900 dark:text-white">Dec 2026</p>
+                <p class="text-lg font-bold text-primary-900 dark:text-white">{{ $savingPlan->target_date ? $savingPlan->target_date->format('M Y') : 'Not Set' }}</p>
             </div>
         </div>
 

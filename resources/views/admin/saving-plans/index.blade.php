@@ -12,8 +12,8 @@
       <form method="GET" action="{{ route('admin.saving-plans.index') }}" class="flex-1">
         <div class="relative">
           <i class="fa-solid fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-primary-400"></i>
-          <input type="text" name="memberid" value="{{ request('memberid') }}"
-                 placeholder="Search by member ID..."
+          <input type="text" name="member_number" value="{{ request('member_number') }}"
+                 placeholder="Search by member number..."
                  class="form-input pl-9 py-2.5 text-sm">
         </div>
       </form>
@@ -41,8 +41,8 @@
         <span class="text-xs font-semibold text-primary-600 dark:text-primary-400">
           <i class="fa-solid fa-list-check mr-1.5"></i> {{ $savingPlans->total() }} Saving Plans Found
         </span>
-        @if(request('memberid'))
-          <span class="badge badge-blue text-[10px]">Member: {{ request('memberid') }}</span>
+        @if(request('member_number'))
+          <span class="badge badge-blue text-[10px]">Member: {{ request('member_number') }}</span>
         @endif
         @if(request('membership'))
           <span class="badge badge-green text-[10px]">Membership: {{ request('membership') }}</span>
@@ -56,8 +56,10 @@
           <tr>
             <th class="w-12">#</th>
             <th>Name</th>
-            <th>Member ID</th>
+            <th>Member Number</th>
             <th>Membership</th>
+            <th>Target Date</th>
+            <th>Status</th>
             <th class="text-right">Monthly Goal</th>
             <th class="text-right">Goal</th>
             <th class="text-right">Actions</th>
@@ -70,7 +72,7 @@
               <td>
                 <span class="font-semibold text-primary-600">{{ $savingPlan->name }}</span>
               </td>
-              <td>{{ $savingPlan->memberid }}</td>
+              <td>{{ $savingPlan->member_number }}</td>
               <td>
                 @php
                   $membershipColors = [
@@ -81,6 +83,18 @@
                   $color = $membershipColors[$savingPlan->membership] ?? 'bg-gray-100 text-gray-700';
                 @endphp
                 <span class="badge {{ $color }} text-[10px]">{{ ucfirst($savingPlan->membership) }}</span>
+              </td>
+              <td>{{ $savingPlan->target_date ? $savingPlan->target_date->format('M d, Y') : '-' }}</td>
+              <td>
+                @php
+                  $statusColors = [
+                    'active' => 'bg-green-100 text-green-700',
+                    'completed' => 'bg-blue-100 text-blue-700',
+                    'paused' => 'bg-yellow-100 text-yellow-700',
+                  ];
+                  $statusColor = $statusColors[$savingPlan->status ?? 'active'] ?? 'bg-gray-100 text-gray-700';
+                @endphp
+                <span class="badge {{ $statusColor }} text-[10px]">{{ ucfirst($savingPlan->status ?? 'active') }}</span>
               </td>
               <td class="text-right font-semibold">{{ number_format($savingPlan->monthly_goal, 2) }}</td>
               <td class="text-right font-semibold">{{ number_format($savingPlan->goal, 2) }}</td>
@@ -104,7 +118,7 @@
             </tr>
           @empty
             <tr>
-              <td colspan="7" class="text-center py-12 text-gray-500">
+              <td colspan="9" class="text-center py-12 text-gray-500">
                 <i class="fa-solid fa-inbox text-4xl mb-3 block"></i>
                 <p>No saving plans found</p>
               </td>

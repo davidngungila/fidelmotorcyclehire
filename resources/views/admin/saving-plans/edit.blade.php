@@ -23,11 +23,11 @@
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Member ID</label>
-          <input type="text" name="memberid" value="{{ $savingPlan->memberid }}" required
-                 placeholder="Enter member ID"
+          <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Member Number</label>
+          <input type="text" name="member_number" value="{{ $savingPlan->member_number }}" required
+                 placeholder="Enter member number"
                  class="form-input py-2.5 px-4">
-          @error('memberid')
+          @error('member_number')
             <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
           @enderror
         </div>
@@ -63,6 +63,30 @@
                  placeholder="Enter total goal"
                  class="form-input py-2.5 px-4">
           @error('goal')
+            <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
+          @enderror
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Target Date</label>
+          <input type="date" name="target_date" value="{{ $savingPlan->target_date ? $savingPlan->target_date->format('Y-m-d') : '' }}"
+                 placeholder="Enter target date"
+                 class="form-input py-2.5 px-4">
+          @error('target_date')
+            <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
+          @enderror
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Status</label>
+          <select name="status" class="form-input py-2.5 px-4">
+            <option value="active" {{ ($savingPlan->status ?? 'active') == 'active' ? 'selected' : '' }}>Active</option>
+            <option value="completed" {{ $savingPlan->status == 'completed' ? 'selected' : '' }}>Completed</option>
+            <option value="paused" {{ $savingPlan->status == 'paused' ? 'selected' : '' }}>Paused</option>
+          </select>
+          @error('status')
             <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
           @enderror
         </div>

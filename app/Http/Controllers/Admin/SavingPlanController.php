@@ -15,8 +15,8 @@ class SavingPlanController extends Controller
     {
         $query = SavingPlan::query();
 
-        if ($request->filled('memberid')) {
-            $query->byMemberId($request->memberid);
+        if ($request->filled('member_number')) {
+            $query->byMemberNumber($request->member_number);
         }
 
         if ($request->filled('membership')) {
@@ -37,10 +37,12 @@ class SavingPlanController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'memberid' => 'required|string|max:50',
+            'member_number' => 'required|string|max:50',
             'membership' => 'required|string|max:50',
             'monthly_goal' => 'required|numeric|min:0',
             'goal' => 'required|numeric|min:0',
+            'target_date' => 'nullable|date',
+            'status' => 'nullable|string|in:active,completed,paused',
         ]);
 
         SavingPlan::create($validated);
@@ -58,10 +60,12 @@ class SavingPlanController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'memberid' => 'required|string|max:50',
+            'member_number' => 'required|string|max:50',
             'membership' => 'required|string|max:50',
             'monthly_goal' => 'required|numeric|min:0',
             'goal' => 'required|numeric|min:0',
+            'target_date' => 'nullable|date',
+            'status' => 'nullable|string|in:active,completed,paused',
         ]);
 
         $savingPlan->update($validated);

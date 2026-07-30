@@ -23,9 +23,7 @@ class SavingPlanController extends Controller
         $memberNumber = $user->member_number;
 
         // Get the member's saving plan
-        $savingPlan = SavingPlan::where('memberid', $memberNumber)
-            ->orWhere('membership', $memberNumber)
-            ->first();
+        $savingPlan = SavingPlan::where('member_number', $memberNumber)->first();
 
         if (!$savingPlan) {
             return view('member.saving-plan.empty');
