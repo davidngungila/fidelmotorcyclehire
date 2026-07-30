@@ -10,6 +10,7 @@ use App\Models\ActivityLog;
 use App\Models\Transaction;
 use App\Traits\FlashMessages;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
@@ -111,6 +112,18 @@ class SavingController extends Controller
         // Update running balance to the latest calculated balance
         $runningBalance = $currentBalance;
 
+        // Paginate ledger (20 per page)
+        $currentPage = $request->input('page', 1);
+        $perPage = 20;
+        $totalLedger = count($ledger);
+        $ledgerPaginated = new LengthAwarePaginator(
+            array_slice($ledger, ($currentPage - 1) * $perPage, $perPage),
+            $totalLedger,
+            $perPage,
+            $currentPage,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
         ActivityLog::create([
             'user_id' => $user->id,
             'subject_type' => 'savings',
@@ -134,6 +147,7 @@ class SavingController extends Controller
             'deposits',
             'withdrawals',
             'ledger',
+            'ledgerPaginated',
             'totalDeposited',
             'totalWithdrawn'
         ));

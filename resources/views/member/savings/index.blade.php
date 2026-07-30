@@ -174,7 +174,7 @@
                 <p class="text-[11px] text-primary-500 dark:text-primary-400 mt-0.5">Complete chronological transaction history</p>
             </div>
             <span class="text-[11px] font-semibold text-primary-600 dark:text-primary-400">
-                {{ count($ledger) }} entries
+                {{ $ledgerPaginated->total() }} entries
             </span>
         </div>
         <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
@@ -190,7 +190,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($ledger as $idx => $txn)
+                    @forelse($ledgerPaginated as $idx => $txn)
                         @php
                             $typeLower = strtolower($txn['type'] ?? '');
                             $striped = $idx % 2 === 1;
@@ -234,6 +234,11 @@
                 </tbody>
             </table>
         </div>
+        @if($ledgerPaginated->hasPages())
+            <div class="px-5 py-4 border-t border-primary-100 dark:border-dark-border">
+                {{ $ledgerPaginated->appends(request()->query())->links() }}
+            </div>
+        @endif
     </div>
 
 </div>
