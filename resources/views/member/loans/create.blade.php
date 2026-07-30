@@ -295,17 +295,22 @@ function loanCreateForm() {
           });
           this.currentTab = 2;
         } else {
+          let errorMessage = data.message || 'Failed to save basic information.';
+          if (data.errors) {
+            const errorMessages = Object.values(data.errors).flat();
+            errorMessage = errorMessages.join(', ');
+          }
           Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: data.message || 'Failed to save basic information.'
+            text: errorMessage
           });
         }
       } catch (error) {
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: 'Failed to save basic information.'
+          text: error.message || 'Failed to save basic information.'
         });
       }
       
@@ -341,17 +346,22 @@ function loanCreateForm() {
           });
           this.currentTab = 3;
         } else {
+          let errorMessage = data.message || 'Failed to save loan details.';
+          if (data.errors) {
+            const errorMessages = Object.values(data.errors).flat();
+            errorMessage = errorMessages.join(', ');
+          }
           Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: data.message || 'Failed to save loan details.'
+            text: errorMessage
           });
         }
       } catch (error) {
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: 'Failed to save loan details.'
+          text: error.message || 'Failed to save loan details.'
         });
       }
       
@@ -387,17 +397,22 @@ function loanCreateForm() {
           });
           this.currentTab = 4;
         } else {
+          let errorMessage = data.message || 'Failed to save collateral information.';
+          if (data.errors) {
+            const errorMessages = Object.values(data.errors).flat();
+            errorMessage = errorMessages.join(', ');
+          }
           Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: data.message || 'Failed to save collateral information.'
+            text: errorMessage
           });
         }
       } catch (error) {
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: 'Failed to save collateral information.'
+          text: error.message || 'Failed to save collateral information.'
         });
       }
       
@@ -438,10 +453,15 @@ function loanCreateForm() {
             window.location.href = '/member/loans';
           });
         } else {
+          let errorMessage = data.message || 'Failed to submit loan application.';
+          if (data.errors) {
+            const errorMessages = Object.values(data.errors).flat();
+            errorMessage = errorMessages.join(', ');
+          }
           Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: data.message || 'Failed to submit loan application.'
+            text: errorMessage
           });
         }
       } catch (error) {
