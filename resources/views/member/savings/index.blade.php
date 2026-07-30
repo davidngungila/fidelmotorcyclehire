@@ -75,13 +75,13 @@
                         :class="activeMiniTab === 'deposits' ? 'bg-white dark:bg-primary-800 text-green-600 dark:text-green-400 shadow' : 'text-primary-600 dark:text-primary-400 hover:text-primary-800'"
                         class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all">
                     <i class="fa-solid fa-arrow-down text-green-500"></i>
-                    Deposits ({{ count($deposits) }})
+                    Deposits ({{ $depositsPaginated->total() }})
                 </button>
                 <button @click="activeMiniTab = 'withdrawals'"
                         :class="activeMiniTab === 'withdrawals' ? 'bg-white dark:bg-primary-800 text-red-600 dark:text-red-400 shadow' : 'text-primary-600 dark:text-primary-400 hover:text-primary-800'"
                         class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all">
                     <i class="fa-solid fa-arrow-up text-red-500"></i>
-                    Withdrawals ({{ count($withdrawals) }})
+                    Withdrawals ({{ $withdrawalsPaginated->total() }})
                 </button>
             </div>
         </div>
@@ -98,7 +98,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($deposits as $d)
+                        @forelse($depositsPaginated as $d)
                             <tr>
                                 <td class="text-xs font-semibold text-primary-800 dark:text-primary-200 whitespace-nowrap tabular-nums">
                                     {{ \Carbon\Carbon::parse($d['date'])->format('M j, Y') }}
@@ -124,6 +124,11 @@
                     </tbody>
                 </table>
             </div>
+            @if($depositsPaginated->hasPages())
+                <div class="mt-4">
+                    {{ $depositsPaginated->appends(request()->query())->links() }}
+                </div>
+            @endif
         </div>
 
         <div x-show="activeMiniTab === 'withdrawals'" x-transition:enter="fade-in 0.2s ease" style="display: none;">
@@ -138,7 +143,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($withdrawals as $w)
+                        @forelse($withdrawalsPaginated as $w)
                             <tr>
                                 <td class="text-xs font-semibold text-primary-800 dark:text-primary-200 whitespace-nowrap tabular-nums">
                                     {{ \Carbon\Carbon::parse($w['date'])->format('M j, Y') }}
@@ -164,6 +169,11 @@
                     </tbody>
                 </table>
             </div>
+            @if($withdrawalsPaginated->hasPages())
+                <div class="mt-4">
+                    {{ $withdrawalsPaginated->appends(request()->query())->links() }}
+                </div>
+            @endif
         </div>
     </div>
 

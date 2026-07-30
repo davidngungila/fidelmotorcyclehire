@@ -124,6 +124,28 @@ class SavingController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         );
 
+        // Paginate deposits (20 per page)
+        $depositsPage = $request->input('deposits_page', 1);
+        $totalDepositsCount = count($deposits);
+        $depositsPaginated = new LengthAwarePaginator(
+            array_slice($deposits, ($depositsPage - 1) * $perPage, $perPage),
+            $totalDepositsCount,
+            $perPage,
+            $depositsPage,
+            ['path' => $request->url(), 'query' => $request->query(), 'pageName' => 'deposits_page']
+        );
+
+        // Paginate withdrawals (20 per page)
+        $withdrawalsPage = $request->input('withdrawals_page', 1);
+        $totalWithdrawalsCount = count($withdrawals);
+        $withdrawalsPaginated = new LengthAwarePaginator(
+            array_slice($withdrawals, ($withdrawalsPage - 1) * $perPage, $perPage),
+            $totalWithdrawalsCount,
+            $perPage,
+            $withdrawalsPage,
+            ['path' => $request->url(), 'query' => $request->query(), 'pageName' => 'withdrawals_page']
+        );
+
         ActivityLog::create([
             'user_id' => $user->id,
             'subject_type' => 'savings',
@@ -148,6 +170,8 @@ class SavingController extends Controller
             'withdrawals',
             'ledger',
             'ledgerPaginated',
+            'depositsPaginated',
+            'withdrawalsPaginated',
             'totalDeposited',
             'totalWithdrawn'
         ));
