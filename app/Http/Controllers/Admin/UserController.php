@@ -555,6 +555,11 @@ class UserController extends Controller
             $id = (int) $this->encryptedIdService->decrypt($encryptedId);
             $validated = $request->validated();
             
+            // Filter out empty values
+            $validated = array_filter($validated, function($value) {
+                return $value !== '' && $value !== null;
+            });
+            
             $profile = MemberProfile::where('user_id', $id)->firstOrFail();
             
             $profileUpdateData = [];
@@ -601,6 +606,11 @@ class UserController extends Controller
         try {
             $id = (int) $this->encryptedIdService->decrypt($encryptedId);
             $validated = $request->validated();
+            
+            // Filter out empty values
+            $validated = array_filter($validated, function($value) {
+                return $value !== '' && $value !== null;
+            });
             
             $profile = MemberProfile::where('user_id', $id)->firstOrFail();
             
@@ -676,6 +686,11 @@ class UserController extends Controller
             $id = (int) $this->encryptedIdService->decrypt($encryptedId);
             $validated = $request->validated();
             
+            // Filter out empty values
+            $validated = array_filter($validated, function($value) {
+                return $value !== '' && $value !== null;
+            });
+            
             $profile = MemberProfile::where('user_id', $id)->firstOrFail();
             
             $profileUpdateData = [];
@@ -725,6 +740,11 @@ class UserController extends Controller
         try {
             $id = (int) $this->encryptedIdService->decrypt($encryptedId);
             $validated = $request->validated();
+            
+            // Filter out empty values
+            $validated = array_filter($validated, function($value) {
+                return $value !== '' && $value !== null;
+            });
             
             $profile = MemberProfile::where('user_id', $id)->firstOrFail();
             
@@ -823,6 +843,11 @@ class UserController extends Controller
         try {
             $id = (int) $this->encryptedIdService->decrypt($encryptedId);
             $validated = $request->validated();
+            
+            // Filter out empty values
+            $validated = array_filter($validated, function($value) {
+                return $value !== '' && $value !== null;
+            });
             
             $profile = MemberProfile::where('user_id', $id)->firstOrFail();
             
