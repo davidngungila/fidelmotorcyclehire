@@ -458,10 +458,15 @@ class UserController extends Controller
             $id = (int) $this->encryptedIdService->decrypt($encryptedId);
             $validated = $request->validated();
             
+            // Log the validated data for debugging
+            \Log::info('UpdateBasicInfo validated data:', $validated);
+            
             // Filter out empty values
             $validated = array_filter($validated, function($value) {
                 return $value !== '' && $value !== null;
             });
+            
+            \Log::info('UpdateBasicInfo after filter:', $validated);
             
             $user = User::findOrFail($id);
             
@@ -520,8 +525,13 @@ class UserController extends Controller
                     $profileUpdateData['passport_photo'] = $request->file('profile_photo')->store('documents', 'public');
                 }
 
+                \Log::info('UpdateBasicInfo profile update data:', $profileUpdateData);
+                
                 if (!empty($profileUpdateData)) {
                     $user->memberProfile->update($profileUpdateData);
+                    \Log::info('UpdateBasicInfo profile updated successfully');
+                } else {
+                    \Log::info('UpdateBasicInfo no profile data to update');
                 }
             }
 
@@ -542,6 +552,7 @@ class UserController extends Controller
                 'errors' => $e->errors()
             ], 422);
         } catch (\Exception $e) {
+            \Log::error('UpdateBasicInfo error:', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
