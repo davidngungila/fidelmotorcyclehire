@@ -93,6 +93,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/loan-products', [AdminLoanProductController::class, 'index'])->name('loan-products.index');
     Route::get('/loan-products/create', [AdminLoanProductController::class, 'create'])->name('loan-products.create');
     Route::post('/loan-products', [AdminLoanProductController::class, 'store'])->name('loan-products.store');
+    Route::get('/loan-products/{encryptedId}', [AdminLoanProductController::class, 'show'])->name('loan-products.show');
     Route::get('/loan-products/{encryptedId}/edit', [AdminLoanProductController::class, 'edit'])->name('loan-products.edit');
     Route::put('/loan-products/{encryptedId}', [AdminLoanProductController::class, 'update'])->name('loan-products.update');
     Route::delete('/loan-products/{encryptedId}', [AdminLoanProductController::class, 'destroy'])->name('loan-products.destroy');

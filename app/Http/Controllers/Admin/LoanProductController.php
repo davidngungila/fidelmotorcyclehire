@@ -58,6 +58,29 @@ class LoanProductController extends Controller
         return view('admin.loan-products.create');
     }
 
+    public function show(Request $request, string $encryptedId)
+    {
+        Gate::authorize('admin-only');
+
+        try {
+            $id = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            return redirect()->route('admin.loan-products.index')
+                ->with('error', 'Invalid loan product ID.');
+        }
+
+        $loanProduct = LoanProduct::findOrFail($id);
+
+        ActivityLog::create([
+            'user_id' => Auth::id(),
+            'description' => 'Admin viewed loan product details: ' . $loanProduct->name,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return view('admin.loan-products.show', compact('loanProduct', 'encryptedId'));
+    }
+
     public function store(Request $request)
     {
         Gate::authorize('admin-only');
