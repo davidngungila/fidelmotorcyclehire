@@ -33,7 +33,26 @@ class DashboardController extends Controller
         }
 
         $member = $this->repository->getMemberByNumber($memberNumber);
-        $loans = $this->repository->getMemberLoans($memberNumber);
+        
+        // Use database loans instead of Google Sheets
+        $dbLoans = \App\Models\Loan::where('member_number', $memberNumber)->get();
+        
+        // Convert database loans to the format expected
+        $loans = $dbLoans->map(function ($loan) {
+            return [
+                'loan_number' => $loan->loan_number,
+                'loan_product' => ucfirst($loan->purpose),
+                'loan_amount' => $loan->principal_amount,
+                'paid_amount' => $loan->amount_paid ?? 0,
+                'outstanding_balance' => $loan->balance ?? 0,
+                'installment' => $loan->monthly_payment ?? 0,
+                'interest_rate' => $loan->interest_rate ?? 0,
+                'status' => $loan->status,
+                'disbursement_date' => $loan->disbursement_date ? $loan->disbursement_date->format('Y-m-d') : null,
+                'maturity_date' => $loan->maturity_date ? $loan->maturity_date->format('Y-m-d') : null,
+            ];
+        })->toArray();
+        
         $savings = $this->repository->getMemberSavings($memberNumber);
         $deposits = $this->repository->getMemberDeposits($memberNumber);
         $swf = $this->repository->getMemberSwf($memberNumber);

@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Member;
 use App\Contracts\GoogleSheetRepositoryInterface;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\Loan;
 use App\Services\EncryptedIdService;
 use App\Traits\FlashMessages;
 use Illuminate\Http\Request;
@@ -32,9 +33,28 @@ class LoanController extends Controller
 
         \Log::info('LoanController::index - Member Number: ' . $memberNumber);
 
-        $loans = $this->repository->getMemberLoans($memberNumber);
+        // Use database loans instead of Google Sheets
+        $dbLoans = Loan::where('member_number', $memberNumber)->get();
+        
+        \Log::info('LoanController::index - Database loans count: ' . $dbLoans->count());
 
-        \Log::info('LoanController::index - Raw loans data:', $loans);
+        // Convert database loans to the format expected by the view
+        $loans = $dbLoans->map(function ($loan) {
+            return [
+                'loan_number' => $loan->loan_number,
+                'loan_product' => ucfirst($loan->purpose),
+                'loan_amount' => $loan->principal_amount,
+                'paid_amount' => $loan->amount_paid ?? 0,
+                'outstanding_balance' => $loan->balance ?? 0,
+                'installment' => $loan->monthly_payment ?? 0,
+                'interest_rate' => $loan->interest_rate ?? 0,
+                'status' => $loan->status,
+                'disbursement_date' => $loan->disbursement_date ? $loan->disbursement_date->format('Y-m-d') : null,
+                'maturity_date' => $loan->maturity_date ? $loan->maturity_date->format('Y-m-d') : null,
+            ];
+        })->toArray();
+
+        \Log::info('LoanController::index - Converted loans data:', $loans);
 
         // Filter to show only active loans
         $activeLoans = array_filter($loans, function(array $loan): bool {
