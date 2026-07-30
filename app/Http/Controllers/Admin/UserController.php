@@ -241,7 +241,7 @@ class UserController extends Controller
     {
         $id = (int) $this->encryptedIdService->decrypt($encryptedId);
         
-        $user = User::with('roles')->findOrFail($id);
+        $user = User::with('roles', 'nextOfKin', 'bankingDetails', 'documents', 'memberType')->findOrFail($id);
 
         ActivityLog::create([
             'user_id' => Auth::id(),
@@ -253,10 +253,12 @@ class UserController extends Controller
         ]);
 
         $roles = Role::all();
+        $memberTypes = MemberType::active()->orderBy('priority', 'desc')->get();
 
         return view('admin.users.edit', [
             'user' => $user,
             'roles' => $roles,
+            'memberTypes' => $memberTypes,
         ]);
     }
 
@@ -267,15 +269,50 @@ class UserController extends Controller
         $user = User::findOrFail($id);
         $validated = $request->validated();
 
+        // Combine name from first, middle, last names if provided
+        if (!empty($validated['first_name']) || !empty($validated['last_name'])) {
+            $validated['name'] = trim(($validated['first_name'] ?? '') . ' ' . ($validated['middle_name'] ?? '') . ' ' . ($validated['last_name'] ?? ''));
+        }
+
         $updateData = [
             'name' => $validated['name'],
+            'first_name' => $validated['first_name'] ?? $user->first_name,
+            'middle_name' => $validated['middle_name'] ?? $user->middle_name,
+            'last_name' => $validated['last_name'] ?? $user->last_name,
             'email' => $validated['email'],
             'role' => $validated['role'],
-            'status' => $request->input('status', $user->status ?? 'active'),
+            'status' => $validated['status'] ?? $user->status,
+            'phone' => $validated['phone'] ?? $user->phone,
+            'alternative_phone' => $validated['alternative_phone'] ?? $user->alternative_phone,
+            'gender' => $validated['gender'] ?? $user->gender,
+            'date_of_birth' => $validated['date_of_birth'] ?? $user->date_of_birth,
+            'national_id' => $validated['national_id'] ?? $user->national_id,
+            'passport_license' => $validated['passport_license'] ?? $user->passport_license,
+            'registration_date' => $validated['registration_date'] ?? $user->registration_date,
+            'region' => $validated['region'] ?? $user->region,
+            'district' => $validated['district'] ?? $user->district,
+            'ward' => $validated['ward'] ?? $user->ward,
+            'street_village' => $validated['street_village'] ?? $user->street_village,
+            'physical_address' => $validated['physical_address'] ?? $user->physical_address,
+            'branch' => $validated['branch'] ?? $user->branch,
+            'membership_category' => $validated['membership_category'] ?? $user->membership_category,
+            'occupation' => $validated['occupation'] ?? $user->occupation,
+            'employer_business' => $validated['employer_business'] ?? $user->employer_business,
+            'monthly_income' => $validated['monthly_income'] ?? $user->monthly_income,
+            'introduced_by' => $validated['introduced_by'] ?? $user->introduced_by,
+            'joining_fee' => $validated['joining_fee'] ?? $user->joining_fee,
+            'shares_purchased' => $validated['shares_purchased'] ?? $user->shares_purchased,
+            'initial_savings' => $validated['initial_savings'] ?? $user->initial_savings,
+            'username' => $validated['username'] ?? $user->username,
+            'email_verified' => $validated['email_verified'] ?? $user->email_verified,
+            'phone_verified' => $validated['phone_verified'] ?? $user->phone_verified,
+            'notes' => $validated['notes'] ?? $user->notes,
+            'tags' => $validated['tags'] ?? $user->tags,
+            'custom_fields' => $validated['custom_fields'] ?? $user->custom_fields,
         ];
 
-        if (! empty($validated['member_number'])) {
-            $updateData['member_number'] = $validated['member_number'];
+        if (! empty($validated['member_type_id'])) {
+            $updateData['member_type_id'] = $validated['member_type_id'];
         }
 
         if (! empty($validated['password'])) {
@@ -283,6 +320,46 @@ class UserController extends Controller
         }
 
         $user->update($updateData);
+
+        // Update or Create Next of Kin
+        if (!empty($validated['next_of_kin_full_name'])) {
+            NextOfKin::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'full_name' => $validated['next_of_kin_full_name'],
+                    'relationship' => $validated['next_of_kin_relationship'] ?? null,
+                    'phone_number' => $validated['next_of_kin_phone'] ?? null,
+                    'address' => $validated['next_of_kin_address'] ?? null,
+                ]
+            );
+        }
+
+        // Update or Create Banking Details
+        if (!empty($validated['bank_name']) || !empty($validated['mobile_money_network'])) {
+            BankingDetail::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'bank_name' => $validated['bank_name'] ?? null,
+                    'bank_account_number' => $validated['bank_account_number'] ?? null,
+                    'account_name' => $validated['account_name'] ?? null,
+                    'mobile_money_network' => $validated['mobile_money_network'] ?? null,
+                    'mobile_wallet_number' => $validated['mobile_wallet_number'] ?? null,
+                ]
+            );
+        }
+
+        // Update or Create Documents
+        if (!empty($validated['passport_photo']) || !empty($validated['national_id_copy'])) {
+            MemberDocument::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'passport_photo' => $validated['passport_photo'] ?? $user->documents->passport_photo ?? null,
+                    'national_id_copy' => $validated['national_id_copy'] ?? $user->documents->national_id_copy ?? null,
+                    'signature' => $validated['signature'] ?? $user->documents->signature ?? null,
+                    'other_attachments' => $validated['other_attachments'] ?? $user->documents->other_attachments ?? null,
+                ]
+            );
+        }
 
         if (! empty($validated['role'])) {
             try {
