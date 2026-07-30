@@ -106,10 +106,14 @@ class UserController extends Controller
             // Generate member number
             $memberNumber = 'MB' . date('ymd') . str_pad((string) rand(1, 9999), 4, '0', STR_PAD_LEFT);
             
+            // Auto-generate password from last name (uppercase)
+            $autoPassword = strtoupper($validated['last_name']);
+            
             // Create user
             $user = User::create([
                 'name' => trim($validated['first_name'] . ' ' . ($validated['middle_name'] ?? '') . ' ' . $validated['last_name']),
                 'email' => $validated['email_address'] ?? null,
+                'password' => Hash::make($autoPassword),
                 'member_number' => $memberNumber,
                 'member_type_id' => $validated['member_type_id'],
                 'status' => $validated['status'],
