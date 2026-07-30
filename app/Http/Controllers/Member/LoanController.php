@@ -32,6 +32,11 @@ class LoanController extends Controller
 
         $loans = $this->repository->getMemberLoans($memberNumber);
 
+        // Filter to show only active loans
+        $activeLoans = array_filter($loans, function(array $loan): bool {
+            return strtolower($loan['status'] ?? '') === 'active';
+        });
+
         $processedLoans = array_map(function (array $loan): array {
             $totalAmount = (float) ($loan['loan_amount'] ?? 0);
             $paid = (float) ($loan['paid_amount'] ?? 0);
@@ -44,18 +49,18 @@ class LoanController extends Controller
                 'paid_amount_float' => $paid,
                 'outstanding_float' => $outstanding,
             ]);
-        }, $loans);
+        }, $activeLoans);
 
         $totalOutstanding = array_sum(array_column($processedLoans, 'outstanding_float'));
         $totalBorrowed = array_sum(array_column($processedLoans, 'total_amount'));
-        $activeCount = count(array_filter($processedLoans, static fn(array $l): bool => strtolower($l['status'] ?? '') === 'active'));
+        $activeCount = count($processedLoans);
 
         ActivityLog::create([
             'user_id' => $user->id,
             'subject_type' => 'loan',
             'subject_id' => null,
-            'description' => 'Member viewed loans',
-            'properties' => ['member_number' => $memberNumber, 'loan_count' => count($processedLoans)],
+            'description' => 'Member viewed active loans',
+            'properties' => ['member_number' => $memberNumber, 'active_loan_count' => $activeCount],
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
         ]);

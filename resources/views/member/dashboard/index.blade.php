@@ -177,77 +177,65 @@
         <div class="glass rounded-2xl overflow-hidden xl:col-span-3">
             <div class="flex items-center justify-between px-5 py-4 border-b border-primary-100 dark:border-dark-border">
                 <div>
-                    <h3 class="font-bold text-primary-900 dark:text-white text-sm">Recent Transactions</h3>
-                    <p class="text-[11px] text-primary-500 dark:text-primary-400 mt-0.5">Last 5 activities across your accounts</p>
+                    <h3 class="font-bold text-primary-900 dark:text-white text-sm">Active Loans</h3>
+                    <p class="text-[11px] text-primary-500 dark:text-primary-400 mt-0.5">{{ count($activeLoans) }} active loan{{ count($activeLoans) !== 1 ? 's' : '' }}</p>
                 </div>
-                <a href="{{ route('member.statements.index') }}" class="text-[11px] font-bold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 inline-flex items-center gap-1">
-                    View Statement
+                <a href="{{ route('member.loans.index') }}" class="text-[11px] font-bold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 inline-flex items-center gap-1">
+                    View All
                     <i class="fa-solid fa-arrow-right text-[10px]"></i>
                 </a>
             </div>
-            <div class="overflow-x-auto">
-                <table class="data-table" x-data>
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Type</th>
-                            <th>Description</th>
-                            <th class="text-right">Amount</th>
-                            <th class="text-right">Running Balance</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($recentTransactions as $idx => $txn)
-                            @php
-                                $typeLower = strtolower($txn['type'] ?? '');
-                                $isCredit = str_contains($typeLower, 'deposit') || str_contains($typeLower, 'interest') || str_contains($typeLower, 'maturity') || str_contains($typeLower, 'contribution') || str_contains($typeLower, 'disbursement') || str_contains($typeLower, 'placement');
-                                $amountClass = $isCredit ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
-                                $sign = ($isCredit && !str_contains($typeLower, 'disbursement') && !str_contains($typeLower, 'placement')) ? '+' : '';
-                                if (str_contains($typeLower, 'disbursement') || str_contains($typeLower, 'repayment')) {
-                                    $sign = str_contains($typeLower, 'repayment') ? '-' : '+';
-                                }
-                                if (($txn['amount'] ?? 0) < 0) {
-                                    $sign = '-';
-                                }
-                                $striped = $idx % 2 === 1;
-                            @endphp
-                            <tr class="{{ $striped ? 'bg-primary-50/60 dark:bg-primary-900/10' : '' }} hover:!bg-primary-100/50 dark:hover:!bg-primary-900/20 transition-colors">
-                                <td class="whitespace-nowrap text-xs font-semibold text-primary-800 dark:text-primary-200">
-                                    {{ \Carbon\Carbon::parse($txn['date'])->format('M j, Y') }}
-                                </td>
-                                <td class="whitespace-nowrap">
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold border
-                                        {{ str_contains($typeLower, 'loan')
-                                            ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border-amber-100 dark:border-amber-800/50'
-                                            : (str_contains($typeLower, 'deposit') || str_contains($typeLower, 'saving') || str_contains($typeLower, 'maturity')
-                                                ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-100 dark:border-green-800/50'
-                                                : (str_contains($typeLower, 'swf')
-                                                    ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border-amber-100 dark:border-amber-800/50'
-                                                    : 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-100 dark:border-blue-800/50')) }}">
-                                        {{ $txn['type'] }}
-                                    </span>
-                                </td>
-                                <td class="text-xs text-primary-700 dark:text-primary-300 max-w-[220px] truncate" title="{{ $txn['description'] }}">
-                                    {{ $txn['description'] }}
-                                </td>
-                                <td class="text-right whitespace-nowrap font-bold text-xs {{ $amountClass }} tabular-nums">
-                                    {{ $sign }}{{ fmtTsh(abs($txn['amount'] ?? 0)) }}
-                                </td>
-                                <td class="text-right whitespace-nowrap text-xs font-semibold text-primary-800 dark:text-primary-200 tabular-nums">
-                                    {{ fmtTsh($txn['balance_after'] ?? 0) }}
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="text-center py-12 text-primary-400 dark:text-primary-500 text-sm">
-                                    <i class="fa-solid fa-inbox text-3xl mb-2 block opacity-40"></i>
-                                    No recent transactions to display.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+            @forelse($activeLoans as $loan)
+                <div class="p-4 border-b border-primary-100 dark:border-dark-border last:border-b-0 hover:bg-primary-50/30 dark:hover:bg-primary-900/10 transition-colors">
+                    <div class="flex items-start justify-between gap-3 mb-3">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-primary-50 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-800/60">
+                                    {{ $loan['loan_number'] }}
+                                </span>
+                                <span class="badge badge-green text-[10px]">Active</span>
+                            </div>
+                            <h4 class="font-bold text-primary-900 dark:text-white text-sm truncate">
+                                {{ $loan['loan_product'] }}
+                            </h4>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs font-bold text-primary-900 dark:text-white tabular-nums">
+                                {{ fmtTsh($loan['outstanding_balance'] ?? 0) }}
+                            </p>
+                            <p class="text-[10px] text-primary-500 dark:text-primary-400">Outstanding</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3 text-[10px]">
+                        <div>
+                            <p class="text-primary-500 dark:text-primary-400 mb-0.5">Principal</p>
+                            <p class="font-semibold text-primary-800 dark:text-primary-200 tabular-nums">
+                                {{ fmtTsh($loan['loan_amount'] ?? 0) }}
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-primary-500 dark:text-primary-400 mb-0.5">Installment</p>
+                            <p class="font-semibold text-primary-800 dark:text-primary-200 tabular-nums">
+                                {{ fmtTsh($loan['installment'] ?? 0) }}
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-primary-500 dark:text-primary-400 mb-0.5">Interest</p>
+                            <p class="font-semibold text-primary-800 dark:text-primary-200 tabular-nums">
+                                {{ $loan['interest_rate'] ?? 0 }}%
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="p-8 text-center">
+                    <div class="w-12 h-12 rounded-xl bg-green-50 dark:bg-green-900/20 text-green-500 flex items-center justify-center mx-auto mb-3">
+                        <i class="fa-solid fa-circle-check text-xl"></i>
+                    </div>
+                    <h4 class="font-bold text-primary-900 dark:text-white text-sm mb-1">No Active Loans</h4>
+                    <p class="text-xs text-primary-600 dark:text-primary-400">You have no active loan accounts.</p>
+                </div>
+            @endforelse
         </div>
 
         <div class="glass rounded-2xl overflow-hidden xl:col-span-2 flex flex-col">

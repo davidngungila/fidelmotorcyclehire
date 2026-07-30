@@ -88,6 +88,11 @@ class DashboardController extends Controller
         $swfBalance = $swf['current_balance'] ?? 0;
         $investmentBalance = collect($investments)->sum('current_value');
 
+        // Filter active loans for dashboard display
+        $activeLoans = array_filter($loans, function(array $loan): bool {
+            return strtolower($loan['status'] ?? '') === 'active';
+        });
+
         $recentTransactions = $this->consolidateRecentTransactions($loans, $savings, $deposits, $swf, $investments);
 
         $savingsGrowth = $this->buildSavingsGrowthData($savings);
@@ -106,6 +111,7 @@ class DashboardController extends Controller
             'user',
             'member',
             'loans',
+            'activeLoans',
             'savings',
             'deposits',
             'swf',
