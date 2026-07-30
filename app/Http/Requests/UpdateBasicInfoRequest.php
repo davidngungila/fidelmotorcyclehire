@@ -43,7 +43,7 @@ class UpdateBasicInfoRequest extends FormRequest
             'email_address' => 'nullable|email|max:255|unique:users,email,' . $userId,
             'gender' => 'nullable|in:male,female,other',
             'date_of_birth' => 'nullable|date|before:today',
-            'national_id' => 'nullable|string|max:50|unique:member_profiles,national_id,' . $profileId,
+            'national_id' => 'nullable|string|max:50',
             'passport_driving_license' => 'nullable|string|max:50',
             'registration_date' => 'nullable|date',
             'status' => 'nullable|in:active,pending,suspended',

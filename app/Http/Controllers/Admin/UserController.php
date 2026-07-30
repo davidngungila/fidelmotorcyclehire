@@ -461,10 +461,10 @@ class UserController extends Controller
             // Log the validated data for debugging
             \Log::info('UpdateBasicInfo validated data:', $validated);
             
-            // Filter out empty values
-            $validated = array_filter($validated, function($value) {
-                return $value !== '' && $value !== null;
-            });
+            // Don't filter for now to see if data is being received
+            // $validated = array_filter($validated, function($value) {
+            //     return $value !== '' && $value !== null;
+            // });
             
             \Log::info('UpdateBasicInfo after filter:', $validated);
             
