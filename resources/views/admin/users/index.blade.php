@@ -146,12 +146,14 @@
                     $encryptedId = app(\App\Services\EncryptedIdService::class)->encrypt($user->id);
                   @endphp
                   <button @click="openConfirmModal('{{ $encryptedId }}', '{{ addslashes($user->name) }}')"
-                          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 text-amber-700 dark:text-amber-300 text-[11px] font-bold transition-colors border border-amber-200 dark:border-amber-800/40">
-                    <i class="fa-solid fa-key text-[10px]"></i> Reset Password
+                          class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 text-amber-700 dark:text-amber-300 text-xs transition-colors border border-amber-200 dark:border-amber-800/40"
+                          title="Reset Password">
+                    <i class="fa-solid fa-key text-[10px]"></i>
                   </button>
                   <a href="{{ route('admin.users.edit', $encryptedId) }}"
-                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-[11px] font-bold transition-colors">
-                    <i class="fa-solid fa-pen-to-square text-[10px]"></i> Edit
+                     class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-xs transition-colors"
+                     title="Edit">
+                    <i class="fa-solid fa-pen-to-square text-[10px]"></i>
                   </a>
                   <form method="POST" action="{{ route('admin.users.destroy', $encryptedId) }}"
                         class="inline"
@@ -160,8 +162,9 @@
                     @csrf
                     @method('DELETE')
                     <button type="submit"
-                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-300 text-[11px] font-bold transition-colors border border-red-200 dark:border-red-800/40">
-                      <i class="fa-solid fa-trash text-[10px]"></i> Delete
+                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-300 text-xs transition-colors border border-red-200 dark:border-red-800/40"
+                            title="Delete">
+                      <i class="fa-solid fa-trash text-[10px]"></i>
                     </button>
                   </form>
                 </div>
