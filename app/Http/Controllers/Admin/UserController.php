@@ -349,14 +349,15 @@ class UserController extends Controller
         }
 
         // Update or Create Documents
+        $existingDocuments = $user->documents;
         if (!empty($validated['passport_photo']) || !empty($validated['national_id_copy'])) {
             MemberDocument::updateOrCreate(
                 ['user_id' => $user->id],
                 [
-                    'passport_photo' => $validated['passport_photo'] ?? $user->documents->passport_photo ?? null,
-                    'national_id_copy' => $validated['national_id_copy'] ?? $user->documents->national_id_copy ?? null,
-                    'signature' => $validated['signature'] ?? $user->documents->signature ?? null,
-                    'other_attachments' => $validated['other_attachments'] ?? $user->documents->other_attachments ?? null,
+                    'passport_photo' => $validated['passport_photo'] ?? $existingDocuments?->passport_photo ?? null,
+                    'national_id_copy' => $validated['national_id_copy'] ?? $existingDocuments?->national_id_copy ?? null,
+                    'signature' => $validated['signature'] ?? $existingDocuments?->signature ?? null,
+                    'other_attachments' => $validated['other_attachments'] ?? $existingDocuments?->other_attachments ?? null,
                 ]
             );
         }

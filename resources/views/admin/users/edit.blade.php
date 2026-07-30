@@ -469,7 +469,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div class="md:col-span-2">
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Full Name *</label>
-                <input type="text" name="next_of_kin_full_name" value="{{ old('next_of_kin_full_name', $user->nextOfKin->full_name ?? '') }}"
+                <input type="text" name="next_of_kin_full_name" value="{{ old('next_of_kin_full_name', $user->nextOfKin?->full_name ?? '') }}"
                        placeholder="e.g. Jane Doe"
                        class="form-input @error('next_of_kin_full_name') !border-red-400 @enderror">
                 @error('next_of_kin_full_name')
@@ -479,7 +479,7 @@
 
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Relationship *</label>
-                <input type="text" name="next_of_kin_relationship" value="{{ old('next_of_kin_relationship', $user->nextOfKin->relationship ?? '') }}"
+                <input type="text" name="next_of_kin_relationship" value="{{ old('next_of_kin_relationship', $user->nextOfKin?->relationship ?? '') }}"
                        placeholder="e.g. Spouse, Parent, Sibling"
                        class="form-input @error('next_of_kin_relationship') !border-red-400 @enderror">
                 @error('next_of_kin_relationship')
@@ -489,7 +489,7 @@
 
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Phone Number *</label>
-                <input type="tel" name="next_of_kin_phone" value="{{ old('next_of_kin_phone', $user->nextOfKin->phone_number ?? '') }}"
+                <input type="tel" name="next_of_kin_phone" value="{{ old('next_of_kin_phone', $user->nextOfKin?->phone_number ?? '') }}"
                        placeholder="e.g. +255 123 456 789"
                        class="form-input @error('next_of_kin_phone') !border-red-400 @enderror">
                 @error('next_of_kin_phone')
@@ -501,7 +501,7 @@
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Address *</label>
                 <textarea name="next_of_kin_address" rows="2"
                           placeholder="Full address of next of kin"
-                          class="form-input @error('next_of_kin_address') !border-red-400 @enderror">{{ old('next_of_kin_address', $user->nextOfKin->address ?? '') }}</textarea>
+                          class="form-input @error('next_of_kin_address') !border-red-400 @enderror">{{ old('next_of_kin_address', $user->nextOfKin?->address ?? '') }}</textarea>
                 @error('next_of_kin_address')
                   <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
                 @enderror
@@ -523,7 +523,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Bank Name</label>
-                <input type="text" name="bank_name" value="{{ old('bank_name', $user->bankingDetails->bank_name ?? '') }}"
+                <input type="text" name="bank_name" value="{{ old('bank_name', $user->bankingDetails?->bank_name ?? '') }}"
                        placeholder="e.g. CRDB Bank"
                        class="form-input @error('bank_name') !border-red-400 @enderror">
                 @error('bank_name')
@@ -533,7 +533,7 @@
 
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Bank Account Number</label>
-                <input type="text" name="bank_account_number" value="{{ old('bank_account_number', $user->bankingDetails->bank_account_number ?? '') }}"
+                <input type="text" name="bank_account_number" value="{{ old('bank_account_number', $user->bankingDetails?->bank_account_number ?? '') }}"
                        placeholder="e.g. 01512345678900"
                        class="form-input @error('bank_account_number') !border-red-400 @enderror">
                 @error('bank_account_number')
@@ -543,7 +543,7 @@
 
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Account Name</label>
-                <input type="text" name="account_name" value="{{ old('account_name', $user->bankingDetails->account_name ?? '') }}"
+                <input type="text" name="account_name" value="{{ old('account_name', $user->bankingDetails?->account_name ?? '') }}"
                        placeholder="e.g. John Doe"
                        class="form-input @error('account_name') !border-red-400 @enderror">
                 @error('account_name')
@@ -555,10 +555,10 @@
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Mobile Money Network</label>
                 <select name="mobile_money_network" class="form-select @error('mobile_money_network') !border-red-400 @enderror">
                   <option value="">Select Network</option>
-                  <option value="m-pesa" {{ old('mobile_money_network', $user->bankingDetails->mobile_money_network) === 'm-pesa' ? 'selected' : '' }}>M-Pesa</option>
-                  <option value="tigopesa" {{ old('mobile_money_network', $user->bankingDetails->mobile_money_network) === 'tigopesa' ? 'selected' : '' }}>Tigo Pesa</option>
-                  <option value="airtel" {{ old('mobile_money_network', $user->bankingDetails->mobile_money_network) === 'airtel' ? 'selected' : '' }}>Airtel Money</option>
-                  <option value="halopesa" {{ old('mobile_money_network', $user->bankingDetails->mobile_money_network) === 'halopesa' ? 'selected' : '' }}>Halopesa</option>
+                  <option value="m-pesa" {{ old('mobile_money_network', $user->bankingDetails?->mobile_money_network) === 'm-pesa' ? 'selected' : '' }}>M-Pesa</option>
+                  <option value="tigopesa" {{ old('mobile_money_network', $user->bankingDetails?->mobile_money_network) === 'tigopesa' ? 'selected' : '' }}>Tigo Pesa</option>
+                  <option value="airtel" {{ old('mobile_money_network', $user->bankingDetails?->mobile_money_network) === 'airtel' ? 'selected' : '' }}>Airtel Money</option>
+                  <option value="halopesa" {{ old('mobile_money_network', $user->bankingDetails?->mobile_money_network) === 'halopesa' ? 'selected' : '' }}>Halopesa</option>
                 </select>
                 @error('mobile_money_network')
                   <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
@@ -567,7 +567,7 @@
 
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Mobile Wallet Number</label>
-                <input type="tel" name="mobile_wallet_number" value="{{ old('mobile_wallet_number', $user->bankingDetails->mobile_wallet_number ?? '') }}"
+                <input type="tel" name="mobile_wallet_number" value="{{ old('mobile_wallet_number', $user->bankingDetails?->mobile_wallet_number ?? '') }}"
                        placeholder="e.g. +255 123 456 789"
                        class="form-input @error('mobile_wallet_number') !border-red-400 @enderror">
                 @error('mobile_wallet_number')
