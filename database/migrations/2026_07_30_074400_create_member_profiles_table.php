@@ -24,7 +24,7 @@ return new class extends Migration
             $table->enum('status', ['active', 'pending', 'suspended'])->default('pending');
             
             // Contact Information
-            $table->string('phone_number');
+            $table->string('phone_number')->nullable();
             $table->string('alternative_phone')->nullable();
             $table->string('email_address')->nullable();
             $table->string('region')->nullable();
