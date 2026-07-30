@@ -30,12 +30,18 @@ class LoanController extends Controller
         $user = Auth::user();
         $memberNumber = $user->member_number;
 
+        \Log::info('LoanController::index - Member Number: ' . $memberNumber);
+
         $loans = $this->repository->getMemberLoans($memberNumber);
+
+        \Log::info('LoanController::index - Raw loans data:', $loans);
 
         // Filter to show only active loans
         $activeLoans = array_filter($loans, function(array $loan): bool {
             return strtolower($loan['status'] ?? '') === 'active';
         });
+
+        \Log::info('LoanController::index - Active loans count: ' . count($activeLoans));
 
         $processedLoans = array_map(function (array $loan): array {
             $totalAmount = (float) ($loan['loan_amount'] ?? 0);
