@@ -424,11 +424,25 @@
       @if(in_array($loan['status'], ['approved', 'disbursed', 'active']))
       <form method="POST" action="{{ route('admin.loans.recordPayment', encryptId($loanNumber)) }}">
         @csrf
+        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold text-blue-700 dark:text-blue-300">Outstanding Balance</p>
+              <p class="text-lg font-black text-blue-800 dark:text-blue-400">{{ $fmt($outstanding) }}</p>
+            </div>
+            <div id="excessInfo" class="hidden">
+              <p class="text-xs font-semibold text-orange-700 dark:text-orange-300">Excess Amount</p>
+              <p class="text-lg font-black text-orange-800 dark:text-orange-400" id="excessAmount">TSh 0.00</p>
+            </div>
+          </div>
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Amount (TSh) *</label>
             <input type="number" name="amount" required min="0" step="0.01" 
                    placeholder="Enter payment amount"
+                   x-model="paymentAmount"
+                   @input="calculateExcess()"
                    class="form-input py-2.5 px-4">
             @error('amount')
               <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
@@ -454,6 +468,15 @@
             @error('payment_method')
               <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
             @enderror
+          </div>
+          <div x-show="hasExcess">
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Allocate Excess To</label>
+            <select name="allocate_excess_to" class="form-input py-2.5 px-4">
+              <option value="refund">Refund to Customer</option>
+              <option value="savings">Add to Savings Account</option>
+              <option value="investment">Add to Investment Account</option>
+            </select>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Choose where to allocate the excess payment amount</p>
           </div>
           <div class="md:col-span-2">
             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Notes</label>
@@ -677,6 +700,9 @@
   function loanShow() {
     return {
       activeTab: 'overview',
+      paymentAmount: 0,
+      outstandingBalance: {{ $outstanding }},
+      hasExcess: false,
       tabs: [
         { id: 'overview', label: 'Overview', icon: 'fa-solid fa-circle-info' },
         { id: 'processing', label: 'Loan Processing', icon: 'fa-solid fa-gears' },
@@ -697,6 +723,20 @@
           history.pushState(null, null, '#tab-' + tabId);
         } else {
           window.location.hash = 'tab-' + tabId;
+        }
+      },
+      calculateExcess() {
+        const excess = Math.max(0, this.paymentAmount - this.outstandingBalance);
+        this.hasExcess = excess > 0;
+        
+        const excessInfo = document.getElementById('excessInfo');
+        const excessAmountEl = document.getElementById('excessAmount');
+        
+        if (this.hasExcess) {
+          excessInfo.classList.remove('hidden');
+          excessAmountEl.textContent = 'TSh ' + excess.toLocaleString('en-TZ', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        } else {
+          excessInfo.classList.add('hidden');
         }
       }
     };

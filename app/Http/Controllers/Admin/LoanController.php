@@ -513,6 +513,7 @@ class LoanController extends Controller
             'payment_date' => 'required|date',
             'payment_method' => 'required|in:cash,bank_transfer,mobile_money,cheque',
             'notes' => 'nullable|string',
+            'allocate_excess_to' => 'nullable|in:savings,investment,refund',
         ]);
 
         $loan = Loan::where('loan_number', $loanNumber)->first();
@@ -523,15 +524,20 @@ class LoanController extends Controller
         }
 
         $paymentAmount = (float) $validated['amount'];
+        $outstandingBalance = (float) $loan->balance;
+        
+        // Calculate excess payment
+        $excessAmount = max(0, $paymentAmount - $outstandingBalance);
+        $loanPaymentAmount = min($paymentAmount, $outstandingBalance);
         
         // Update loan balance and amount paid
         $loan->update([
-            'amount_paid' => $loan->amount_paid + $paymentAmount,
-            'balance' => max(0, $loan->balance - $paymentAmount),
+            'amount_paid' => $loan->amount_paid + $loanPaymentAmount,
+            'balance' => max(0, $loan->balance - $loanPaymentAmount),
         ]);
 
         // Update repayment schedule status
-        $this->updateRepaymentScheduleStatus($loan, $paymentAmount, $validated['payment_date']);
+        $this->updateRepaymentScheduleStatus($loan, $loanPaymentAmount, $validated['payment_date']);
 
         // Create loan payment record with sequential reference number
         $today = date('Ymd');
@@ -540,19 +546,59 @@ class LoanController extends Controller
         \App\Models\LoanPayment::create([
             'loan_id' => $loan->id,
             'customer_id' => $loan->member_number,
-            'payment_amount' => $paymentAmount,
+            'payment_amount' => $loanPaymentAmount,
             'payment_date' => $validated['payment_date'],
             'payment_method' => $validated['payment_method'],
             'reference_number' => 'PAY' . $today . $sequentialNumber,
-            'principal_amount' => $paymentAmount,
+            'principal_amount' => $loanPaymentAmount,
         ]);
+
+        // Handle excess payment allocation
+        if ($excessAmount > 0) {
+            $allocationType = $validated['allocate_excess_to'] ?? 'refund';
+            
+            if ($allocationType === 'savings') {
+                // Add to member's savings account
+                \App\Models\Transaction::create([
+                    'member_code' => $loan->member_number,
+                    'date' => $validated['payment_date'],
+                    'type' => 'Deposit',
+                    'description' => "Excess loan payment from {$loanNumber}",
+                    'amount' => $excessAmount,
+                    'balance_after' => 0, // Will be calculated
+                    'reference' => 'EXC-' . $today . $sequentialNumber,
+                ]);
+            } elseif ($allocationType === 'investment') {
+                // Add to member's investment account
+                \App\Models\Transaction::create([
+                    'member_code' => $loan->member_number,
+                    'date' => $validated['payment_date'],
+                    'type' => 'Investment',
+                    'description' => "Excess loan payment from {$loanNumber}",
+                    'amount' => $excessAmount,
+                    'balance_after' => 0, // Will be calculated
+                    'reference' => 'EXC-' . $today . $sequentialNumber,
+                ]);
+            }
+            // If 'refund', just record the excess without allocation
+        }
 
         // Check if loan is fully paid
         if ($loan->balance <= 0) {
             $loan->update(['status' => 'paid']);
         }
 
-        $this->success('Payment recorded successfully.');
+        $message = 'Payment recorded successfully.';
+        if ($excessAmount > 0) {
+            $message .= " Excess amount: " . number_format($excessAmount, 2) . ' TSh';
+            if (isset($allocationType) && $allocationType !== 'refund') {
+                $message .= " allocated to {$allocationType}.";
+            } else {
+                $message .= " to be refunded.";
+            }
+        }
+        
+        $this->success($message);
 
         return redirect()->back();
     }
