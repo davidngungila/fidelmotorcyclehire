@@ -424,7 +424,13 @@ class UserController extends Controller
     {
         $id = (int) $this->encryptedIdService->decrypt($encryptedId);
         
-        $user = User::with('roles')->findOrFail($id);
+        $user = User::with(['roles', 'memberProfile', 'memberType'])->findOrFail($id);
+
+        // If user is a member without complete profile, redirect to registration flow
+        if ($user->role === 'member' && !$user->memberProfile) {
+            return redirect()->route('admin.users.create')
+                ->with('info', 'This member has not completed registration. Please complete the registration process.');
+        }
 
         ActivityLog::create([
             'user_id' => Auth::id(),
@@ -436,10 +442,12 @@ class UserController extends Controller
         ]);
 
         $roles = Role::all();
+        $memberTypes = \App\Models\MemberType::active()->orderBy('priority', 'desc')->get();
 
         return view('admin.users.edit', [
             'user' => $user,
             'roles' => $roles,
+            'memberTypes' => $memberTypes,
         ]);
     }
 
