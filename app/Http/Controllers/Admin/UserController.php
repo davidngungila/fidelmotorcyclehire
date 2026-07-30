@@ -467,7 +467,7 @@ class UserController extends Controller
 
             // Update member profile if exists
             if ($user->memberProfile) {
-                $user->memberProfile->update([
+                $profileUpdateData = [
                     'first_name' => $validated['first_name'],
                     'middle_name' => $validated['middle_name'],
                     'last_name' => $validated['last_name'],
@@ -477,7 +477,14 @@ class UserController extends Controller
                     'passport_driving_license' => $validated['passport_driving_license'],
                     'registration_date' => $validated['registration_date'],
                     'status' => $validated['status'],
-                ]);
+                ];
+
+                // Handle profile photo upload
+                if ($request->hasFile('profile_photo')) {
+                    $profileUpdateData['passport_photo'] = $request->file('profile_photo')->store('documents', 'public');
+                }
+
+                $user->memberProfile->update($profileUpdateData);
             }
 
             ActivityLog::create([

@@ -11,8 +11,17 @@
       <i class="fa-solid fa-arrow-left text-sm"></i>
     </a>
     <div class="flex items-center gap-3 flex-1">
-      <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 text-white flex items-center justify-center text-base font-bold shadow-md">
-        {{ strtoupper(substr($user->name, 0, 1) ?? 'U') }}
+      <div class="relative">
+        @if($user->memberProfile && $user->memberProfile->passport_photo)
+          <img src="{{ asset('storage/' . $user->memberProfile->passport_photo) }}" 
+               alt="{{ $user->name }}" 
+               class="w-12 h-12 rounded-2xl object-cover shadow-md"
+               onerror="this.src='{{ asset('images/default-avatar.png') }}'">
+        @else
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 text-white flex items-center justify-center text-base font-bold shadow-md">
+            {{ strtoupper(substr($user->name, 0, 1) ?? 'U') }}
+          </div>
+        @endif
       </div>
       <div class="flex-1 min-w-0">
         <h2 class="font-bold text-lg truncate" :class="darkMode ? 'text-white' : 'text-primary-900'">{{ $user->name }}</h2>
@@ -68,6 +77,18 @@
             @method('PUT')
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
               @if($user->memberProfile)
+                <div class="md:col-span-3">
+                  <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Profile Photo</label>
+                  <div class="flex items-center gap-4">
+                    @if($user->memberProfile->passport_photo)
+                      <img src="{{ asset('storage/' . $user->memberProfile->passport_photo) }}" 
+                           alt="{{ $user->name }}" 
+                           class="w-20 h-20 rounded-xl object-cover shadow-md"
+                           onerror="this.style.display='none'">
+                    @endif
+                    <input type="file" name="profile_photo" accept="image/*" class="form-input flex-1">
+                  </div>
+                </div>
                 <div class="md:col-span-3">
                   <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Member Type *</label>
                   <select name="member_type_id" required class="form-input">
