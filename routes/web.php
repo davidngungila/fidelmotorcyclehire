@@ -163,6 +163,14 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
     Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
     Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
+    Route::post('/users/basic-info', [AdminUserController::class, 'storeBasicInfo'])->name('users.store-basic-info');
+    Route::post('/users/{userId}/contact-info', [AdminUserController::class, 'storeContactInfo'])->name('users.store-contact-info');
+    Route::post('/users/{userId}/membership-details', [AdminUserController::class, 'storeMembershipDetails'])->name('users.store-membership-details');
+    Route::post('/users/{userId}/account-info', [AdminUserController::class, 'storeAccountInfo'])->name('users.store-account-info');
+    Route::post('/users/{userId}/next-of-kin', [AdminUserController::class, 'storeNextOfKin'])->name('users.store-next-of-kin');
+    Route::post('/users/{userId}/banking-info', [AdminUserController::class, 'storeBankingInfo'])->name('users.store-banking-info');
+    Route::post('/users/{userId}/documents-info', [AdminUserController::class, 'storeDocumentsInfo'])->name('users.store-documents-info');
+    Route::post('/users/{userId}/additional-info', [AdminUserController::class, 'storeAdditionalInfo'])->name('users.store-additional-info');
     Route::get('/users/{encryptedId}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
     Route::put('/users/{encryptedId}', [AdminUserController::class, 'update'])->name('users.update');
     Route::delete('/users/{encryptedId}', [AdminUserController::class, 'destroy'])->name('users.destroy');

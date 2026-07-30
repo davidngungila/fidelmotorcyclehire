@@ -17,46 +17,21 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name',
-        'first_name',
-        'middle_name',
-        'last_name',
         'email',
         'password',
         'role',
         'member_number',
         'phone',
-        'alternative_phone',
         'gender',
-        'date_of_birth',
-        'national_id',
-        'passport_license',
         'address',
-        'physical_address',
-        'region',
-        'district',
-        'ward',
-        'street_village',
         'occupation',
         'employer',
-        'employer_business',
         'branch',
-        'membership_category',
-        'monthly_income',
-        'introduced_by',
-        'joining_fee',
-        'shares_purchased',
-        'initial_savings',
-        'username',
         'photo',
         'status',
         'member_type_id',
         'registration_date',
         'email_verified_at',
-        'email_verified',
-        'phone_verified',
-        'notes',
-        'tags',
-        'custom_fields',
     ];
 
     protected $hidden = [
@@ -70,15 +45,6 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'registration_date' => 'date',
-            'date_of_birth' => 'date',
-            'monthly_income' => 'decimal:2',
-            'joining_fee' => 'decimal:2',
-            'shares_purchased' => 'decimal:2',
-            'initial_savings' => 'decimal:2',
-            'email_verified' => 'boolean',
-            'phone_verified' => 'boolean',
-            'tags' => 'array',
-            'custom_fields' => 'array',
         ];
     }
 
@@ -107,19 +73,9 @@ class User extends Authenticatable
         return $this->belongsTo(MemberType::class);
     }
 
-    public function nextOfKin()
+    public function memberProfile()
     {
-        return $this->hasOne(NextOfKin::class);
-    }
-
-    public function bankingDetails()
-    {
-        return $this->hasOne(BankingDetail::class);
-    }
-
-    public function documents()
-    {
-        return $this->hasOne(MemberDocument::class);
+        return $this->hasOne(MemberProfile::class);
     }
 
     public function hasRole($role): bool
