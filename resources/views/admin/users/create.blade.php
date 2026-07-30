@@ -106,6 +106,19 @@
           </div>
 
           <div>
+            <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Member Type</label>
+            <select name="member_type_id" class="form-input @error('member_type_id') !border-red-400 @enderror">
+              <option value="">Select member type...</option>
+              @foreach(\App\Models\MemberType::active()->orderBy('priority', 'desc')->get() as $type)
+                <option value="{{ $type->id }}" {{ old('member_type_id') == $type->id ? 'selected' : '' }}>{{ $type->name }} - {{ $type->code }}</option>
+              @endforeach
+            </select>
+            @error('member_type_id')
+              <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
+            @enderror
+          </div>
+
+          <div>
             <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Member Number</label>
             <input type="text" name="member_number" value="{{ old('member_number') }}"
                    placeholder="e.g. FTN-00123 (optional)"

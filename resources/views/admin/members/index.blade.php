@@ -84,6 +84,7 @@
             </th>
             <th>Phone</th>
             <th>Email</th>
+            <th>Member Type</th>
             <th class="cursor-pointer select-none" @click="sortBy('branch')">
               Branch
               <i class="fa-solid ml-1.5 text-[10px] {{ $memberService->getSortDirectionIcon($sortColumn, 'branch', $sortDirection) }}"></i>
@@ -156,6 +157,22 @@
               <td>
                 @if($memberEmail && $memberEmail !== '-')
                   <span class="text-xs text-primary-700 dark:text-primary-300 max-w-[180px] truncate block">{{ $memberEmail }}</span>
+                @else
+                  <span class="text-xs text-primary-300 dark:text-primary-600 italic">-</span>
+                @endif
+              </td>
+              <td>
+                @if(isset($member['member_type_id']) && $member['member_type_id'])
+                  @php
+                    $memberType = \App\Models\MemberType::find($member['member_type_id']);
+                  @endphp
+                  @if($memberType)
+                    <span class="inline-flex items-center px-2 py-1 rounded-lg bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 text-xs font-bold">
+                      {{ $memberType->name }}
+                    </span>
+                  @else
+                    <span class="text-xs text-primary-300 dark:text-primary-600 italic">-</span>
+                  @endif
                 @else
                   <span class="text-xs text-primary-300 dark:text-primary-600 italic">-</span>
                 @endif

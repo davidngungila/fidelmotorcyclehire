@@ -19,6 +19,7 @@ class StoreUserRequest extends FormRequest
             'password' => ['required', 'confirmed', 'min:8'],
             'role' => ['required', 'in:admin,member'],
             'member_number' => ['nullable', 'unique:users'],
+            'member_type_id' => ['nullable', 'exists:member_types,id'],
         ];
     }
 }

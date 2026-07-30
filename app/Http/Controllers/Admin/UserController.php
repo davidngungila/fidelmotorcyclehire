@@ -96,6 +96,7 @@ class UserController extends Controller
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
             'member_number' => $validated['member_number'] ?? null,
+            'member_type_id' => $validated['member_type_id'] ?? null,
             'status' => $request->input('status', 'active'),
         ]);
 

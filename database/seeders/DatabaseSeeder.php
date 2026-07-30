@@ -64,6 +64,7 @@ class DatabaseSeeder extends Seeder
 
         // Seed loan products
         $this->call([
+            MemberTypeSeeder::class,
             LoanProductSeeder::class,
             SavingsProductSeeder::class,
             InvestmentProductSeeder::class,
@@ -71,6 +72,7 @@ class DatabaseSeeder extends Seeder
 
         $this->command->info('✓ Default admin user created: admin@membersportal.co.tz / admin123');
         $this->command->info('✓ Default member user created: member@membersportal.co.tz / member123');
+        $this->command->info('✓ Member types seeded successfully');
         $this->command->info('✓ Loan products seeded successfully');
         $this->command->info('✓ Savings products seeded successfully');
         $this->command->info('✓ Investment products seeded successfully');

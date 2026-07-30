@@ -29,6 +29,7 @@ class User extends Authenticatable
         'branch',
         'photo',
         'status',
+        'member_type_id',
         'registration_date',
         'email_verified_at',
     ];
@@ -65,6 +66,11 @@ class User extends Authenticatable
     public function notifications(): MorphMany
     {
         return $this->morphMany(DatabaseNotification::class, 'notifiable');
+    }
+
+    public function memberType()
+    {
+        return $this->belongsTo(MemberType::class);
     }
 
     public function hasRole($role): bool

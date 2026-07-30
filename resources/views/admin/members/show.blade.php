@@ -83,6 +83,17 @@
             <div class="flex flex-wrap items-center gap-3 mb-2">
               <h1 class="text-2xl font-bold text-primary-900 dark:text-white">{{ $memberName }}</h1>
               <span class="badge {{ $statusBadge['class'] }}">{{ $statusBadge['label'] }}</span>
+              @if(isset($member['member_type_id']) && $member['member_type_id'])
+                @php
+                  $memberType = \App\Models\MemberType::find($member['member_type_id']);
+                @endphp
+                @if($memberType)
+                  <span class="inline-flex items-center px-3 py-1 rounded-lg bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 text-xs font-bold">
+                    <i class="fa-solid fa-user-tag mr-1.5 text-[10px]"></i>
+                    {{ $memberType->name }}
+                  </span>
+                @endif
+              @endif
             </div>
             <div class="flex flex-wrap items-center gap-2">
               <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-primary-100 dark:bg-primary-900/50 font-mono text-xs font-bold text-primary-700 dark:text-primary-300">
