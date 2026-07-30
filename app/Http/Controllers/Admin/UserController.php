@@ -997,11 +997,21 @@ class UserController extends Controller
             
             $user = User::findOrFail($id);
             
-            // Generate a random password
-            $newPassword = strtoupper(substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 8));
+            // Use default password
+            $newPassword = 'password';
             
             $user->password = Hash::make($newPassword);
             $user->save();
+
+            // Send email with new password
+            try {
+                \Mail::raw("Your password has been reset to: {$newPassword}\n\nPlease login and change your password immediately.", function($message) use ($user) {
+                    $message->to($user->email)
+                            ->subject('Password Reset - Members Portal');
+                });
+            } catch (\Exception $e) {
+                \Log::error('Failed to send password reset email: ' . $e->getMessage());
+            }
 
             ActivityLog::create([
                 'user_id' => Auth::id(),
@@ -1018,7 +1028,7 @@ class UserController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Password reset successfully',
+                'message' => 'Password reset successfully and sent to email',
                 'new_password' => $newPassword,
                 'user_name' => $user->name,
             ]);
@@ -1053,11 +1063,21 @@ class UserController extends Controller
                     $id = (int) $this->encryptedIdService->decrypt($encryptedId);
                     $user = User::findOrFail($id);
                     
-                    // Generate a random password
-                    $newPassword = strtoupper(substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 8));
+                    // Use default password
+                    $newPassword = 'password';
                     
                     $user->password = Hash::make($newPassword);
                     $user->save();
+
+                    // Send email with new password
+                    try {
+                        \Mail::raw("Your password has been reset to: {$newPassword}\n\nPlease login and change your password immediately.", function($message) use ($user) {
+                            $message->to($user->email)
+                                    ->subject('Password Reset - Members Portal');
+                        });
+                    } catch (\Exception $e) {
+                        \Log::error('Failed to send password reset email: ' . $e->getMessage());
+                    }
 
                     $results[] = [
                         'user_id' => $user->id,
@@ -1083,18 +1103,18 @@ class UserController extends Controller
 
                     $successCount++;
                 } catch (\Exception $e) {
+                    $failureCount++;
                     $results[] = [
                         'user_id' => $encryptedId,
-                        'success' => false,
                         'error' => $e->getMessage(),
+                        'success' => false,
                     ];
-                    $failureCount++;
                 }
             }
 
             return response()->json([
                 'success' => true,
-                'message' => "Password reset completed for {$successCount} users. {$failureCount} failed.",
+                'message' => "Password reset completed. Success: {$successCount}, Failed: {$failureCount}",
                 'results' => $results,
                 'success_count' => $successCount,
                 'failure_count' => $failureCount,
