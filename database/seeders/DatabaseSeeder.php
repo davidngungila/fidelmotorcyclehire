@@ -62,7 +62,17 @@ class DatabaseSeeder extends Seeder
             $member->save();
         }
 
+        // Seed loan products
+        $this->call([
+            LoanProductSeeder::class,
+            SavingsProductSeeder::class,
+            InvestmentProductSeeder::class,
+        ]);
+
         $this->command->info('✓ Default admin user created: admin@membersportal.co.tz / admin123');
         $this->command->info('✓ Default member user created: member@membersportal.co.tz / member123');
+        $this->command->info('✓ Loan products seeded successfully');
+        $this->command->info('✓ Savings products seeded successfully');
+        $this->command->info('✓ Investment products seeded successfully');
     }
 }
