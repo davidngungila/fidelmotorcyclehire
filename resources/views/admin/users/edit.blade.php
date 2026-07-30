@@ -599,7 +599,6 @@ function memberEditForm() {
     async saveContactInfo() {
       const form = document.getElementById('contactInfoForm');
       const formData = new FormData(form);
-      this.loading = true;
       
       try {
         const response = await fetch(`{{ route('admin.users.update-contact-info', $encryptedId) }}`, {
@@ -644,15 +643,12 @@ function memberEditForm() {
           title: 'Error',
           text: error.message || 'Failed to save contact information.'
         });
-      } finally {
-        this.loading = false;
       }
     },
 
     async saveMembershipDetails() {
       const form = document.getElementById('membershipDetailsForm');
       const formData = new FormData(form);
-      this.loading = true;
       
       try {
         const response = await fetch(`{{ route('admin.users.update-membership-details', $encryptedId) }}`, {
@@ -697,15 +693,12 @@ function memberEditForm() {
           title: 'Error',
           text: error.message || 'Failed to save membership details.'
         });
-      } finally {
-        this.loading = false;
       }
     },
 
     async saveAccountInfo() {
       const form = document.getElementById('accountInfoForm');
       const formData = new FormData(form);
-      this.loading = true;
       
       try {
         const response = await fetch(`{{ route('admin.users.update-account-info', $encryptedId) }}`, {
@@ -750,15 +743,12 @@ function memberEditForm() {
           title: 'Error',
           text: error.message || 'Failed to save account information.'
         });
-      } finally {
-        this.loading = false;
       }
     },
 
     async saveNextOfKin() {
       const form = document.getElementById('nextOfKinForm');
       const formData = new FormData(form);
-      this.loading = true;
       
       try {
         const response = await fetch(`{{ route('admin.users.update-next-of-kin', $encryptedId) }}`, {
@@ -803,15 +793,12 @@ function memberEditForm() {
           title: 'Error',
           text: error.message || 'Failed to save next of kin information.'
         });
-      } finally {
-        this.loading = false;
       }
     },
 
     async saveBankingInfo() {
       const form = document.getElementById('bankingInfoForm');
       const formData = new FormData(form);
-      this.loading = true;
       
       try {
         const response = await fetch(`{{ route('admin.users.update-banking-info', $encryptedId) }}`, {
@@ -856,15 +843,12 @@ function memberEditForm() {
           title: 'Error',
           text: error.message || 'Failed to save banking information.'
         });
-      } finally {
-        this.loading = false;
       }
     },
 
     async saveDocumentsInfo() {
       const form = document.getElementById('documentsInfoForm');
       const formData = new FormData(form);
-      this.loading = true;
       
       try {
         const response = await fetch(`{{ route('admin.users.update-documents-info', $encryptedId) }}`, {
@@ -909,15 +893,12 @@ function memberEditForm() {
           title: 'Error',
           text: error.message || 'Failed to save documents.'
         });
-      } finally {
-        this.loading = false;
       }
     },
 
     async saveAdditionalInfo() {
       const form = document.getElementById('additionalInfoForm');
       const formData = new FormData(form);
-      this.loading = true;
       
       try {
         const response = await fetch(`{{ route('admin.users.update-additional-info', $encryptedId) }}`, {
@@ -962,8 +943,6 @@ function memberEditForm() {
           title: 'Error',
           text: error.message || 'Failed to save additional information.'
         });
-      } finally {
-        this.loading = false;
       }
     }
   };

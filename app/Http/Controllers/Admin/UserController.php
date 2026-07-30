@@ -551,7 +551,16 @@ class UserController extends Controller
             $validated = $request->validated();
             
             $profile = MemberProfile::where('user_id', $id)->firstOrFail();
-            $profile->update($validated);
+            
+            $profileUpdateData = [];
+            
+            foreach ($validated as $key => $value) {
+                $profileUpdateData[$key] = $value;
+            }
+            
+            if (!empty($profileUpdateData)) {
+                $profile->update($profileUpdateData);
+            }
 
             ActivityLog::create([
                 'user_id' => Auth::id(),
@@ -589,7 +598,16 @@ class UserController extends Controller
             $validated = $request->validated();
             
             $profile = MemberProfile::where('user_id', $id)->firstOrFail();
-            $profile->update($validated);
+            
+            $profileUpdateData = [];
+            
+            foreach ($validated as $key => $value) {
+                $profileUpdateData[$key] = $value;
+            }
+            
+            if (!empty($profileUpdateData)) {
+                $profile->update($profileUpdateData);
+            }
 
             ActivityLog::create([
                 'user_id' => Auth::id(),
@@ -654,12 +672,25 @@ class UserController extends Controller
             $validated = $request->validated();
             
             $profile = MemberProfile::where('user_id', $id)->firstOrFail();
-            $profile->update([
-                'kin_full_name' => $validated['kin_full_name'],
-                'kin_relationship' => $validated['kin_relationship'],
-                'kin_phone_number' => $validated['kin_phone_number'],
-                'kin_address' => $validated['kin_address'],
-            ]);
+            
+            $profileUpdateData = [];
+            
+            if (isset($validated['kin_full_name'])) {
+                $profileUpdateData['kin_full_name'] = $validated['kin_full_name'];
+            }
+            if (isset($validated['kin_relationship'])) {
+                $profileUpdateData['kin_relationship'] = $validated['kin_relationship'];
+            }
+            if (isset($validated['kin_phone_number'])) {
+                $profileUpdateData['kin_phone_number'] = $validated['kin_phone_number'];
+            }
+            if (isset($validated['kin_address'])) {
+                $profileUpdateData['kin_address'] = $validated['kin_address'];
+            }
+            
+            if (!empty($profileUpdateData)) {
+                $profile->update($profileUpdateData);
+            }
 
             ActivityLog::create([
                 'user_id' => Auth::id(),
@@ -691,7 +722,16 @@ class UserController extends Controller
             $validated = $request->validated();
             
             $profile = MemberProfile::where('user_id', $id)->firstOrFail();
-            $profile->update($validated);
+            
+            $profileUpdateData = [];
+            
+            foreach ($validated as $key => $value) {
+                $profileUpdateData[$key] = $value;
+            }
+            
+            if (!empty($profileUpdateData)) {
+                $profile->update($profileUpdateData);
+            }
 
             ActivityLog::create([
                 'user_id' => Auth::id(),
@@ -780,7 +820,16 @@ class UserController extends Controller
             $validated = $request->validated();
             
             $profile = MemberProfile::where('user_id', $id)->firstOrFail();
-            $profile->update($validated);
+            
+            $profileUpdateData = [];
+            
+            foreach ($validated as $key => $value) {
+                $profileUpdateData[$key] = $value;
+            }
+            
+            if (!empty($profileUpdateData)) {
+                $profile->update($profileUpdateData);
+            }
 
             ActivityLog::create([
                 'user_id' => Auth::id(),
