@@ -232,6 +232,11 @@ Route::prefix('member')->middleware(['auth', 'role:member', 'member.isolation'])
     Route::put('/profile', [MemberProfileController::class, 'update'])->name('profile.update');
 
     Route::get('/loans', [MemberLoanController::class, 'index'])->name('loans.index');
+    Route::get('/loans/create', [MemberLoanController::class, 'create'])->name('loans.create');
+    Route::post('/loans/store-basic-info', [MemberLoanController::class, 'storeBasicInfo'])->name('loans.store-basic-info');
+    Route::post('/loans/store-loan-details', [MemberLoanController::class, 'storeLoanDetails'])->name('loans.store-loan-details');
+    Route::post('/loans/store-collateral', [MemberLoanController::class, 'storeCollateral'])->name('loans.store-collateral');
+    Route::post('/loans', [MemberLoanController::class, 'store'])->name('loans.store');
     Route::get('/loans/{encryptedLoanNumber}', [MemberLoanController::class, 'show'])->name('loans.show');
 
     Route::get('/savings', [MemberSavingController::class, 'index'])->name('savings.index');

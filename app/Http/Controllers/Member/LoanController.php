@@ -94,6 +94,221 @@ class LoanController extends Controller
         ));
     }
 
+    public function create(Request $request): View
+    {
+        Gate::authorize('member-only');
+
+        $user = Auth::user();
+        $memberNumber = $user->member_number;
+
+        ActivityLog::create([
+            'user_id' => $user->id,
+            'subject_type' => 'loan',
+            'subject_id' => null,
+            'description' => 'Member viewed loan application form',
+            'properties' => ['member_number' => $memberNumber],
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return view('member.loans.create', [
+            'user' => $user,
+            'memberNumber' => $memberNumber,
+        ]);
+    }
+
+    public function storeBasicInfo(Request $request)
+    {
+        Gate::authorize('member-only');
+
+        try {
+            $validated = $request->validate([
+                'loan_product_id' => 'nullable|exists:loan_products,id',
+                'member_number' => 'required|string|max:50',
+                'application_date' => 'required|date',
+                'purpose' => 'required|in:business,education,agriculture,personal,emergency,other',
+                'purpose_description' => 'nullable|string',
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Basic information saved successfully.',
+                'loan_data' => $validated,
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function storeLoanDetails(Request $request)
+    {
+        Gate::authorize('member-only');
+
+        try {
+            $validated = $request->validate([
+                'principal_amount' => 'required|numeric|min:0',
+                'interest_rate' => 'required|numeric|min:0|max:100',
+                'term_months' => 'required|integer|min:1',
+                'repayment_frequency' => 'nullable|in:monthly,biweekly,weekly',
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Loan details saved successfully.',
+                'loan_data' => $validated,
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function storeCollateral(Request $request)
+    {
+        Gate::authorize('member-only');
+
+        try {
+            $validated = $request->validate([
+                'collateral' => 'nullable|string',
+                'guarantor' => 'nullable|string',
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Collateral information saved successfully.',
+                'loan_data' => $validated,
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function store(Request $request)
+    {
+        Gate::authorize('member-only');
+
+        $user = Auth::user();
+        $memberNumber = $user->member_number;
+
+        $validated = $request->validate([
+            'loan_product_id' => 'nullable|exists:loan_products,id',
+            'principal_amount' => 'required|numeric|min:0',
+            'interest_rate' => 'required|numeric|min:0|max:100',
+            'term_months' => 'required|integer|min:1',
+            'application_date' => 'required|date',
+            'purpose' => 'required|in:business,education,agriculture,personal,emergency,other',
+            'purpose_description' => 'nullable|string',
+            'collateral' => 'nullable|string',
+            'guarantor' => 'nullable|string',
+            'notes' => 'nullable|string',
+            'repayment_frequency' => 'nullable|in:monthly,biweekly,weekly',
+        ]);
+
+        // Generate sequential loan number
+        $today = date('Ymd');
+        $loanCountToday = Loan::where('loan_number', 'like', 'LN' . $today . '%')->count();
+        $sequentialNumber = str_pad((string) ($loanCountToday + 1), 4, '0', STR_PAD_LEFT);
+        
+        $validated['loan_number'] = 'LN' . $today . $sequentialNumber;
+        $validated['user_id'] = $user->id;
+        $validated['member_number'] = $memberNumber;
+        $validated['status'] = 'pending';
+
+        $loan = Loan::create($validated);
+
+        // Create repayment schedule
+        $this->createRepaymentSchedule($loan);
+
+        ActivityLog::create([
+            'user_id' => $user->id,
+            'subject_type' => 'loan',
+            'subject_id' => $loan->id,
+            'description' => "Member submitted loan application: {$loan->loan_number}",
+            'properties' => [
+                'member_number' => $memberNumber,
+                'loan_amount' => $validated['principal_amount'],
+                'purpose' => $validated['purpose'],
+            ],
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        $this->success('Loan application submitted successfully. It will be reviewed by admin.');
+
+        return redirect()->route('loans.index');
+    }
+
+    private function createRepaymentSchedule(Loan $loan)
+    {
+        $principal = (float) $loan->principal_amount;
+        $interestRate = (float) $loan->interest_rate;
+        $termMonths = (int) $loan->term_months;
+        
+        // Calculate monthly payment using amortization formula
+        if ($interestRate > 0) {
+            $monthlyRate = $interestRate / 100 / 12;
+            $monthlyPayment = $principal * ($monthlyRate * pow(1 + $monthlyRate, $termMonths)) / (pow(1 + $monthlyRate, $termMonths) - 1);
+        } else {
+            $monthlyPayment = $principal / $termMonths;
+        }
+
+        $balance = $principal;
+        $startDate = $loan->application_date ? $loan->application_date->format('Y-m-d') : date('Y-m-d');
+
+        for ($i = 1; $i <= $termMonths; $i++) {
+            $dueDate = date('Y-m-d', strtotime("+{$i} month", strtotime($startDate)));
+            
+            $interestPortion = $balance * ($interestRate / 100 / 12);
+            $principalPortion = $monthlyPayment - $interestPortion;
+            $balance = max(0, $balance - $principalPortion);
+
+            \App\Models\LoanRepaymentSchedule::create([
+                'loan_id' => $loan->id,
+                'installment_number' => $i,
+                'due_date' => $dueDate,
+                'principal_amount' => $principalPortion,
+                'interest_amount' => $interestPortion,
+                'total_amount' => $monthlyPayment,
+                'balance_after' => $balance,
+                'status' => 'pending',
+                'amount_paid' => 0,
+            ]);
+        }
+
+        // Update loan with calculated monthly payment
+        $loan->update([
+            'monthly_payment' => $monthlyPayment,
+            'total_amount_due' => $monthlyPayment * $termMonths,
+            'balance' => $principal,
+        ]);
+    }
+
     public function show(Request $request, string $encryptedLoanNumber): View
     {
         $loanNumber = $this->encryptedIdService->decrypt($encryptedLoanNumber);
