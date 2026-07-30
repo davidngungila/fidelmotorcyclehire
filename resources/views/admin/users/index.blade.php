@@ -26,10 +26,18 @@
       </form>
     </div>
 
-    <a href="{{ route('admin.users.create') }}"
-       class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95 whitespace-nowrap">
-      <i class="fa-solid fa-user-plus text-[13px]"></i> Create User
-    </a>
+    <div class="flex items-center gap-3">
+      <button @click="openBulkResetModal()"
+              :disabled="selectedUsers.length === 0"
+              :class="selectedUsers.length === 0 ? 'opacity-50 cursor-not-allowed' : ''"
+              class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed">
+        <i class="fa-solid fa-key text-[13px]"></i> Bulk Reset Password
+      </button>
+      <a href="{{ route('admin.users.create') }}"
+         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95 whitespace-nowrap">
+        <i class="fa-solid fa-user-plus text-[13px]"></i> Create User
+      </a>
+    </div>
   </div>
 
   <div class="glass p-5">
@@ -59,6 +67,12 @@
       <table class="data-table">
         <thead>
           <tr>
+            <th class="w-12">
+              <input type="checkbox" 
+                     @change="toggleSelectAll($el.checked)"
+                     :checked="allSelected"
+                     class="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+            </th>
             <th class="w-12">#</th>
             <th>Name</th>
             <th>Email</th>
@@ -75,8 +89,15 @@
               $rowNum = ($users->currentPage() - 1) * $users->perPage() + $index + 1;
               $userRole = $user->role ?? ($user->roles->first()->name ?? 'member');
               $userStatus = $user->status ?? 'active';
+              $encryptedId = app(\App\Services\EncryptedIdService::class)->encrypt($user->id);
             @endphp
             <tr class="group">
+              <td class="text-xs text-primary-400 dark:text-primary-500 font-mono">
+                <input type="checkbox" 
+                       :value="'{{ $encryptedId }}'"
+                       x-model="selectedUsers"
+                       class="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+              </td>
               <td class="text-xs text-primary-400 dark:text-primary-500 font-mono">{{ $rowNum }}.</td>
               <td>
                 <div class="flex items-center gap-3">
@@ -172,7 +193,7 @@
             </tr>
           @empty
             <tr>
-              <td colspan="8" class="text-center py-16 text-primary-500 dark:text-primary-400">
+              <td colspan="9" class="text-center py-16 text-primary-500 dark:text-primary-400">
                 <i class="fa-solid fa-users-slash text-4xl mb-4 block opacity-30"></i>
                 <p class="text-sm font-semibold mb-1">No users found</p>
                 <p class="text-xs">
@@ -242,6 +263,114 @@
         </nav>
       </div>
     @endif
+  </div>
+
+  <!-- Bulk Password Reset Confirmation Modal -->
+  <div x-show="showBulkResetModal" 
+       x-transition:enter="transition ease-out duration-300"
+       x-transition:enter-start="opacity-0"
+       x-transition:enter-end="opacity-100"
+       x-transition:leave="transition ease-in duration-200"
+       x-transition:leave-start="opacity-100"
+       x-transition:leave-end="opacity-0"
+       class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+       style="display: none;">
+    <div x-show="showBulkResetModal"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 max-w-lg w-full mx-4">
+      <div class="text-center">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
+          <i class="fa-solid fa-key text-2xl text-amber-600 dark:text-amber-400"></i>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Bulk Reset Password?</h3>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+          Are you sure you want to reset passwords for <span class="font-bold text-amber-600 dark:text-amber-400" x-text="selectedUsers.length"></span> selected users?
+        </p>
+        <div class="flex gap-3">
+          <button @click="closeBulkResetModal()"
+                  class="flex-1 px-4 py-2.5 rounded-lg bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white text-sm font-bold transition-colors">
+            Cancel
+          </button>
+          <button @click="confirmBulkReset()"
+                  :disabled="isBulkResetting"
+                  class="flex-1 px-4 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-sm font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            <i class="fa-solid fa-key mr-2"></i> 
+            <span x-show="!isBulkResetting">Reset Passwords</span>
+            <span x-show="isBulkResetting">Resetting...</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk Password Reset Results Modal -->
+  <div x-show="showBulkResultsModal" 
+       x-transition:enter="transition ease-out duration-300"
+       x-transition:enter-start="opacity-0"
+       x-transition:enter-end="opacity-100"
+       x-transition:leave="transition ease-in duration-200"
+       x-transition:leave-start="opacity-100"
+       x-transition:leave-end="opacity-0"
+       class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+       style="display: none;">
+    <div x-show="showBulkResultsModal"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+      <div>
+        <div class="text-center mb-6">
+          <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center">
+            <i class="fa-solid fa-check text-2xl text-green-600 dark:text-green-400"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Password Reset Results</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-400">
+            <span class="font-bold text-green-600 dark:text-green-400" x-text="bulkResults.success_count"></span> successful, 
+            <span class="font-bold text-red-600 dark:text-red-400" x-text="bulkResults.failure_count"></span> failed
+          </p>
+        </div>
+        <div class="space-y-3 max-h-96 overflow-y-auto">
+          <template x-for="result in bulkResults.results" :key="result.user_id">
+            <div class="p-3 rounded-lg border" 
+                 :class="result.success ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'">
+              <div class="flex items-center justify-between mb-2">
+                <span class="font-semibold text-sm text-gray-900 dark:text-white" x-text="result.user_name || 'Unknown'"></span>
+                <span class="text-xs px-2 py-1 rounded-full"
+                      :class="result.success ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'">
+                  <i :class="result.success ? 'fa-solid fa-check' : 'fa-solid fa-xmark'" class="mr-1"></i>
+                  <span x-text="result.success ? 'Success' : 'Failed'"></span>
+                </span>
+              </div>
+              <div x-show="result.success" class="flex items-center justify-between">
+                <span class="text-xs text-gray-600 dark:text-gray-400">New Password:</span>
+                <div class="flex items-center gap-2">
+                  <span class="font-mono font-bold text-primary-600 dark:text-primary-400" x-text="result.new_password"></span>
+                  <button @click="copyPassword(result.new_password)" 
+                          class="text-xs text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300">
+                    <i class="fa-solid fa-copy"></i>
+                  </button>
+                </div>
+              </div>
+              <div x-show="!result.success" class="text-xs text-red-600 dark:text-red-400" x-text="result.error"></div>
+            </div>
+          </template>
+        </div>
+        <div class="flex gap-3 mt-6">
+          <button @click="closeBulkResultsModal()"
+                  class="flex-1 px-4 py-2.5 rounded-lg bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white text-sm font-bold transition-colors">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Password Reset Confirmation Modal -->
@@ -335,9 +464,15 @@
       searchQuery: @json($searchQuery ?? ''),
       showPasswordModal: false,
       showConfirmModal: false,
+      showBulkResetModal: false,
+      showBulkResultsModal: false,
+      isBulkResetting: false,
       newPassword: '',
       userName: '',
       userIdToReset: null,
+      selectedUsers: [],
+      allSelected: false,
+      bulkResults: { results: [], success_count: 0, failure_count: 0 },
       changePerPage(value) {
         const params = new URLSearchParams(window.location.search);
         params.set('per_page', value);
@@ -386,14 +521,73 @@
         
         this.userIdToReset = null;
       },
-      copyPassword() {
-        navigator.clipboard.writeText(this.newPassword);
+      copyPassword(password) {
+        navigator.clipboard.writeText(password);
         alert('Password copied to clipboard!');
       },
       closePasswordModal() {
         this.showPasswordModal = false;
         this.newPassword = '';
         this.userName = '';
+      },
+      toggleSelectAll(checked) {
+        this.allSelected = checked;
+        if (checked) {
+          const checkboxes = document.querySelectorAll('tbody input[type="checkbox"]');
+          this.selectedUsers = Array.from(checkboxes).map(cb => cb.value);
+        } else {
+          this.selectedUsers = [];
+        }
+      },
+      openBulkResetModal() {
+        if (this.selectedUsers.length === 0) {
+          alert('Please select at least one user to reset passwords.');
+          return;
+        }
+        this.showBulkResetModal = true;
+      },
+      closeBulkResetModal() {
+        this.showBulkResetModal = false;
+      },
+      async confirmBulkReset() {
+        this.isBulkResetting = true;
+        
+        try {
+          const response = await fetch('/admin/users/bulk-reset-password', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+              user_ids: this.selectedUsers
+            })
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            this.bulkResults = {
+              results: data.results,
+              success_count: data.success_count,
+              failure_count: data.failure_count
+            };
+            this.showBulkResetModal = false;
+            this.showBulkResultsModal = true;
+            this.selectedUsers = [];
+            this.allSelected = false;
+          } else {
+            alert('Failed to reset passwords: ' + data.message);
+          }
+        } catch (error) {
+          alert('Error resetting passwords: ' + error.message);
+        }
+        
+        this.isBulkResetting = false;
+      },
+      closeBulkResultsModal() {
+        this.showBulkResultsModal = false;
+        this.bulkResults = { results: [], success_count: 0, failure_count: 0 };
       }
     }
   }

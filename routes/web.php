@@ -186,6 +186,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::put('/users/{encryptedId}/additional-info', [AdminUserController::class, 'updateAdditionalInfo'])->name('users.update-additional-info');
     Route::delete('/users/{encryptedId}', [AdminUserController::class, 'destroy'])->name('users.destroy');
     Route::post('/users/{encryptedId}/reset-password', [AdminUserController::class, 'resetPassword'])->name('users.reset-password');
+    Route::post('/users/bulk-reset-password', [AdminUserController::class, 'bulkResetPassword'])->name('users.bulk-reset-password');
 
     Route::get('/settings', [AdminSettingController::class, 'index'])->name('settings.index');
     Route::put('/settings', [AdminSettingController::class, 'update'])->name('settings.update');

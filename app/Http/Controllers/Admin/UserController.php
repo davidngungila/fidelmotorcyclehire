@@ -1034,4 +1034,80 @@ class UserController extends Controller
             ], 500);
         }
     }
+
+    public function bulkResetPassword(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'user_ids' => 'required|array',
+                'user_ids.*' => 'required|string',
+            ]);
+
+            $userIds = $validated['user_ids'];
+            $results = [];
+            $successCount = 0;
+            $failureCount = 0;
+
+            foreach ($userIds as $encryptedId) {
+                try {
+                    $id = (int) $this->encryptedIdService->decrypt($encryptedId);
+                    $user = User::findOrFail($id);
+                    
+                    // Generate a random password
+                    $newPassword = strtoupper(substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 8));
+                    
+                    $user->password = Hash::make($newPassword);
+                    $user->save();
+
+                    $results[] = [
+                        'user_id' => $user->id,
+                        'user_name' => $user->name,
+                        'user_email' => $user->email,
+                        'new_password' => $newPassword,
+                        'success' => true,
+                    ];
+
+                    ActivityLog::create([
+                        'user_id' => Auth::id(),
+                        'subject_type' => 'user',
+                        'subject_id' => $user->id,
+                        'description' => "Admin reset password for user: {$user->name} (bulk reset)",
+                        'ip_address' => $request->ip(),
+                        'user_agent' => $request->userAgent(),
+                        'properties' => [
+                            'user_email' => $user->email,
+                            'reset_by' => Auth::id(),
+                            'bulk_reset' => true,
+                        ],
+                    ]);
+
+                    $successCount++;
+                } catch (\Exception $e) {
+                    $results[] = [
+                        'user_id' => $encryptedId,
+                        'success' => false,
+                        'error' => $e->getMessage(),
+                    ];
+                    $failureCount++;
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => "Password reset completed for {$successCount} users. {$failureCount} failed.",
+                'results' => $results,
+                'success_count' => $successCount,
+                'failure_count' => $failureCount,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Bulk password reset failed: ' . $e->getMessage(), [
+                'exception' => $e,
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to perform bulk password reset: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 }
