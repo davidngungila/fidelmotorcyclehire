@@ -31,15 +31,10 @@ class LoanController extends Controller
         $user = Auth::user();
         $memberNumber = $user->member_number;
 
-        \Log::info('LoanController::index - Member Number: ' . $memberNumber);
-
-        // Use database loans instead of Google Sheets
+        // Use database loans instead of Google Sheets - same as dashboard
         $dbLoans = Loan::where('member_number', $memberNumber)->get();
-        
-        \Log::info('LoanController::index - Database loans count: ' . $dbLoans->count());
-        \Log::info('LoanController::index - Database loans:', $dbLoans->toArray());
 
-        // Convert database loans to the format expected by the view
+        // Convert database loans to the format expected by the view - same as dashboard
         $loans = $dbLoans->map(function ($loan) {
             return [
                 'loan_number' => $loan->loan_number,
@@ -55,16 +50,7 @@ class LoanController extends Controller
             ];
         })->toArray();
 
-        \Log::info('LoanController::index - Converted loans data:', $loans);
-
-        // Filter to show only active loans
-        $activeLoans = array_filter($loans, function(array $loan): bool {
-            return strtolower($loan['status'] ?? '') === 'active';
-        });
-
-        \Log::info('LoanController::index - Active loans count: ' . count($activeLoans));
-        \Log::info('LoanController::index - Active loans:', array_values($activeLoans));
-
+        // Process all loans (not just active) to show complete history
         $processedLoans = array_map(function (array $loan): array {
             $totalAmount = (float) ($loan['loan_amount'] ?? 0);
             $paid = (float) ($loan['paid_amount'] ?? 0);
@@ -77,24 +63,24 @@ class LoanController extends Controller
                 'paid_amount_float' => $paid,
                 'outstanding_float' => $outstanding,
             ]);
-        }, $activeLoans);
+        }, $loans);
 
+        // Calculate totals from all loans
         $totalOutstanding = array_sum(array_column($processedLoans, 'outstanding_float'));
         $totalBorrowed = array_sum(array_column($processedLoans, 'total_amount'));
-        $activeCount = count($processedLoans);
-
-        \Log::info('LoanController::index - Final stats:', [
-            'totalOutstanding' => $totalOutstanding,
-            'totalBorrowed' => $totalBorrowed,
-            'activeCount' => $activeCount
-        ]);
+        
+        // Count active loans separately for display
+        $activeLoans = array_filter($processedLoans, function(array $loan): bool {
+            return strtolower($loan['status'] ?? '') === 'active';
+        });
+        $activeCount = count($activeLoans);
 
         ActivityLog::create([
             'user_id' => $user->id,
             'subject_type' => 'loan',
             'subject_id' => null,
-            'description' => 'Member viewed active loans',
-            'properties' => ['member_number' => $memberNumber, 'active_loan_count' => $activeCount],
+            'description' => 'Member viewed loans',
+            'properties' => ['member_number' => $memberNumber, 'loan_count' => count($processedLoans), 'active_count' => $activeCount],
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
         ]);
