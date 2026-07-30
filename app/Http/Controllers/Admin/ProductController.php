@@ -56,7 +56,24 @@ class ProductController extends Controller
 
         $product = SavingsProduct::findOrFail($id);
 
-        return view('admin.products.show', compact('product', 'encryptedId'));
+        // Fetch saving balances based on product type
+        $savingBalances = collect();
+        $balanceField = match($product->code) {
+            'BS' => 'business_balance',
+            'FF' => 'flexi_balance',
+            'EF' => 'emergency_balance',
+            'RDA' => 'rda_balance',
+            default => null,
+        };
+
+        if ($balanceField) {
+            $savingBalances = \App\Models\SavingBalance::where($balanceField, '>', 0)
+                ->with('customer')
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
+        }
+
+        return view('admin.products.show', compact('product', 'encryptedId', 'savingBalances', 'balanceField'));
     }
 
     public function store(Request $request)

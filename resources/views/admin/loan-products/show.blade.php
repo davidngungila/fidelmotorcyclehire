@@ -192,6 +192,58 @@
             <p class="text-sm text-primary-700 dark:text-primary-300 leading-relaxed">{{ $loanProduct->description }}</p>
         </div>
     @endif
+
+    <!-- Loans Using This Product -->
+    <div class="glass p-6 rounded-2xl">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
+                <i class="fa-solid fa-list text-primary-500 text-xs"></i>
+                Loans Using This Product
+            </h3>
+            <span class="text-xs text-primary-600 dark:text-primary-400">{{ $loans->total() }} loan{{ $loans->total() !== 1 ? 's' : '' }}</span>
+        </div>
+        @if($loans->count() > 0)
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-primary-50 dark:bg-primary-900/20">
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-primary-600 dark:text-primary-400">Loan Number</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-primary-600 dark:text-primary-400">Member</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-primary-600 dark:text-primary-400">Amount</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-primary-600 dark:text-primary-400">Balance</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-primary-600 dark:text-primary-400">Status</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-primary-600 dark:text-primary-400">Date Awarded</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($loans as $loan)
+                            <tr class="border-b border-primary-100 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/10 transition-colors">
+                                <td class="px-4 py-3 text-sm font-mono font-medium text-primary-900 dark:text-white">{{ $loan->loan_number }}</td>
+                                <td class="px-4 py-3 text-sm text-primary-700 dark:text-primary-300">{{ $loan->member_number }}</td>
+                                <td class="px-4 py-3 text-sm text-primary-700 dark:text-primary-300">{{ fmtTsh($loan->principal_amount) }}</td>
+                                <td class="px-4 py-3 text-sm text-primary-700 dark:text-primary-300">{{ fmtTsh($loan->balance) }}</td>
+                                <td class="px-4 py-3">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {{ $loan->status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : ($loan->status === 'paid' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : ($loan->status === 'pending' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400')) }}">
+                                        {{ ucfirst($loan->status) }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-sm text-primary-700 dark:text-primary-300">{{ $loan->disbursement_date ? $loan->disbursement_date->format('M d, Y') : '—' }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-4 flex items-center justify-between">
+                <p class="text-xs text-primary-600 dark:text-primary-400">Showing {{ $loans->firstItem() }}-{{ $loans->lastItem() }} of {{ $loans->total() }} loans</p>
+                {{ $loans->links() }}
+            </div>
+        @else
+            <div class="text-center py-8">
+                <i class="fa-solid fa-inbox text-2xl mb-2 block opacity-40 text-primary-400"></i>
+                <p class="text-sm text-primary-600 dark:text-primary-400">No loans found for this product</p>
+            </div>
+        @endif
+    </div>
 </div>
 
 @push('scripts')

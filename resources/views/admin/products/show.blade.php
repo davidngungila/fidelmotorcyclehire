@@ -196,6 +196,47 @@
             <p class="text-sm text-primary-700 dark:text-primary-300 leading-relaxed">{{ $product->description }}</p>
         </div>
     @endif
+
+    <!-- Savings Using This Product -->
+    @if($balanceField && $savingBalances->count() > 0)
+        <div class="glass p-6 rounded-2xl">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-list text-primary-500 text-xs"></i>
+                    Accounts Using This Product
+                </h3>
+                <span class="text-xs text-primary-600 dark:text-primary-400">{{ $savingBalances->total() }} account{{ $savingBalances->total() !== 1 ? 's' : '' }}</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-primary-50 dark:bg-primary-900/20">
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-primary-600 dark:text-primary-400">Customer ID</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-primary-600 dark:text-primary-400">Customer Name</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-primary-600 dark:text-primary-400">Balance</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-primary-600 dark:text-primary-400">Total Saved</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-primary-600 dark:text-primary-400">Last Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($savingBalances as $balance)
+                            <tr class="border-b border-primary-100 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/10 transition-colors">
+                                <td class="px-4 py-3 text-sm font-mono font-medium text-primary-900 dark:text-white">{{ $balance->customer_id }}</td>
+                                <td class="px-4 py-3 text-sm text-primary-700 dark:text-primary-300">{{ $balance->customer->name ?? 'Unknown' }}</td>
+                                <td class="px-4 py-3 text-sm text-primary-700 dark:text-primary-300">{{ fmtTsh($balance->$balanceField) }}</td>
+                                <td class="px-4 py-3 text-sm text-primary-700 dark:text-primary-300">{{ fmtTsh($balance->total_saved) }}</td>
+                                <td class="px-4 py-3 text-sm text-primary-700 dark:text-primary-300">{{ $balance->updated_at ? $balance->updated_at->format('M d, Y') : '—' }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-4 flex items-center justify-between">
+                <p class="text-xs text-primary-600 dark:text-primary-400">Showing {{ $savingBalances->firstItem() }}-{{ $savingBalances->lastItem() }} of {{ $savingBalances->total() }} accounts</p>
+                {{ $savingBalances->links() }}
+            </div>
+        </div>
+    @endif
 </div>
 
 @push('scripts')

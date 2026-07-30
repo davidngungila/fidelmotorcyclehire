@@ -70,6 +70,7 @@ class LoanProductController extends Controller
         }
 
         $loanProduct = LoanProduct::findOrFail($id);
+        $loans = $loanProduct->loans()->orderBy('created_at', 'desc')->paginate(10);
 
         ActivityLog::create([
             'user_id' => Auth::id(),
@@ -78,7 +79,7 @@ class LoanProductController extends Controller
             'user_agent' => $request->userAgent(),
         ]);
 
-        return view('admin.loan-products.show', compact('loanProduct', 'encryptedId'));
+        return view('admin.loan-products.show', compact('loanProduct', 'encryptedId', 'loans'));
     }
 
     public function store(Request $request)
