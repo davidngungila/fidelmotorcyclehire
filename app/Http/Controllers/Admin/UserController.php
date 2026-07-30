@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreBasicInfoRequest;
+use App\Http\Requests\UpdateBasicInfoRequest;
 use App\Http\Requests\StoreContactInfoRequest;
 use App\Http\Requests\StoreMembershipDetailsRequest;
 use App\Http\Requests\StoreAccountInfoRequest;
@@ -451,7 +452,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function updateBasicInfo(StoreBasicInfoRequest $request, string $encryptedId)
+    public function updateBasicInfo(UpdateBasicInfoRequest $request, string $encryptedId)
     {
         try {
             $id = (int) $this->encryptedIdService->decrypt($encryptedId);
