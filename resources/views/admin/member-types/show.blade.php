@@ -119,6 +119,57 @@
       </div>
     </div>
 
+    <!-- Members List -->
+    @if($members->count() > 0)
+      <div class="lg:col-span-2">
+        <div class="glass p-6 rounded-2xl">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
+              <i class="fa-solid fa-users text-primary-500 text-xs"></i>
+              Members Using This Type
+            </h3>
+            <span class="text-xs text-primary-600 dark:text-primary-400">{{ $members->total() }} member{{ $members->total() !== 1 ? 's' : '' }}</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="bg-primary-50 dark:bg-primary-900/20">
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-primary-600 dark:text-primary-400">Member Number</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-primary-600 dark:text-primary-400">Name</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-primary-600 dark:text-primary-400">Email</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-primary-600 dark:text-primary-400">Status</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-primary-600 dark:text-primary-400">Joined</th>
+                </tr>
+              </thead>
+              <tbody>
+                @foreach($members as $member)
+                  <tr class="border-b border-primary-100 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/10 transition-colors">
+                    <td class="px-4 py-3">
+                      <span class="inline-flex items-center px-2 py-1 rounded-lg bg-primary-100 dark:bg-primary-900/40 font-mono text-xs font-bold text-primary-700 dark:text-primary-300">
+                        {{ $member->member_number ?? 'N/A' }}
+                      </span>
+                    </td>
+                    <td class="px-4 py-3 text-sm font-medium text-primary-900 dark:text-white">{{ $member->name }}</td>
+                    <td class="px-4 py-3 text-sm text-primary-700 dark:text-primary-300">{{ $member->email }}</td>
+                    <td class="px-4 py-3">
+                      <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {{ $member->status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' }}">
+                        {{ ucfirst($member->status) }}
+                      </span>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-primary-700 dark:text-primary-300">{{ $member->registration_date ? $member->registration_date->format('M d, Y') : '—' }}</td>
+                  </tr>
+                @endforeach
+              </tbody>
+            </table>
+          </div>
+          <div class="mt-4 flex items-center justify-between">
+            <p class="text-xs text-primary-600 dark:text-primary-400">Showing {{ $members->firstItem() }}-{{ $members->lastItem() }} of {{ $members->total() }} members</p>
+            {{ $members->links() }}
+          </div>
+        </div>
+      </div>
+    @endif
+
     <!-- Sidebar -->
     <div class="space-y-6">
       <!-- Quick Actions -->

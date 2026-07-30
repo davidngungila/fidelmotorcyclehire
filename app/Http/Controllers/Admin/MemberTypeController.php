@@ -116,6 +116,7 @@ class MemberTypeController extends Controller
 
         $memberType = MemberType::findOrFail($id);
         $membersCount = $memberType->users()->count();
+        $members = $memberType->users()->latest()->paginate(15);
 
         ActivityLog::create([
             'user_id' => Auth::id(),
@@ -124,7 +125,7 @@ class MemberTypeController extends Controller
             'user_agent' => $request->userAgent(),
         ]);
 
-        return view('admin.member-types.show', compact('memberType', 'encryptedId', 'membersCount'));
+        return view('admin.member-types.show', compact('memberType', 'encryptedId', 'membersCount', 'members'));
     }
 
     public function edit(Request $request, string $encryptedId): View
