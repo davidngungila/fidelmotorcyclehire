@@ -174,6 +174,14 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::post('/users/{userId}/additional-info', [AdminUserController::class, 'storeAdditionalInfo'])->name('users.store-additional-info');
     Route::get('/users/{encryptedId}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
     Route::put('/users/{encryptedId}', [AdminUserController::class, 'update'])->name('users.update');
+    Route::put('/users/{encryptedId}/basic-info', [AdminUserController::class, 'updateBasicInfo'])->name('users.update-basic-info');
+    Route::put('/users/{encryptedId}/contact-info', [AdminUserController::class, 'updateContactInfo'])->name('users.update-contact-info');
+    Route::put('/users/{encryptedId}/membership-details', [AdminUserController::class, 'updateMembershipDetails'])->name('users.update-membership-details');
+    Route::put('/users/{encryptedId}/account-info', [AdminUserController::class, 'updateAccountInfo'])->name('users.update-account-info');
+    Route::put('/users/{encryptedId}/next-of-kin', [AdminUserController::class, 'updateNextOfKin'])->name('users.update-next-of-kin');
+    Route::put('/users/{encryptedId}/banking-info', [AdminUserController::class, 'updateBankingInfo'])->name('users.update-banking-info');
+    Route::put('/users/{encryptedId}/documents-info', [AdminUserController::class, 'updateDocumentsInfo'])->name('users.update-documents-info');
+    Route::put('/users/{encryptedId}/additional-info', [AdminUserController::class, 'updateAdditionalInfo'])->name('users.update-additional-info');
     Route::delete('/users/{encryptedId}', [AdminUserController::class, 'destroy'])->name('users.destroy');
     Route::post('/users/{encryptedId}/reset-password', [AdminUserController::class, 'resetPassword'])->name('users.reset-password');
 

@@ -451,6 +451,320 @@ class UserController extends Controller
         ]);
     }
 
+    public function updateBasicInfo(StoreBasicInfoRequest $request, string $encryptedId)
+    {
+        try {
+            $id = (int) $this->encryptedIdService->decrypt($encryptedId);
+            $validated = $request->validated();
+            
+            $user = User::findOrFail($id);
+            
+            // Update user basic info
+            $user->name = trim($validated['first_name'] . ' ' . ($validated['middle_name'] ?? '') . ' ' . $validated['last_name']);
+            $user->email = $validated['email_address'];
+            $user->member_type_id = $validated['member_type_id'];
+            $user->save();
+
+            // Update member profile if exists
+            if ($user->memberProfile) {
+                $user->memberProfile->update([
+                    'first_name' => $validated['first_name'],
+                    'middle_name' => $validated['middle_name'],
+                    'last_name' => $validated['last_name'],
+                    'gender' => $validated['gender'],
+                    'date_of_birth' => $validated['date_of_birth'],
+                    'national_id' => $validated['national_id'],
+                    'passport_driving_license' => $validated['passport_driving_license'],
+                    'registration_date' => $validated['registration_date'],
+                    'status' => $validated['status'],
+                ]);
+            }
+
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'subject_type' => 'user',
+                'subject_id' => $user->id,
+                'description' => "Admin updated basic info for member: {$user->name}",
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            return response()->json(['success' => true, 'message' => 'Basic information updated successfully.']);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function updateContactInfo(StoreContactInfoRequest $request, string $encryptedId)
+    {
+        try {
+            $id = (int) $this->encryptedIdService->decrypt($encryptedId);
+            $validated = $request->validated();
+            
+            $profile = MemberProfile::where('user_id', $id)->firstOrFail();
+            $profile->update($validated);
+
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'subject_type' => 'user',
+                'subject_id' => $id,
+                'description' => 'Admin updated contact info for member: ' . $profile->full_name,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            return response()->json(['success' => true, 'message' => 'Contact information updated successfully.']);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Member profile not found.'
+            ], 404);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function updateMembershipDetails(StoreMembershipDetailsRequest $request, string $encryptedId)
+    {
+        try {
+            $id = (int) $this->encryptedIdService->decrypt($encryptedId);
+            $validated = $request->validated();
+            
+            $profile = MemberProfile::where('user_id', $id)->firstOrFail();
+            $profile->update($validated);
+
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'subject_type' => 'user',
+                'subject_id' => $id,
+                'description' => 'Admin updated membership details for member: ' . $profile->full_name,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            return response()->json(['success' => true, 'message' => 'Membership details updated successfully.']);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Member profile not found.'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function updateAccountInfo(StoreAccountInfoRequest $request, string $encryptedId)
+    {
+        try {
+            $id = (int) $this->encryptedIdService->decrypt($encryptedId);
+            $validated = $request->validated();
+            
+            $user = User::findOrFail($id);
+            
+            if (!empty($validated['password'])) {
+                $user->password = Hash::make($validated['password']);
+            }
+            
+            $user->email_verified_at = isset($validated['email_verified']) && $validated['email_verified'] ? now() : null;
+            $user->save();
+
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'subject_type' => 'user',
+                'subject_id' => $user->id,
+                'description' => 'Admin updated account info for member: ' . $user->name,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            return response()->json(['success' => true, 'message' => 'Account information updated successfully.']);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function updateNextOfKin(StoreNextOfKinRequest $request, string $encryptedId)
+    {
+        try {
+            $id = (int) $this->encryptedIdService->decrypt($encryptedId);
+            $validated = $request->validated();
+            
+            $profile = MemberProfile::where('user_id', $id)->firstOrFail();
+            $profile->update([
+                'kin_full_name' => $validated['kin_full_name'],
+                'kin_relationship' => $validated['kin_relationship'],
+                'kin_phone_number' => $validated['kin_phone_number'],
+                'kin_address' => $validated['kin_address'],
+            ]);
+
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'subject_type' => 'user',
+                'subject_id' => $id,
+                'description' => 'Admin updated next of kin info for member: ' . $profile->full_name,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            return response()->json(['success' => true, 'message' => 'Next of kin information updated successfully.']);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Member profile not found.'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function updateBankingInfo(StoreBankingInfoRequest $request, string $encryptedId)
+    {
+        try {
+            $id = (int) $this->encryptedIdService->decrypt($encryptedId);
+            $validated = $request->validated();
+            
+            $profile = MemberProfile::where('user_id', $id)->firstOrFail();
+            $profile->update($validated);
+
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'subject_type' => 'user',
+                'subject_id' => $id,
+                'description' => 'Admin updated banking info for member: ' . $profile->full_name,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            return response()->json(['success' => true, 'message' => 'Banking information updated successfully.']);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Member profile not found.'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function updateDocumentsInfo(StoreDocumentsInfoRequest $request, string $encryptedId)
+    {
+        try {
+            $id = (int) $this->encryptedIdService->decrypt($encryptedId);
+            $validated = $request->validated();
+            
+            $profile = MemberProfile::where('user_id', $id)->firstOrFail();
+            
+            $updateData = [];
+            
+            if ($request->hasFile('passport_photo')) {
+                $updateData['passport_photo'] = $request->file('passport_photo')->store('documents', 'public');
+            }
+            
+            if ($request->hasFile('national_id_copy')) {
+                $updateData['national_id_copy'] = $request->file('national_id_copy')->store('documents', 'public');
+            }
+            
+            if ($request->hasFile('signature')) {
+                $updateData['signature'] = $request->file('signature')->store('documents', 'public');
+            }
+            
+            if (isset($validated['other_attachments'])) {
+                $attachments = [];
+                foreach ($validated['other_attachments'] as $file) {
+                    $attachments[] = $file->store('documents', 'public');
+                }
+                $updateData['other_attachments'] = $attachments;
+            }
+            
+            if (!empty($updateData)) {
+                $profile->update($updateData);
+            }
+
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'subject_type' => 'user',
+                'subject_id' => $id,
+                'description' => 'Admin updated documents for member: ' . $profile->full_name,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            return response()->json(['success' => true, 'message' => 'Documents updated successfully.']);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Member profile not found.'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function updateAdditionalInfo(StoreAdditionalInfoRequest $request, string $encryptedId)
+    {
+        try {
+            $id = (int) $this->encryptedIdService->decrypt($encryptedId);
+            $validated = $request->validated();
+            
+            $profile = MemberProfile::where('user_id', $id)->firstOrFail();
+            $profile->update($validated);
+
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'subject_type' => 'user',
+                'subject_id' => $id,
+                'description' => 'Admin updated additional info for member: ' . $profile->full_name,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            return response()->json(['success' => true, 'message' => 'Additional information updated successfully.']);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Member profile not found.'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function update(UpdateUserRequest $request, string $encryptedId)
     {
         $id = (int) $this->encryptedIdService->decrypt($encryptedId);

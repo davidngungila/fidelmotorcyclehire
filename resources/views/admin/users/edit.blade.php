@@ -1,12 +1,10 @@
 @extends('layouts.admin')
 
-@section('breadcrumb', 'System \u203A Users \u203A Edit')
-@section('page_title', 'Edit User: ' . $user->name)
+@section('breadcrumb', 'Members \u203A Edit Member')
+@section('page_title', 'Edit Member: ' . $user->name)
 
 @section('content')
-
-<div class="space-y-6">
-
+<div x-data="memberEditForm()" class="space-y-6">
   <div class="flex items-center gap-4">
     <a href="{{ route('admin.users.index') }}"
        class="p-2.5 rounded-xl bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 transition-colors">
@@ -20,339 +18,836 @@
         <h2 class="font-bold text-lg truncate" :class="darkMode ? 'text-white' : 'text-primary-900'">{{ $user->name }}</h2>
         <p class="text-xs mt-0.5 truncate" :class="darkMode ? 'text-primary-400' : 'text-primary-600'">{{ $user->email }}</p>
       </div>
-      @php
-        $userRole = $user->role ?? ($user->roles->first()->name ?? 'member');
-      @endphp
-      @if($userRole === 'admin')
-        <span class="role-tag role-admin">Admin</span>
-      @elseif($userRole === 'manager')
-        <span class="role-tag role-manager">Manager</span>
-      @elseif($userRole === 'teller')
-        <span class="role-tag role-teller">Teller</span>
-      @elseif($userRole === 'auditor')
-        <span class="role-tag role-auditor">Auditor</span>
-      @else
-        <span class="role-tag role-member">Member</span>
+      @if($user->memberProfile)
+        <span class="px-3 py-1 rounded-full text-xs font-bold bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300">
+          {{ $user->memberProfile->status }}
+        </span>
       @endif
     </div>
   </div>
 
-  <div class="glass p-6 lg:p-8">
-    <form method="POST" action="{{ route('admin.users.update', $user->id) }}" class="space-y-6">
-      @csrf
-      @method('PUT')
-
-      <div class="flex items-center gap-4 pb-6 border-b border-primary-100 dark:border-primary-900/50">
-        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 text-white flex items-center justify-center text-2xl shadow-md">
-          <i class="fa-solid fa-pen-to-square"></i>
-        </div>
-        <div>
-          <h2 class="font-bold text-lg" :class="darkMode ? 'text-white' : 'text-primary-900'">Edit User Information</h2>
-          <p class="text-xs mt-0.5" :class="darkMode ? 'text-primary-400' : 'text-primary-600'">Update user account details and permissions</p>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        @if($user->memberProfile)
-          <div class="md:col-span-2 lg:col-span-3">
-            <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Member Type *</label>
-            <select name="member_type_id" required class="form-input @error('member_type_id') !border-red-400 @enderror">
-              <option value="">Select member type...</option>
-              @foreach($memberTypes as $type)
-                <option value="{{ $type->id }}" {{ old('member_type_id', $user->member_type_id) == $type->id ? 'selected' : '' }}>{{ $type->name }} - {{ $type->code }}</option>
-              @endforeach
-            </select>
-            @error('member_type_id')
-              <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
-            @enderror
-          </div>
-          <div>
-            <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">First Name *</label>
-            <input type="text" name="first_name" value="{{ old('first_name', $user->memberProfile->first_name) }}" required
-                   placeholder="e.g. John"
-                   class="form-input @error('first_name') !border-red-400 @enderror">
-            @error('first_name')
-              <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
-            @enderror
-          </div>
-          <div>
-            <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Middle Name</label>
-            <input type="text" name="middle_name" value="{{ old('middle_name', $user->memberProfile->middle_name) }}"
-                   placeholder="e.g. Michael"
-                   class="form-input @error('middle_name') !border-red-400 @enderror">
-            @error('middle_name')
-              <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
-            @enderror
-          </div>
-          <div>
-            <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Last Name *</label>
-            <input type="text" name="last_name" value="{{ old('last_name', $user->memberProfile->last_name) }}" required
-                   placeholder="e.g. Doe"
-                   class="form-input @error('last_name') !border-red-400 @enderror">
-            @error('last_name')
-              <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
-            @enderror
-          </div>
-        @else
-          <div class="md:col-span-2 lg:col-span-3">
-            <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Full Name *</label>
-            <input type="text" name="name" value="{{ old('name', $user->name) }}" required
-                   placeholder="e.g. John Mwangi"
-                   class="form-input @error('name') !border-red-400 @enderror">
-            @error('name')
-              <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
-            @enderror
-          </div>
-        @endif
-
-        <div class="md:col-span-2 lg:col-span-3">
-          <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Email Address *</label>
-          <input type="email" name="email" value="{{ old('email', $user->email) }}" required
-                 placeholder="e.g. john@example.com"
-                 class="form-input @error('email') !border-red-400 @enderror">
-          @error('email')
-            <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
-          @enderror
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <!-- Main Form Area -->
+    <div class="lg:col-span-3">
+      <div class="glass p-6 rounded-2xl">
+        <!-- Tabs Navigation -->
+        <div class="flex flex-wrap gap-2 mb-6 border-b border-primary-100 dark:border-primary-900/50 pb-4">
+          <button @click="currentTab = 1" :class="currentTab === 1 ? 'bg-primary-600 text-white' : 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300'" class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors">
+            <i class="fa-solid fa-user text-[10px]"></i> Basic Info
+          </button>
+          <button @click="currentTab = 2" :class="currentTab === 2 ? 'bg-primary-600 text-white' : 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300'" class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors">
+            <i class="fa-solid fa-address-book text-[10px]"></i> Contact
+          </button>
+          <button @click="currentTab = 3" :class="currentTab === 3 ? 'bg-primary-600 text-white' : 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300'" class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors">
+            <i class="fa-solid fa-id-card text-[10px]"></i> Membership
+          </button>
+          <button @click="currentTab = 4" :class="currentTab === 4 ? 'bg-primary-600 text-white' : 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300'" class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors">
+            <i class="fa-solid fa-lock text-[10px]"></i> Account
+          </button>
+          <button @click="currentTab = 5" :class="currentTab === 5 ? 'bg-primary-600 text-white' : 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300'" class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors">
+            <i class="fa-solid fa-users text-[10px]"></i> Next of Kin
+          </button>
+          <button @click="currentTab = 6" :class="currentTab === 6 ? 'bg-primary-600 text-white' : 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300'" class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors">
+            <i class="fa-solid fa-building-columns text-[10px]"></i> Banking
+          </button>
+          <button @click="currentTab = 7" :class="currentTab === 7 ? 'bg-primary-600 text-white' : 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300'" class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors">
+            <i class="fa-solid fa-file text-[10px]"></i> Documents
+          </button>
+          <button @click="currentTab = 8" :class="currentTab === 8 ? 'bg-primary-600 text-white' : 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300'" class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors">
+            <i class="fa-solid fa-note-sticky text-[10px]"></i> Additional
+          </button>
         </div>
 
-        @if($user->memberProfile)
-          <div>
-            <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Phone</label>
-            <input type="text" name="phone_number" value="{{ old('phone_number', $user->memberProfile->phone_number) }}"
-                   placeholder="+255 123 456 789"
-                   class="form-input @error('phone_number') !border-red-400 @enderror">
-            @error('phone_number')
-              <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
-            @enderror
-          </div>
-
-          <div>
-            <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Date of Birth</label>
-            <input type="date" name="date_of_birth" value="{{ old('date_of_birth', $user->memberProfile->date_of_birth ? $user->memberProfile->date_of_birth->format('Y-m-d') : '') }}"
-                   class="form-input @error('date_of_birth') !border-red-400 @enderror">
-            @error('date_of_birth')
-              <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
-            @enderror
-          </div>
-
-          <div>
-            <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Gender</label>
-            <select name="gender" class="form-input @error('gender') !border-red-400 @enderror">
-              <option value="">Select gender</option>
-              <option value="male" {{ old('gender', $user->memberProfile->gender) === 'male' ? 'selected' : '' }}>Male</option>
-              <option value="female" {{ old('gender', $user->memberProfile->gender) === 'female' ? 'selected' : '' }}>Female</option>
-              <option value="other" {{ old('gender', $user->memberProfile->gender) === 'other' ? 'selected' : '' }}>Other</option>
-            </select>
-            @error('gender')
-              <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
-            @enderror
-          </div>
-
-          <div>
-            <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">National ID (NIDA)</label>
-            <input type="text" name="national_id" value="{{ old('national_id', $user->memberProfile->national_id) }}"
-                   placeholder="e.g. 1234567890123"
-                   class="form-input font-mono @error('national_id') !border-red-400 @enderror">
-            @error('national_id')
-              <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
-            @enderror
-          </div>
-
-          <div>
-            <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Passport/Driving License</label>
-            <input type="text" name="passport_driving_license" value="{{ old('passport_driving_license', $user->memberProfile->passport_driving_license) }}"
-                   placeholder="Optional"
-                   class="form-input @error('passport_driving_license') !border-red-400 @enderror">
-            @error('passport_driving_license')
-              <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
-            @enderror
-          </div>
-
-          <div>
-            <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Member Number</label>
-            <input type="text" name="member_number" value="{{ old('member_number', $user->member_number) }}"
-                   readonly
-                   class="form-input font-mono bg-primary-50 dark:bg-primary-900/30">
-          </div>
-
-          <div>
-            <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Registration Date</label>
-            <input type="date" name="registration_date" value="{{ old('registration_date', $user->memberProfile->registration_date ? $user->memberProfile->registration_date->format('Y-m-d') : '') }}"
-                   class="form-input @error('registration_date') !border-red-400 @enderror">
-            @error('registration_date')
-              <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
-            @enderror
-          </div>
-        @else
-          <div>
-            <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Phone</label>
-            <input type="text" name="phone" value="{{ old('phone', $user->phone) }}"
-                   placeholder="+255 123 456 789"
-                   class="form-input @error('phone') !border-red-400 @enderror">
-            @error('phone')
-              <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
-            @enderror
-          </div>
-
-          <div>
-            <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Date of Birth</label>
-            <input type="date" name="date_of_birth" value="{{ old('date_of_birth', $user->date_of_birth) }}"
-                   class="form-input @error('date_of_birth') !border-red-400 @enderror">
-            @error('date_of_birth')
-              <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
-            @enderror
-          </div>
-
-          <div>
-            <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Gender</label>
-            <select name="gender" class="form-input @error('gender') !border-red-400 @enderror">
-              <option value="">Select gender</option>
-              <option value="male" {{ old('gender', $user->gender) === 'male' ? 'selected' : '' }}>Male</option>
-              <option value="female" {{ old('gender', $user->gender) === 'female' ? 'selected' : '' }}>Female</option>
-              <option value="other" {{ old('gender', $user->gender) === 'other' ? 'selected' : '' }}>Other</option>
-            </select>
-            @error('gender')
-              <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
-            @enderror
-          </div>
-
-          <div>
-            <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">National ID</label>
-            <input type="text" name="national_id" value="{{ old('national_id', $user->national_id) }}"
-                   placeholder="National ID number"
-                   class="form-input @error('national_id') !border-red-400 @enderror">
-            @error('national_id')
-              <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
-            @enderror
-          </div>
-        @endif
-
-        <div class="md:col-span-2 lg:col-span-3">
-          <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Bio / About Me</label>
-          <textarea name="bio" rows="3"
-                    class="form-input @error('bio') !border-red-400 @enderror"
-                    placeholder="Tell us about yourself...">{{ old('bio', $user->bio) }}</textarea>
-          @error('bio')
-            <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
-          @enderror
-        </div>
-
-        <div>
-          <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">New Password <span class="font-normal normal-case opacity-70">(leave blank to keep current)</span></label>
-          <div x-data="{ show: false }" class="relative">
-            <input :type="show ? 'text' : 'password'" name="password"
-                   placeholder="Min. 8 characters"
-                   class="form-input pr-10 @error('password') !border-red-400 @enderror">
-            <button type="button" @click="show = !show"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-primary-400 hover:text-primary-600 dark:hover:text-primary-300">
-              <i :class="show ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'" class="text-sm"></i>
-            </button>
-          </div>
-          @error('password')
-            <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
-          @enderror
-        </div>
-
-        <div>
-          <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Confirm New Password</label>
-          <div x-data="{ show: false }" class="relative">
-            <input :type="show ? 'text' : 'password'" name="password_confirmation"
-                   placeholder="Re-enter new password"
-                   class="form-input pr-10">
-            <button type="button" @click="show = !show"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-primary-400 hover:text-primary-600 dark:hover:text-primary-300">
-              <i :class="show ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'" class="text-sm"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="pt-5 mt-5 border-t border-primary-100 dark:border-primary-900/50">
-        <h3 class="text-xs font-bold uppercase tracking-wider mb-4" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">
-          <i class="fa-solid fa-shield-halved mr-1.5"></i> Access & Role Configuration
-        </h3>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          <div>
-            <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Role *</label>
-            <select name="role" required class="form-input @error('role') !border-red-400 @enderror">
-              <option value="">Select a role...</option>
-              <option value="admin" {{ old('role', $userRole) === 'admin' ? 'selected' : '' }}>Admin - Full system access</option>
-              <option value="manager" {{ old('role', $userRole) === 'manager' ? 'selected' : '' }}>Manager - Operational oversight</option>
-              <option value="teller" {{ old('role', $userRole) === 'teller' ? 'selected' : '' }}>Teller - Transactions only</option>
-              <option value="member" {{ old('role', $userRole) === 'member' ? 'selected' : '' }}>Member - Self-service portal</option>
-              <option value="auditor" {{ old('role', $userRole) === 'auditor' ? 'selected' : '' }}>Auditor - Read-only access</option>
-            </select>
-            @error('role')
-              <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
-            @enderror
-          </div>
-
-          <div>
-            <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Member Number</label>
-            <input type="text" name="member_number" value="{{ old('member_number', $user->member_number) }}"
-                   placeholder="e.g. FTN-00123 (optional)"
-                   class="form-input font-mono @error('member_number') !border-red-400 @enderror">
-            @error('member_number')
-              <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
-            @enderror
-          </div>
-
-          <div>
-            <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Marital Status</label>
-            <select name="marital_status" class="form-input @error('marital_status') !border-red-400 @enderror">
-              <option value="">Select status</option>
-              <option value="single" {{ old('marital_status', $user->marital_status) === 'single' ? 'selected' : '' }}>Single</option>
-              <option value="married" {{ old('marital_status', $user->marital_status) === 'married' ? 'selected' : '' }}>Married</option>
-              <option value="divorced" {{ old('marital_status', $user->marital_status) === 'divorced' ? 'selected' : '' }}>Divorced</option>
-              <option value="widowed" {{ old('marital_status', $user->marital_status) === 'widowed' ? 'selected' : '' }}>Widowed</option>
-            </select>
-            @error('marital_status')
-              <p class="mt-1.5 text-xs text-red-600 dark:text-red-400"><i class="fa-solid fa-circle-exclamation mr-1 text-[10px]"></i>{{ $message }}</p>
-            @enderror
-          </div>
-
-          <div class="md:col-span-2 lg:col-span-3">
-            <label class="form-label uppercase tracking-wider mb-2" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Account Status</label>
-            <div class="grid grid-cols-3 gap-3">
-              @php
-                $currentStatus = old('status', $user->status ?? 'active');
-              @endphp
-              <label class="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 cursor-pointer transition-all text-xs font-semibold
-                           border-primary-200 dark:border-primary-900/60 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300
-                           has-[:checked]:border-green-500 has-[:checked]:bg-green-50 dark:has-[:checked]:bg-green-900/30 has-[:checked]:text-green-700 dark:has-[:checked]:text-green-300">
-                <input type="radio" name="status" value="active" class="hidden" {{ $currentStatus === 'active' ? 'checked' : '' }}>
-                <i class="fa-solid fa-circle-check text-[12px]"></i> Active
-              </label>
-              <label class="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 cursor-pointer transition-all text-xs font-semibold
-                           border-primary-200 dark:border-primary-900/60 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300
-                           has-[:checked]:border-yellow-500 has-[:checked]:bg-yellow-50 dark:has-[:checked]:bg-yellow-900/30 has-[:checked]:text-yellow-700 dark:has-[:checked]:text-yellow-300">
-                <input type="radio" name="status" value="pending" class="hidden" {{ $currentStatus === 'pending' ? 'checked' : '' }}>
-                <i class="fa-solid fa-clock text-[12px]"></i> Pending
-              </label>
-              <label class="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 cursor-pointer transition-all text-xs font-semibold
-                           border-primary-200 dark:border-primary-900/60 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300
-                           has-[:checked]:border-gray-500 has-[:checked]:bg-gray-50 dark:has-[:checked]:bg-gray-900/30 has-[:checked]:text-gray-700 dark:has-[:checked]:text-gray-300">
-                <input type="radio" name="status" value="inactive" class="hidden" {{ $currentStatus === 'inactive' ? 'checked' : '' }}>
-                <i class="fa-solid fa-circle-xmark text-[12px]"></i> Inactive
-              </label>
+        <!-- Tab 1: Basic Information -->
+        <div x-show="currentTab === 1" x-transition class="space-y-5">
+          <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
+            <i class="fa-solid fa-user text-primary-500 text-xs"></i> Basic Information
+          </h3>
+          <form id="basicInfoForm" @submit.prevent="saveBasicInfo" class="space-y-5">
+            @csrf
+            @method('PUT')
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+              @if($user->memberProfile)
+                <div class="md:col-span-3">
+                  <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Member Type *</label>
+                  <select name="member_type_id" required class="form-input">
+                    <option value="">Select member type...</option>
+                    @foreach($memberTypes as $type)
+                      <option value="{{ $type->id }}" {{ $user->member_type_id == $type->id ? 'selected' : '' }}>{{ $type->name }} - {{ $type->code }}</option>
+                    @endforeach
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">First Name *</label>
+                  <input type="text" name="first_name" value="{{ $user->memberProfile->first_name }}" required class="form-input">
+                </div>
+                <div>
+                  <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Middle Name</label>
+                  <input type="text" name="middle_name" value="{{ $user->memberProfile->middle_name }}" class="form-input">
+                </div>
+                <div>
+                  <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Last Name *</label>
+                  <input type="text" name="last_name" value="{{ $user->memberProfile->last_name }}" required class="form-input">
+                </div>
+                <div class="md:col-span-3">
+                  <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Email Address *</label>
+                  <input type="email" name="email_address" value="{{ $user->email }}" required class="form-input">
+                </div>
+                <div>
+                  <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Gender *</label>
+                  <select name="gender" required class="form-input">
+                    <option value="">Select gender...</option>
+                    <option value="male" {{ $user->memberProfile->gender === 'male' ? 'selected' : '' }}>Male</option>
+                    <option value="female" {{ $user->memberProfile->gender === 'female' ? 'selected' : '' }}>Female</option>
+                    <option value="other" {{ $user->memberProfile->gender === 'other' ? 'selected' : '' }}>Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Date of Birth</label>
+                  <input type="date" name="date_of_birth" value="{{ $user->memberProfile->date_of_birth ? $user->memberProfile->date_of_birth->format('Y-m-d') : '' }}" class="form-input">
+                </div>
+                <div>
+                  <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">National ID (NIDA)</label>
+                  <input type="text" name="national_id" value="{{ $user->memberProfile->national_id }}" class="form-input font-mono">
+                </div>
+                <div>
+                  <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Passport/Driving License</label>
+                  <input type="text" name="passport_driving_license" value="{{ $user->memberProfile->passport_driving_license }}" class="form-input">
+                </div>
+                <div>
+                  <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Registration Date</label>
+                  <input type="date" name="registration_date" value="{{ $user->memberProfile->registration_date ? $user->memberProfile->registration_date->format('Y-m-d') : '' }}" class="form-input">
+                </div>
+                <div>
+                  <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Status</label>
+                  <select name="status" required class="form-input">
+                    <option value="active" {{ $user->memberProfile->status === 'active' ? 'selected' : '' }}>Active</option>
+                    <option value="pending" {{ $user->memberProfile->status === 'pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="suspended" {{ $user->memberProfile->status === 'suspended' ? 'selected' : '' }}>Suspended</option>
+                  </select>
+                </div>
+              @else
+                <div class="md:col-span-3">
+                  <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Full Name *</label>
+                  <input type="text" name="name" value="{{ $user->name }}" required class="form-input">
+                </div>
+                <div class="md:col-span-3">
+                  <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Email Address *</label>
+                  <input type="email" name="email" value="{{ $user->email }}" required class="form-input">
+                </div>
+              @endif
             </div>
+            <div class="flex justify-end">
+              <button type="submit" class="px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-all">
+                <i class="fa-solid fa-save mr-1.5"></i> Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Tab 2: Contact Information -->
+        <div x-show="currentTab === 2" x-transition class="space-y-5">
+          <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
+            <i class="fa-solid fa-address-book text-primary-500 text-xs"></i> Contact Information
+          </h3>
+          @if($user->memberProfile)
+          <form id="contactInfoForm" @submit.prevent="saveContactInfo" class="space-y-5">
+            @csrf
+            @method('PUT')
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Phone Number</label>
+                <input type="text" name="phone_number" value="{{ $user->memberProfile->phone_number }}" class="form-input">
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Alternative Phone</label>
+                <input type="text" name="alternative_phone" value="{{ $user->memberProfile->alternative_phone }}" class="form-input">
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Region</label>
+                <input type="text" name="region" value="{{ $user->memberProfile->region }}" class="form-input">
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">District</label>
+                <input type="text" name="district" value="{{ $user->memberProfile->district }}" class="form-input">
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Ward</label>
+                <input type="text" name="ward" value="{{ $user->memberProfile->ward }}" class="form-input">
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Street/Village</label>
+                <input type="text" name="street_village" value="{{ $user->memberProfile->street_village }}" class="form-input">
+              </div>
+              <div class="md:col-span-2">
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Physical Address</label>
+                <textarea name="physical_address" rows="2" class="form-input">{{ $user->memberProfile->physical_address }}</textarea>
+              </div>
+            </div>
+            <div class="flex justify-end">
+              <button type="submit" class="px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-all">
+                <i class="fa-solid fa-save mr-1.5"></i> Save Changes
+              </button>
+            </div>
+          </form>
+          @else
+          <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl text-yellow-700 dark:text-yellow-300 text-sm">
+            <i class="fa-solid fa-info-circle mr-2"></i> This member has not completed the registration process. Contact information is not available.
           </div>
+          @endif
+        </div>
+
+        <!-- Tab 3: Membership Details -->
+        <div x-show="currentTab === 3" x-transition class="space-y-5">
+          <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
+            <i class="fa-solid fa-id-card text-primary-500 text-xs"></i> Membership Details
+          </h3>
+          @if($user->memberProfile)
+          <form id="membershipDetailsForm" @submit.prevent="saveMembershipDetails" class="space-y-5">
+            @csrf
+            @method('PUT')
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Branch</label>
+                <select name="branch_id" class="form-input">
+                  <option value="">Select branch...</option>
+                  <option value="1" {{ $user->memberProfile->branch_id == 1 ? 'selected' : '' }}>Main Branch</option>
+                  <option value="2" {{ $user->memberProfile->branch_id == 2 ? 'selected' : '' }}>Branch A</option>
+                  <option value="3" {{ $user->memberProfile->branch_id == 3 ? 'selected' : '' }}>Branch B</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Membership Category</label>
+                <input type="text" name="membership_category" value="{{ $user->memberProfile->membership_category }}" class="form-input">
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Occupation</label>
+                <input type="text" name="occupation" value="{{ $user->memberProfile->occupation }}" class="form-input">
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Employer/Business</label>
+                <input type="text" name="employer_business" value="{{ $user->memberProfile->employer_business }}" class="form-input">
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Monthly Income</label>
+                <input type="number" name="monthly_income" value="{{ $user->memberProfile->monthly_income }}" class="form-input">
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Introduced By</label>
+                <input type="text" name="introduced_by" value="{{ $user->memberProfile->introduced_by }}" class="form-input">
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Joining Fee</label>
+                <input type="number" name="joining_fee" value="{{ $user->memberProfile->joining_fee }}" class="form-input">
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Shares Purchased</label>
+                <input type="number" name="shares_purchased" value="{{ $user->memberProfile->shares_purchased }}" class="form-input">
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Initial Savings Deposit</label>
+                <input type="number" name="initial_savings_deposit" value="{{ $user->memberProfile->initial_savings_deposit }}" class="form-input">
+              </div>
+            </div>
+            <div class="flex justify-end">
+              <button type="submit" class="px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-all">
+                <i class="fa-solid fa-save mr-1.5"></i> Save Changes
+              </button>
+            </div>
+          </form>
+          @else
+          <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl text-yellow-700 dark:text-yellow-300 text-sm">
+            <i class="fa-solid fa-info-circle mr-2"></i> This member has not completed the registration process. Membership details are not available.
+          </div>
+          @endif
+        </div>
+
+        <!-- Tab 4: Account Information -->
+        <div x-show="currentTab === 4" x-transition class="space-y-5">
+          <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
+            <i class="fa-solid fa-lock text-primary-500 text-xs"></i> Account Information
+          </h3>
+          <form id="accountInfoForm" @submit.prevent="saveAccountInfo" class="space-y-5">
+            @csrf
+            @method('PUT')
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Member Number</label>
+                <input type="text" value="{{ $user->member_number }}" readonly class="form-input font-mono bg-primary-50 dark:bg-primary-900/30">
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">New Password</label>
+                <input type="password" name="password" class="form-input" placeholder="Leave blank to keep current">
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Confirm New Password</label>
+                <input type="password" name="password_confirmation" class="form-input" placeholder="Re-enter new password">
+              </div>
+              <div class="flex items-center gap-3">
+                <input type="checkbox" name="email_verified" id="email_verified" {{ $user->email_verified_at ? 'checked' : '' }} class="w-4 h-4 rounded">
+                <label for="email_verified" class="text-sm text-primary-700 dark:text-primary-300">Email Verified</label>
+              </div>
+            </div>
+            <div class="flex justify-end">
+              <button type="submit" class="px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-all">
+                <i class="fa-solid fa-save mr-1.5"></i> Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Tab 5: Next of Kin -->
+        <div x-show="currentTab === 5" x-transition class="space-y-5">
+          <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
+            <i class="fa-solid fa-users text-primary-500 text-xs"></i> Next of Kin
+          </h3>
+          @if($user->memberProfile)
+          <form id="nextOfKinForm" @submit.prevent="saveNextOfKin" class="space-y-5">
+            @csrf
+            @method('PUT')
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Full Name</label>
+                <input type="text" name="kin_full_name" value="{{ $user->memberProfile->kin_full_name }}" class="form-input">
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Relationship</label>
+                <input type="text" name="kin_relationship" value="{{ $user->memberProfile->kin_relationship }}" class="form-input">
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Phone Number</label>
+                <input type="text" name="kin_phone_number" value="{{ $user->memberProfile->kin_phone_number }}" class="form-input">
+              </div>
+              <div class="md:col-span-2">
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Address</label>
+                <textarea name="kin_address" rows="2" class="form-input">{{ $user->memberProfile->kin_address }}</textarea>
+              </div>
+            </div>
+            <div class="flex justify-end">
+              <button type="submit" class="px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-all">
+                <i class="fa-solid fa-save mr-1.5"></i> Save Changes
+              </button>
+            </div>
+          </form>
+          @else
+          <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl text-yellow-700 dark:text-yellow-300 text-sm">
+            <i class="fa-solid fa-info-circle mr-2"></i> This member has not completed the registration process. Next of kin information is not available.
+          </div>
+          @endif
+        </div>
+
+        <!-- Tab 6: Banking & Mobile Money -->
+        <div x-show="currentTab === 6" x-transition class="space-y-5">
+          <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
+            <i class="fa-solid fa-building-columns text-primary-500 text-xs"></i> Banking & Mobile Money
+          </h3>
+          @if($user->memberProfile)
+          <form id="bankingInfoForm" @submit.prevent="saveBankingInfo" class="space-y-5">
+            @csrf
+            @method('PUT')
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Bank Name</label>
+                <input type="text" name="bank_name" value="{{ $user->memberProfile->bank_name }}" class="form-input">
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Bank Account Number</label>
+                <input type="text" name="bank_account_number" value="{{ $user->memberProfile->bank_account_number }}" class="form-input font-mono">
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Account Name</label>
+                <input type="text" name="account_name" value="{{ $user->memberProfile->account_name }}" class="form-input">
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Mobile Money Network</label>
+                <select name="mobile_money_network" class="form-input">
+                  <option value="">Select network...</option>
+                  <option value="mtn" {{ $user->memberProfile->mobile_money_network === 'mtn' ? 'selected' : '' }}>MTN Mobile Money</option>
+                  <option value="airtel" {{ $user->memberProfile->mobile_money_network === 'airtel' ? 'selected' : '' }}>Airtel Money</option>
+                  <option value="vodacom" {{ $user->memberProfile->mobile_money_network === 'vodacom' ? 'selected' : '' }}>Vodacom M-Pesa</option>
+                  <option value="tigopesa" {{ $user->memberProfile->mobile_money_network === 'tigopesa' ? 'selected' : '' }}>Tigo Pesa</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Mobile Wallet Number</label>
+                <input type="text" name="mobile_wallet_number" value="{{ $user->memberProfile->mobile_wallet_number }}" class="form-input font-mono">
+              </div>
+            </div>
+            <div class="flex justify-end">
+              <button type="submit" class="px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-all">
+                <i class="fa-solid fa-save mr-1.5"></i> Save Changes
+              </button>
+            </div>
+          </form>
+          @else
+          <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl text-yellow-700 dark:text-yellow-300 text-sm">
+            <i class="fa-solid fa-info-circle mr-2"></i> This member has not completed the registration process. Banking information is not available.
+          </div>
+          @endif
+        </div>
+
+        <!-- Tab 7: Documents -->
+        <div x-show="currentTab === 7" x-transition class="space-y-5">
+          <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
+            <i class="fa-solid fa-file text-primary-500 text-xs"></i> Documents
+          </h3>
+          @if($user->memberProfile)
+          <form id="documentsInfoForm" @submit.prevent="saveDocumentsInfo" class="space-y-5">
+            @csrf
+            @method('PUT')
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Passport Photo</label>
+                <input type="file" name="passport_photo" accept="image/*" class="form-input">
+                @if($user->memberProfile->passport_photo)
+                  <p class="mt-2 text-xs text-primary-600 dark:text-primary-400">Current: {{ $user->memberProfile->passport_photo }}</p>
+                @endif
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">National ID Copy</label>
+                <input type="file" name="national_id_copy" class="form-input">
+                @if($user->memberProfile->national_id_copy)
+                  <p class="mt-2 text-xs text-primary-600 dark:text-primary-400">Current: {{ $user->memberProfile->national_id_copy }}</p>
+                @endif
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Signature</label>
+                <input type="file" name="signature" accept="image/*" class="form-input">
+                @if($user->memberProfile->signature)
+                  <p class="mt-2 text-xs text-primary-600 dark:text-primary-400">Current: {{ $user->memberProfile->signature }}</p>
+                @endif
+              </div>
+            </div>
+            <div class="flex justify-end">
+              <button type="submit" class="px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-all">
+                <i class="fa-solid fa-save mr-1.5"></i> Save Changes
+              </button>
+            </div>
+          </form>
+          @else
+          <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl text-yellow-700 dark:text-yellow-300 text-sm">
+            <i class="fa-solid fa-info-circle mr-2"></i> This member has not completed the registration process. Documents are not available.
+          </div>
+          @endif
+        </div>
+
+        <!-- Tab 8: Additional Information -->
+        <div x-show="currentTab === 8" x-transition class="space-y-5">
+          <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
+            <i class="fa-solid fa-note-sticky text-primary-500 text-xs"></i> Additional Information
+          </h3>
+          @if($user->memberProfile)
+          <form id="additionalInfoForm" @submit.prevent="saveAdditionalInfo" class="space-y-5">
+            @csrf
+            @method('PUT')
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div class="md:col-span-2">
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Notes</label>
+                <textarea name="notes" rows="4" class="form-input">{{ $user->memberProfile->notes }}</textarea>
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Tags (comma separated)</label>
+                <input type="text" name="tags" value="{{ $user->memberProfile->tags ? implode(', ', json_decode($user->memberProfile->tags, true)) : '' }}" class="form-input" placeholder="e.g. VIP, Corporate">
+              </div>
+            </div>
+            <div class="flex justify-end">
+              <button type="submit" class="px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-all">
+                <i class="fa-solid fa-save mr-1.5"></i> Save Changes
+              </button>
+            </div>
+          </form>
+          @else
+          <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl text-yellow-700 dark:text-yellow-300 text-sm">
+            <i class="fa-solid fa-info-circle mr-2"></i> This member has not completed the registration process. Additional information is not available.
+          </div>
+          @endif
         </div>
       </div>
+    </div>
 
-      <div class="pt-6 mt-6 border-t border-primary-100 dark:border-primary-900/50 flex flex-col sm:flex-row items-center justify-end gap-3">
-        <a href="{{ route('admin.users.index') }}"
-           class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-sm font-bold transition-colors text-center">
-          Cancel
-        </a>
-        <button type="submit"
-                class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95">
-          <i class="fa-solid fa-floppy-disk mr-1.5 text-[13px]"></i> Save Changes
-        </button>
+    <!-- Right Sidebar Summary -->
+    <div class="lg:col-span-1">
+      <div class="glass p-6 rounded-2xl sticky top-6">
+        <h3 class="font-bold text-primary-900 dark:text-white text-sm mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-user-circle text-primary-500"></i> Member Summary
+        </h3>
+        <div class="space-y-4">
+          <div>
+            <p class="text-xs text-primary-600 dark:text-primary-400 uppercase tracking-wider">Member Number</p>
+            <p class="font-mono text-sm font-bold text-primary-900 dark:text-white">{{ $user->member_number }}</p>
+          </div>
+          <div>
+            <p class="text-xs text-primary-600 dark:text-primary-400 uppercase tracking-wider">Name</p>
+            <p class="text-sm font-semibold text-primary-900 dark:text-white">{{ $user->name }}</p>
+          </div>
+          <div>
+            <p class="text-xs text-primary-600 dark:text-primary-400 uppercase tracking-wider">Email</p>
+            <p class="text-sm text-primary-700 dark:text-primary-300">{{ $user->email }}</p>
+          </div>
+          @if($user->memberProfile)
+          <div>
+            <p class="text-xs text-primary-600 dark:text-primary-400 uppercase tracking-wider">Status</p>
+            <span class="inline-block px-2 py-1 rounded text-xs font-bold 
+              {{ $user->memberProfile->status === 'active' ? 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300' : 
+                 $user->memberProfile->status === 'pending' ? 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300' : 
+                 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300' }}">
+              {{ ucfirst($user->memberProfile->status) }}
+            </span>
+          </div>
+          @if($user->memberType)
+          <div>
+            <p class="text-xs text-primary-600 dark:text-primary-400 uppercase tracking-wider">Member Type</p>
+            <p class="text-sm text-primary-700 dark:text-primary-300">{{ $user->memberType->name }}</p>
+          </div>
+          @endif
+          @endif
+        </div>
+        <div class="mt-6 pt-4 border-t border-primary-100 dark:border-primary-900/50">
+          <a href="{{ route('admin.users.index') }}" class="w-full block text-center px-4 py-2.5 rounded-xl bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-sm font-bold transition-colors">
+            <i class="fa-solid fa-arrow-left mr-1.5"></i> Back to List
+          </a>
+        </div>
       </div>
-    </form>
+    </div>
   </div>
 </div>
 
+<script>
+function memberEditForm() {
+  return {
+    currentTab: 1,
+    userId: '{{ $user->id }}',
+    
+    async saveBasicInfo() {
+      const form = document.getElementById('basicInfoForm');
+      const formData = new FormData(form);
+      
+      try {
+        const response = await fetch(`{{ route('admin.users.update', $user->id) }}`, {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+          },
+          body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success || response.ok) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Saved!',
+            text: 'Basic information updated successfully.',
+            timer: 1500,
+            showConfirmButton: false
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: data.message || 'Failed to save basic information.'
+          });
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error.message || 'Failed to save basic information.'
+        });
+      }
+    },
+
+    async saveContactInfo() {
+      const form = document.getElementById('contactInfoForm');
+      const formData = new FormData(form);
+      
+      try {
+        const response = await fetch(`{{ route('admin.users.update-contact-info', $user->id) }}`, {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+          },
+          body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Saved!',
+            text: 'Contact information updated successfully.',
+            timer: 1500,
+            showConfirmButton: false
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: data.message || 'Failed to save contact information.'
+          });
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error.message || 'Failed to save contact information.'
+        });
+      }
+    },
+
+    async saveMembershipDetails() {
+      const form = document.getElementById('membershipDetailsForm');
+      const formData = new FormData(form);
+      
+      try {
+        const response = await fetch(`{{ route('admin.users.update-membership-details', $user->id) }}`, {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+          },
+          body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Saved!',
+            text: 'Membership details updated successfully.',
+            timer: 1500,
+            showConfirmButton: false
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: data.message || 'Failed to save membership details.'
+          });
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error.message || 'Failed to save membership details.'
+        });
+      }
+    },
+
+    async saveAccountInfo() {
+      const form = document.getElementById('accountInfoForm');
+      const formData = new FormData(form);
+      
+      try {
+        const response = await fetch(`{{ route('admin.users.update-account-info', $user->id) }}`, {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+          },
+          body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Saved!',
+            text: 'Account information updated successfully.',
+            timer: 1500,
+            showConfirmButton: false
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: data.message || 'Failed to save account information.'
+          });
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error.message || 'Failed to save account information.'
+        });
+      }
+    },
+
+    async saveNextOfKin() {
+      const form = document.getElementById('nextOfKinForm');
+      const formData = new FormData(form);
+      
+      try {
+        const response = await fetch(`{{ route('admin.users.update-next-of-kin', $user->id) }}`, {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+          },
+          body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Saved!',
+            text: 'Next of kin information updated successfully.',
+            timer: 1500,
+            showConfirmButton: false
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: data.message || 'Failed to save next of kin information.'
+          });
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error.message || 'Failed to save next of kin information.'
+        });
+      }
+    },
+
+    async saveBankingInfo() {
+      const form = document.getElementById('bankingInfoForm');
+      const formData = new FormData(form);
+      
+      try {
+        const response = await fetch(`{{ route('admin.users.update-banking-info', $user->id) }}`, {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+          },
+          body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Saved!',
+            text: 'Banking information updated successfully.',
+            timer: 1500,
+            showConfirmButton: false
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: data.message || 'Failed to save banking information.'
+          });
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error.message || 'Failed to save banking information.'
+        });
+      }
+    },
+
+    async saveDocumentsInfo() {
+      const form = document.getElementById('documentsInfoForm');
+      const formData = new FormData(form);
+      
+      try {
+        const response = await fetch(`{{ route('admin.users.update-documents-info', $user->id) }}`, {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+          },
+          body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Saved!',
+            text: 'Documents updated successfully.',
+            timer: 1500,
+            showConfirmButton: false
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: data.message || 'Failed to save documents.'
+          });
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error.message || 'Failed to save documents.'
+        });
+      }
+    },
+
+    async saveAdditionalInfo() {
+      const form = document.getElementById('additionalInfoForm');
+      const formData = new FormData(form);
+      
+      try {
+        const response = await fetch(`{{ route('admin.users.update-additional-info', $user->id) }}`, {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+          },
+          body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Saved!',
+            text: 'Additional information updated successfully.',
+            timer: 1500,
+            showConfirmButton: false
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: data.message || 'Failed to save additional information.'
+          });
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error.message || 'Failed to save additional information.'
+        });
+      }
+    }
+  };
+}
+</script>
+
 @endsection
+
