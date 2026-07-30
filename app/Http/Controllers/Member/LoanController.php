@@ -213,55 +213,70 @@ class LoanController extends Controller
     {
         Gate::authorize('member-only');
 
-        $user = Auth::user();
-        $memberNumber = $user->member_number;
+        try {
+            $user = Auth::user();
+            $memberNumber = $user->member_number;
 
-        $validated = $request->validate([
-            'loan_product_id' => 'nullable|exists:loan_products,id',
-            'principal_amount' => 'required|numeric|min:0',
-            'interest_rate' => 'required|numeric|min:0|max:100',
-            'term_months' => 'required|integer|min:1',
-            'application_date' => 'required|date',
-            'purpose' => 'required|in:business,education,agriculture,personal,emergency,other',
-            'purpose_description' => 'nullable|string',
-            'collateral' => 'nullable|string',
-            'guarantor' => 'nullable|string',
-            'notes' => 'nullable|string',
-            'repayment_frequency' => 'nullable|in:monthly,biweekly,weekly',
-        ]);
+            $validated = $request->validate([
+                'loan_product_id' => 'nullable|exists:loan_products,id',
+                'principal_amount' => 'required|numeric|min:0',
+                'interest_rate' => 'required|numeric|min:0|max:100',
+                'term_months' => 'required|integer|min:1',
+                'application_date' => 'required|date',
+                'purpose' => 'required|in:business,education,agriculture,personal,emergency,other',
+                'purpose_description' => 'nullable|string',
+                'collateral' => 'nullable|string',
+                'guarantor' => 'nullable|string',
+                'notes' => 'nullable|string',
+                'repayment_frequency' => 'nullable|in:monthly,biweekly,weekly',
+            ]);
 
-        // Generate sequential loan number
-        $today = date('Ymd');
-        $loanCountToday = Loan::where('loan_number', 'like', 'LN' . $today . '%')->count();
-        $sequentialNumber = str_pad((string) ($loanCountToday + 1), 4, '0', STR_PAD_LEFT);
-        
-        $validated['loan_number'] = 'LN' . $today . $sequentialNumber;
-        $validated['user_id'] = $user->id;
-        $validated['member_number'] = $memberNumber;
-        $validated['status'] = 'pending';
+            // Generate sequential loan number
+            $today = date('Ymd');
+            $loanCountToday = Loan::where('loan_number', 'like', 'LN' . $today . '%')->count();
+            $sequentialNumber = str_pad((string) ($loanCountToday + 1), 4, '0', STR_PAD_LEFT);
+            
+            $validated['loan_number'] = 'LN' . $today . $sequentialNumber;
+            $validated['user_id'] = $user->id;
+            $validated['member_number'] = $memberNumber;
+            $validated['status'] = 'pending';
 
-        $loan = Loan::create($validated);
+            $loan = Loan::create($validated);
 
-        // Create repayment schedule
-        $this->createRepaymentSchedule($loan);
+            // Create repayment schedule
+            $this->createRepaymentSchedule($loan);
 
-        ActivityLog::create([
-            'user_id' => $user->id,
-            'subject_type' => 'loan',
-            'subject_id' => $loan->id,
-            'description' => "Member submitted loan application: {$loan->loan_number}",
-            'properties' => [
-                'member_number' => $memberNumber,
-                'loan_amount' => $validated['principal_amount'],
-                'purpose' => $validated['purpose'],
-            ],
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
+            ActivityLog::create([
+                'user_id' => $user->id,
+                'subject_type' => 'loan',
+                'subject_id' => $loan->id,
+                'description' => "Member submitted loan application: {$loan->loan_number}",
+                'properties' => [
+                    'member_number' => $memberNumber,
+                    'loan_amount' => $validated['principal_amount'],
+                    'purpose' => $validated['purpose'],
+                ],
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
 
-        $this->success('Loan application submitted successfully. It will be reviewed by admin.');
-
-        return redirect()->route('loans.index');
+            return response()->json([
+                'success' => true,
+                'message' => 'Loan application submitted successfully.',
+                'loan_number' => $loan->loan_number,
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     private function createRepaymentSchedule(Loan $loan)
