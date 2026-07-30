@@ -100,43 +100,50 @@ class UserController extends Controller
 
     public function storeBasicInfo(StoreBasicInfoRequest $request)
     {
-        $validated = $request->validated();
-        
-        // Generate member number
-        $memberNumber = 'MB' . date('ymd') . str_pad((string) rand(1, 9999), 4, '0', STR_PAD_LEFT);
-        
-        // Create user
-        $user = User::create([
-            'name' => trim($validated['first_name'] . ' ' . ($validated['middle_name'] ?? '') . ' ' . $validated['last_name']),
-            'email' => $validated['email_address'] ?? null,
-            'member_number' => $memberNumber,
-            'member_type_id' => $validated['member_type_id'],
-            'status' => $validated['status'],
-        ]);
+        try {
+            $validated = $request->validated();
+            
+            // Generate member number
+            $memberNumber = 'MB' . date('ymd') . str_pad((string) rand(1, 9999), 4, '0', STR_PAD_LEFT);
+            
+            // Create user
+            $user = User::create([
+                'name' => trim($validated['first_name'] . ' ' . ($validated['middle_name'] ?? '') . ' ' . $validated['last_name']),
+                'email' => $validated['email_address'] ?? null,
+                'member_number' => $memberNumber,
+                'member_type_id' => $validated['member_type_id'],
+                'status' => $validated['status'],
+            ]);
 
-        // Create member profile
-        MemberProfile::create([
-            'user_id' => $user->id,
-            'first_name' => $validated['first_name'],
-            'middle_name' => $validated['middle_name'],
-            'last_name' => $validated['last_name'],
-            'gender' => $validated['gender'],
-            'date_of_birth' => $validated['date_of_birth'],
-            'national_id' => $validated['national_id'],
-            'passport_driving_license' => $validated['passport_driving_license'],
-            'registration_date' => $validated['registration_date'],
-            'status' => $validated['status'],
-        ]);
+            // Create member profile
+            MemberProfile::create([
+                'user_id' => $user->id,
+                'first_name' => $validated['first_name'],
+                'middle_name' => $validated['middle_name'],
+                'last_name' => $validated['last_name'],
+                'gender' => $validated['gender'],
+                'date_of_birth' => $validated['date_of_birth'],
+                'national_id' => $validated['national_id'],
+                'passport_driving_license' => $validated['passport_driving_license'],
+                'registration_date' => $validated['registration_date'],
+                'status' => $validated['status'],
+            ]);
 
-        ActivityLog::create([
-            'user_id' => Auth::id(),
-            'description' => 'Admin saved basic info for member: ' . $user->name,
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'description' => 'Admin saved basic info for member: ' . $user->name,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
 
-        $this->success('Basic information saved successfully.');
-        return response()->json(['success' => true, 'user_id' => $user->id]);
+            $this->success('Basic information saved successfully.');
+            return response()->json(['success' => true, 'user_id' => $user->id]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function storeContactInfo(StoreContactInfoRequest $request, $userId)

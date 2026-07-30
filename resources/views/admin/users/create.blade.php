@@ -491,12 +491,26 @@ function memberCreateForm() {
           });
           
           this.currentTab = 2;
+        } else {
+          let errorMessage = 'Failed to save basic information.';
+          if (data.errors) {
+            const errorMessages = Object.values(data.errors).flat();
+            errorMessage = errorMessages.join('\n');
+          } else if (data.message) {
+            errorMessage = data.message;
+          }
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: errorMessage
+          });
         }
       } catch (error) {
+        console.error('Error:', error);
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: 'Failed to save basic information.'
+          text: error.message || 'Failed to save basic information.'
         });
       }
     },
