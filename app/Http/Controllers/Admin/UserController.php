@@ -458,9 +458,14 @@ class UserController extends Controller
             $id = (int) $this->encryptedIdService->decrypt($encryptedId);
             $validated = $request->validated();
             
+            // Filter out empty values
+            $validated = array_filter($validated, function($value) {
+                return $value !== '' && $value !== null;
+            });
+            
             $user = User::findOrFail($id);
             
-            // Update user basic info - only if fields are present and not empty
+            // Update user basic info - only if fields are present
             if (isset($validated['first_name']) || isset($validated['last_name'])) {
                 $firstName = $validated['first_name'] ?? $user->memberProfile->first_name ?? '';
                 $middleName = $validated['middle_name'] ?? $user->memberProfile->middle_name ?? '';
@@ -468,11 +473,11 @@ class UserController extends Controller
                 $user->name = trim($firstName . ' ' . $middleName . ' ' . $lastName);
             }
             
-            if (isset($validated['email_address']) && $validated['email_address'] !== '') {
+            if (isset($validated['email_address'])) {
                 $user->email = $validated['email_address'];
             }
             
-            if (isset($validated['member_type_id']) && $validated['member_type_id'] !== '') {
+            if (isset($validated['member_type_id'])) {
                 $user->member_type_id = $validated['member_type_id'];
             }
             
@@ -482,31 +487,31 @@ class UserController extends Controller
             if ($user->memberProfile) {
                 $profileUpdateData = [];
                 
-                if (isset($validated['first_name']) && $validated['first_name'] !== '') {
+                if (isset($validated['first_name'])) {
                     $profileUpdateData['first_name'] = $validated['first_name'];
                 }
-                if (isset($validated['middle_name']) && $validated['middle_name'] !== '') {
+                if (isset($validated['middle_name'])) {
                     $profileUpdateData['middle_name'] = $validated['middle_name'];
                 }
-                if (isset($validated['last_name']) && $validated['last_name'] !== '') {
+                if (isset($validated['last_name'])) {
                     $profileUpdateData['last_name'] = $validated['last_name'];
                 }
-                if (isset($validated['gender']) && $validated['gender'] !== '') {
+                if (isset($validated['gender'])) {
                     $profileUpdateData['gender'] = $validated['gender'];
                 }
-                if (isset($validated['date_of_birth']) && $validated['date_of_birth'] !== '') {
+                if (isset($validated['date_of_birth'])) {
                     $profileUpdateData['date_of_birth'] = $validated['date_of_birth'];
                 }
-                if (isset($validated['national_id']) && $validated['national_id'] !== '') {
+                if (isset($validated['national_id'])) {
                     $profileUpdateData['national_id'] = $validated['national_id'];
                 }
-                if (isset($validated['passport_driving_license']) && $validated['passport_driving_license'] !== '') {
+                if (isset($validated['passport_driving_license'])) {
                     $profileUpdateData['passport_driving_license'] = $validated['passport_driving_license'];
                 }
-                if (isset($validated['registration_date']) && $validated['registration_date'] !== '') {
+                if (isset($validated['registration_date'])) {
                     $profileUpdateData['registration_date'] = $validated['registration_date'];
                 }
-                if (isset($validated['status']) && $validated['status'] !== '') {
+                if (isset($validated['status'])) {
                     $profileUpdateData['status'] = $validated['status'];
                 }
 
