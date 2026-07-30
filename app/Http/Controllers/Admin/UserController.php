@@ -112,7 +112,7 @@ class UserController extends Controller
             // Create user
             $user = User::create([
                 'name' => trim($validated['first_name'] . ' ' . ($validated['middle_name'] ?? '') . ' ' . $validated['last_name']),
-                'email' => $validated['email_address'] ?? null,
+                'email' => $validated['email_address'],
                 'password' => Hash::make($autoPassword),
                 'member_number' => $memberNumber,
                 'member_type_id' => $validated['member_type_id'],
@@ -142,6 +142,17 @@ class UserController extends Controller
 
             $this->success('Basic information saved successfully.');
             return response()->json(['success' => true, 'user_id' => $user->id]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Database error: ' . $e->getMessage()
+            ], 500);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
