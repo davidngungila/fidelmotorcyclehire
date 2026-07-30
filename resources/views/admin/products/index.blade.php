@@ -124,6 +124,9 @@
                             </td>
                             <td class="px-4 py-3 text-right">
                                 <div class="flex items-center justify-end gap-2">
+                                    <a href="{{ route('admin.products.show', $encryptedId) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-100 hover:bg-green-200 dark:bg-green-900/40 dark:hover:bg-green-900/60 text-green-700 dark:text-green-300 text-xs font-medium transition-colors">
+                                        <i class="fa-solid fa-eye text-[10px]"></i> View
+                                    </a>
                                     <a href="{{ route('admin.products.edit', $encryptedId) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/40 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-300 text-xs font-medium transition-colors">
                                         <i class="fa-solid fa-pen text-[10px]"></i> Edit
                                     </a>

@@ -43,6 +43,22 @@ class ProductController extends Controller
         return view('admin.products.create');
     }
 
+    public function show(Request $request, string $encryptedId): View
+    {
+        Gate::authorize('admin-only');
+
+        try {
+            $id = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            return redirect()->route('admin.products.index')
+                ->with('error', 'Invalid product ID.');
+        }
+
+        $product = SavingsProduct::findOrFail($id);
+
+        return view('admin.products.show', compact('product', 'encryptedId'));
+    }
+
     public function store(Request $request)
     {
         Gate::authorize('admin-only');
