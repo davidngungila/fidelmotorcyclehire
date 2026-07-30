@@ -553,6 +553,9 @@ function memberCreateForm() {
       const formData = new FormData(form);
       formData.append('_method', 'PUT');
       
+      console.log('Saving contact info for user ID:', this.userId);
+      console.log('Form data:', Object.fromEntries(formData));
+      
       try {
         const response = await fetch(`{{ route('admin.users.store-contact-info', ':userId') }}`.replace(':userId', this.userId), {
           method: 'POST',
@@ -563,11 +566,16 @@ function memberCreateForm() {
           body: formData
         });
         
+        console.log('Response status:', response.status);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+        
         const contentType = response.headers.get('content-type');
+        console.log('Content type:', contentType);
         
         if (!response.ok) {
           if (contentType && contentType.includes('application/json')) {
             const data = await response.json();
+            console.log('Error data:', data);
             let errorMessage = 'Failed to save contact information.';
             if (data.errors) {
               const errorMessages = Object.values(data.errors).flat();
@@ -593,6 +601,7 @@ function memberCreateForm() {
         }
         
         const data = await response.json();
+        console.log('Success data:', data);
         
         if (data.success) {
           this.progress = 25;
