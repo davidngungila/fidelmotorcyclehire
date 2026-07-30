@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Contracts\Validation\Validator;
 
 class StoreDocumentsInfoRequest extends FormRequest
 {
@@ -20,5 +22,14 @@ class StoreDocumentsInfoRequest extends FormRequest
             'other_attachments' => 'nullable|array',
             'other_attachments.*' => 'file|max:10240',
         ];
+    }
+
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(response()->json([
+            'success' => false,
+            'message' => 'Validation failed',
+            'errors' => $validator->errors()
+        ], 422));
     }
 }

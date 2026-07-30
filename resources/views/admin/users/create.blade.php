@@ -133,16 +133,12 @@
             @csrf
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Phone Number *</label>
-                <input type="text" name="phone_number" required class="form-input">
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Phone Number</label>
+                <input type="text" name="phone_number" class="form-input">
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Alternative Phone</label>
                 <input type="text" name="alternative_phone" class="form-input">
-              </div>
-              <div>
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Email Address</label>
-                <input type="email" name="email_address" class="form-input">
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Region</label>
@@ -241,30 +237,19 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Username</label>
-                <input type="text" name="username" class="form-input">
+                <input type="text" name="username" class="form-input" placeholder="Leave blank to use member number">
               </div>
               <div>
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Password *</label>
-                <input type="password" name="password" required class="form-input">
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">New Password</label>
+                <input type="password" name="password" class="form-input" placeholder="Leave blank to keep current password">
               </div>
               <div>
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Confirm Password *</label>
-                <input type="password" name="password_confirmation" required class="form-input">
-              </div>
-              <div>
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Role *</label>
-                <select name="role" required class="form-input">
-                  <option value="member">Member</option>
-                  <option value="admin">Admin</option>
-                </select>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Confirm New Password</label>
+                <input type="password" name="password_confirmation" class="form-input" placeholder="Re-enter new password">
               </div>
               <div class="flex items-center gap-3">
                 <input type="checkbox" name="email_verified" id="email_verified" class="w-4 h-4 rounded">
                 <label for="email_verified" class="text-sm text-primary-700 dark:text-primary-300">Email Verified</label>
-              </div>
-              <div class="flex items-center gap-3">
-                <input type="checkbox" name="phone_verified" id="phone_verified" class="w-4 h-4 rounded">
-                <label for="phone_verified" class="text-sm text-primary-700 dark:text-primary-300">Phone Verified</label>
               </div>
             </div>
             <div class="flex justify-end">
