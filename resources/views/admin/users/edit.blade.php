@@ -480,10 +480,6 @@
             <p class="text-xs text-primary-600 dark:text-primary-400 uppercase tracking-wider">Name</p>
             <p class="text-sm font-semibold text-primary-900 dark:text-white">{{ $user->name }}</p>
           </div>
-          <div>
-            <p class="text-xs text-primary-600 dark:text-primary-400 uppercase tracking-wider">Email</p>
-            <p class="text-sm text-primary-700 dark:text-primary-300">{{ $user->email }}</p>
-          </div>
           @if($user->memberProfile)
           <div>
             <p class="text-xs text-primary-600 dark:text-primary-400 uppercase tracking-wider">Status</p>
