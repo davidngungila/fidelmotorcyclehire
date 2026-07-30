@@ -5,8 +5,43 @@
 @section('breadcrumb', 'Savings & Deposits › Products › Edit')
 
 @section('content')
-<div class="glass p-8">
-  <form method="POST" action="{{ route('admin.products.update', $encryptedId) }}" class="space-y-6">
+<div class="space-y-6">
+  <!-- Product Details Card -->
+  <div class="glass p-6">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h2 class="text-xl font-bold text-primary-900 dark:text-white">{{ $product->name }}</h2>
+        <p class="text-sm text-primary-600 dark:text-primary-400 mt-1">Product Code: <span class="font-mono font-semibold">{{ $product->code }}</span></p>
+      </div>
+      <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-bold {{ $product->status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' }}">
+        {{ ucfirst($product->status) }}
+      </span>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-primary-50 dark:bg-primary-900/30 rounded-lg p-4">
+        <p class="text-xs text-primary-600 dark:text-primary-400 font-medium mb-1">Interest Rate</p>
+        <p class="text-lg font-bold text-primary-900 dark:text-white">{{ number_format($product->interest_rate, 2) }}%</p>
+      </div>
+      <div class="bg-primary-50 dark:bg-primary-900/30 rounded-lg p-4">
+        <p class="text-xs text-primary-600 dark:text-primary-400 font-medium mb-1">Min Deposit</p>
+        <p class="text-lg font-bold text-primary-900 dark:text-white">TSh {{ number_format($product->min_deposit, 0) }}</p>
+      </div>
+      <div class="bg-primary-50 dark:bg-primary-900/30 rounded-lg p-4">
+        <p class="text-xs text-primary-600 dark:text-primary-400 font-medium mb-1">Interest Frequency</p>
+        <p class="text-lg font-bold text-primary-900 dark:text-white">{{ ucfirst($product->interest_frequency) }}</p>
+      </div>
+      <div class="bg-primary-50 dark:bg-primary-900/30 rounded-lg p-4">
+        <p class="text-xs text-primary-600 dark:text-primary-400 font-medium mb-1">Auto Credit</p>
+        <p class="text-lg font-bold text-primary-900 dark:text-white">{{ $product->auto_interest_credit ? 'Yes' : 'No' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Form -->
+  <div class="glass p-8">
+    <h3 class="text-lg font-bold text-primary-900 dark:text-white mb-6">Edit Product Details</h3>
+    <form method="POST" action="{{ route('admin.products.update', $encryptedId) }}" class="space-y-6">
     @csrf
     @method('PUT')
 
