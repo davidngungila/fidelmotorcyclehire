@@ -103,9 +103,9 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/products', [App\Http\Controllers\Admin\ProductController::class, 'index'])->name('products.index');
     Route::get('/products/create', [App\Http\Controllers\Admin\ProductController::class, 'create'])->name('products.create');
     Route::post('/products', [App\Http\Controllers\Admin\ProductController::class, 'store'])->name('products.store');
-    Route::get('/products/{id}/edit', [App\Http\Controllers\Admin\ProductController::class, 'edit'])->name('products.edit');
-    Route::put('/products/{id}', [App\Http\Controllers\Admin\ProductController::class, 'update'])->name('products.update');
-    Route::delete('/products/{id}', [App\Http\Controllers\Admin\ProductController::class, 'destroy'])->name('products.destroy');
+    Route::get('/products/{encryptedId}/edit', [App\Http\Controllers\Admin\ProductController::class, 'edit'])->name('products.edit');
+    Route::put('/products/{encryptedId}', [App\Http\Controllers\Admin\ProductController::class, 'update'])->name('products.update');
+    Route::delete('/products/{encryptedId}', [App\Http\Controllers\Admin\ProductController::class, 'destroy'])->name('products.destroy');
 
     Route::get('/saving-plans', [App\Http\Controllers\Admin\SavingPlanController::class, 'index'])->name('saving-plans.index');
     Route::get('/saving-plans/create', [App\Http\Controllers\Admin\SavingPlanController::class, 'create'])->name('saving-plans.create');
