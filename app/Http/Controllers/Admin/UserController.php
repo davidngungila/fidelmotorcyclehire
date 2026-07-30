@@ -460,32 +460,64 @@ class UserController extends Controller
             
             $user = User::findOrFail($id);
             
-            // Update user basic info
-            $user->name = trim($validated['first_name'] . ' ' . ($validated['middle_name'] ?? '') . ' ' . $validated['last_name']);
-            $user->email = $validated['email_address'];
-            $user->member_type_id = $validated['member_type_id'];
+            // Update user basic info - only if fields are present
+            if (isset($validated['first_name']) || isset($validated['last_name'])) {
+                $firstName = $validated['first_name'] ?? $user->memberProfile->first_name ?? '';
+                $middleName = $validated['middle_name'] ?? $user->memberProfile->middle_name ?? '';
+                $lastName = $validated['last_name'] ?? $user->memberProfile->last_name ?? '';
+                $user->name = trim($firstName . ' ' . $middleName . ' ' . $lastName);
+            }
+            
+            if (isset($validated['email_address'])) {
+                $user->email = $validated['email_address'];
+            }
+            
+            if (isset($validated['member_type_id'])) {
+                $user->member_type_id = $validated['member_type_id'];
+            }
+            
             $user->save();
 
             // Update member profile if exists
             if ($user->memberProfile) {
-                $profileUpdateData = [
-                    'first_name' => $validated['first_name'],
-                    'middle_name' => $validated['middle_name'],
-                    'last_name' => $validated['last_name'],
-                    'gender' => $validated['gender'],
-                    'date_of_birth' => $validated['date_of_birth'],
-                    'national_id' => $validated['national_id'],
-                    'passport_driving_license' => $validated['passport_driving_license'],
-                    'registration_date' => $validated['registration_date'],
-                    'status' => $validated['status'],
-                ];
+                $profileUpdateData = [];
+                
+                if (isset($validated['first_name'])) {
+                    $profileUpdateData['first_name'] = $validated['first_name'];
+                }
+                if (isset($validated['middle_name'])) {
+                    $profileUpdateData['middle_name'] = $validated['middle_name'];
+                }
+                if (isset($validated['last_name'])) {
+                    $profileUpdateData['last_name'] = $validated['last_name'];
+                }
+                if (isset($validated['gender'])) {
+                    $profileUpdateData['gender'] = $validated['gender'];
+                }
+                if (isset($validated['date_of_birth'])) {
+                    $profileUpdateData['date_of_birth'] = $validated['date_of_birth'];
+                }
+                if (isset($validated['national_id'])) {
+                    $profileUpdateData['national_id'] = $validated['national_id'];
+                }
+                if (isset($validated['passport_driving_license'])) {
+                    $profileUpdateData['passport_driving_license'] = $validated['passport_driving_license'];
+                }
+                if (isset($validated['registration_date'])) {
+                    $profileUpdateData['registration_date'] = $validated['registration_date'];
+                }
+                if (isset($validated['status'])) {
+                    $profileUpdateData['status'] = $validated['status'];
+                }
 
                 // Handle profile photo upload
                 if ($request->hasFile('profile_photo')) {
                     $profileUpdateData['passport_photo'] = $request->file('profile_photo')->store('documents', 'public');
                 }
 
-                $user->memberProfile->update($profileUpdateData);
+                if (!empty($profileUpdateData)) {
+                    $user->memberProfile->update($profileUpdateData);
+                }
             }
 
             ActivityLog::create([
