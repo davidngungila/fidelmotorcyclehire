@@ -8,6 +8,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\ActivityLog;
+use App\Models\BankingDetail;
+use App\Models\MemberDocument;
+use App\Models\MemberType;
+use App\Models\NextOfKin;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\EncryptedIdService;
@@ -80,9 +84,11 @@ class UserController extends Controller
         ]);
 
         $roles = Role::all();
+        $memberTypes = MemberType::active()->orderBy('priority', 'desc')->get();
 
         return view('admin.users.create', [
             'roles' => $roles,
+            'memberTypes' => $memberTypes,
         ]);
     }
 
@@ -90,15 +96,99 @@ class UserController extends Controller
     {
         $validated = $request->validated();
 
+        // Generate member number if not provided
+        if (empty($validated['member_number'])) {
+            $validated['member_number'] = $this->generateMemberNumber();
+        }
+
+        // Set default registration date if not provided
+        if (empty($validated['registration_date'])) {
+            $validated['registration_date'] = now()->format('Y-m-d');
+        }
+
+        // Set default status if not provided
+        if (empty($validated['status'])) {
+            $validated['status'] = 'active';
+        }
+
+        // Combine name from first, middle, last names if provided
+        if (!empty($validated['first_name']) || !empty($validated['last_name'])) {
+            $validated['name'] = trim(($validated['first_name'] ?? '') . ' ' . ($validated['middle_name'] ?? '') . ' ' . ($validated['last_name'] ?? ''));
+        }
+
         $user = User::create([
             'name' => $validated['name'],
+            'first_name' => $validated['first_name'] ?? null,
+            'middle_name' => $validated['middle_name'] ?? null,
+            'last_name' => $validated['last_name'] ?? null,
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
-            'member_number' => $validated['member_number'] ?? null,
+            'member_number' => $validated['member_number'],
             'member_type_id' => $validated['member_type_id'] ?? null,
-            'status' => $request->input('status', 'active'),
+            'status' => $validated['status'],
+            'phone' => $validated['phone'] ?? null,
+            'alternative_phone' => $validated['alternative_phone'] ?? null,
+            'gender' => $validated['gender'] ?? null,
+            'date_of_birth' => $validated['date_of_birth'] ?? null,
+            'national_id' => $validated['national_id'] ?? null,
+            'passport_license' => $validated['passport_license'] ?? null,
+            'registration_date' => $validated['registration_date'],
+            'region' => $validated['region'] ?? null,
+            'district' => $validated['district'] ?? null,
+            'ward' => $validated['ward'] ?? null,
+            'street_village' => $validated['street_village'] ?? null,
+            'physical_address' => $validated['physical_address'] ?? null,
+            'branch' => $validated['branch'] ?? null,
+            'membership_category' => $validated['membership_category'] ?? null,
+            'occupation' => $validated['occupation'] ?? null,
+            'employer_business' => $validated['employer_business'] ?? null,
+            'monthly_income' => $validated['monthly_income'] ?? null,
+            'introduced_by' => $validated['introduced_by'] ?? null,
+            'joining_fee' => $validated['joining_fee'] ?? null,
+            'shares_purchased' => $validated['shares_purchased'] ?? null,
+            'initial_savings' => $validated['initial_savings'] ?? null,
+            'username' => $validated['username'] ?? $validated['member_number'],
+            'email_verified' => $validated['email_verified'] ?? false,
+            'phone_verified' => $validated['phone_verified'] ?? false,
+            'notes' => $validated['notes'] ?? null,
+            'tags' => $validated['tags'] ?? null,
+            'custom_fields' => $validated['custom_fields'] ?? null,
         ]);
+
+        // Save Next of Kin
+        if (!empty($validated['next_of_kin_full_name'])) {
+            NextOfKin::create([
+                'user_id' => $user->id,
+                'full_name' => $validated['next_of_kin_full_name'],
+                'relationship' => $validated['next_of_kin_relationship'] ?? null,
+                'phone_number' => $validated['next_of_kin_phone'] ?? null,
+                'address' => $validated['next_of_kin_address'] ?? null,
+            ]);
+        }
+
+        // Save Banking Details
+        if (!empty($validated['bank_name']) || !empty($validated['mobile_money_network'])) {
+            BankingDetail::create([
+                'user_id' => $user->id,
+                'bank_name' => $validated['bank_name'] ?? null,
+                'bank_account_number' => $validated['bank_account_number'] ?? null,
+                'account_name' => $validated['account_name'] ?? null,
+                'mobile_money_network' => $validated['mobile_money_network'] ?? null,
+                'mobile_wallet_number' => $validated['mobile_wallet_number'] ?? null,
+            ]);
+        }
+
+        // Save Documents
+        if (!empty($validated['passport_photo']) || !empty($validated['national_id_copy'])) {
+            MemberDocument::create([
+                'user_id' => $user->id,
+                'passport_photo' => $validated['passport_photo'] ?? null,
+                'national_id_copy' => $validated['national_id_copy'] ?? null,
+                'signature' => $validated['signature'] ?? null,
+                'other_attachments' => $validated['other_attachments'] ?? null,
+            ]);
+        }
 
         if (! empty($validated['role'])) {
             try {
@@ -119,13 +209,32 @@ class UserController extends Controller
             'properties' => [
                 'user_email' => $user->email,
                 'user_role' => $validated['role'],
-                'member_number' => $validated['member_number'] ?? null,
+                'member_number' => $validated['member_number'],
             ],
         ]);
 
         $this->success("User {$user->name} created successfully.");
 
         return redirect()->route('admin.users.index');
+    }
+
+    protected function generateMemberNumber(): string
+    {
+        $date = now()->format('ymd');
+        $prefix = 'MB' . $date;
+        
+        $lastMember = User::where('member_number', 'like', $prefix . '%')
+            ->orderBy('member_number', 'desc')
+            ->first();
+        
+        if ($lastMember) {
+            $lastNumber = (int) substr($lastMember->member_number, -4);
+            $newNumber = $lastNumber + 1;
+        } else {
+            $newNumber = 1;
+        }
+        
+        return $prefix . str_pad((string) $newNumber, 4, '0', STR_PAD_LEFT);
     }
 
     public function edit(Request $request, string $encryptedId)
