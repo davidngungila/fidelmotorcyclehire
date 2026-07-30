@@ -103,13 +103,27 @@ class LoanController extends Controller
         $user = Auth::user();
         $memberNumber = $user->member_number;
 
-        $loans = $this->repository->getMemberLoans($memberNumber);
-        $loan = collect($loans)->firstWhere('loan_number', $loanNumber);
+        // Use database loan instead of Google Sheets
+        $dbLoan = Loan::where('loan_number', $loanNumber)->where('member_number', $memberNumber)->first();
 
-        if (! $loan) {
+        if (! $dbLoan) {
             $this->error("Loan {$loanNumber} not found or access denied.");
             abort(404, 'Loan not found');
         }
+
+        // Convert database loan to the format expected by the view
+        $loan = [
+            'loan_number' => $dbLoan->loan_number,
+            'loan_product' => ucfirst($dbLoan->purpose),
+            'loan_amount' => $dbLoan->principal_amount,
+            'paid_amount' => $dbLoan->amount_paid ?? 0,
+            'outstanding_balance' => $dbLoan->balance ?? 0,
+            'installment' => $dbLoan->monthly_payment ?? 0,
+            'interest_rate' => $dbLoan->interest_rate ?? 0,
+            'status' => $dbLoan->status,
+            'disbursement_date' => $dbLoan->disbursement_date ? $dbLoan->disbursement_date->format('Y-m-d') : null,
+            'maturity_date' => $dbLoan->maturity_date ? $dbLoan->maturity_date->format('Y-m-d') : null,
+        ];
 
         $totalAmount = (float) ($loan['loan_amount'] ?? 0);
         $paid = (float) ($loan['paid_amount'] ?? 0);
@@ -122,7 +136,7 @@ class LoanController extends Controller
         ActivityLog::create([
             'user_id' => $user->id,
             'subject_type' => 'loan',
-            'subject_id' => null,
+            'subject_id' => $dbLoan->id,
             'description' => "Member viewed loan: {$loanNumber}",
             'properties' => ['member_number' => $memberNumber, 'loan_product' => $loan['loan_product'] ?? null],
             'ip_address' => $request->ip(),
