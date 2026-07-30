@@ -130,6 +130,99 @@ class LoanController extends Controller
         ]);
     }
 
+    public function storeBasicInfo(Request $request)
+    {
+        Gate::authorize('admin-only');
+
+        try {
+            $validated = $request->validate([
+                'loan_product_id' => 'nullable|exists:loan_products,id',
+                'user_id' => 'required|exists:users,id',
+                'member_number' => 'required|string|max:50',
+                'application_date' => 'required|date',
+                'purpose' => 'required|in:business,education,agriculture,personal,emergency,other',
+                'purpose_description' => 'nullable|string',
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Basic information saved successfully.',
+                'loan_data' => $validated,
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function storeLoanDetails(Request $request)
+    {
+        Gate::authorize('admin-only');
+
+        try {
+            $validated = $request->validate([
+                'principal_amount' => 'required|numeric|min:0',
+                'interest_rate' => 'required|numeric|min:0|max:100',
+                'term_months' => 'required|integer|min:1',
+                'repayment_frequency' => 'nullable|in:monthly,biweekly,weekly',
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Loan details saved successfully.',
+                'loan_data' => $validated,
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function storeCollateral(Request $request)
+    {
+        Gate::authorize('admin-only');
+
+        try {
+            $validated = $request->validate([
+                'collateral' => 'nullable|string',
+                'guarantor' => 'nullable|string',
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Collateral information saved successfully.',
+                'loan_data' => $validated,
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function store(Request $request)
     {
         Gate::authorize('admin-only');
