@@ -94,7 +94,7 @@
                 </div>
                 <div class="md:col-span-3">
                   <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Member Type *</label>
-                  <select name="member_type_id" required class="form-input">
+                  <select name="member_type_id" class="form-input">
                     <option value="">Select member type...</option>
                     @foreach($memberTypes as $type)
                       <option value="{{ $type->id }}" {{ $user->member_type_id == $type->id ? 'selected' : '' }}>{{ $type->name }} - {{ $type->code }}</option>
@@ -103,7 +103,7 @@
                 </div>
                 <div>
                   <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">First Name *</label>
-                  <input type="text" name="first_name" value="{{ $user->memberProfile->first_name }}" required class="form-input">
+                  <input type="text" name="first_name" value="{{ $user->memberProfile->first_name }}" class="form-input">
                 </div>
                 <div>
                   <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Middle Name</label>
@@ -111,15 +111,15 @@
                 </div>
                 <div>
                   <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Last Name *</label>
-                  <input type="text" name="last_name" value="{{ $user->memberProfile->last_name }}" required class="form-input">
+                  <input type="text" name="last_name" value="{{ $user->memberProfile->last_name }}" class="form-input">
                 </div>
                 <div class="md:col-span-3">
                   <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Email Address *</label>
-                  <input type="email" name="email_address" value="{{ $user->email }}" required class="form-input">
+                  <input type="email" name="email_address" value="{{ $user->email }}" class="form-input">
                 </div>
                 <div>
                   <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Gender *</label>
-                  <select name="gender" required class="form-input">
+                  <select name="gender" class="form-input">
                     <option value="">Select gender...</option>
                     <option value="male" {{ $user->memberProfile->gender === 'male' ? 'selected' : '' }}>Male</option>
                     <option value="female" {{ $user->memberProfile->gender === 'female' ? 'selected' : '' }}>Female</option>
