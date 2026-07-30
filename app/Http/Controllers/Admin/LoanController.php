@@ -11,6 +11,7 @@ use App\Services\AdminDashboardService;
 use App\Services\EncryptedIdService;
 use App\Services\MemberService;
 use App\Traits\FlashMessages;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -585,6 +586,230 @@ class LoanController extends Controller
                 $remainingAmount = 0;
             }
         }
+    }
+
+    public function exportPdf(Request $request, string $encryptedLoanNumber)
+    {
+        try {
+            $loanNumber = $this->encryptedIdService->decrypt($encryptedLoanNumber);
+        } catch (\Exception $e) {
+            $this->error('Invalid loan number.');
+            return redirect()->route('admin.loans.index');
+        }
+        
+        Gate::authorize('admin-only');
+
+        $loan = Loan::with(['user', 'repaymentSchedules'])->where('loan_number', $loanNumber)->first();
+
+        if (!$loan) {
+            $this->error("Loan {$loanNumber} not found.");
+            return redirect()->route('admin.loans.index');
+        }
+
+        $loanAmount = (float) $loan->principal_amount;
+        $paidAmount = (float) $loan->amount_paid;
+        $outstanding = (float) $loan->balance;
+        $progress = $loanAmount > 0 ? min(($paidAmount / $loanAmount) * 100, 100) : 0;
+
+        $installment = (float) $loan->monthly_payment;
+        $interestRate = (float) $loan->interest_rate;
+        $disbursementDate = $loan->disbursement_date ? $loan->disbursement_date->format('Y-m-d') : '-';
+        $maturityDate = $loan->maturity_date ? $loan->maturity_date->format('Y-m-d') : '-';
+
+        $repaymentSchedule = $loan->repaymentSchedules->map(function ($schedule) {
+            return [
+                'installment_no' => $schedule->installment_number,
+                'due_date' => $schedule->due_date->format('Y-m-d'),
+                'amount' => (float) $schedule->total_amount,
+                'principal' => (float) $schedule->principal_amount,
+                'interest' => (float) $schedule->interest_amount,
+                'balance_after' => (float) $schedule->balance_after,
+                'status' => ucfirst($schedule->status),
+            ];
+        })->toArray();
+
+        $repaymentHistory = [];
+        if ($paidAmount > 0 && !empty($repaymentSchedule)) {
+            $paidCount = (int) floor($paidAmount / $installment);
+            $paidCount = min($paidCount, count($repaymentSchedule));
+            for ($i = 0; $i < $paidCount; $i++) {
+                $repaymentHistory[] = array_merge($repaymentSchedule[$i], [
+                    'payment_date' => $repaymentSchedule[$i]['due_date'],
+                    'transaction_ref' => 'PAY-' . str_pad((string) ($i + 1), 6, '0', STR_PAD_LEFT),
+                    'method' => 'Bank Transfer',
+                ]);
+            }
+            $remaining = $paidAmount - ($paidCount * $installment);
+            if ($remaining > 0 && $paidCount < count($repaymentSchedule)) {
+                $repaymentHistory[] = array_merge($repaymentSchedule[$paidCount], [
+                    'amount' => $remaining,
+                    'payment_date' => $repaymentSchedule[$paidCount]['due_date'],
+                    'transaction_ref' => 'PAY-' . str_pad((string) ($paidCount + 1), 6, '0', STR_PAD_LEFT),
+                    'method' => 'Partial Payment',
+                ]);
+            }
+        }
+
+        $loanStatement = array_merge(
+            [
+                [
+                    'date' => $disbursementDate,
+                    'type' => 'Disbursement',
+                    'reference' => $loanNumber,
+                    'debit' => 0,
+                    'credit' => $loanAmount,
+                    'balance' => $loanAmount,
+                    'description' => "Loan disbursed",
+                ],
+            ],
+            array_map(static fn ($h) => [
+                'date' => $h['payment_date'] ?? $h['due_date'],
+                'type' => 'Repayment',
+                'reference' => $h['transaction_ref'] ?? 'PAY-000000',
+                'debit' => $h['amount'],
+                'credit' => 0,
+                'balance' => $h['balance_after'] ?? 0,
+                'description' => $h['method'] ?? 'Loan Repayment',
+            ], $repaymentHistory)
+        );
+
+        $member = [
+            'name' => $loan->user->name ?? 'Unknown',
+            'member_number' => $loan->member_number,
+            'phone' => $loan->user->phone ?? '-',
+            'branch' => '-',
+        ];
+
+        $pdf = Pdf::loadView('admin.loans.pdf', compact(
+            'loan',
+            'loanNumber',
+            'member',
+            'loanAmount',
+            'paidAmount',
+            'outstanding',
+            'progress',
+            'installment',
+            'interestRate',
+            'disbursementDate',
+            'maturityDate',
+            'repaymentSchedule',
+            'repaymentHistory',
+            'loanStatement'
+        ));
+
+        return $pdf->download("loan_statement_{$loanNumber}.pdf");
+    }
+
+    public function exportCsv(Request $request, string $encryptedLoanNumber)
+    {
+        try {
+            $loanNumber = $this->encryptedIdService->decrypt($encryptedLoanNumber);
+        } catch (\Exception $e) {
+            $this->error('Invalid loan number.');
+            return redirect()->route('admin.loans.index');
+        }
+        
+        Gate::authorize('admin-only');
+
+        $loan = Loan::with(['user', 'repaymentSchedules'])->where('loan_number', $loanNumber)->first();
+
+        if (!$loan) {
+            $this->error("Loan {$loanNumber} not found.");
+            return redirect()->route('admin.loans.index');
+        }
+
+        $loanAmount = (float) $loan->principal_amount;
+        $paidAmount = (float) $loan->amount_paid;
+        $outstanding = (float) $loan->balance;
+        $progress = $loanAmount > 0 ? min(($paidAmount / $loanAmount) * 100, 100) : 0;
+
+        $installment = (float) $loan->monthly_payment;
+        $interestRate = (float) $loan->interest_rate;
+        $disbursementDate = $loan->disbursement_date ? $loan->disbursement_date->format('Y-m-d') : '-';
+        $maturityDate = $loan->maturity_date ? $loan->maturity_date->format('Y-m-d') : '-';
+
+        $repaymentSchedule = $loan->repaymentSchedules->map(function ($schedule) {
+            return [
+                'installment_no' => $schedule->installment_number,
+                'due_date' => $schedule->due_date->format('Y-m-d'),
+                'amount' => (float) $schedule->total_amount,
+                'principal' => (float) $schedule->principal_amount,
+                'interest' => (float) $schedule->interest_amount,
+                'balance_after' => (float) $schedule->balance_after,
+                'status' => ucfirst($schedule->status),
+            ];
+        })->toArray();
+
+        $repaymentHistory = [];
+        if ($paidAmount > 0 && !empty($repaymentSchedule)) {
+            $paidCount = (int) floor($paidAmount / $installment);
+            $paidCount = min($paidCount, count($repaymentSchedule));
+            for ($i = 0; $i < $paidCount; $i++) {
+                $repaymentHistory[] = array_merge($repaymentSchedule[$i], [
+                    'payment_date' => $repaymentSchedule[$i]['due_date'],
+                    'transaction_ref' => 'PAY-' . str_pad((string) ($i + 1), 6, '0', STR_PAD_LEFT),
+                    'method' => 'Bank Transfer',
+                ]);
+            }
+            $remaining = $paidAmount - ($paidCount * $installment);
+            if ($remaining > 0 && $paidCount < count($repaymentSchedule)) {
+                $repaymentHistory[] = array_merge($repaymentSchedule[$paidCount], [
+                    'amount' => $remaining,
+                    'payment_date' => $repaymentSchedule[$paidCount]['due_date'],
+                    'transaction_ref' => 'PAY-' . str_pad((string) ($paidCount + 1), 6, '0', STR_PAD_LEFT),
+                    'method' => 'Partial Payment',
+                ]);
+            }
+        }
+
+        $loanStatement = array_merge(
+            [
+                [
+                    'date' => $disbursementDate,
+                    'type' => 'Disbursement',
+                    'reference' => $loanNumber,
+                    'debit' => 0,
+                    'credit' => $loanAmount,
+                    'balance' => $loanAmount,
+                    'description' => "Loan disbursed",
+                ],
+            ],
+            array_map(static fn ($h) => [
+                'date' => $h['payment_date'] ?? $h['due_date'],
+                'type' => 'Repayment',
+                'reference' => $h['transaction_ref'] ?? 'PAY-000000',
+                'debit' => $h['amount'],
+                'credit' => 0,
+                'balance' => $h['balance_after'] ?? 0,
+                'description' => $h['method'] ?? 'Loan Repayment',
+            ], $repaymentHistory)
+        );
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=loan_statement_{$loanNumber}.csv",
+        ];
+
+        $callback = function () use ($loanStatement) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, ['Date', 'Type', 'Reference', 'Description', 'Debit', 'Credit', 'Balance']);
+            
+            foreach ($loanStatement as $row) {
+                fputcsv($file, [
+                    $row['date'],
+                    $row['type'],
+                    $row['reference'],
+                    $row['description'],
+                    $row['debit'],
+                    $row['credit'],
+                    $row['balance'],
+                ]);
+            }
+            
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     public function importLoanPayments(Request $request)

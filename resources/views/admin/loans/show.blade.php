@@ -540,12 +540,15 @@
           <p class="text-[11px] text-primary-500 dark:text-primary-400 mt-1">Member: <span class="font-semibold">{{ $memberName }} ({{ $memberNo }})</span></p>
         </div>
         <div class="flex items-center gap-2">
-          <button class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-xs font-bold transition-colors">
+          <button onclick="window.print()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-xs font-bold transition-colors">
             <i class="fa-solid fa-print text-[11px]"></i> Print
           </button>
-          <button class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/40 dark:hover:bg-purple-900/60 text-purple-700 dark:text-purple-300 text-xs font-bold transition-colors">
+          <a href="{{ route('admin.loans.export-pdf', encryptId($loanNumber)) }}" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/40 dark:hover:bg-purple-900/60 text-purple-700 dark:text-purple-300 text-xs font-bold transition-colors">
             <i class="fa-solid fa-file-pdf text-[11px]"></i> Export PDF
-          </button>
+          </a>
+          <a href="{{ route('admin.loans.export-csv', encryptId($loanNumber)) }}" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-green-100 hover:bg-green-200 dark:bg-green-900/40 dark:hover:bg-green-900/60 text-green-700 dark:text-green-300 text-xs font-bold transition-colors">
+            <i class="fa-solid fa-file-csv text-[11px]"></i> Export CSV
+          </a>
         </div>
       </div>
 

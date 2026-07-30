@@ -90,6 +90,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/loans/create', [AdminLoanController::class, 'create'])->name('loans.create');
     Route::post('/loans', [AdminLoanController::class, 'store'])->name('loans.store');
     Route::get('/loans/{encryptedLoanNumber}', [AdminLoanController::class, 'show'])->name('loans.show');
+    Route::get('/loans/{encryptedLoanNumber}/export-pdf', [AdminLoanController::class, 'exportPdf'])->name('loans.export-pdf');
+    Route::get('/loans/{encryptedLoanNumber}/export-csv', [AdminLoanController::class, 'exportCsv'])->name('loans.export-csv');
     Route::post('/loans/{encryptedLoanNumber}/recordPayment', [AdminLoanController::class, 'recordPayment'])->name('loans.recordPayment');
     Route::get('/loans/{id}/edit', [AdminLoanController::class, 'edit'])->name('loans.edit');
     Route::put('/loans/{id}', [AdminLoanController::class, 'update'])->name('loans.update');
