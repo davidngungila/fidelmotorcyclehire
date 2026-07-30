@@ -55,6 +55,7 @@ class MemberController extends Controller
         
         $dbMembers = $dbMembersQuery->get()->map(function($member) {
             return [
+                'id' => $member->id,
                 'member_number' => $member->member_number,
                 'name' => $member->full_name,
                 'gender' => $member->gender,
