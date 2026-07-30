@@ -162,6 +162,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
 
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
     Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
+    Route::get('/users/{encryptedId}', [AdminUserController::class, 'show'])->name('users.show');
     Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
     Route::post('/users/basic-info', [AdminUserController::class, 'storeBasicInfo'])->name('users.store-basic-info');
     Route::post('/users/{userId}/contact-info', [AdminUserController::class, 'storeContactInfo'])->name('users.store-contact-info');

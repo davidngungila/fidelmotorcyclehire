@@ -347,6 +347,34 @@ class UserController extends Controller
         return redirect()->route('admin.users.index');
     }
 
+    public function show(Request $request, string $encryptedId)
+    {
+        Gate::authorize('admin-only');
+
+        try {
+            $id = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            return redirect()->route('admin.users.index')
+                ->with('error', 'Invalid user ID.');
+        }
+
+        $user = User::with(['roles', 'memberProfile', 'memberType'])->findOrFail($id);
+
+        ActivityLog::create([
+            'user_id' => Auth::id(),
+            'subject_type' => 'user',
+            'subject_id' => $user->id,
+            'description' => "Admin viewed user details: {$user->name}",
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return view('admin.users.show', [
+            'user' => $user,
+            'encryptedId' => $encryptedId,
+        ]);
+    }
+
     public function edit(Request $request, string $encryptedId)
     {
         $id = (int) $this->encryptedIdService->decrypt($encryptedId);
