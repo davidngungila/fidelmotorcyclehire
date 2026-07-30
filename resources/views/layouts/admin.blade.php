@@ -103,6 +103,12 @@
             <i class="fa-solid fa-user-xmark w-4 text-center flex-shrink-0"></i>
             <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Inactive Members</span>
           </a>
+          <a href="{{ route('admin.member-types.index') }}"
+             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
+                    {{ request()->routeIs('admin.member-types.*') ? 'active' : '' }}">
+            <i class="fa-solid fa-user-tag w-4 text-center flex-shrink-0"></i>
+            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Member Types</span>
+          </a>
         </div>
       </div>
 
