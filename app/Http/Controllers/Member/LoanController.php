@@ -37,6 +37,7 @@ class LoanController extends Controller
         $dbLoans = Loan::where('member_number', $memberNumber)->get();
         
         \Log::info('LoanController::index - Database loans count: ' . $dbLoans->count());
+        \Log::info('LoanController::index - Database loans:', $dbLoans->toArray());
 
         // Convert database loans to the format expected by the view
         $loans = $dbLoans->map(function ($loan) {
@@ -62,6 +63,7 @@ class LoanController extends Controller
         });
 
         \Log::info('LoanController::index - Active loans count: ' . count($activeLoans));
+        \Log::info('LoanController::index - Active loans:', array_values($activeLoans));
 
         $processedLoans = array_map(function (array $loan): array {
             $totalAmount = (float) ($loan['loan_amount'] ?? 0);
@@ -80,6 +82,12 @@ class LoanController extends Controller
         $totalOutstanding = array_sum(array_column($processedLoans, 'outstanding_float'));
         $totalBorrowed = array_sum(array_column($processedLoans, 'total_amount'));
         $activeCount = count($processedLoans);
+
+        \Log::info('LoanController::index - Final stats:', [
+            'totalOutstanding' => $totalOutstanding,
+            'totalBorrowed' => $totalBorrowed,
+            'activeCount' => $activeCount
+        ]);
 
         ActivityLog::create([
             'user_id' => $user->id,
