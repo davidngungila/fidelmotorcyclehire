@@ -430,6 +430,10 @@
               <p class="text-xs font-semibold text-blue-700 dark:text-blue-300">Outstanding Balance</p>
               <p class="text-lg font-black text-blue-800 dark:text-blue-400">{{ $fmt($outstanding) }}</p>
             </div>
+            <div>
+              <p class="text-xs font-semibold text-purple-700 dark:text-purple-300">Minimum Payment</p>
+              <p class="text-lg font-black text-purple-800 dark:text-purple-400">{{ $fmt($installment) }}</p>
+            </div>
             <div id="excessInfo" class="hidden">
               <p class="text-xs font-semibold text-orange-700 dark:text-orange-300">Excess Amount</p>
               <p class="text-lg font-black text-orange-800 dark:text-orange-400" id="excessAmount">TSh 0.00</p>

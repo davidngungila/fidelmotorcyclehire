@@ -508,20 +508,22 @@ class LoanController extends Controller
 
         Gate::authorize('admin-only');
 
-        $validated = $request->validate([
-            'amount' => 'required|numeric|min:0',
-            'payment_date' => 'required|date',
-            'payment_method' => 'required|in:cash,bank_transfer,mobile_money,cheque',
-            'notes' => 'nullable|string',
-            'allocate_excess_to' => 'nullable|in:savings,investment,refund',
-        ]);
-
         $loan = Loan::where('loan_number', $loanNumber)->first();
 
         if (!$loan) {
             $this->error("Loan {$loanNumber} not found.");
             return redirect()->route('admin.loans.index');
         }
+
+        $validated = $request->validate([
+            'amount' => ['required', 'numeric', 'min:0', "gte:{$loan->monthly_payment}"],
+            'payment_date' => 'required|date',
+            'payment_method' => 'required|in:cash,bank_transfer,mobile_money,cheque',
+            'notes' => 'nullable|string',
+            'allocate_excess_to' => 'nullable|in:savings,investment,refund',
+        ], [
+            'amount.gte' => "Payment amount must be at least the monthly installment of " . number_format($loan->monthly_payment, 2) . " TSh",
+        ]);
 
         $paymentAmount = (float) $validated['amount'];
         $outstandingBalance = (float) $loan->balance;
