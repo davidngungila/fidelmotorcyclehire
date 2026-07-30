@@ -554,7 +554,7 @@ function memberEditForm() {
         
         const data = await response.json();
         
-        if (data.success || response.ok) {
+        if (data.success) {
           Swal.fire({
             icon: 'success',
             title: 'Saved!',
@@ -565,11 +565,20 @@ function memberEditForm() {
           // Reload page to show updated profile photo
           setTimeout(() => window.location.reload(), 1600);
         } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: data.message || 'Failed to save basic information.'
-          });
+          if (data.errors) {
+            const errorMessages = Object.values(data.errors).flat().join('\n');
+            Swal.fire({
+              icon: 'error',
+              title: 'Validation Error',
+              text: errorMessages || data.message || 'Failed to save basic information.'
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: data.message || 'Failed to save basic information.'
+            });
+          }
         }
       } catch (error) {
         console.error('Error:', error);
@@ -606,11 +615,20 @@ function memberEditForm() {
             showConfirmButton: false
           });
         } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: data.message || 'Failed to save contact information.'
-          });
+          if (data.errors) {
+            const errorMessages = Object.values(data.errors).flat().join('\n');
+            Swal.fire({
+              icon: 'error',
+              title: 'Validation Error',
+              text: errorMessages || data.message || 'Failed to save contact information.'
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: data.message || 'Failed to save contact information.'
+            });
+          }
         }
       } catch (error) {
         console.error('Error:', error);
@@ -647,11 +665,20 @@ function memberEditForm() {
             showConfirmButton: false
           });
         } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: data.message || 'Failed to save membership details.'
-          });
+          if (data.errors) {
+            const errorMessages = Object.values(data.errors).flat().join('\n');
+            Swal.fire({
+              icon: 'error',
+              title: 'Validation Error',
+              text: errorMessages || data.message || 'Failed to save membership details.'
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: data.message || 'Failed to save membership details.'
+            });
+          }
         }
       } catch (error) {
         console.error('Error:', error);
@@ -688,11 +715,20 @@ function memberEditForm() {
             showConfirmButton: false
           });
         } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: data.message || 'Failed to save account information.'
-          });
+          if (data.errors) {
+            const errorMessages = Object.values(data.errors).flat().join('\n');
+            Swal.fire({
+              icon: 'error',
+              title: 'Validation Error',
+              text: errorMessages || data.message || 'Failed to save account information.'
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: data.message || 'Failed to save account information.'
+            });
+          }
         }
       } catch (error) {
         console.error('Error:', error);
@@ -729,11 +765,20 @@ function memberEditForm() {
             showConfirmButton: false
           });
         } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: data.message || 'Failed to save next of kin information.'
-          });
+          if (data.errors) {
+            const errorMessages = Object.values(data.errors).flat().join('\n');
+            Swal.fire({
+              icon: 'error',
+              title: 'Validation Error',
+              text: errorMessages || data.message || 'Failed to save next of kin information.'
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: data.message || 'Failed to save next of kin information.'
+            });
+          }
         }
       } catch (error) {
         console.error('Error:', error);
@@ -770,11 +815,20 @@ function memberEditForm() {
             showConfirmButton: false
           });
         } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: data.message || 'Failed to save banking information.'
-          });
+          if (data.errors) {
+            const errorMessages = Object.values(data.errors).flat().join('\n');
+            Swal.fire({
+              icon: 'error',
+              title: 'Validation Error',
+              text: errorMessages || data.message || 'Failed to save banking information.'
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: data.message || 'Failed to save banking information.'
+            });
+          }
         }
       } catch (error) {
         console.error('Error:', error);
@@ -811,11 +865,20 @@ function memberEditForm() {
             showConfirmButton: false
           });
         } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: data.message || 'Failed to save documents.'
-          });
+          if (data.errors) {
+            const errorMessages = Object.values(data.errors).flat().join('\n');
+            Swal.fire({
+              icon: 'error',
+              title: 'Validation Error',
+              text: errorMessages || data.message || 'Failed to save documents.'
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: data.message || 'Failed to save documents.'
+            });
+          }
         }
       } catch (error) {
         console.error('Error:', error);
@@ -852,11 +915,20 @@ function memberEditForm() {
             showConfirmButton: false
           });
         } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: data.message || 'Failed to save additional information.'
-          });
+          if (data.errors) {
+            const errorMessages = Object.values(data.errors).flat().join('\n');
+            Swal.fire({
+              icon: 'error',
+              title: 'Validation Error',
+              text: errorMessages || data.message || 'Failed to save additional information.'
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: data.message || 'Failed to save additional information.'
+            });
+          }
         }
       } catch (error) {
         console.error('Error:', error);
