@@ -5,6 +5,9 @@
 
 @section('content')
 <div x-data="memberEditForm()" class="space-y-6">
+  @php
+    $encryptedId = app(\App\Services\EncryptedIdService::class)->encrypt($user->id);
+  @endphp
   <div class="flex items-center gap-4">
     <a href="{{ route('admin.users.index') }}"
        class="p-2.5 rounded-xl bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 transition-colors">
@@ -533,15 +536,15 @@
 function memberEditForm() {
   return {
     currentTab: 1,
-    userId: '{{ $user->id }}',
+    userId: '{{ $encryptedId }}',
     
     async saveBasicInfo() {
       const form = document.getElementById('basicInfoForm');
       const formData = new FormData(form);
       
       try {
-        const response = await fetch(`{{ route('admin.users.update', $user->id) }}`, {
-          method: 'POST',
+        const response = await fetch(`{{ route('admin.users.update-basic-info', $encryptedId) }}`, {
+          method: 'PUT',
           headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
             'Accept': 'application/json'
@@ -559,6 +562,8 @@ function memberEditForm() {
             timer: 1500,
             showConfirmButton: false
           });
+          // Reload page to show updated profile photo
+          setTimeout(() => window.location.reload(), 1600);
         } else {
           Swal.fire({
             icon: 'error',
@@ -581,8 +586,8 @@ function memberEditForm() {
       const formData = new FormData(form);
       
       try {
-        const response = await fetch(`{{ route('admin.users.update-contact-info', $user->id) }}`, {
-          method: 'POST',
+        const response = await fetch(`{{ route('admin.users.update-contact-info', $encryptedId) }}`, {
+          method: 'PUT',
           headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
             'Accept': 'application/json'
@@ -622,8 +627,8 @@ function memberEditForm() {
       const formData = new FormData(form);
       
       try {
-        const response = await fetch(`{{ route('admin.users.update-membership-details', $user->id) }}`, {
-          method: 'POST',
+        const response = await fetch(`{{ route('admin.users.update-membership-details', $encryptedId) }}`, {
+          method: 'PUT',
           headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
             'Accept': 'application/json'
@@ -663,8 +668,8 @@ function memberEditForm() {
       const formData = new FormData(form);
       
       try {
-        const response = await fetch(`{{ route('admin.users.update-account-info', $user->id) }}`, {
-          method: 'POST',
+        const response = await fetch(`{{ route('admin.users.update-account-info', $encryptedId) }}`, {
+          method: 'PUT',
           headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
             'Accept': 'application/json'
@@ -704,8 +709,8 @@ function memberEditForm() {
       const formData = new FormData(form);
       
       try {
-        const response = await fetch(`{{ route('admin.users.update-next-of-kin', $user->id) }}`, {
-          method: 'POST',
+        const response = await fetch(`{{ route('admin.users.update-next-of-kin', $encryptedId) }}`, {
+          method: 'PUT',
           headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
             'Accept': 'application/json'
@@ -745,8 +750,8 @@ function memberEditForm() {
       const formData = new FormData(form);
       
       try {
-        const response = await fetch(`{{ route('admin.users.update-banking-info', $user->id) }}`, {
-          method: 'POST',
+        const response = await fetch(`{{ route('admin.users.update-banking-info', $encryptedId) }}`, {
+          method: 'PUT',
           headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
             'Accept': 'application/json'
@@ -786,8 +791,8 @@ function memberEditForm() {
       const formData = new FormData(form);
       
       try {
-        const response = await fetch(`{{ route('admin.users.update-documents-info', $user->id) }}`, {
-          method: 'POST',
+        const response = await fetch(`{{ route('admin.users.update-documents-info', $encryptedId) }}`, {
+          method: 'PUT',
           headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
             'Accept': 'application/json'
@@ -827,8 +832,8 @@ function memberEditForm() {
       const formData = new FormData(form);
       
       try {
-        const response = await fetch(`{{ route('admin.users.update-additional-info', $user->id) }}`, {
-          method: 'POST',
+        const response = await fetch(`{{ route('admin.users.update-additional-info', $encryptedId) }}`, {
+          method: 'PUT',
           headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
             'Accept': 'application/json'
