@@ -78,6 +78,10 @@
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Last Name *</label>
                 <input type="text" name="last_name" required class="form-input">
               </div>
+              <div class="md:col-span-3">
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Email Address *</label>
+                <input type="email" name="email_address" required class="form-input">
+              </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Gender *</label>
                 <select name="gender" required class="form-input">

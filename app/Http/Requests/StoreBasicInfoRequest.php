@@ -18,6 +18,7 @@ class StoreBasicInfoRequest extends FormRequest
             'first_name' => 'required|string|max:255',
             'middle_name' => 'nullable|string|max:255',
             'last_name' => 'required|string|max:255',
+            'email_address' => 'required|email|max:255|unique:users,email',
             'gender' => 'required|in:male,female,other',
             'date_of_birth' => 'nullable|date|before:today',
             'national_id' => 'nullable|string|max:50|unique:member_profiles,national_id',
