@@ -6,7 +6,7 @@
 @section('content')
 <div x-data="loanCreateForm()" class="space-y-6">
   <div class="flex items-center gap-4">
-    <a href="{{ route('loans.index') }}"
+    <a href="{{ route('member.loans.index') }}"
        class="p-2.5 rounded-xl bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 transition-colors">
       <i class="fa-solid fa-arrow-left text-sm"></i>
     </a>
