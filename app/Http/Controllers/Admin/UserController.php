@@ -1094,7 +1094,8 @@ class UserController extends Controller
                     try {
                         \Mail::raw("Your password has been reset to: {$newPassword}\n\nPlease login and change your password immediately.", function($message) use ($user) {
                             $message->to($user->email)
-                                    ->subject('Password Reset - Members Portal');
+                                    ->subject('Password Reset - Members Portal')
+                                    ->from(config('mail.from.address', 'noreply@feedtancmg.org'), config('mail.from.name', 'Members Portal'));
                         });
                         
                         \Log::info('Password reset email sent successfully (bulk)', [
@@ -1106,7 +1107,9 @@ class UserController extends Controller
                             'user_id' => $user->id,
                             'user_email' => $user->email,
                             'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString(),
                         ]);
+                        // Continue with password reset even if email fails
                     }
 
                     $results[] = [

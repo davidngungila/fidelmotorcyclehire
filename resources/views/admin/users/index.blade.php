@@ -620,6 +620,14 @@
             this.showBulkResultsModal = true;
             this.selectedUsers = [];
             this.allSelected = false;
+            
+            Swal.fire({
+              icon: 'success',
+              title: 'Success',
+              text: `Password reset completed. ${data.success_count} successful, ${data.failure_count} failed. Emails sent to all successful resets.`,
+              timer: 3000,
+              showConfirmButton: false
+            });
           } else {
             Swal.fire({
               icon: 'error',
