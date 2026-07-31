@@ -87,4 +87,45 @@ class CommunicationController extends Controller
             return back()->with('error', 'Failed to send message: ' . $e->getMessage());
         }
     }
+
+    public function testWhatsAppPage(): View
+    {
+        $whatsappSettings = \App\Models\WhatsAppSettings::first() ?? new \App\Models\WhatsAppSettings();
+        return view('admin.communication.test-whatsapp', [
+            'whatsappSettings' => $whatsappSettings,
+        ]);
+    }
+
+    public function testWhatsApp(Request $request)
+    {
+        $request->validate([
+            'phone' => 'required|string',
+            'template' => 'required|string',
+        ]);
+
+        try {
+            $phone = $request->input('phone');
+            $template = $request->input('template');
+            $test = $request->input('test', false);
+
+            // Format phone number
+            $phone = preg_replace('/[^0-9]/', '', $phone);
+            if (!str_starts_with($phone, '255')) {
+                $phone = '255' . ltrim($phone, '0');
+            }
+
+            $result = $this->whatsappService->sendTextMessage([$phone], $template, $test);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Test message sent successfully',
+                'result' => $result,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send test message: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 }

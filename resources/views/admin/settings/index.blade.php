@@ -577,11 +577,15 @@
             </div>
           </div>
 
-          <div class="pt-6 mt-6 border-t border-primary-100 dark:border-primary-900/50 flex justify-end">
+          <div class="pt-6 mt-6 border-t border-primary-100 dark:border-primary-900/50 flex justify-between items-center">
             <button type="submit"
                     class="px-6 py-2.5 rounded-xl bg-green-600 hover:bg-green-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95">
               <i class="fa-brands fa-whatsapp mr-1.5 text-[13px]"></i> Save WhatsApp Settings
             </button>
+            <a href="{{ route('admin.communication.whatsapp.test') }}"
+                    class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95 inline-flex items-center">
+              <i class="fa-solid fa-paper-plane mr-1.5 text-[13px]"></i> Test WhatsApp
+            </a>
           </div>
         </form>
       </div>

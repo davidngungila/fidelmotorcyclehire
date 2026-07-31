@@ -239,6 +239,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
         Route::get('/email', [\App\Http\Controllers\Admin\CommunicationController::class, 'email'])->name('email');
         Route::get('/whatsapp', [\App\Http\Controllers\Admin\CommunicationController::class, 'whatsapp'])->name('whatsapp');
         Route::post('/whatsapp/send', [\App\Http\Controllers\Admin\CommunicationController::class, 'sendWhatsApp'])->name('whatsapp.send');
+        Route::get('/whatsapp/test', [\App\Http\Controllers\Admin\CommunicationController::class, 'testWhatsAppPage'])->name('whatsapp.test');
+        Route::post('/whatsapp/test', [\App\Http\Controllers\Admin\CommunicationController::class, 'testWhatsApp'])->name('whatsapp.test.send');
     });
 });
 
