@@ -44,16 +44,19 @@
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="md:col-span-2">
-            <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Phone Number</label>
-            <input type="text" x-model="phone" 
-                   class="form-input" 
-                   placeholder="e.g. 255123456789"
-                   :disabled="sending">
-            <p class="text-xs mt-1" :class="darkMode ? 'text-primary-400' : 'text-primary-600'">Enter phone number with country code (255 for Tanzania)</p>
+            <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Select Template</label>
+            <select x-model="selectedTemplate" @change="onTemplateChange" class="form-input" :disabled="sending">
+              <option value="">-- Select a Template --</option>
+              <template x-for="tmpl in templates" :key="tmpl.name">
+                <option :value="tmpl.name" x-text="tmpl.label"></option>
+              </template>
+              <option value="custom">-- Custom Template --</option>
+            </select>
+            <p class="text-xs mt-1" :class="darkMode ? 'text-primary-400' : 'text-primary-600'">Choose a predefined template or enter custom template name</p>
           </div>
 
-          <div class="md:col-span-2">
-            <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Template Name</label>
+          <div class="md:col-span-2" x-show="selectedTemplate === 'custom'">
+            <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Custom Template Name</label>
             <input type="text" x-model="template" 
                    class="form-input" 
                    placeholder="e.g. medicine_reminder"
@@ -62,6 +65,32 @@
           </div>
 
           <div class="md:col-span-2">
+            <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Phone Number</label>
+            <input type="text" x-model="phone" 
+                   class="form-input" 
+                   placeholder="e.g. 255123456789"
+                   :disabled="sending">
+            <p class="text-xs mt-1" :class="darkMode ? 'text-primary-400' : 'text-primary-600'">Enter phone number with country code (255 for Tanzania)</p>
+          </div>
+
+          <!-- Dynamic Personalisation Fields -->
+          <template x-if="selectedTemplate && selectedTemplate !== 'custom' && getTemplateParameters().length > 0">
+            <div class="md:col-span-2 space-y-4">
+              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Template Parameters</label>
+              <template x-for="param in getTemplateParameters()" :key="param">
+                <div>
+                  <label class="block text-sm font-medium mb-1" :class="darkMode ? 'text-primary-300' : 'text-primary-700'" x-text="formatParameterLabel(param)"></label>
+                  <input type="text" x-model="personalisationData[param]" 
+                         class="form-input" 
+                         :placeholder="'Enter ' + param"
+                         :disabled="sending">
+                </div>
+              </template>
+            </div>
+          </template>
+
+          <!-- Custom JSON Personalisation -->
+          <div class="md:col-span-2" x-show="selectedTemplate === 'custom'">
             <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Personalisation (JSON, Optional)</label>
             <textarea x-model="personalisation" rows="4" 
                       class="form-input font-mono text-xs" 
@@ -122,9 +151,32 @@
     return {
       phone: '',
       template: '',
+      selectedTemplate: '',
       personalisation: '',
+      personalisationData: {},
       testMode: true,
       sending: false,
+      templates: @json($templates->map(function($tmpl) {
+        return [
+          'name' => $tmpl->name,
+          'label' => $tmpl->description ?: ucfirst(str_replace('_', ' ', $tmpl->name)),
+          'parameters' => $tmpl->parameters ?? [],
+        ];
+      })->toArray()),
+      onTemplateChange() {
+        if (this.selectedTemplate && this.selectedTemplate !== 'custom') {
+          this.template = this.selectedTemplate;
+          this.personalisationData = {};
+          this.personalisation = '';
+        }
+      },
+      getTemplateParameters() {
+        const tmpl = this.templates.find(t => t.name === this.selectedTemplate);
+        return tmpl ? tmpl.parameters : [];
+      },
+      formatParameterLabel(param) {
+        return param.charAt(0).toUpperCase() + param.slice(1).replace(/_/g, ' ');
+      },
       async sendTestWhatsApp() {
         if (!this.phone || !this.template) {
           Swal.fire({
@@ -138,6 +190,34 @@
         this.sending = true;
 
         try {
+          let personalisationData = null;
+          
+          // Use dynamic fields if template is selected
+          if (this.selectedTemplate && this.selectedTemplate !== 'custom') {
+            const params = this.getTemplateParameters();
+            if (params.length > 0) {
+              personalisationData = {};
+              params.forEach(param => {
+                if (this.personalisationData[param]) {
+                  personalisationData[param] = this.personalisationData[param];
+                }
+              });
+            }
+          } else if (this.personalisation) {
+            // Parse JSON for custom template
+            try {
+              personalisationData = JSON.parse(this.personalisation);
+            } catch (e) {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Invalid JSON format for personalisation.',
+              });
+              this.sending = false;
+              return;
+            }
+          }
+
           const response = await fetch('{{ route('admin.communication.whatsapp.test.send') }}', {
             method: 'POST',
             headers: {
@@ -147,7 +227,7 @@
             body: JSON.stringify({
               phone: this.phone,
               template: this.template,
-              personalisation: this.personalisation ? JSON.parse(this.personalisation) : null,
+              personalisation: personalisationData,
               test: this.testMode,
             }),
           });
