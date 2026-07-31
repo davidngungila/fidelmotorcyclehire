@@ -36,7 +36,7 @@ class DashboardController extends Controller
         $member = $user; // Use user object directly since we're not using Google Sheets
         
         // Use database loans instead of Google Sheets
-        $dbLoans = \App\Models\Loan::where('member_number', $memberNumber)->get();
+        $dbLoans = \App\Models\Loan::where('member_number', $memberNumber)->active()->get();
         
         // Convert database loans to the format expected
         $loans = $dbLoans->map(function ($loan) {
