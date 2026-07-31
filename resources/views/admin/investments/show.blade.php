@@ -86,6 +86,9 @@
   <!-- Investments List -->
   @if(isset($investments) && $investments->count() > 0)
     @foreach($investments as $investment)
+      @php
+        $productName = $investment->investmentProduct ? $investment->investmentProduct->name : 'Unknown Product';
+      @endphp
       <div class="glass p-6 rounded-2xl">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
           <div>
@@ -94,9 +97,6 @@
               {{ $investment->investment_number }}
             </h3>
             <p class="text-xs text-primary-500 dark:text-primary-400 mt-1">
-              @php
-                $productName = $investment->investmentProduct ? $investment->investmentProduct->name : 'Unknown Product';
-              @endphp
               {{ $productName }}
             </p>
           </div>
