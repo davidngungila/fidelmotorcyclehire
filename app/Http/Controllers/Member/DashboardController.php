@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Member;
 
-use App\Contracts\GoogleSheetRepositoryInterface;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\Investment;
 use App\Models\Transaction;
+use App\Services\AdminDashboardService;
 use App\Traits\FlashMessages;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,7 +20,7 @@ class DashboardController extends Controller
     use FlashMessages;
 
     public function __construct(
-        protected GoogleSheetRepositoryInterface $repository,
+        protected AdminDashboardService $dashboardService,
     ) {}
 
     public function index(Request $request): View|RedirectResponse
@@ -32,7 +33,7 @@ class DashboardController extends Controller
             return redirect()->route('member.profile.index')->with('hint', 'missing_member_number');
         }
 
-        $member = $this->repository->getMemberByNumber($memberNumber);
+        $member = $user; // Use user object directly since we're not using Google Sheets
         
         // Use database loans instead of Google Sheets
         $dbLoans = \App\Models\Loan::where('member_number', $memberNumber)->get();
@@ -53,10 +54,37 @@ class DashboardController extends Controller
             ];
         })->toArray();
         
-        $savings = $this->repository->getMemberSavings($memberNumber);
-        $deposits = $this->repository->getMemberDeposits($memberNumber);
-        $swf = $this->repository->getMemberSwf($memberNumber);
-        $investments = $this->repository->getMemberInvestments($memberNumber);
+        // Use database investments instead of Google Sheets
+        $dbInvestments = Investment::with(['investmentProduct'])
+            ->where('member_number', $memberNumber)
+            ->orderBy('investment_date', 'desc')
+            ->get();
+        
+        $investments = $dbInvestments->map(function ($inv) {
+            $actualReturn = $inv->actual_return ?? 0;
+            $expectedReturn = $inv->expected_return ?? 0;
+            $amount = $inv->amount ?? 0;
+            
+            // Use expected_return for profit calculation if actual_return equals amount (new investment)
+            $returnValue = ($actualReturn == $amount) ? $expectedReturn : $actualReturn;
+            $profit = $returnValue - $amount;
+            $profitPct = $amount > 0 ? (($profit / $amount) * 100) : 0;
+            
+            return [
+                'investment_number' => $inv->investment_number,
+                'product' => $inv->investmentProduct ? $inv->investmentProduct->name : 'Unknown Product',
+                'amount_invested' => $amount,
+                'current_value' => $returnValue,
+                'profit_earned' => $profit,
+                'return_rate' => $profitPct,
+                'start_date' => $inv->investment_date ? $inv->investment_date->format('Y-m-d') : null,
+                'status' => $inv->status,
+            ];
+        })->toArray();
+        
+        $savings = ['transactions' => [], 'balance' => 0, 'running_balance' => 0]; // Placeholder for savings
+        $deposits = []; // Placeholder for deposits
+        $swf = ['current_balance' => 0, 'contribution_history' => []]; // Placeholder for SWF
 
         // Get database transactions
         $dbTransactions = Transaction::byMemberCode($memberNumber)
@@ -74,9 +102,8 @@ class DashboardController extends Controller
             })
             ->toArray();
 
-        // Merge Google Sheets transactions with database transactions
-        $googleTransactions = $savings['transactions'] ?? [];
-        $allTransactions = array_merge($googleTransactions, $dbTransactions);
+        // Use database transactions for savings
+        $allTransactions = $dbTransactions;
 
         // Sort by date ascending for balance calculation
         usort($allTransactions, static fn($a, $b): int => strtotime($a['date'] ?? '') <=> strtotime($b['date'] ?? ''));
@@ -103,8 +130,8 @@ class DashboardController extends Controller
 
         $loanBalance = collect($loans)->sum('outstanding_balance');
         $savingsBalance = $currentBalance;
-        $depositBalance = collect($deposits)->sum('current_value');
-        $swfBalance = $swf['current_balance'] ?? 0;
+        $depositBalance = 0; // Placeholder for deposits
+        $swfBalance = 0; // Placeholder for SWF
         $investmentBalance = collect($investments)->sum('current_value');
 
         // Filter active loans for dashboard display
