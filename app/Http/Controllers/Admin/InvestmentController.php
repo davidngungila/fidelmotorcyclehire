@@ -238,7 +238,7 @@ class InvestmentController extends Controller
 
         $memberNumber = $this->encryptedIdService->decrypt($encryptedMemberNumber);
 
-        $investments = Investment::with(['user', 'investmentProduct'])
+        $investments = Investment::with(['investmentProduct'])
             ->where('member_number', $memberNumber)
             ->orderBy('investment_date', 'desc')
             ->get();
@@ -248,7 +248,11 @@ class InvestmentController extends Controller
             return redirect()->route('admin.investments.index');
         }
 
-        $user = $investments->first()->user;
+        // Load user by member_number for member name display
+        $user = User::where('member_number', $memberNumber)->first();
+        $memberName = $user ? $user->name : $memberNumber;
+        $memberEmail = $user ? $user->email : null;
+
         $totalInvested = $investments->sum('amount');
         $totalCurrentValue = $investments->sum(function ($inv) {
             return $inv->actual_return ?? $inv->expected_return ?? 0;
@@ -286,7 +290,7 @@ class InvestmentController extends Controller
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
             'properties' => [
-                'member_name' => $user->name ?? null,
+                'member_name' => $memberName,
                 'total_invested' => $totalInvested,
                 'investment_count' => $investments->count(),
             ],
@@ -294,9 +298,9 @@ class InvestmentController extends Controller
 
         return view('admin.investments.show', [
             'member' => [
-                'name' => $user->name ?? 'Unknown',
+                'name' => $memberName,
                 'member_number' => $memberNumber,
-                'email' => $user->email ?? null,
+                'email' => $memberEmail,
             ],
             'memberNumber' => $memberNumber,
             'investments' => $enrichedInvestments,
