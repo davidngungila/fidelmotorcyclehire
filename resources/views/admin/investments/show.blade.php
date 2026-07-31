@@ -11,84 +11,95 @@
 @section('content')
 
 <div class="space-y-6">
+  <!-- Member Header -->
   @if($member)
     <div class="glass p-6">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div class="flex items-center gap-4">
           <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-400 to-teal-600 text-white flex items-center justify-center text-2xl font-bold shadow-lg">
-            {{ strtoupper(substr($member['full_name'] ?? 'M', 0, 1)) }}
+            {{ strtoupper(substr($member['name'] ?? 'M', 0, 1)) }}
           </div>
           <div>
-            <h2 class="text-xl font-bold text-primary-900 dark:text-white">{{ $member['full_name'] ?? 'Unknown' }}</h2>
+            <h2 class="text-xl font-bold text-primary-900 dark:text-white">{{ $member['name'] ?? 'Unknown' }}</h2>
             <div class="flex items-center gap-3 mt-1">
               <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-teal-50 dark:bg-teal-900/40 font-mono text-xs font-bold text-teal-700 dark:text-teal-300">
                 <i class="fa-solid fa-id-card text-[10px]"></i>
                 {{ $memberNumber }}
               </span>
-              <span class="badge {{ $dashboardService->memberStatusBadge($member['status'] ?? null)['class'] }}">
-                {{ $dashboardService->memberStatusBadge($member['status'] ?? null)['label'] }}
-              </span>
+              <span class="text-xs text-primary-500 dark:text-primary-400">{{ $member['email'] ?? '-' }}</span>
             </div>
           </div>
         </div>
         <div class="flex items-center gap-3">
-          <a href="tel:{{ $member['phone'] ?? '' }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-green-100 hover:bg-green-200 dark:bg-green-900/40 dark:hover:bg-green-900/60 text-green-700 dark:text-green-300 text-xs font-bold transition-colors">
-            <i class="fa-solid fa-phone text-[10px]"></i> Call
+          <a href="{{ route('admin.members.show, encryptId($memberNumber)) }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-xs font-bold transition-colors">
+            <i class="fa-solid fa-arrow-left text-[10px]"></i> Back to Profile
           </a>
-          <a href="mailto:{{ $member['email'] ?? '' }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/40 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-300 text-xs font-bold transition-colors">
-            <i class="fa-solid fa-envelope text-[10px]"></i> Email
-          </a>
-          <a href="{{ route('admin.members.show', encryptId($memberNumber)) }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-xs font-bold transition-colors">
-            <i class="fa-solid fa-arrow-left text-[10px]"></i> Back
-          </a>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <div class="bg-teal-50 dark:bg-teal-900/30 rounded-xl p-4">
-          <p class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase mb-1">Gender</p>
-          <p class="text-sm font-bold text-primary-900 dark:text-white">{{ $member['gender'] ?? '-' }}</p>
-        </div>
-        <div class="bg-teal-50 dark:bg-teal-900/30 rounded-xl p-4">
-          <p class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase mb-1">Branch</p>
-          <p class="text-sm font-bold text-primary-900 dark:text-white">{{ $member['branch'] ?? '-' }}</p>
-        </div>
-        <div class="bg-teal-50 dark:bg-teal-900/30 rounded-xl p-4">
-          <p class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase mb-1">Phone</p>
-          <p class="text-sm font-bold text-primary-900 dark:text-white">{{ $member['phone'] ?? '-' }}</p>
-        </div>
-        <div class="bg-teal-50 dark:bg-teal-900/30 rounded-xl p-4">
-          <p class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase mb-1">Email</p>
-          <p class="text-sm font-bold text-primary-900 dark:text-white truncate">{{ $member['email'] ?? '-' }}</p>
-        </div>
-        <div class="bg-teal-50 dark:bg-teal-900/30 rounded-xl p-4">
-          <p class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase mb-1">Occupation</p>
-          <p class="text-sm font-bold text-primary-900 dark:text-white">{{ $member['occupation'] ?? '-' }}</p>
-        </div>
-        <div class="bg-teal-50 dark:bg-teal-900/30 rounded-xl p-4">
-          <p class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase mb-1">Employer</p>
-          <p class="text-sm font-bold text-primary-900 dark:text-white truncate">{{ $member['employer'] ?? '-' }}</p>
         </div>
       </div>
     </div>
   @endif
 
-  @if(isset($investments) && is_array($investments) && count($investments) > 0)
+  <!-- Summary Cards -->
+  @if(isset($totalInvested))
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="glass p-5 rounded-2xl">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-xl bg-teal-100 dark:bg-teal-900/40 flex items-center justify-center">
+            <i class="fa-solid fa-coins text-teal-600 dark:text-teal-400 text-sm"></i>
+          </div>
+          <p class="text-xs font-bold text-teal-600 dark:text-teal-400 uppercase">Total Invested</p>
+        </div>
+        <p class="text-2xl font-black text-primary-900 dark:text-white">{{ $fmt($totalInvested) }}</p>
+      </div>
+      <div class="glass p-5 rounded-2xl">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900/40 flex items-center justify-center">
+            <i class="fa-solid fa-chart-line text-green-600 dark:text-green-400 text-sm"></i>
+          </div>
+          <p class="text-xs font-bold text-green-600 dark:text-green-400 uppercase">Current Value</p>
+        </div>
+        <p class="text-2xl font-black text-primary-900 dark:text-white">{{ $fmt($totalCurrentValue) }}</p>
+      </div>
+      <div class="glass p-5 rounded-2xl">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-xl {{ $totalProfit >= 0 ? 'bg-green-100 dark:bg-green-900/40' : 'bg-red-100 dark:bg-red-900/40' }} flex items-center justify-center">
+            <i class="fa-solid {{ $totalProfit >= 0 ? 'fa-arrow-trend-up text-green-600 dark:text-green-400' : 'fa-arrow-trend-down text-red-600 dark:text-red-400' }} text-sm"></i>
+          </div>
+          <p class="text-xs font-bold {{ $totalProfit >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }} uppercase">Total Profit</p>
+        </div>
+        <p class="text-2xl font-black {{ $totalProfit >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
+          {{ $totalProfit >= 0 ? '+' : '' }}{{ $fmt($totalProfit) }}
+        </p>
+      </div>
+      <div class="glass p-5 rounded-2xl">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-900/40 flex items-center justify-center">
+            <i class="fa-solid fa-percent text-primary-600 dark:text-primary-400 text-sm"></i>
+          </div>
+          <p class="text-xs font-bold text-primary-600 dark:text-primary-400 uppercase">Overall Return</p>
+        </div>
+        <p class="text-2xl font-black text-primary-900 dark:text-white">{{ number_format($overallReturn, 2) }}%</p>
+      </div>
+    </div>
+  @endif
+
+  <!-- Investments List -->
+  @if(isset($investments) && $investments->count() > 0)
     @foreach($investments as $investment)
-      <div class="glass p-5">
+      <div class="glass p-6 rounded-2xl">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
           <div>
             <h3 class="text-lg font-bold text-primary-900 dark:text-white flex items-center gap-2">
               <i class="fa-solid fa-chart-line text-teal-500"></i>
-              {{ $investment['product'] ?? 'Investment' }}
+              {{ $investment->investment_number }}
             </h3>
             <p class="text-xs text-primary-500 dark:text-primary-400 mt-1">
-              Started: {{ $investment['start_date'] ?? '-' }}
+              {{ $investment->investmentProduct->name ?? 'Unknown Product' }}
             </p>
           </div>
           <div class="flex items-center gap-3">
             @php
-              $status = $dashboardService->depositStatusBadge($investment['status'] ?? null);
+              $status = $dashboardService->depositStatusBadge($investment->status ?? null);
             @endphp
             <span class="badge {{ $status['class'] }}">{{ $status['label'] }}</span>
           </div>
@@ -97,50 +108,74 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
           <div class="bg-teal-50 dark:bg-teal-900/30 rounded-xl p-4">
             <p class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase mb-1">Amount Invested</p>
-            <p class="text-lg font-black text-primary-900 dark:text-white">{{ $fmt($investment['amount_invested'] ?? 0) }}</p>
+            <p class="text-lg font-black text-primary-900 dark:text-white">{{ $fmt($investment->amount ?? 0) }}</p>
           </div>
           <div class="bg-teal-50 dark:bg-teal-900/30 rounded-xl p-4">
-            <p class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase mb-1">Units</p>
-            <p class="text-lg font-black text-primary-900 dark:text-white">{{ $fmtInt($investment['units'] ?? 0) }}</p>
+            <p class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase mb-1">Interest Rate</p>
+            <p class="text-lg font-black text-primary-900 dark:text-white">{{ number_format($investment->interest_rate ?? 0, 2) }}%</p>
           </div>
           <div class="bg-teal-50 dark:bg-teal-900/30 rounded-xl p-4">
-            <p class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase mb-1">Current Value</p>
-            <p class="text-lg font-black text-primary-900 dark:text-white">{{ $fmt($investment['current_value'] ?? 0) }}</p>
+            <p class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase mb-1">Expected Return</p>
+            <p class="text-lg font-black text-primary-900 dark:text-white">{{ $fmt($investment->expected_return ?? 0) }}</p>
           </div>
           <div class="bg-teal-50 dark:bg-teal-900/30 rounded-xl p-4">
-            <p class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase mb-1">Profit/Loss</p>
-            @php
-              $profit = $investment['profit'] ?? 0;
-              $profitClass = $profit >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
-              $profitIcon = $profit >= 0 ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down';
-            @endphp
-            <p class="text-lg font-black {{ $profitClass }} flex items-center gap-1">
-              <i class="fa-solid {{ $profitIcon }} text-sm"></i>
-              {{ $profit >= 0 ? '+' : '' }}{{ $fmt($profit) }}
-            </p>
+            <p class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase mb-1">Actual Return</p>
+            <p class="text-lg font-black text-primary-900 dark:text-white">{{ $fmt($investment->actual_return ?? 0) }}</p>
           </div>
         </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+          <div class="bg-primary-50 dark:bg-primary-900/30 rounded-xl p-4">
+            <p class="text-[10px] font-bold text-primary-600 dark:text-primary-400 uppercase mb-1">Investment Date</p>
+            <p class="text-sm font-bold text-primary-900 dark:text-white">{{ $investment->investment_date ? $investment->investment_date->format('M d, Y') : '-' }}</p>
+          </div>
+          <div class="bg-primary-50 dark:bg-primary-900/30 rounded-xl p-4">
+            <p class="text-[10px] font-bold text-primary-600 dark:text-primary-400 uppercase mb-1">Maturity Date</p>
+            <p class="text-sm font-bold text-primary-900 dark:text-white">{{ $investment->maturity_date ? $investment->maturity_date->format('M d, Y') : '-' }}</p>
+          </div>
+          <div class="bg-primary-50 dark:bg-primary-900/30 rounded-xl p-4">
+            <p class="text-[10px] font-bold text-primary-600 dark:text-primary-400 uppercase mb-1">Duration</p>
+            @php
+              $duration = '';
+              if ($investment->investment_date && $investment->maturity_date) {
+                $duration = $investment->investment_date->diffInMonths($investment->maturity_date) . ' months';
+              }
+            @endphp
+            <p class="text-sm font-bold text-primary-900 dark:text-white">{{ $duration ?: '-' }}</p>
+          </div>
+        </div>
+
+        @if($investment->notes)
+          <div class="bg-gray-50 dark:bg-gray-900/30 rounded-xl p-4 mb-5">
+            <p class="text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase mb-1">Notes</p>
+            <p class="text-sm text-primary-900 dark:text-white">{{ $investment->notes }}</p>
+          </div>
+        @endif
 
         <div class="flex items-center gap-4">
           <div class="flex-1">
             <div class="flex items-center justify-between mb-1">
-              <span class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase">Return</span>
+              <span class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase">Profit/Loss</span>
               @php
-                $returnPct = $investment['return_percentage'] ?? 0;
+                $profit = ($investment->actual_return ?? 0) - ($investment->amount ?? 0);
+                $profitPct = $investment->amount > 0 ? (($profit / $investment->amount) * 100) : 0;
               @endphp
-              <span class="badge {{ $returnPct >= 0 ? 'badge-green' : 'badge-red' }}">
-                {{ $returnPct >= 0 ? '+' : '' }}{{ number_format($returnPct, 2) }}%
+              <span class="badge {{ $profit >= 0 ? 'badge-green' : 'badge-red' }}">
+                {{ $profit >= 0 ? '+' : '' }}{{ number_format($profitPct, 2) }}%
               </span>
             </div>
             <div class="progress-bar">
-              <div class="progress-fill {{ $returnPct >= 0 ? 'bg-teal-500' : 'bg-red-500' }}" style="width: {{ min(abs($returnPct), 100) }}%"></div>
+              <div class="progress-fill {{ $profit >= 0 ? 'bg-teal-500' : 'bg-red-500' }}" style="width: {{ min(abs($profitPct), 100) }}%"></div>
             </div>
+            <p class="text-xs font-bold {{ $profit >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }} mt-1">
+              {{ $profit >= 0 ? '+' : '' }}{{ $fmt($profit) }}
+            </p>
           </div>
         </div>
       </div>
     @endforeach
   @else
-    <div class="glass p-8 text-center">
+    <div class="glass p-8 text-center rounded-2xl">
       <i class="fa-solid fa-inbox text-4xl text-primary-300 dark:text-primary-700 mb-3 block"></i>
       <p class="text-sm font-semibold text-primary-600 dark:text-primary-400">No investments found for this member</p>
     </div>
