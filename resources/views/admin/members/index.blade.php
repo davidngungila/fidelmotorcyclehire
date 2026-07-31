@@ -13,21 +13,16 @@
 
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div class="flex flex-col sm:flex-row sm:items-center gap-3 flex-1 max-w-2xl">
-      <form method="GET" action="{{ route('admin.members.index') }}" class="flex-1" x-ref="searchForm">
-        <div class="relative">
-          <i class="fa-solid fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-primary-400"></i>
-          <input type="text" name="q" value="{{ $searchQuery ?? '' }}"
-                 placeholder="Search by member number, name, phone, email..."
-                 class="form-input pl-9 py-2.5 text-sm"
-                 x-model="searchQuery"
-                 @input.debounce.400ms="submitSearch"/>
-          @if($searchQuery)
-            <a href="{{ route('admin.members.index') }}" class="absolute right-3 top-1/2 -translate-y-1/2 text-primary-400 hover:text-primary-600">
-              <i class="fa-solid fa-xmark text-xs"></i>
-            </a>
-          @endif
-        </div>
-      </form>
+      <div class="relative flex-1">
+        <i class="fa-solid fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-primary-400"></i>
+        <input type="text" 
+               placeholder="Search by member number, name, phone, email..."
+               class="form-input pl-9 py-2.5 text-sm"
+               x-model="searchQuery"/>
+        <button x-show="searchQuery" @click="clearSearch()" class="absolute right-3 top-1/2 -translate-y-1/2 text-primary-400 hover:text-primary-600">
+          <i class="fa-solid fa-xmark text-xs"></i>
+        </button>
+      </div>
     </div>
 
     <div class="flex items-center gap-3">
@@ -46,11 +41,9 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
       <div class="flex items-center gap-3">
         <span class="text-xs font-semibold text-primary-600 dark:text-primary-400">
-          <i class="fa-solid fa-list-check mr-1.5"></i> {{ $members->total() }} Members Found
+          <i class="fa-solid fa-list-check mr-1.5"></i> <span x-text="document.querySelectorAll('tbody tr:not([x-show])').length || {{ $members->total() }}"></span> Members Found
         </span>
-        @if($searchQuery)
-          <span class="badge badge-blue text-[10px]">Search: {{ $searchQuery }}</span>
-        @endif
+        <span x-show="searchQuery" class="badge badge-blue text-[10px]">Search: <span x-text="searchQuery"></span></span>
       </div>
       <div class="flex items-center gap-3">
         <label class="flex items-center gap-2 text-xs text-primary-600 dark:text-primary-400">
@@ -92,7 +85,18 @@
               $statusBadge = $dashboardService->memberStatusBadge($member['status'] ?? null);
               $rowNum = ($members->currentPage() - 1) * $members->perPage() + $index + 1;
             @endphp
-            <tr class="group">
+            <tr class="group" 
+                x-data="{ 
+                  memberNo: {{ json_encode($memberNo) }}, 
+                  memberName: {{ json_encode($memberName) }}, 
+                  memberPhone: {{ json_encode($memberPhone) }},
+                  memberEmail: {{ json_encode($member['email'] ?? $member['Email'] ?? '') }}
+                }"
+                x-show="!searchQuery || searchQuery.trim() === '' || 
+                       memberNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                       memberName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                       memberPhone.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                       memberEmail.toLowerCase().includes(searchQuery.toLowerCase())">
               <td class="text-xs text-primary-400 dark:text-primary-500 font-mono">{{ $rowNum }}.</td>
               <td>
                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary-50 dark:bg-primary-900/40 font-mono text-xs font-bold text-primary-700 dark:text-primary-300">
@@ -346,6 +350,9 @@
   function membersList() {
     return {
       searchQuery: @json($searchQuery ?? ''),
+      clearSearch() {
+        this.searchQuery = '';
+      },
       sortBy(column) {
         const params = new URLSearchParams(window.location.search);
         if (params.get('sort') === column) {
@@ -361,9 +368,6 @@
         params.set('per_page', value);
         params.delete('page');
         window.location.href = window.location.pathname + '?' + params.toString();
-      },
-      submitSearch() {
-        this.$refs.searchForm.submit();
       }
     };
   }
