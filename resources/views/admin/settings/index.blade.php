@@ -582,7 +582,7 @@
   function settingsTabs() {
     return {
       activeTab: 'general',
-      smsActive: {{ $smsSettings->is_active ?? false }},
+      smsActive: {{ json_encode($smsSettings->is_active ?? false) }},
       testSmsModalOpen: false,
       testSmsPhone: '',
       testSmsMessage: 'This is a test message from FEEDTAN Members Portal.',
