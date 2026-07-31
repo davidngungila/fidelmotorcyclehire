@@ -28,6 +28,9 @@
         @endif
       </div>
     </form>
+    <a href="{{ route('admin.swf.members.create') }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95">
+      <i class="fa-solid fa-user-plus"></i> Register Member
+    </a>
   </div>
 
   <div class="glass p-5">

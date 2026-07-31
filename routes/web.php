@@ -156,6 +156,20 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/swf', [AdminSwfController::class, 'index'])->name('swf.index');
     Route::get('/swf/{encryptedMemberNumber}', [AdminSwfController::class, 'show'])->name('swf.show');
 
+    Route::prefix('swf')->name('swf.')->group(function () {
+        Route::get('/members/create', [\App\Http\Controllers\Admin\SwfMemberController::class, 'create'])->name('members.create');
+        Route::post('/members', [\App\Http\Controllers\Admin\SwfMemberController::class, 'store'])->name('members.store');
+        Route::get('/members/{id}', [\App\Http\Controllers\Admin\SwfMemberController::class, 'show'])->name('members.show');
+        
+        Route::get('/contributions/create/{swfMemberId}', [\App\Http\Controllers\Admin\SwfContributionController::class, 'create'])->name('contributions.create');
+        Route::post('/contributions', [\App\Http\Controllers\Admin\SwfContributionController::class, 'store'])->name('contributions.store');
+        
+        Route::get('/benefits', [\App\Http\Controllers\Admin\SwfBenefitController::class, 'index'])->name('benefits.index');
+        Route::get('/benefits/create', [\App\Http\Controllers\Admin\SwfBenefitController::class, 'create'])->name('benefits.create');
+        Route::post('/benefits', [\App\Http\Controllers\Admin\SwfBenefitController::class, 'store'])->name('benefits.store');
+        Route::post('/benefits/grant', [\App\Http\Controllers\Admin\SwfBenefitController::class, 'grant'])->name('benefits.grant');
+    });
+
     Route::get('/investments', [AdminInvestmentController::class, 'index'])->name('investments.index');
     Route::get('/investments/create', [AdminInvestmentController::class, 'create'])->name('investments.create');
     Route::post('/investments', [AdminInvestmentController::class, 'store'])->name('investments.store');

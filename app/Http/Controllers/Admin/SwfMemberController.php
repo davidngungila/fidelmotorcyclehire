@@ -1,0 +1,78 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
+use App\Models\SwfMember;
+use App\Models\User;
+use App\Traits\FlashMessages;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
+
+class SwfMemberController extends Controller
+{
+    use FlashMessages;
+
+    public function create(): View
+    {
+        $members = User::where('role', 'member')->whereDoesntHave('swfMember')->get();
+        
+        return view('admin.swf.members.create', [
+            'members' => $members,
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'join_date' => 'required|date',
+        ]);
+
+        try {
+            $user = User::findOrFail($request->input('user_id'));
+            
+            // Generate membership number
+            $membershipNumber = 'SWF-' . date('Y') . '-' . str_pad(SwfMember::count() + 1, 4, '0', STR_PAD_LEFT);
+            
+            $swfMember = SwfMember::create([
+                'user_id' => $user->id,
+                'membership_number' => $membershipNumber,
+                'join_date' => $request->input('join_date'),
+                'total_contributions' => 0,
+                'total_benefits_received' => 0,
+                'is_active' => true,
+            ]);
+
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'subject_type' => 'swf_member',
+                'subject_id' => $swfMember->id,
+                'description' => "Admin registered new SWF member: {$membershipNumber}",
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'properties' => [
+                    'user_id' => $user->id,
+                    'user_name' => $user->name,
+                    'membership_number' => $membershipNumber,
+                ],
+            ]);
+
+            $this->success('SWF member registered successfully!');
+            return redirect()->route('admin.swf.index');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to register SWF member: ' . $e->getMessage());
+        }
+    }
+
+    public function show($id): View
+    {
+        $swfMember = SwfMember::with(['user', 'contributions', 'benefits'])->findOrFail($id);
+        
+        return view('admin.swf.members.show', [
+            'swfMember' => $swfMember,
+        ]);
+    }
+}
