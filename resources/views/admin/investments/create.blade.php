@@ -49,24 +49,28 @@
       </div>
 
       <!-- Product Details (shown when product is selected) -->
-      <div x-show="selectedProduct" class="mb-6 p-4 rounded-xl bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800/40">
+      <div x-show="selectedProduct" 
+           x-transition:enter="transition ease-out duration-200"
+           x-transition:enter-start="opacity-0 transform -translate-y-2"
+           x-transition:enter-end="opacity-100 transform translate-y-0"
+           class="mb-6 p-4 rounded-xl bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800/40">
         <h4 class="text-sm font-bold text-teal-700 dark:text-teal-300 mb-2">Product Details</h4>
         <div class="grid grid-cols-2 gap-4 text-xs">
           <div>
             <span class="text-teal-600 dark:text-teal-400">Interest Rate:</span>
-            <span class="font-bold text-teal-900 dark:text-teal-100" x-text="selectedProduct.interest_rate + '%'"></span>
+            <span class="font-bold text-teal-900 dark:text-teal-100" x-text="(selectedProduct.interest_rate || 0).toFixed(1) + '%'"></span>
           </div>
           <div>
             <span class="text-teal-600 dark:text-teal-400">Duration:</span>
-            <span class="font-bold text-teal-900 dark:text-teal-100" x-text="selectedProduct.duration + ' months'"></span>
+            <span class="font-bold text-teal-900 dark:text-teal-100" x-text="(selectedProduct.duration || 0) + ' months'"></span>
           </div>
           <div>
             <span class="text-teal-600 dark:text-teal-400">Min Investment:</span>
-            <span class="font-bold text-teal-900 dark:text-teal-100" x-text="formatCurrency(selectedProduct.min_investment)"></span>
+            <span class="font-bold text-teal-900 dark:text-teal-100" x-text="formatCurrency(selectedProduct.min_investment || 0)"></span>
           </div>
           <div>
             <span class="text-teal-600 dark:text-teal-400">Max Investment:</span>
-            <span class="font-bold text-teal-900 dark:text-teal-100" x-text="formatCurrency(selectedProduct.max_investment)"></span>
+            <span class="font-bold text-teal-900 dark:text-teal-100" x-text="formatCurrency(selectedProduct.max_investment || 0)"></span>
           </div>
         </div>
       </div>
@@ -79,6 +83,7 @@
         <input type="number" name="amount" required min="0" step="0.01"
                class="form-input w-full"
                x-model="form.amount"
+               @input="calculateExpectedReturn"
                placeholder="Enter investment amount"/>
         @error('amount')
           <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>
@@ -127,12 +132,16 @@
       </div>
 
       <!-- Expected Return Preview -->
-      <div x-show="form.amount && selectedProduct" class="mb-6 p-4 rounded-xl bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800/40">
+      <div x-show="form.amount && selectedProduct" 
+           x-transition:enter="transition ease-out duration-200"
+           x-transition:enter-start="opacity-0 transform -translate-y-2"
+           x-transition:enter-end="opacity-100 transform translate-y-0"
+           class="mb-6 p-4 rounded-xl bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800/40">
         <h4 class="text-sm font-bold text-primary-700 dark:text-primary-300 mb-2">Investment Summary</h4>
         <div class="grid grid-cols-2 gap-4 text-xs">
           <div>
             <span class="text-primary-600 dark:text-primary-400">Invested Amount:</span>
-            <span class="font-bold text-primary-900 dark:text-white" x-text="formatCurrency(form.amount)"></span>
+            <span class="font-bold text-primary-900 dark:text-white" x-text="formatCurrency(parseFloat(form.amount) || 0)"></span>
           </div>
           <div>
             <span class="text-primary-600 dark:text-primary-400">Expected Return:</span>
@@ -140,11 +149,11 @@
           </div>
           <div>
             <span class="text-primary-600 dark:text-primary-400">Expected Profit:</span>
-            <span class="font-bold text-green-600 dark:text-green-400" x-text="formatCurrency(calculateExpectedReturn() - form.amount)"></span>
+            <span class="font-bold text-green-600 dark:text-green-400" x-text="formatCurrency(calculateExpectedReturn() - (parseFloat(form.amount) || 0))"></span>
           </div>
           <div>
             <span class="text-primary-600 dark:text-primary-400">Return Percentage:</span>
-            <span class="font-bold text-primary-900 dark:text-white" x-text="selectedProduct.interest_rate + '%'"></span>
+            <span class="font-bold text-primary-900 dark:text-white" x-text="(selectedProduct.interest_rate || 0).toFixed(1) + '%'"></span>
           </div>
         </div>
       </div>
