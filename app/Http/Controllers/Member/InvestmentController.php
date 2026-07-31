@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Member;
 
-use App\Contracts\GoogleSheetRepositoryInterface;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\Investment;
+use App\Services\AdminDashboardService;
 use App\Traits\FlashMessages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,7 +19,7 @@ class InvestmentController extends Controller
     use FlashMessages;
 
     public function __construct(
-        protected GoogleSheetRepositoryInterface $repository,
+        protected AdminDashboardService $dashboardService,
     ) {}
 
     public function index(Request $request): View
@@ -28,48 +29,47 @@ class InvestmentController extends Controller
         $user = Auth::user();
         $memberNumber = $user->member_number;
 
-        $investments = $this->repository->getMemberInvestments($memberNumber);
+        $investments = Investment::with(['investmentProduct'])
+            ->where('member_number', $memberNumber)
+            ->orderBy('investment_date', 'desc')
+            ->get();
 
-        $processedInvestments = array_map(function (array $inv): array {
-            $amountInvested = (float) ($inv['amount_invested'] ?? 0);
-            $currentValue = (float) ($inv['current_value'] ?? 0);
-            $profitEarned = (float) ($inv['profit_earned'] ?? 0);
-            $returnRate = (float) ($inv['return_rate'] ?? 0);
-
-            $isProfit = $profitEarned >= 0;
-            $sparkline = $this->generateSparkline($inv['history'] ?? [], $currentValue, $amountInvested);
-
-            return array_merge($inv, [
-                'amount_invested_float' => $amountInvested,
-                'current_value_float' => $currentValue,
-                'profit_earned_float' => $profitEarned,
-                'return_rate_float' => $returnRate,
-                'is_profit' => $isProfit,
-                'sparkline' => $sparkline,
-            ]);
-        }, $investments);
-
-        $totalInvested = array_sum(array_column($processedInvestments, 'amount_invested_float'));
-        $totalValue = array_sum(array_column($processedInvestments, 'current_value_float'));
-        $totalProfit = $totalValue - $totalInvested;
-        $overallReturn = $totalInvested > 0 ? round(($totalProfit / $totalInvested) * 100, 2) : 0;
-        $productsCount = count($processedInvestments);
-
-        $transactionHistory = [];
-        foreach ($processedInvestments as $inv) {
-            if (! empty($inv['history']) && is_array($inv['history'])) {
-                foreach ($inv['history'] as $event) {
-                    $transactionHistory[] = [
-                        'date' => $event['date'] ?? '',
-                        'product' => $inv['product'] ?? 'Investment',
-                        'type' => $event['type'] ?? 'Transaction',
-                        'value' => (float) ($event['value'] ?? 0),
-                        'units' => $inv['units'] ?? null,
-                    ];
-                }
+        $enrichedInvestments = $investments->map(function ($inv) {
+            $productName = $inv->investmentProduct ? $inv->investmentProduct->name : 'Unknown Product';
+            $productCode = $inv->investmentProduct ? $inv->investmentProduct->code : 'Unknown';
+            $duration = '';
+            if ($inv->investment_date && $inv->maturity_date) {
+                $duration = $inv->investment_date->diffInMonths($inv->maturity_date) . ' months';
             }
-        }
-        usort($transactionHistory, static fn($a, $b): int => strtotime($b['date']) <=> strtotime($a['date']));
+            $actualReturn = $inv->actual_return ?? 0;
+            $expectedReturn = $inv->expected_return ?? 0;
+            $amount = $inv->amount ?? 0;
+            
+            // Use expected_return for profit calculation if actual_return equals amount (new investment)
+            $returnValue = ($actualReturn == $amount) ? $expectedReturn : $actualReturn;
+            $profit = $returnValue - $amount;
+            $profitPct = $amount > 0 ? (($profit / $amount) * 100) : 0;
+            $status = $this->dashboardService->depositStatusBadge($inv->status ?? null);
+
+            return (object) [
+                'investment' => $inv,
+                'product_name' => $productName,
+                'product_code' => $productCode,
+                'duration' => $duration,
+                'profit' => $profit,
+                'profit_pct' => $profitPct,
+                'status' => $status,
+            ];
+        });
+
+        $totalInvested = $investments->sum('amount');
+        $totalCurrentValue = $investments->sum(function ($inv) {
+            $returnValue = ($inv->actual_return == $inv->amount) ? ($inv->expected_return ?? 0) : ($inv->actual_return ?? 0);
+            return $returnValue;
+        });
+        $totalProfit = $totalCurrentValue - $totalInvested;
+        $overallReturn = $totalInvested > 0 ? (($totalCurrentValue - $totalInvested) / $totalInvested) * 100 : 0;
+        $productsCount = $investments->count();
 
         ActivityLog::create([
             'user_id' => $user->id,
@@ -79,57 +79,20 @@ class InvestmentController extends Controller
             'properties' => [
                 'member_number' => $memberNumber,
                 'investment_count' => $productsCount,
-                'total_value' => $totalValue,
+                'total_value' => $totalCurrentValue,
             ],
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
         ]);
 
-        return view('member.investments.index', compact(
-            'processedInvestments',
-            'investments',
-            'totalInvested',
-            'totalValue',
-            'totalProfit',
-            'overallReturn',
-            'productsCount',
-            'transactionHistory'
-        ));
-    }
-
-    protected function generateSparkline(?array $history, float $currentValue, float $startValue): array
-    {
-        $points = 8;
-        $sparkline = [];
-
-        if (! empty($history) && is_array($history)) {
-            $sorted = $history;
-            usort($sorted, static fn($a, $b): int => strtotime($a['date'] ?? '') <=> strtotime($b['date'] ?? ''));
-            $values = array_map(static fn($h) => (float) ($h['value'] ?? 0), $sorted);
-
-            if (count($values) >= 2) {
-                $step = (count($values) - 1) / ($points - 1);
-                for ($i = 0; $i < $points; $i++) {
-                    $idx = (int) floor($i * $step);
-                    $nextIdx = min(count($values) - 1, $idx + 1);
-                    $frac = ($i * $step) - $idx;
-                    $val = $values[$idx] + ($values[$nextIdx] - $values[$idx]) * $frac;
-                    $sparkline[] = round($val, 2);
-                }
-            } else {
-                $sparkline = array_fill(0, $points, $startValue);
-            }
-        } else {
-            $step = ($currentValue - $startValue) / ($points - 1);
-            for ($i = 0; $i < $points; $i++) {
-                $sparkline[] = round($startValue + ($step * $i), 2);
-            }
-        }
-
-        if (! empty($sparkline)) {
-            $sparkline[count($sparkline) - 1] = $currentValue;
-        }
-
-        return $sparkline;
+        return view('member.investments.index', [
+            'investments' => $enrichedInvestments,
+            'totalInvested' => $totalInvested,
+            'totalCurrentValue' => $totalCurrentValue,
+            'totalProfit' => $totalProfit,
+            'overallReturn' => $overallReturn,
+            'productsCount' => $productsCount,
+            'dashboardService' => $this->dashboardService,
+        ]);
     }
 }

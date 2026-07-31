@@ -39,7 +39,7 @@
             </div>
             <p class="text-[11px] uppercase font-bold tracking-wider text-primary-500 dark:text-primary-400 mb-1">Current Value</p>
             <p class="text-2xl lg:text-3xl font-extrabold text-primary-900 dark:text-white leading-tight tabular-nums">
-                {{ fmtTshInv($totalValue) }}
+                {{ fmtTshInv($totalCurrentValue) }}
             </p>
             <p class="text-[11px] text-primary-500 dark:text-primary-400 mt-1">
                 Market value today
@@ -64,28 +64,45 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-        @forelse($investments as $inv)
+        @forelse($investments as $item)
+            @php
+                $inv = $item->investment;
+                $productName = $item->product_name;
+                $productCode = $item->product_code;
+                $duration = $item->duration;
+                $profit = $item->profit;
+                $profitPct = $item->profit_pct;
+                $status = $item->status;
+                
+                // Handle status object
+                if (is_array($status)) {
+                    $statusClass = $status['class'] ?? 'badge-gray';
+                    $statusLabel = $status['label'] ?? 'Unknown';
+                } elseif (is_object($status)) {
+                    $statusClass = $status->class ?? 'badge-gray';
+                    $statusLabel = $status->label ?? 'Unknown';
+                } else {
+                    $statusLabel = ucfirst($status ?? 'Unknown');
+                    $statusClass = match(strtolower($status ?? '')) {
+                        'active' => 'badge-green',
+                        'matured', 'completed' => 'badge-blue',
+                        'pending' => 'badge-yellow',
+                        default => 'badge-gray',
+                    };
+                }
+            @endphp
             <div class="glass p-5 rounded-2xl hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 flex flex-col">
                 <div class="flex items-start justify-between gap-3 mb-4">
                     <div class="flex-1 min-w-0">
                         <h3 class="font-bold text-primary-900 dark:text-white text-base leading-tight mb-1">
-                            {{ $inv['product'] ?? 'Investment' }}
+                            {{ $productName }}
                         </h3>
                         <p class="text-[11px] text-primary-500 dark:text-primary-400">
-                            Started: {{ $inv['start_date'] ? \Carbon\Carbon::parse($inv['start_date'])->format('M j, Y') : '—' }}
+                            Started: {{ $inv->investment_date ? \Carbon\Carbon::parse($inv->investment_date)->format('M j, Y') : '—' }}
                         </p>
                     </div>
-                    @php
-                        $status = $inv['status'] ?? 'active';
-                        $statusClass = match(strtolower($status)) {
-                            'active' => 'badge-green',
-                            'matured', 'completed' => 'badge-blue',
-                            'pending' => 'badge-yellow',
-                            default => 'badge-gray',
-                        };
-                    @endphp
                     <span class="badge {{ $statusClass }} flex-shrink-0">
-                        {{ ucfirst($status) }}
+                        {{ $statusLabel }}
                     </span>
                 </div>
 
@@ -93,25 +110,24 @@
                     <div>
                         <p class="text-[10px] uppercase font-bold tracking-wider text-primary-500 dark:text-primary-400 mb-1">Invested</p>
                         <p class="text-sm font-bold text-primary-900 dark:text-white tabular-nums">
-                            {{ fmtTshInv($inv['amount_invested'] ?? 0) }}
+                            {{ fmtTshInv($inv->amount ?? 0) }}
                         </p>
                     </div>
                     <div>
-                        <p class="text-[10px] uppercase font-bold tracking-wider text-primary-500 dark:text-primary-400 mb-1">Units</p>
+                        <p class="text-[10px] uppercase font-bold tracking-wider text-primary-500 dark:text-primary-400 mb-1">Duration</p>
                         <p class="text-sm font-bold text-primary-900 dark:text-white tabular-nums">
-                            {{ number_format($inv['units'] ?? 0, 2) }}
+                            {{ $duration ?: '—' }}
                         </p>
                     </div>
                     <div>
                         <p class="text-[10px] uppercase font-bold tracking-wider text-primary-500 dark:text-primary-400 mb-1">Current Value</p>
                         <p class="text-sm font-bold text-primary-900 dark:text-white tabular-nums">
-                            {{ fmtTshInv($inv['current_value'] ?? 0) }}
+                            {{ fmtTshInv($inv->actual_return ?? $inv->expected_return ?? 0) }}
                         </p>
                     </div>
                     <div>
                         <p class="text-[10px] uppercase font-bold tracking-wider text-primary-500 dark:text-primary-400 mb-1">Profit/Loss</p>
                         @php
-                            $profit = $inv['profit'] ?? 0;
                             $profitClass = $profit >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
                         @endphp
                         <p class="text-sm font-bold {{ $profitClass }} tabular-nums">
@@ -123,20 +139,17 @@
                 <div class="mb-4 pt-3 border-t border-primary-100 dark:border-dark-border">
                     <div class="flex items-end justify-between mb-2">
                         <p class="text-[10px] uppercase font-bold tracking-wider text-primary-500 dark:text-primary-400">Return</p>
-                        @php
-                            $returnPct = $inv['return_percentage'] ?? 0;
-                        @endphp
-                        <p class="text-lg font-bold {{ $returnPct >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }} tabular-nums">
-                            {{ $returnPct >= 0 ? '+' : '' }}{{ number_format($returnPct, 2) }}%
+                        <p class="text-lg font-bold {{ $profitPct >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }} tabular-nums">
+                            {{ $profitPct >= 0 ? '+' : '' }}{{ number_format($profitPct, 2) }}%
                         </p>
                     </div>
                     <div class="progress-bar">
-                        <div class="progress-fill {{ $returnPct >= 0 ? 'bg-green-500' : 'bg-red-500' }}" style="width: {{ min(abs($returnPct), 100) }}%"></div>
+                        <div class="progress-fill {{ $profitPct >= 0 ? 'bg-green-500' : 'bg-red-500' }}" style="width: {{ min(abs($profitPct), 100) }}%"></div>
                     </div>
                 </div>
 
                 <div class="mt-auto pt-3">
-                    <a href="{{ route('member.investments.show', $inv['id'] ?? 'default') }}"
+                    <a href="{{ route('admin.investments.show', app('App\Services\EncryptedIdService')->encrypt($inv->member_number)) }}"
                        class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-br from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-lg shadow-teal-500/20 hover:shadow-teal-500/30 transition-all">
                         <i class="fa-solid fa-circle-info text-xs"></i>
                         View Details
