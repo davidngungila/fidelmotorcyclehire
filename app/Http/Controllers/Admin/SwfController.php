@@ -78,7 +78,7 @@ class SwfController extends Controller
         ]);
     }
 
-    public function show(Request $request, int $id): View
+    public function show(Request $request, string $id): View
     {
         Gate::authorize('admin-only');
 
