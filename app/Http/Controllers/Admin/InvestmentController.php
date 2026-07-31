@@ -62,7 +62,7 @@ class InvestmentController extends Controller
         $investments->through(function ($inv) {
             $memberNo = $inv->member_number ?? '-';
             $memberName = $inv->user ? $inv->user->name : 'Unknown';
-            $product = $inv->investmentProduct ? $inv->investmentProduct->name : 'Unknown Product';
+            $product = $inv->investmentProduct ? $inv->investmentProduct->code : 'Unknown';
             $amountInvested = $inv->amount ?? 0;
             $currentValue = $inv->actual_return ?? 0;
             $profit = ($inv->actual_return ?? 0) - ($inv->amount ?? 0);
