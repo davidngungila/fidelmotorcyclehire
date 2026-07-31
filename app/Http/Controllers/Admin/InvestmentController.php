@@ -37,15 +37,12 @@ class InvestmentController extends Controller
         $searchQuery = $request->input('q', '');
         $statusFilter = $request->input('status', '');
 
-        $query = Investment::with(['user', 'investmentProduct']);
+        $query = Investment::with(['investmentProduct']);
 
         // Search
         if (!empty($searchQuery)) {
             $query->where('investment_number', 'like', '%' . $searchQuery . '%')
-                  ->orWhere('member_number', 'like', '%' . $searchQuery . '%')
-                  ->orWhereHas('user', function ($q) use ($searchQuery) {
-                      $q->where('name', 'like', '%' . $searchQuery . '%');
-                  });
+                  ->orWhere('member_number', 'like', '%' . $searchQuery . '%');
         }
 
         // Filter by status
@@ -58,22 +55,22 @@ class InvestmentController extends Controller
 
         $investments = $query->paginate($perPage);
 
+        // Load all users by member_number for efficient lookup
+        $memberNumbers = $investments->pluck('member_number')->filter()->unique();
+        $usersByMemberNumber = User::whereIn('member_number', $memberNumbers)
+            ->pluck('name', 'member_number')
+            ->toArray();
+
         // Enrich investments with calculated values while preserving pagination
-        $investments->through(function ($inv) {
+        $investments->through(function ($inv) use ($usersByMemberNumber) {
             $memberNo = $inv->member_number ?? '-';
             
-            // Try to get member name from user relationship first
-            $memberName = null;
-            if ($inv->user && !empty($inv->user->name)) {
-                $memberName = $inv->user->name;
-            }
+            // Try to get member name from cache first
+            $memberName = $usersByMemberNumber[$memberNo] ?? null;
             
-            // If not found via relationship, try to find user by member_number
-            if (empty($memberName) && !empty($memberNo) && $memberNo !== '-') {
-                $user = User::where('member_number', $memberNo)->first();
-                if ($user && !empty($user->name)) {
-                    $memberName = $user->name;
-                }
+            // If not found in cache, try user relationship
+            if (empty($memberName) && $inv->user && !empty($inv->user->name)) {
+                $memberName = $inv->user->name;
             }
             
             // If still not found, use member_number as fallback
