@@ -13,20 +13,25 @@
 <div class="space-y-6">
   <!-- Member Header -->
   @if($member)
+    @php
+      $memberInitial = isset($member['name']) ? strtoupper(substr($member['name'], 0, 1)) : 'M';
+      $memberName = isset($member['name']) ? $member['name'] : 'Unknown';
+      $memberEmail = isset($member['email']) ? $member['email'] : '-';
+    @endphp
     <div class="glass p-6">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div class="flex items-center gap-4">
           <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-400 to-teal-600 text-white flex items-center justify-center text-2xl font-bold shadow-lg">
-            {{ strtoupper(substr($member['name'] ?? 'M', 0, 1)) }}
+            {{ $memberInitial }}
           </div>
           <div>
-            <h2 class="text-xl font-bold text-primary-900 dark:text-white">{{ $member['name'] ?? 'Unknown' }}</h2>
+            <h2 class="text-xl font-bold text-primary-900 dark:text-white">{{ $memberName }}</h2>
             <div class="flex items-center gap-3 mt-1">
               <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-teal-50 dark:bg-teal-900/40 font-mono text-xs font-bold text-teal-700 dark:text-teal-300">
                 <i class="fa-solid fa-id-card text-[10px]"></i>
                 {{ $memberNumber }}
               </span>
-              <span class="text-xs text-primary-500 dark:text-primary-400">{{ $member['email'] ?? '-' }}</span>
+              <span class="text-xs text-primary-500 dark:text-primary-400">{{ $memberEmail }}</span>
             </div>
           </div>
         </div>
@@ -120,34 +125,55 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
           <div class="bg-teal-50 dark:bg-teal-900/30 rounded-xl p-4">
             <p class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase mb-1">Amount Invested</p>
-            <p class="text-lg font-black text-primary-900 dark:text-white">{{ $fmt($investment->amount) }}</p>
+            @php
+              $amountValue = isset($investment->amount) ? $investment->amount : 0;
+            @endphp
+            <p class="text-lg font-black text-primary-900 dark:text-white">{{ $fmt($amountValue) }}</p>
           </div>
           <div class="bg-teal-50 dark:bg-teal-900/30 rounded-xl p-4">
             <p class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase mb-1">Interest Rate</p>
-            <p class="text-lg font-black text-primary-900 dark:text-white">{{ number_format($investment->interest_rate, 2) }}%</p>
+            @php
+              $interestRateValue = isset($investment->interest_rate) ? $investment->interest_rate : 0;
+            @endphp
+            <p class="text-lg font-black text-primary-900 dark:text-white">{{ number_format($interestRateValue, 2) }}%</p>
           </div>
           <div class="bg-teal-50 dark:bg-teal-900/30 rounded-xl p-4">
             <p class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase mb-1">Expected Return</p>
-            <p class="text-lg font-black text-primary-900 dark:text-white">{{ $fmt($investment->expected_return) }}</p>
+            @php
+              $expectedReturnValue = isset($investment->expected_return) ? $investment->expected_return : 0;
+            @endphp
+            <p class="text-lg font-black text-primary-900 dark:text-white">{{ $fmt($expectedReturnValue) }}</p>
           </div>
           <div class="bg-teal-50 dark:bg-teal-900/30 rounded-xl p-4">
             <p class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase mb-1">Actual Return</p>
-            <p class="text-lg font-black text-primary-900 dark:text-white">{{ $fmt($investment->actual_return) }}</p>
+            @php
+              $actualReturnValue = isset($investment->actual_return) ? $investment->actual_return : 0;
+            @endphp
+            <p class="text-lg font-black text-primary-900 dark:text-white">{{ $fmt($actualReturnValue) }}</p>
           </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
           <div class="bg-primary-50 dark:bg-primary-900/30 rounded-xl p-4">
             <p class="text-[10px] font-bold text-primary-600 dark:text-primary-400 uppercase mb-1">Investment Date</p>
-            <p class="text-sm font-bold text-primary-900 dark:text-white">{{ $investment->investment_date ? $investment->investment_date->format('M d, Y') : '-' }}</p>
+            @php
+              $investmentDate = isset($investment->investment_date) && $investment->investment_date ? $investment->investment_date->format('M d, Y') : '-';
+            @endphp
+            <p class="text-sm font-bold text-primary-900 dark:text-white">{{ $investmentDate }}</p>
           </div>
           <div class="bg-primary-50 dark:bg-primary-900/30 rounded-xl p-4">
             <p class="text-[10px] font-bold text-primary-600 dark:text-primary-400 uppercase mb-1">Maturity Date</p>
-            <p class="text-sm font-bold text-primary-900 dark:text-white">{{ $investment->maturity_date ? $investment->maturity_date->format('M d, Y') : '-' }}</p>
+            @php
+              $maturityDate = isset($investment->maturity_date) && $investment->maturity_date ? $investment->maturity_date->format('M d, Y') : '-';
+            @endphp
+            <p class="text-sm font-bold text-primary-900 dark:text-white">{{ $maturityDate }}</p>
           </div>
           <div class="bg-primary-50 dark:bg-primary-900/30 rounded-xl p-4">
             <p class="text-[10px] font-bold text-primary-600 dark:text-primary-400 uppercase mb-1">Duration</p>
-            <p class="text-sm font-bold text-primary-900 dark:text-white">{{ $duration ?: '-' }}</p>
+            @php
+              $durationDisplay = $duration ?: '-';
+            @endphp
+            <p class="text-sm font-bold text-primary-900 dark:text-white">{{ $durationDisplay }}</p>
           </div>
         </div>
 
