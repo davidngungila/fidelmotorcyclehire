@@ -101,11 +101,14 @@ class CommunicationController extends Controller
         $request->validate([
             'phone' => 'required|string',
             'template' => 'required|string',
+            'personalisation' => 'nullable|array',
+            'test' => 'nullable|boolean',
         ]);
 
         try {
             $phone = $request->input('phone');
             $template = $request->input('template');
+            $personalisation = $request->input('personalisation');
             $test = $request->input('test', false);
 
             // Format phone number
@@ -114,7 +117,20 @@ class CommunicationController extends Controller
                 $phone = '255' . ltrim($phone, '0');
             }
 
-            $result = $this->whatsappService->sendTextMessage([$phone], $template, $test);
+            // Use personalized message if personalisation data is provided
+            if ($personalisation && is_array($personalisation)) {
+                $result = $this->whatsappService->sendPersonalizedMessage([$phone], $template, $personalisation, $test);
+            } else {
+                $result = $this->whatsappService->sendTextMessage([$phone], $template, $test);
+            }
+
+            if (isset($result['success']) && $result['success'] === false) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $result['error'] ?? 'Failed to send test message',
+                    'result' => $result,
+                ]);
+            }
 
             return response()->json([
                 'success' => true,
