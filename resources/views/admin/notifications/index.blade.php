@@ -13,6 +13,11 @@
             <p class="text-sm text-primary-600 dark:text-primary-400">Stay updated with system activities and announcements</p>
         </div>
         <div class="flex items-center gap-2">
+            <a href="{{ route('admin.notifications.create') }}"
+                    class="px-4 py-2 rounded-xl bg-green-600 hover:bg-green-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95 inline-flex items-center gap-2">
+                <i class="fa-solid fa-plus text-[12px]"></i>
+                <span>Create</span>
+            </a>
             <span class="badge badge-blue text-xs">Total: {{ count($notifications) }}</span>
             @if($unreadCount > 0)
                 <span class="badge badge-green text-xs">{{ $unreadCount }} Unread</span>
@@ -74,12 +79,13 @@
     <div class="space-y-3">
         @forelse($notifications as $notification)
             @php
-                $isUnread = !($notification['is_read'] ?? false);
-                $category = $notification['category'] ?? 'general';
-                $priority = $notification['priority'] ?? 'normal';
+                $isUnread = !$notification->is_read;
+                $category = $notification->category ?? 'general';
+                $priority = $notification->priority ?? 'normal';
                 $categoryConfig = match($category) {
                     'announcement' => ['icon' => 'fa-bullhorn', 'color' => 'blue', 'label' => 'Announcement'],
                     'system' => ['icon' => 'fa-gear', 'color' => 'purple', 'label' => 'System'],
+                    'alert' => ['icon' => 'fa-triangle-exclamation', 'color' => 'red', 'label' => 'Alert'],
                     default => ['icon' => 'fa-circle-info', 'color' => 'blue', 'label' => 'Info'],
                 };
                 $priorityConfig = match($priority) {
@@ -110,7 +116,7 @@
                                     <span class="badge badge-orange text-[10px] mb-1 ml-1">High</span>
                                 @endif
                                 <h3 class="font-bold text-primary-900 dark:text-white text-sm">
-                                    {{ $notification['title'] ?? 'Notification' }}
+                                    {{ $notification->title }}
                                 </h3>
                             </div>
                             @if($isUnread)
@@ -118,18 +124,33 @@
                             @endif
                         </div>
                         <p class="text-sm text-primary-700 dark:text-primary-300 mb-2">
-                            {{ $notification['message'] ?? '' }}
+                            {{ $notification->message }}
                         </p>
-                        <div class="flex items-center gap-3 text-[11px] text-primary-500 dark:text-primary-400">
-                            <span class="flex items-center gap-1">
-                                <i class="fa-solid fa-clock text-[10px]"></i>
-                                {{ \Carbon\Carbon::parse($notification['date'] ?? now())->diffForHumans() }}
-                            </span>
-                            @if($notification['date'] ?? null)
-                                <span>
-                                    {{ \Carbon\Carbon::parse($notification['date'])->format('M j, Y g:i A') }}
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-3 text-[11px] text-primary-500 dark:text-primary-400">
+                                <span class="flex items-center gap-1">
+                                    <i class="fa-solid fa-clock text-[10px]"></i>
+                                    {{ $notification->created_at->diffForHumans() }}
                                 </span>
-                            @endif
+                                <span>
+                                    {{ $notification->created_at->format('M j, Y g:i A') }}
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                @if($isUnread)
+                                    <button onclick="markAsRead({{ $notification->id }})"
+                                            class="text-[11px] text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-200 transition-colors">
+                                        Mark as read
+                                    </button>
+                                @endif
+                                <form action="{{ route('admin.notifications.destroy', $notification->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this notification?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-[11px] text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200 transition-colors">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -150,3 +171,26 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+function markAsRead(id) {
+    fetch('{{ route('admin.notifications.mark-read', ':id') }}'.replace(':id', id), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+</script>
+@endpush

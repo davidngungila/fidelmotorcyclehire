@@ -70,6 +70,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/create', [AdminNotificationController::class, 'create'])->name('notifications.create');
+    Route::post('/notifications', [AdminNotificationController::class, 'store'])->name('notifications.store');
+    Route::post('/notifications/{id}/mark-read', [AdminNotificationController::class, 'markAsRead'])->name('notifications.mark-read');
+    Route::delete('/notifications/{id}', [AdminNotificationController::class, 'destroy'])->name('notifications.destroy');
 
     Route::get('/members', [AdminMemberController::class, 'index'])->name('members.index');
     Route::get('/members/template', [AdminMemberController::class, 'downloadTemplate'])->name('members.template');
