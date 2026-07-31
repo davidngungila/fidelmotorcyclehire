@@ -38,7 +38,7 @@ class InvestmentController extends Controller
         $statusFilter = $request->input('status', '');
 
         $query = Investment::with(['user', 'investmentProduct'])
-            ->leftJoin('users', 'investments.user_id', '=', 'users.id')
+            ->leftJoin('users', 'investments.member_number', '=', 'users.member_number')
             ->select('investments.*', 'users.name as user_name', 'users.member_number as user_member_number');
 
         // Search
