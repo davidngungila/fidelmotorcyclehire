@@ -11,8 +11,8 @@ class WhatsAppService
 {
     protected string $baseUrl;
     protected string $testUrl;
-    protected string $apiKey;
-    protected string $account;
+    protected ?string $apiKey;
+    protected ?string $account;
 
     public function __construct()
     {
