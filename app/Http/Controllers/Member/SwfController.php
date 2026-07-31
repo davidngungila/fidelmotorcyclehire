@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Member;
 
-use App\Contracts\GoogleSheetRepositoryInterface;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\SwfMember;
 use App\Traits\FlashMessages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,24 +17,41 @@ class SwfController extends Controller
 {
     use FlashMessages;
 
-    public function __construct(
-        protected GoogleSheetRepositoryInterface $repository,
-    ) {}
-
     public function index(Request $request): View
     {
         Gate::authorize('member-only');
 
         $user = Auth::user();
-        $memberNumber = $user->member_number;
+        $swfMember = $user->swfMember;
 
-        $swf = $this->repository->getMemberSwf($memberNumber);
+        if (!$swfMember) {
+            return view('member.swf.index', [
+                'swfMember' => null,
+                'totalContribution' => 0,
+                'benefits' => 0,
+                'currentBalance' => 0,
+                'processedHistory' => [],
+                'contributionHistory' => [],
+                'monthsContributed' => 0,
+                'avgContribution' => 0,
+                'benefitsInfo' => [],
+            ]);
+        }
 
-        $totalContribution = (float) ($swf['total_contribution'] ?? 0);
-        $benefits = (float) ($swf['benefits'] ?? 0);
-        $currentBalance = (float) ($swf['current_balance'] ?? 0);
+        $swfMember->load(['contributions', 'benefits']);
 
-        $contributionHistory = $swf['contribution_history'] ?? [];
+        $totalContribution = $swfMember->total_contributions;
+        $benefits = $swfMember->total_benefits_received;
+        $currentBalance = $swfMember->total_contributions - $swfMember->total_benefits_received;
+
+        $contributionHistory = $swfMember->contributions->map(function ($contribution) {
+            return [
+                'date' => $contribution->contribution_date->format('Y-m-d'),
+                'amount' => $contribution->amount,
+                'payment_method' => $contribution->payment_method,
+                'reference_number' => $contribution->reference_number,
+            ];
+        })->toArray();
 
         $processedHistory = array_map(static function (array $c): array {
             return array_merge($c, [
@@ -47,44 +64,23 @@ class SwfController extends Controller
         $monthsContributed = count($processedHistory);
         $avgContribution = $monthsContributed > 0 ? round($totalContribution / $monthsContributed, 2) : 0;
 
-        $benefitsInfo = [
-            [
-                'title' => 'Funeral Cover',
-                'amount' => 300000,
-                'description' => 'Beneficiary support in case of member demise.',
-                'icon' => 'fa-heart',
-                'color' => 'red',
-            ],
-            [
-                'title' => 'Medical Emergency',
-                'amount' => 100000,
-                'description' => 'Hospital bill support for serious conditions.',
-                'icon' => 'fa-kit-medical',
-                'color' => 'blue',
-            ],
-            [
-                'title' => 'Education Grant',
-                'amount' => 50000,
-                'description' => 'Annual grant for dependent school fees.',
-                'icon' => 'fa-graduation-cap',
+        $benefitsInfo = $swfMember->benefits->map(function ($benefit) {
+            return [
+                'title' => $benefit->name,
+                'amount' => $benefit->pivot->amount,
+                'description' => $benefit->description,
+                'icon' => 'fa-gift',
                 'color' => 'purple',
-            ],
-            [
-                'title' => 'Welfare Assistance',
-                'amount' => 25000,
-                'description' => 'General welfare & hardship support.',
-                'icon' => 'fa-hand-holding-heart',
-                'color' => 'yellow',
-            ],
-        ];
+            ];
+        })->toArray();
 
         ActivityLog::create([
             'user_id' => $user->id,
-            'subject_type' => 'swf',
-            'subject_id' => null,
+            'subject_type' => 'swf_member',
+            'subject_id' => $swfMember->id,
             'description' => 'Member viewed SWF',
             'properties' => [
-                'member_number' => $memberNumber,
+                'membership_number' => $swfMember->membership_number,
                 'current_balance' => $currentBalance,
                 'contribution_count' => count($processedHistory),
             ],
@@ -93,7 +89,7 @@ class SwfController extends Controller
         ]);
 
         return view('member.swf.index', compact(
-            'swf',
+            'swfMember',
             'totalContribution',
             'benefits',
             'currentBalance',

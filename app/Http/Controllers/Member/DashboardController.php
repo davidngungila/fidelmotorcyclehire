@@ -84,7 +84,31 @@ class DashboardController extends Controller
         
         $savings = ['transactions' => [], 'balance' => 0, 'running_balance' => 0]; // Placeholder for savings
         $deposits = []; // Placeholder for deposits
-        $swf = ['current_balance' => 0, 'contribution_history' => []]; // Placeholder for SWF
+        
+        // Get SWF data from database
+        $swfMember = $user->swfMember;
+        if ($swfMember) {
+            $swfMember->load(['contributions']);
+            $swfBalance = $swfMember->total_contributions - $swfMember->total_benefits_received;
+            $swfContributionHistory = $swfMember->contributions->map(function ($contribution) {
+                return [
+                    'date' => $contribution->contribution_date->format('Y-m-d'),
+                    'amount' => $contribution->amount,
+                    'payment_method' => $contribution->payment_method,
+                    'reference_number' => $contribution->reference_number,
+                    'description' => 'SWF Contribution',
+                ];
+            })->toArray();
+            $swf = [
+                'current_balance' => $swfBalance,
+                'contribution_history' => $swfContributionHistory,
+                'total_contributions' => $swfMember->total_contributions,
+                'total_benefits' => $swfMember->total_benefits_received,
+            ];
+        } else {
+            $swf = ['current_balance' => 0, 'contribution_history' => [], 'total_contributions' => 0, 'total_benefits' => 0];
+            $swfBalance = 0;
+        }
 
         // Get database transactions
         $dbTransactions = Transaction::byMemberCode($memberNumber)
@@ -131,7 +155,6 @@ class DashboardController extends Controller
         $loanBalance = collect($loans)->sum('outstanding_balance');
         $savingsBalance = $currentBalance;
         $depositBalance = 0; // Placeholder for deposits
-        $swfBalance = 0; // Placeholder for SWF
         $investmentBalance = collect($investments)->sum('current_value');
 
         // Filter active loans for dashboard display
