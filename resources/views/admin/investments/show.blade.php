@@ -41,17 +41,6 @@
 
   <!-- Summary Cards -->
   @if(isset($totalInvested))
-    @php
-      if ($totalProfit >= 0) {
-        $profitClass = 'bg-green-100 dark:bg-green-900/40';
-        $profitIcon = 'fa-arrow-trend-up text-green-600 dark:text-green-400';
-        $profitTextClass = 'text-green-600 dark:text-green-400';
-      } else {
-        $profitClass = 'bg-red-100 dark:bg-red-900/40';
-        $profitIcon = 'fa-arrow-trend-down text-red-600 dark:text-red-400';
-        $profitTextClass = 'text-red-600 dark:text-red-400';
-      }
-    @endphp
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <div class="glass p-5 rounded-2xl">
         <div class="flex items-center gap-3 mb-3">
@@ -73,12 +62,12 @@
       </div>
       <div class="glass p-5 rounded-2xl">
         <div class="flex items-center gap-3 mb-3">
-          <div class="w-10 h-10 rounded-xl {{ $profitClass }} flex items-center justify-center">
-            <i class="fa-solid {{ $profitIcon }} text-sm"></i>
+          <div class="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900/40 flex items-center justify-center">
+            <i class="fa-solid fa-arrow-trend-up text-green-600 dark:text-green-400 text-sm"></i>
           </div>
-          <p class="text-xs font-bold {{ $profitTextClass }} uppercase">Total Profit</p>
+          <p class="text-xs font-bold text-green-600 dark:text-green-400 uppercase">Total Profit</p>
         </div>
-        <p class="text-2xl font-black {{ $profitTextClass }}">
+        <p class="text-2xl font-black text-green-600 dark:text-green-400">
           {{ $totalProfit >= 0 ? '+' : '' }}{{ $fmt($totalProfit) }}
         </p>
       </div>
