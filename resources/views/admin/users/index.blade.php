@@ -502,9 +502,23 @@
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+              'Accept': 'application/json'
             }
           });
+          
+          const contentType = response.headers.get('content-type');
+          if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            console.error('Non-JSON response:', text);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'Server returned an unexpected response. Please check the logs.'
+            });
+            this.userIdToReset = null;
+            return;
+          }
           
           const data = await response.json();
           
@@ -512,11 +526,27 @@
             this.newPassword = data.new_password;
             this.userName = data.user_name;
             this.showPasswordModal = true;
+            Swal.fire({
+              icon: 'success',
+              title: 'Success',
+              text: 'Password reset successfully and sent to email.',
+              timer: 2000,
+              showConfirmButton: false
+            });
           } else {
-            alert('Failed to reset password: ' + data.message);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: data.message || 'Failed to reset password'
+            });
           }
         } catch (error) {
-          alert('Error resetting password: ' + error.message);
+          console.error('Password reset error:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Error resetting password: ' + error.message
+          });
         }
         
         this.userIdToReset = null;
@@ -557,12 +587,26 @@
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+              'Accept': 'application/json'
             },
             body: JSON.stringify({
               user_ids: this.selectedUsers
             })
           });
+          
+          const contentType = response.headers.get('content-type');
+          if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            console.error('Non-JSON response:', text);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'Server returned an unexpected response. Please check the logs.'
+            });
+            this.isBulkResetting = false;
+            return;
+          }
           
           const data = await response.json();
           
@@ -577,10 +621,19 @@
             this.selectedUsers = [];
             this.allSelected = false;
           } else {
-            alert('Failed to reset passwords: ' + data.message);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: data.message || 'Failed to reset passwords'
+            });
           }
         } catch (error) {
-          alert('Error resetting passwords: ' + error.message);
+          console.error('Bulk password reset error:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Error resetting passwords: ' + error.message
+          });
         }
         
         this.isBulkResetting = false;
