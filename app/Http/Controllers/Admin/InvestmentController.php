@@ -68,11 +68,6 @@ class InvestmentController extends Controller
             // Try to get member name from cache first
             $memberName = $usersByMemberNumber[$memberNo] ?? null;
             
-            // If not found in cache, try user relationship
-            if (empty($memberName) && $inv->user && !empty($inv->user->name)) {
-                $memberName = $inv->user->name;
-            }
-            
             // If still not found, use member_number as fallback
             if (empty($memberName)) {
                 $memberName = $memberNo;
