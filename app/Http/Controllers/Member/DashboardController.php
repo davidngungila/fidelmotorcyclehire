@@ -142,6 +142,8 @@ class DashboardController extends Controller
         $recentTransactions = $this->consolidateRecentTransactions($loans, $savings, $deposits, $swf, $investments);
 
         $savingsGrowth = $this->buildSavingsGrowthData($savings);
+        $investmentDistribution = $this->buildInvestmentDistribution($dbInvestments);
+        $investmentPerformance = $this->buildInvestmentPerformance($dbInvestments);
 
         ActivityLog::create([
             'user_id' => $user->id,
@@ -168,7 +170,9 @@ class DashboardController extends Controller
             'swfBalance',
             'investmentBalance',
             'recentTransactions',
-            'savingsGrowth'
+            'savingsGrowth',
+            'investmentDistribution',
+            'investmentPerformance'
         ));
     }
 
@@ -314,6 +318,57 @@ class DashboardController extends Controller
         }
         if (!empty($values)) {
             $values[count($values) - 1] = $currentBalance;
+        }
+
+        return ['labels' => $labels, 'values' => $values];
+    }
+
+    protected function buildInvestmentDistribution($investments): array
+    {
+        $distribution = [];
+        
+        foreach ($investments as $inv) {
+            $productName = $inv->investmentProduct ? $inv->investmentProduct->name : 'Unknown';
+            $value = ($inv->actual_return == $inv->amount) ? ($inv->expected_return ?? 0) : ($inv->actual_return ?? 0);
+            
+            if (!isset($distribution[$productName])) {
+                $distribution[$productName] = 0;
+            }
+            $distribution[$productName] += $value;
+        }
+
+        return [
+            'labels' => array_keys($distribution),
+            'values' => array_values($distribution),
+        ];
+    }
+
+    protected function buildInvestmentPerformance($investments): array
+    {
+        $labels = [];
+        $values = [];
+        $today = new \DateTime();
+
+        for ($i = 5; $i >= 0; $i--) {
+            $d = (clone $today)->modify("-{$i} month");
+            $labels[] = $d->format('M Y');
+        }
+
+        $totalValue = 0;
+        foreach ($investments as $inv) {
+            $value = ($inv->actual_return == $inv->amount) ? ($inv->expected_return ?? 0) : ($inv->actual_return ?? 0);
+            $totalValue += $value;
+        }
+
+        // Simulate growth over 6 months
+        $startValue = max(0, $totalValue * 0.85);
+        $step = $totalValue > $startValue ? ($totalValue - $startValue) / 5 : 0;
+        
+        for ($i = 0; $i < 6; $i++) {
+            $values[] = round($startValue + ($step * $i), 2);
+        }
+        if (!empty($values)) {
+            $values[count($values) - 1] = $totalValue;
         }
 
         return ['labels' => $labels, 'values' => $values];

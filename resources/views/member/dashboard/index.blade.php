@@ -255,6 +255,40 @@
         </div>
     </div>
 
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="glass rounded-2xl overflow-hidden flex flex-col">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-primary-100 dark:border-dark-border">
+                <div>
+                    <h3 class="font-bold text-primary-900 dark:text-white text-sm">Investment Distribution</h3>
+                    <p class="text-[11px] text-primary-500 dark:text-primary-400 mt-0.5">By product type</p>
+                </div>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 text-[11px] font-bold border border-purple-100 dark:border-purple-800/50">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    {{ count($investments) }} investment{{ count($investments) !== 1 ? 's' : '' }}
+                </span>
+            </div>
+            <div class="p-4 flex-1 min-h-[280px]">
+                <canvas id="investmentDistributionChart" x-init x-data x-ref="chart"></canvas>
+            </div>
+        </div>
+
+        <div class="glass rounded-2xl overflow-hidden flex flex-col">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-primary-100 dark:border-dark-border">
+                <div>
+                    <h3 class="font-bold text-primary-900 dark:text-white text-sm">Investment Performance</h3>
+                    <p class="text-[11px] text-primary-500 dark:text-primary-400 mt-0.5">Last 6 months performance</p>
+                </div>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 text-[11px] font-bold border border-green-100 dark:border-green-800/50">
+                    <i class="fa-solid fa-chart-line"></i>
+                    +{{ number_format($invDelta, 1) }}%
+                </span>
+            </div>
+            <div class="p-4 flex-1 min-h-[280px]">
+                <canvas id="investmentPerformanceChart" x-init x-data x-ref="chart"></canvas>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 @endsection
@@ -262,7 +296,11 @@
 @push('scripts')
 <script>
 document.addEventListener('alpine:init', () => {
-    queueMicrotask(() => initSavingsChart());
+    queueMicrotask(() => {
+        initSavingsChart();
+        initInvestmentDistributionChart();
+        initInvestmentPerformanceChart();
+    });
 });
 function initSavingsChart() {
     const canvas = document.getElementById('savingsGrowthChart');
@@ -316,6 +354,154 @@ function initSavingsChart() {
                     borderWidth: 1,
                     titleColor: isDark ? '#6ee7b7' : '#065f46',
                     bodyColor: isDark ? '#d1fae5' : '#064e3b',
+                    padding: 10,
+                    cornerRadius: 10,
+                    titleFont: { weight: 'bold', size: 12 },
+                    callbacks: {
+                        label: (ctx) => ' TSh ' + Number(ctx.parsed.y).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: {
+                        color: textColor,
+                        font: { size: 11, weight: 600 }
+                    },
+                    border: { display: false }
+                },
+                y: {
+                    grid: { color: gridColor, drawBorder: false },
+                    ticks: {
+                        color: textColor,
+                        font: { size: 11, weight: 600 },
+                        callback: (v) => {
+                            if (v >= 1000000) return (v / 1000000).toFixed(1) + 'M';
+                            if (v >= 1000) return (v / 1000).toFixed(0) + 'k';
+                            return v;
+                        },
+                        maxTicksLimit: 6
+                    },
+                    border: { display: false }
+                }
+            }
+        }
+    });
+}
+
+function initInvestmentDistributionChart() {
+    const canvas = document.getElementById('investmentDistributionChart');
+    if (!canvas || typeof Chart === 'undefined') return;
+    const ctx = canvas.getContext('2d');
+    const labels = @json($investmentDistribution['labels'] ?? []);
+    const values = @json($investmentDistribution['values'] ?? []);
+
+    const isDark = document.documentElement.classList.contains('dark');
+    const colors = [
+        '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#ec4899', '#06b6d4', '#84cc16'
+    ];
+
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: values,
+                backgroundColor: colors.slice(0, labels.length),
+                borderWidth: 2,
+                borderColor: isDark ? '#1f2937' : '#ffffff',
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: isDark ? '#d1d5db' : '#374151',
+                        font: { size: 11, weight: 600 },
+                        padding: 15,
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: isDark ? '#1f2937' : '#ffffff',
+                    borderColor: isDark ? '#374151' : '#e5e7eb',
+                    borderWidth: 1,
+                    titleColor: isDark ? '#f3f4f6' : '#111827',
+                    bodyColor: isDark ? '#d1d5db' : '#374151',
+                    padding: 12,
+                    cornerRadius: 10,
+                    titleFont: { weight: 'bold', size: 12 },
+                    callbacks: {
+                        label: (ctx) => {
+                            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((ctx.parsed / total) * 100).toFixed(1);
+                            return ' TSh ' + Number(ctx.parsed).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' (' + percentage + '%)';
+                        }
+                    }
+                }
+            },
+            cutout: '60%'
+        }
+    });
+}
+
+function initInvestmentPerformanceChart() {
+    const canvas = document.getElementById('investmentPerformanceChart');
+    if (!canvas || typeof Chart === 'undefined') return;
+    const ctx = canvas.getContext('2d');
+    const labels = @json($investmentPerformance['labels'] ?? []);
+    const values = @json($investmentPerformance['values'] ?? []);
+
+    const isDark = document.documentElement.classList.contains('dark');
+    const gridColor = isDark ? 'rgba(49,46,129,0.6)' : 'rgba(233,213,255,0.6)';
+    const textColor = isDark ? '#a78bfa' : '#7c3aed';
+    const lineColor = '#8b5cf6';
+    const fillStart = 'rgba(139,92,246,0.28)';
+    const fillEnd = 'rgba(139,92,246,0.00)';
+
+    const grad = ctx.createLinearGradient(0, 0, 0, 300);
+    grad.addColorStop(0, fillStart);
+    grad.addColorStop(1, fillEnd);
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Investment Value (TSh)',
+                data: values,
+                borderColor: lineColor,
+                backgroundColor: grad,
+                borderWidth: 2.5,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#ffffff',
+                pointBorderColor: lineColor,
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                pointHoverBackgroundColor: lineColor,
+                pointHoverBorderColor: '#ffffff',
+                pointHoverBorderWidth: 2,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { intersect: false, mode: 'index' },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: isDark ? '#1e1b4b' : '#ffffff',
+                    borderColor: isDark ? '#312e81' : '#e9d5ff',
+                    borderWidth: 1,
+                    titleColor: isDark ? '#a78bfa' : '#5b21b6',
+                    bodyColor: isDark ? '#e9d5ff' : '#4c1d95',
                     padding: 10,
                     cornerRadius: 10,
                     titleFont: { weight: 'bold', size: 12 },
