@@ -92,19 +92,20 @@
           </tr>
         </thead>
         <tbody>
-          @forelse($investments as $index => $inv)
+          @forelse($investments as $index => $item)
             @php
-              $memberNo = $inv->member_number ?? '-';
-              $memberName = $inv->user->name ?? 'Unknown';
-              $product = $inv->investmentProduct->name ?? '-';
-              $amountInvested = $inv->amount ?? 0;
-              $currentValue = $inv->actual_return ?? 0;
-              $profit = ($inv->actual_return ?? 0) - ($inv->amount ?? 0);
-              $returnPct = $inv->amount > 0 ? (($profit / $inv->amount) * 100) : 0;
-              $startDate = $inv->investment_date ? $inv->investment_date->format('Y-m-d') : '-';
-              $status = $dashboardService->depositStatusBadge($inv->status ?? null);
-              $profitClass = $profit >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
-              $profitIcon = $profit >= 0 ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down';
+              $inv = $item->investment;
+              $memberNo = $item->member_no;
+              $memberName = $item->member_name;
+              $product = $item->product;
+              $amountInvested = $item->amount_invested;
+              $currentValue = $item->current_value;
+              $profit = $item->profit;
+              $returnPct = $item->return_pct;
+              $startDate = $item->start_date;
+              $status = $item->status;
+              $profitClass = $item->profit_class;
+              $profitIcon = $item->profit_icon;
               $rowNum = ($investments->currentPage() - 1) * $investments->perPage() + $index + 1;
             @endphp
             <tr class="group">

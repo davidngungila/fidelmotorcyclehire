@@ -58,6 +58,36 @@ class InvestmentController extends Controller
 
         $investments = $query->paginate($perPage);
 
+        // Enrich investments with calculated values while preserving pagination
+        $investments->through(function ($inv) {
+            $memberNo = $inv->member_number ?? '-';
+            $memberName = $inv->user ? $inv->user->name : 'Unknown';
+            $product = $inv->investmentProduct ? $inv->investmentProduct->name : 'Unknown Product';
+            $amountInvested = $inv->amount ?? 0;
+            $currentValue = $inv->actual_return ?? 0;
+            $profit = ($inv->actual_return ?? 0) - ($inv->amount ?? 0);
+            $returnPct = $inv->amount > 0 ? (($profit / $inv->amount) * 100) : 0;
+            $startDate = $inv->investment_date ? $inv->investment_date->format('Y-m-d') : '-';
+            $status = $this->dashboardService->depositStatusBadge($inv->status ?? 'pending');
+            $profitClass = $profit >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+            $profitIcon = $profit >= 0 ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down';
+
+            return (object) [
+                'investment' => $inv,
+                'member_no' => $memberNo,
+                'member_name' => $memberName,
+                'product' => $product,
+                'amount_invested' => $amountInvested,
+                'current_value' => $currentValue,
+                'profit' => $profit,
+                'return_pct' => $returnPct,
+                'start_date' => $startDate,
+                'status' => $status,
+                'profit_class' => $profitClass,
+                'profit_icon' => $profitIcon,
+            ];
+        });
+
         $investments->appends([
             'q' => $searchQuery,
             'status' => $statusFilter,
