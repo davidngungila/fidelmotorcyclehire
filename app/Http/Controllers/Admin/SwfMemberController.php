@@ -40,8 +40,8 @@ class SwfMemberController extends Controller
         try {
             $user = User::findOrFail($request->input('user_id'));
             
-            // Generate membership number
-            $membershipNumber = 'SWF-' . date('Y') . '-' . str_pad(SwfMember::count() + 1, 4, '0', STR_PAD_LEFT);
+            // Use user's member_number as SWF membership number
+            $membershipNumber = $user->member_number;
             
             $swfMember = SwfMember::create([
                 'user_id' => $user->id,
