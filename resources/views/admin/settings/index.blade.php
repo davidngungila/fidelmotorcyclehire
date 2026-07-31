@@ -482,37 +482,18 @@
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div>
-              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">SMS Provider</label>
-              <select name="sms_provider" class="form-input">
-                <option value="twilio" {{ $smsSettings->provider === 'twilio' ? 'selected' : '' }}>Twilio</option>
-                <option value="africalking" {{ $smsSettings->provider === 'africalking' ? 'selected' : '' }}>Africa's Talking</option>
-                <option value="nexmo" {{ $smsSettings->provider === 'nexmo' ? 'selected' : '' }}>Nexmo (Vonage)</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">API Key</label>
-              <input type="text" name="sms_api_key" value="{{ $smsSettings->api_key ?? '' }}"
-                     class="form-input" placeholder="Enter API key">
-            </div>
-
-            <div>
-              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">API Secret</label>
-              <input type="password" name="sms_api_secret" value="{{ $smsSettings->api_secret ?? '' }}"
-                     class="form-input" placeholder="Enter API secret">
+            <div class="md:col-span-2">
+              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">API Token</label>
+              <input type="text" name="sms_api_token" value="{{ $smsSettings->api_token ?? '' }}"
+                     class="form-input" placeholder="Enter your Messaging Service API token">
+              <p class="text-xs mt-1" :class="darkMode ? 'text-primary-400' : 'text-primary-600'>Get your API token from Messaging Service dashboard</p>
             </div>
 
             <div>
               <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Sender ID</label>
-              <input type="text" name="sms_sender_id" value="{{ $smsSettings->sender_id ?? '' }}"
+              <input type="text" name="sms_sender_id" value="{{ $smsSettings->sender_id ?? 'FEEDTAN' }}"
                      class="form-input" placeholder="e.g. FEEDTAN">
-            </div>
-
-            <div class="md:col-span-2">
-              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Phone Number</label>
-              <input type="text" name="sms_phone_number" value="{{ $smsSettings->phone_number ?? '' }}"
-                     class="form-input" placeholder="e.g. +255123456789">
+              <p class="text-xs mt-1" :class="darkMode ? 'text-primary-400' : 'text-primary-600'">Your registered sender name</p>
             </div>
           </div>
 

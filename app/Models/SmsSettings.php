@@ -10,11 +10,8 @@ class SmsSettings extends Model
     use HasFactory;
 
     protected $fillable = [
-        'provider',
-        'api_key',
-        'api_secret',
+        'api_token',
         'sender_id',
-        'phone_number',
         'is_active',
     ];
 

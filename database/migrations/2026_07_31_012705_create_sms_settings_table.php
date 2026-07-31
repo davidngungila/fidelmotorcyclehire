@@ -13,11 +13,8 @@ return new class extends Migration
     {
         Schema::create('sms_settings', function (Blueprint $table) {
             $table->id();
-            $table->string('provider')->default('twilio'); // twilio, africalking, nexmo
-            $table->string('api_key')->nullable();
-            $table->string('api_secret')->nullable();
-            $table->string('sender_id')->nullable();
-            $table->string('phone_number')->nullable();
+            $table->string('api_token')->nullable();
+            $table->string('sender_id')->nullable()->default('FEEDTAN');
             $table->boolean('is_active')->default(false);
             $table->timestamps();
         });

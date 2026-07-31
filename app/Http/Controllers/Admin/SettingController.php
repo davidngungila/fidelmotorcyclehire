@@ -115,11 +115,8 @@ class SettingController extends Controller
             'mail_from_name' => ['nullable', 'string'],
             'is_active' => ['nullable', 'boolean'],
             // SMS settings
-            'sms_provider' => ['nullable', 'string', 'in:twilio,africalking,nexmo'],
-            'sms_api_key' => ['nullable', 'string'],
-            'sms_api_secret' => ['nullable', 'string'],
+            'sms_api_token' => ['nullable', 'string'],
             'sms_sender_id' => ['nullable', 'string'],
-            'sms_phone_number' => ['nullable', 'string'],
             'sms_is_active' => ['nullable', 'boolean'],
         ]);
 
@@ -167,11 +164,8 @@ class SettingController extends Controller
             }
             
             $smsSettings->fill([
-                'provider' => $validated['sms_provider'] ?? 'twilio',
-                'api_key' => $validated['sms_api_key'] ?? null,
-                'api_secret' => $validated['sms_api_secret'] ?? null,
-                'sender_id' => $validated['sms_sender_id'] ?? null,
-                'phone_number' => $validated['sms_phone_number'] ?? null,
+                'api_token' => $validated['sms_api_token'] ?? null,
+                'sender_id' => $validated['sms_sender_id'] ?? 'FEEDTAN',
                 'is_active' => $validated['sms_is_active'] ?? false,
             ]);
             $smsSettings->save();
