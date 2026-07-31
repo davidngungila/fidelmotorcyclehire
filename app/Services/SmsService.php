@@ -220,6 +220,16 @@ class SmsService
      */
     public function isActive(): bool
     {
-        return $this->settings && $this->settings->is_active && ! empty($this->settings->api_key);
+        $isActive = $this->settings && $this->settings->is_active && ! empty($this->settings->api_token);
+        
+        Log::info('SMS Service isActive check', [
+            'settings_exists' => ! empty($this->settings),
+            'is_active' => $this->settings ? $this->settings->is_active : null,
+            'api_token_exists' => $this->settings ? ! empty($this->settings->api_token) : null,
+            'api_token_length' => $this->settings ? strlen($this->settings->api_token ?? '') : null,
+            'final_result' => $isActive,
+        ]);
+        
+        return $isActive;
     }
 }
