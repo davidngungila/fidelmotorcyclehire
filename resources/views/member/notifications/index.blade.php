@@ -39,24 +39,31 @@
     @endif
 
     <div class="space-y-3">
-        @forelse($notifications as $notification)
+        @forelse($displayNotifications as $notification)
             @php
-                $isUnread = !($notification['read_at'] ?? false);
-                $type = $notification['type'] ?? 'info';
-                $typeConfig = match($type) {
+                $isUnread = $notification['is_unread'] ?? false;
+                $category = $notification['category'] ?? 'general';
+                $priority = $notification['priority'] ?? 'normal';
+                $categoryConfig = match($category) {
+                    'announcement' => ['icon' => 'fa-bullhorn', 'color' => 'blue', 'label' => 'Announcement'],
                     'loan' => ['icon' => 'fa-hand-holding-dollar', 'color' => 'orange', 'label' => 'Loan'],
-                    'savings' => ['icon' => 'fa-piggy-bank', 'color' => 'green', 'label' => 'Savings'],
-                    'deposit' => ['icon' => 'fa-certificate', 'color' => 'blue', 'label' => 'Deposit'],
-                    'swf' => ['icon' => 'fa-shield-heart', 'color' => 'purple', 'label' => 'SWF'],
-                    'investment' => ['icon' => 'fa-chart-line', 'color' => 'teal', 'label' => 'Investment'],
-                    'system' => ['icon' => 'fa-gear', 'color' => 'gray', 'label' => 'System'],
+                    'general' => ['icon' => 'fa-circle-info', 'color' => 'green', 'label' => 'General'],
                     default => ['icon' => 'fa-circle-info', 'color' => 'blue', 'label' => 'Info'],
                 };
-                $icon = $typeConfig['icon'];
-                $color = $typeConfig['color'];
-                $label = $typeConfig['label'];
+                $priorityConfig = match($priority) {
+                    'urgent' => ['border' => 'red', 'bg' => 'red'],
+                    'high' => ['border' => 'orange', 'bg' => 'orange'],
+                    'normal' => ['border' => 'primary', 'bg' => 'primary'],
+                    'low' => ['border' => 'gray', 'bg' => 'gray'],
+                    default => ['border' => 'primary', 'bg' => 'primary'],
+                };
+                $icon = $categoryConfig['icon'];
+                $color = $categoryConfig['color'];
+                $label = $categoryConfig['label'];
+                $borderColor = $priorityConfig['border'];
+                $bgColor = $priorityConfig['bg'];
             @endphp
-            <div class="glass p-5 rounded-xl border-l-4 {{ $isUnread ? 'border-l-primary-500 bg-primary-50/50 dark:bg-primary-900/20' : 'border-l-transparent' }} hover:shadow-md transition-all">
+            <div class="glass p-5 rounded-xl border-l-4 {{ $isUnread ? 'border-l-' . $borderColor . '-500 bg-' . $bgColor . '-50/50 dark:bg-' . $bgColor . '-900/20' : 'border-l-transparent' }} hover:shadow-md transition-all">
                 <div class="flex items-start gap-4">
                     <div class="w-10 h-10 rounded-lg bg-{{ $color }}-50 dark:bg-{{ $color }}-900/30 text-{{ $color }}-500 dark:text-{{ $color }}-400 flex items-center justify-center flex-shrink-0">
                         <i class="fa-solid {{ $icon }}"></i>
@@ -65,12 +72,17 @@
                         <div class="flex items-start justify-between gap-3 mb-1">
                             <div>
                                 <span class="badge badge-{{ $color }} text-[10px] mb-1">{{ $label }}</span>
+                                @if($priority === 'urgent')
+                                    <span class="badge badge-red text-[10px] mb-1 ml-1">Urgent</span>
+                                @elseif($priority === 'high')
+                                    <span class="badge badge-orange text-[10px] mb-1 ml-1">High</span>
+                                @endif
                                 <h3 class="font-bold text-primary-900 dark:text-white text-sm">
                                     {{ $notification['title'] ?? 'Notification' }}
                                 </h3>
                             </div>
                             @if($isUnread)
-                                <span class="w-2 h-2 rounded-full bg-primary-500 flex-shrink-0 mt-2"></span>
+                                <span class="w-2 h-2 rounded-full bg-{{ $borderColor }}-500 flex-shrink-0 mt-2"></span>
                             @endif
                         </div>
                         <p class="text-sm text-primary-700 dark:text-primary-300 mb-2">
@@ -79,11 +91,11 @@
                         <div class="flex items-center gap-3 text-[11px] text-primary-500 dark:text-primary-400">
                             <span class="flex items-center gap-1">
                                 <i class="fa-solid fa-clock text-[10px]"></i>
-                                {{ \Carbon\Carbon::parse($notification['created_at'] ?? now())->diffForHumans() }}
+                                {{ \Carbon\Carbon::parse($notification['date'] ?? now())->diffForHumans() }}
                             </span>
-                            @if($notification['created_at'] ?? null)
+                            @if($notification['date'] ?? null)
                                 <span>
-                                    {{ \Carbon\Carbon::parse($notification['created_at'])->format('M j, Y g:i A') }}
+                                    {{ \Carbon\Carbon::parse($notification['date'])->format('M j, Y g:i A') }}
                                 </span>
                             @endif
                         </div>

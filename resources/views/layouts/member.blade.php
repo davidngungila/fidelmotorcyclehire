@@ -172,11 +172,13 @@
           <i :class="darkMode ? 'fa-solid fa-sun' : 'fa-solid fa-moon'" class="text-sm"></i>
         </button>
 
-        <div class="relative" x-data="{ open: false }">
+        <div class="relative" x-data="{ open: false, notifications: [], unreadCount: 0 }" x-init="fetchNotifications()">
           <button @click="open = !open" class="relative p-2 rounded-lg transition-colors"
                   :class="darkMode ? 'text-primary-300 hover:bg-primary-900/50' : 'text-primary-700 hover:bg-primary-100'">
             <i class="fa-solid fa-bell text-sm"></i>
-            <span class="notif-dot" style="top:6px;right:6px;"></span>
+            <span x-show="unreadCount > 0" x-text="unreadCount > 9 ? '9+' : unreadCount" 
+                  class="notif-dot flex items-center justify-center text-[10px] font-bold text-white" 
+                  style="top:6px;right:6px;"></span>
           </button>
           <div x-show="open" @click.away="open=false" x-transition:enter="transition ease-out duration-150"
                x-transition:enter-start="opacity-0 scale-95 translate-y-1"
@@ -189,48 +191,38 @@
             <div class="p-4 border-b flex justify-between items-center"
                  :class="darkMode ? 'border-[#1a3328]' : 'border-primary-100'">
               <h3 class="font-bold text-sm" :class="darkMode ? 'text-white' : 'text-primary-900'">My Notifications</h3>
-              <span class="badge badge-green text-[10px]">New</span>
+              <span x-show="unreadCount > 0" x-text="unreadCount > 9 ? '9+' : unreadCount" 
+                    class="badge badge-green text-[10px]">New</span>
             </div>
             <div class="max-h-72 overflow-y-auto">
-              <div class="p-3 border-b transition-colors cursor-pointer"
-                   :class="darkMode ? 'border-[#1a3328] hover:bg-primary-900/30' : 'border-primary-50 hover:bg-primary-50'">
-                <div class="flex items-start gap-3">
-                  <div class="w-8 h-8 rounded-full bg-green-900/40 text-green-400 flex items-center justify-center flex-shrink-0 text-xs">
-                    <i class="fa-solid fa-check"></i>
+              <template x-if="notifications.length === 0">
+                <div class="p-6 text-center">
+                  <div class="w-12 h-12 rounded-full bg-primary-50 dark:bg-primary-900/20 text-primary-400 flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-bell-slash text-lg"></i>
                   </div>
-                  <div class="flex-1 min-w-0">
-                    <p class="text-xs font-semibold truncate" :class="darkMode ? 'text-white' : 'text-primary-900'">Loan Payment Confirmed</p>
-                    <p class="text-[11px] mt-0.5" :class="darkMode ? 'text-primary-400' : 'text-gray-500'">Your TZS 50,000 installment received</p>
-                    <p class="text-[10px] mt-1 text-primary-500">Today</p>
-                  </div>
+                  <p class="text-sm" :class="darkMode ? 'text-primary-400' : 'text-gray-500'">No notifications</p>
                 </div>
-              </div>
-              <div class="p-3 border-b transition-colors cursor-pointer"
+              </template>
+              <template x-for="notif in notifications.slice(0, 5)" :key="notif.id">
+                <a :href="'{{ route('member.notifications.index') }}'" 
+                   class="p-3 border-b transition-colors cursor-pointer block"
                    :class="darkMode ? 'border-[#1a3328] hover:bg-primary-900/30' : 'border-primary-50 hover:bg-primary-50'">
-                <div class="flex items-start gap-3">
-                  <div class="w-8 h-8 rounded-full bg-blue-900/40 text-blue-400 flex items-center justify-center flex-shrink-0 text-xs">
-                    <i class="fa-solid fa-piggy-bank"></i>
+                  <div class="flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs"
+                         :class="getNotificationIconClass(notif.category)">
+                      <i :class="getNotificationIcon(notif.category)"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2">
+                        <p class="text-xs font-semibold truncate" :class="darkMode ? 'text-white' : 'text-primary-900'" x-text="notif.title"></p>
+                        <span x-show="notif.is_unread" class="w-2 h-2 rounded-full bg-primary-500 flex-shrink-0"></span>
+                      </div>
+                      <p class="text-[11px] mt-0.5 line-clamp-2" :class="darkMode ? 'text-primary-400' : 'text-gray-500'" x-text="notif.message"></p>
+                      <p class="text-[10px] mt-1 text-primary-500" x-text="formatDate(notif.date)"></p>
+                    </div>
                   </div>
-                  <div class="flex-1 min-w-0">
-                    <p class="text-xs font-semibold truncate" :class="darkMode ? 'text-white' : 'text-primary-900'">Savings Interest Posted</p>
-                    <p class="text-[11px] mt-0.5" :class="darkMode ? 'text-primary-400' : 'text-gray-500'">Monthly interest added to your savings</p>
-                    <p class="text-[10px] mt-1 text-primary-500">2 days ago</p>
-                  </div>
-                </div>
-              </div>
-              <div class="p-3 border-b transition-colors cursor-pointer"
-                   :class="darkMode ? 'border-[#1a3328] hover:bg-primary-900/30' : 'border-primary-50 hover:bg-primary-50'">
-                <div class="flex items-start gap-3">
-                  <div class="w-8 h-8 rounded-full bg-yellow-900/40 text-yellow-400 flex items-center justify-center flex-shrink-0 text-xs">
-                    <i class="fa-solid fa-bullhorn"></i>
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <p class="text-xs font-semibold truncate" :class="darkMode ? 'text-white' : 'text-primary-900'">Annual General Meeting</p>
-                    <p class="text-[11px] mt-0.5" :class="darkMode ? 'text-primary-400' : 'text-gray-500'">Join us on 15th July 2026</p>
-                    <p class="text-[10px] mt-1 text-primary-500">1 week ago</p>
-                  </div>
-                </div>
-              </div>
+                </a>
+              </template>
             </div>
             <div class="p-3">
               <a href="{{ route('member.notifications.index') }}" class="w-full text-center text-xs text-primary-500 hover:text-primary-400 font-semibold py-1 block">View all notifications →</a>
@@ -321,3 +313,53 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+function fetchNotifications() {
+  fetch('{{ route('member.notifications.index') }}')
+    .then(response => response.json())
+    .then(data => {
+      this.notifications = data.notifications || [];
+      this.unreadCount = data.unread_count || 0;
+    })
+    .catch(error => {
+      console.error('Error fetching notifications:', error);
+    });
+}
+
+function getNotificationIcon(category) {
+  const icons = {
+    'announcement': 'fa-bullhorn',
+    'loan': 'fa-hand-holding-dollar',
+    'general': 'fa-circle-info',
+  };
+  return icons[category] || 'fa-circle-info';
+}
+
+function getNotificationIconClass(category) {
+  const classes = {
+    'announcement': 'bg-blue-900/40 text-blue-400',
+    'loan': 'bg-orange-900/40 text-orange-400',
+    'general': 'bg-green-900/40 text-green-400',
+  };
+  return classes[category] || 'bg-blue-900/40 text-blue-400';
+}
+
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+  
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+</script>
+@endpush

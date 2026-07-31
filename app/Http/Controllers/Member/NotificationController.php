@@ -8,6 +8,7 @@ use App\Contracts\GoogleSheetRepositoryInterface;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Traits\FlashMessages;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,7 +24,7 @@ class NotificationController extends Controller
         protected GoogleSheetRepositoryInterface $repository,
     ) {}
 
-    public function index(Request $request): View
+    public function index(Request $request): View|JsonResponse
     {
         Gate::authorize('member-only');
 
@@ -61,6 +62,15 @@ class NotificationController extends Controller
         $announcementCount = count(array_filter($enriched, static fn(array $n): bool => ($n['category'] ?? '') === 'announcement'));
         $loanReminderCount = count(array_filter($enriched, static fn(array $n): bool => ($n['category'] ?? '') === 'loan'));
         $generalCount = count(array_filter($enriched, static fn(array $n): bool => ($n['category'] ?? '') === 'general'));
+
+        // Return JSON for AJAX requests
+        if ($request->expectsJson()) {
+            return response()->json([
+                'notifications' => $enriched,
+                'unread_count' => $unreadCount,
+                'total_count' => count($enriched),
+            ]);
+        }
 
         ActivityLog::create([
             'user_id' => $user->id,
