@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\SwfContribution;
 use App\Models\SwfMember;
+use App\Services\EncryptedIdService;
 use App\Traits\FlashMessages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,12 +16,19 @@ class SwfContributionController extends Controller
 {
     use FlashMessages;
 
-    public function create($swfMemberId): View
+    public function __construct(
+        protected EncryptedIdService $encryptedIdService,
+    ) {
+    }
+
+    public function create(string $encryptedSwfMemberId): View
     {
-        $swfMember = SwfMember::with('user')->findOrFail($swfMemberId);
+        $id = $this->encryptedIdService->decrypt($encryptedSwfMemberId);
+        $swfMember = SwfMember::with('user')->findOrFail($id);
         
         return view('admin.swf.contributions.create', [
             'swfMember' => $swfMember,
+            'encryptedSwfMemberId' => $encryptedSwfMemberId,
         ]);
     }
 
@@ -64,7 +72,8 @@ class SwfContributionController extends Controller
             ]);
 
             $this->success('Contribution recorded successfully!');
-            return redirect()->route('admin.swf.members.show', $swfMember->id);
+            $encryptedId = $this->encryptedIdService->encrypt($swfMember->id);
+            return redirect()->route('admin.swf.members.show', $encryptedId);
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to record contribution: ' . $e->getMessage());
         }

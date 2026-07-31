@@ -46,7 +46,7 @@
         </div>
 
         <div class="mt-6 space-y-3">
-          <a href="{{ route('admin.swf.contributions.create', $swfMember->id) }}" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-green-600 hover:bg-green-500 text-white text-sm font-bold transition-all">
+          <a href="{{ route('admin.swf.contributions.create', encryptId($swfMember->id)) }}" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-green-600 hover:bg-green-500 text-white text-sm font-bold transition-all">
             <i class="fa-solid fa-plus"></i> Add Contribution
           </a>
         </div>

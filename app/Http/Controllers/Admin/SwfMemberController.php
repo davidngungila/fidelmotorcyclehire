@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\SwfMember;
 use App\Models\User;
+use App\Services\EncryptedIdService;
 use App\Traits\FlashMessages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,11 @@ use Illuminate\View\View;
 class SwfMemberController extends Controller
 {
     use FlashMessages;
+
+    public function __construct(
+        protected EncryptedIdService $encryptedIdService,
+    ) {
+    }
 
     public function create(): View
     {
@@ -67,12 +73,14 @@ class SwfMemberController extends Controller
         }
     }
 
-    public function show($id): View
+    public function show(string $encryptedId): View
     {
+        $id = $this->encryptedIdService->decrypt($encryptedId);
         $swfMember = SwfMember::with(['user', 'contributions', 'benefits'])->findOrFail($id);
         
         return view('admin.swf.members.show', [
             'swfMember' => $swfMember,
+            'encryptedId' => $encryptedId,
         ]);
     }
 }

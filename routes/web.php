@@ -157,9 +157,9 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
         Route::get('/', [AdminSwfController::class, 'index'])->name('index');
         Route::get('/members/create', [\App\Http\Controllers\Admin\SwfMemberController::class, 'create'])->name('members.create');
         Route::post('/members', [\App\Http\Controllers\Admin\SwfMemberController::class, 'store'])->name('members.store');
-        Route::get('/members/{id}', [\App\Http\Controllers\Admin\SwfMemberController::class, 'show'])->name('members.show');
+        Route::get('/members/{encryptedId}', [\App\Http\Controllers\Admin\SwfMemberController::class, 'show'])->name('members.show');
         
-        Route::get('/contributions/create/{swfMemberId}', [\App\Http\Controllers\Admin\SwfContributionController::class, 'create'])->name('contributions.create');
+        Route::get('/contributions/create/{encryptedSwfMemberId}', [\App\Http\Controllers\Admin\SwfContributionController::class, 'create'])->name('contributions.create');
         Route::post('/contributions', [\App\Http\Controllers\Admin\SwfContributionController::class, 'store'])->name('contributions.store');
         
         Route::get('/benefits', [\App\Http\Controllers\Admin\SwfBenefitController::class, 'index'])->name('benefits.index');
@@ -167,7 +167,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
         Route::post('/benefits', [\App\Http\Controllers\Admin\SwfBenefitController::class, 'store'])->name('benefits.store');
         Route::post('/benefits/grant', [\App\Http\Controllers\Admin\SwfBenefitController::class, 'grant'])->name('benefits.grant');
         
-        Route::get('/{id}', [AdminSwfController::class, 'show'])->name('show');
+        Route::get('/{encryptedId}', [AdminSwfController::class, 'show'])->name('show');
     });
 
     Route::get('/investments', [AdminInvestmentController::class, 'index'])->name('investments.index');

@@ -78,10 +78,11 @@ class SwfController extends Controller
         ]);
     }
 
-    public function show(Request $request, string $id): View
+    public function show(Request $request, string $encryptedId): View
     {
         Gate::authorize('admin-only');
 
+        $id = $this->encryptedIdService->decrypt($encryptedId);
         $swfMember = SwfMember::with(['user', 'contributions', 'benefits'])->findOrFail($id);
 
         $totalContribution = $swfMember->total_contributions;
