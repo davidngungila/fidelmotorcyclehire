@@ -527,6 +527,65 @@
         </form>
       </div>
 
+      <div x-show="activeTab === 'whatsapp'" x-transition:enter="transition ease-out duration-200"
+           x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0">
+        <form method="POST" action="{{ route('admin.settings.update') }}" class="space-y-6">
+          @csrf
+          @method('PUT')
+          <input type="hidden" name="tab" value="whatsapp">
+
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-400 to-green-600 text-white flex items-center justify-center text-xl shadow-md">
+              <i class="fa-brands fa-whatsapp"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-lg" :class="darkMode ? 'text-white' : 'text-primary-900'">WhatsApp Configuration</h3>
+              <p class="text-xs mt-0.5" :class="darkMode ? 'text-primary-400' : 'text-primary-600'">Configure WhatsApp Business API for messaging</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="md:col-span-2">
+              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">API Key</label>
+              <input type="text" name="whatsapp_api_key" value="{{ $whatsappSettings->api_key ?? '' }}"
+                     class="form-input" placeholder="Enter your WhatsApp API key">
+              <p class="text-xs mt-1" :class="darkMode ? 'text-primary-400' : 'text-primary-600'>Get your API key from Messaging Service dashboard</p>
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Account Name</label>
+              <input type="text" name="whatsapp_account" value="{{ $whatsappSettings->account ?? '' }}"
+                     class="form-input" placeholder="e.g. NEXTBYTE">
+              <p class="text-xs mt-1" :class="darkMode ? 'text-primary-400' : 'text-primary-600'">Your WhatsApp Business account name</p>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between p-4 rounded-xl bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-900/50">
+            <div>
+              <p class="font-bold text-sm" :class="darkMode ? 'text-white' : 'text-primary-900'">Enable WhatsApp Messaging</p>
+              <p class="text-xs mt-0.5" :class="darkMode ? 'text-primary-400' : 'text-primary-600'">Allow sending WhatsApp messages to members</p>
+            </div>
+            <div class="relative">
+              <input type="hidden" name="whatsapp_is_active" :value="whatsappActive ? 1 : 0">
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" class="sr-only peer" :checked="whatsappActive" @change="whatsappActive = !whatsappActive; $el.previousElementSibling.value = whatsappActive ? 1 : 0">
+                <div class="w-12 h-7 rounded-full transition-colors bg-gray-200 dark:bg-gray-700 peer-checked:bg-green-600"></div>
+                <div class="absolute left-0.5 top-0.5 w-6 h-6 bg-white rounded-full shadow-md transition-transform peer-checked:translate-x-5 flex items-center justify-center">
+                  <i :class="whatsappActive ? 'fa-solid fa-check text-green-600' : 'fa-solid fa-xmark text-gray-400'" class="text-[10px]"></i>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="pt-6 mt-6 border-t border-primary-100 dark:border-primary-900/50 flex justify-end">
+            <button type="submit"
+                    class="px-6 py-2.5 rounded-xl bg-green-600 hover:bg-green-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95">
+              <i class="fa-brands fa-whatsapp mr-1.5 text-[13px]"></i> Save WhatsApp Settings
+            </button>
+          </div>
+        </form>
+      </div>
+
     </div>
   </div>
 </div>
@@ -539,6 +598,7 @@
     return {
       activeTab: 'general',
       smsActive: {{ json_encode($smsSettings->is_active ?? false) }},
+      whatsappActive: {{ json_encode($whatsappSettings->is_active ?? false) }},
       tabs: [
         { key: 'general', label: 'General', icon: 'fa-solid fa-gear' },
         { key: 'notifications', label: 'Notifications', icon: 'fa-solid fa-bell' },
@@ -546,6 +606,7 @@
         { key: 'security', label: 'Security', icon: 'fa-solid fa-shield-halved' },
         { key: 'email', label: 'Email', icon: 'fa-solid fa-envelope' },
         { key: 'sms', label: 'SMS', icon: 'fa-solid fa-comment-sms' },
+        { key: 'whatsapp', label: 'WhatsApp', icon: 'fa-brands fa-whatsapp' },
       ]
     }
   }

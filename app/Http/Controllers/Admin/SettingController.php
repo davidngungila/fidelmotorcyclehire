@@ -9,6 +9,7 @@ use App\Models\ActivityLog;
 use App\Models\EmailSettings;
 use App\Models\GoogleSheetsConfig;
 use App\Models\SmsSettings;
+use App\Models\WhatsAppSettings;
 use App\Services\SmsService;
 use App\Traits\FlashMessages;
 use Illuminate\Http\JsonResponse;
@@ -61,6 +62,7 @@ class SettingController extends Controller
 
         $emailSettings = EmailSettings::first() ?? new EmailSettings();
         $smsSettings = SmsSettings::first() ?? new SmsSettings();
+        $whatsappSettings = WhatsAppSettings::first() ?? new WhatsAppSettings();
 
         ActivityLog::create([
             'user_id' => Auth::id(),
@@ -76,13 +78,14 @@ class SettingController extends Controller
             'securitySettings' => $securitySettings,
             'emailSettings' => $emailSettings,
             'smsSettings' => $smsSettings,
+            'whatsappSettings' => $whatsappSettings,
         ]);
     }
 
     public function update(Request $request)
     {
         $validated = $request->validate([
-            'tab' => ['required', 'in:general,notifications,google_sheets,security,email,sms'],
+            'tab' => ['required', 'in:general,notifications,google_sheets,security,email,sms,whatsapp'],
             'app_name' => ['nullable', 'string', 'max:255'],
             'support_email' => ['nullable', 'email'],
             'timezone' => ['nullable', 'string'],
@@ -120,6 +123,10 @@ class SettingController extends Controller
             'sms_api_token' => ['nullable', 'string'],
             'sms_sender_id' => ['nullable', 'string'],
             'sms_is_active' => ['nullable', 'boolean'],
+            // WhatsApp settings
+            'whatsapp_api_key' => ['nullable', 'string'],
+            'whatsapp_account' => ['nullable', 'string'],
+            'whatsapp_is_active' => ['nullable', 'boolean'],
         ]);
 
         $tab = $validated['tab'];
@@ -182,6 +189,33 @@ class SettingController extends Controller
             ]);
 
             $this->success('SMS settings saved successfully.');
+            return redirect()->back();
+        }
+
+        // Handle WhatsApp settings separately
+        if ($tab === 'whatsapp') {
+            $whatsappSettings = WhatsAppSettings::first();
+            if (! $whatsappSettings) {
+                $whatsappSettings = new WhatsAppSettings();
+            }
+            
+            $whatsappSettings->fill([
+                'api_key' => $validated['whatsapp_api_key'] ?? null,
+                'account' => $validated['whatsapp_account'] ?? null,
+                'is_active' => $validated['whatsapp_is_active'] ?? false,
+            ]);
+            $whatsappSettings->save();
+
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'description' => 'Admin updated WhatsApp settings',
+                'subject_type' => 'whatsapp_settings',
+                'subject_id' => $whatsappSettings->id,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            $this->success('WhatsApp settings saved successfully.');
             return redirect()->back();
         }
 

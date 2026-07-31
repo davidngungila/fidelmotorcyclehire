@@ -18,8 +18,11 @@ class WhatsAppService
     {
         $this->baseUrl = config('services.whatsapp.base_url', 'https://messaging-service.co.tz/api/whatsapp/v2/text/single');
         $this->testUrl = config('services.whatsapp.test_url', 'https://messaging-service.co.tz/api/whatsapp/v2/test/text/single');
-        $this->apiKey = config('services.whatsapp.api_key');
-        $this->account = config('services.whatsapp.account');
+        
+        // Read from database settings
+        $whatsappSettings = \App\Models\WhatsAppSettings::first();
+        $this->apiKey = $whatsappSettings->api_key ?? config('services.whatsapp.api_key');
+        $this->account = $whatsappSettings->account ?? config('services.whatsapp.account');
     }
 
     /**
