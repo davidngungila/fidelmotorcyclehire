@@ -39,10 +39,10 @@ class MemberController extends Controller
         $sortColumn = $request->input('sort', 'member_number');
         $sortDirection = $request->input('sort_direction', 'asc');
 
-        // Get members from database only
+        // Get all members from database for client-side filtering
         $dbMembersQuery = \App\Models\Member::query();
         
-        // Apply search filter to database members
+        // Apply search filter to database members (for initial load with search query)
         if ($request->filled('q')) {
             $searchTerm = $request->input('q');
             $dbMembersQuery->where(function($query) use ($searchTerm) {
@@ -53,6 +53,25 @@ class MemberController extends Controller
             });
         }
         
+        // Get all members (without pagination for client-side filtering)
+        $allDbMembers = \App\Models\Member::query()->get()->map(function($member) {
+            $statusBadge = $this->dashboardService->memberStatusBadge($member->status);
+            return [
+                'id' => $member->id,
+                'member_number' => $member->member_number,
+                'name' => $member->full_name,
+                'gender' => $member->gender,
+                'phone' => $member->phone,
+                'email' => $member->email,
+                'branch' => $member->branch ?? '-',
+                'status' => $member->status,
+                'status_badge_class' => $statusBadge['class'],
+                'status_badge_label' => $statusBadge['label'],
+                'photo' => $member->photo,
+            ];
+        })->toArray();
+
+        // Use the filtered or all members for pagination
         $dbMembers = $dbMembersQuery->get()->map(function($member) {
             return [
                 'id' => $member->id,
@@ -101,6 +120,7 @@ class MemberController extends Controller
 
         return view('admin.members.index', [
             'members' => $paginated,
+            'allMembers' => $allDbMembers,
             'searchQuery' => $request->input('q'),
             'perPage' => $perPage,
             'sortColumn' => $sortColumn,

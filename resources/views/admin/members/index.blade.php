@@ -41,7 +41,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
       <div class="flex items-center gap-3">
         <span class="text-xs font-semibold text-primary-600 dark:text-primary-400">
-          <i class="fa-solid fa-list-check mr-1.5"></i> <span x-text="document.querySelectorAll('tbody tr:not([x-show])').length || {{ $members->total() }}"></span> Members Found
+          <i class="fa-solid fa-list-check mr-1.5"></i> <span x-text="filteredMembers.length"></span> Members Found
         </span>
         <span x-show="searchQuery" class="badge badge-blue text-[10px]">Search: <span x-text="searchQuery"></span></span>
       </div>
@@ -77,91 +77,62 @@
           </tr>
         </thead>
         <tbody>
-          @forelse($members as $index => $member)
-            @php
-              $memberNo = $member['member_number'] ?? ($member['MemberNumber'] ?? null);
-              $memberName = $member['name'] ?? ($member['Name'] ?? 'Unknown');
-              $memberPhone = $member['phone'] ?? ($member['Phone'] ?? '-');
-              $statusBadge = $dashboardService->memberStatusBadge($member['status'] ?? null);
-              $rowNum = ($members->currentPage() - 1) * $members->perPage() + $index + 1;
-            @endphp
-            <tr class="group" 
-                x-data="{ 
-                  memberNo: {{ json_encode($memberNo) }}, 
-                  memberName: {{ json_encode($memberName) }}, 
-                  memberPhone: {{ json_encode($memberPhone) }},
-                  memberEmail: {{ json_encode($member['email'] ?? $member['Email'] ?? '') }}
-                }"
-                x-show="!searchQuery || searchQuery.trim() === '' || 
-                       memberNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                       memberName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                       memberPhone.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                       memberEmail.toLowerCase().includes(searchQuery.toLowerCase())">
-              <td class="text-xs text-primary-400 dark:text-primary-500 font-mono">{{ $rowNum }}.</td>
+          <template x-for="(member, index) in filteredMembers" :key="member.id">
+            <tr class="group">
+              <td class="text-xs text-primary-400 dark:text-primary-500 font-mono" x-text="index + 1"></td>
               <td>
                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary-50 dark:bg-primary-900/40 font-mono text-xs font-bold text-primary-700 dark:text-primary-300">
                   <i class="fa-solid fa-id-card text-[10px] opacity-60"></i>
-                  {{ $memberNo ?? 'FTN-' . str_pad((string)$rowNum, 5, '0', STR_PAD_LEFT) }}
+                  <span x-text="member.member_number"></span>
                 </span>
               </td>
               <td>
                 <div class="flex items-center gap-3">
-                  @php
-                    $memberPhoto = $member['photo'] ?? null;
-                    $memberPhoto = $memberPhoto ? (is_array($memberPhoto) ? ($memberPhoto['photo'] ?? null) : $memberPhoto) : null;
-                  @endphp
-                  @if($memberPhoto)
-                    <img src="{{ asset('storage/' . $memberPhoto) }}" 
-                         alt="{{ $memberName }}" 
-                         class="w-9 h-9 rounded-full object-cover flex-shrink-0 shadow-sm border-2 border-white dark:border-gray-700">
-                  @else
-                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 text-white flex items-center justify-center text-xs font-bold flex-shrink-0 shadow-sm">
-                      {{ strtoupper(substr($memberName, 0, 1) ?? 'M') }}
-                    </div>
-                  @endif
+                  <div x-show="member.photo" class="w-9 h-9 rounded-full object-cover flex-shrink-0 shadow-sm border-2 border-white dark:border-gray-700 overflow-hidden">
+                    <img :src="'/storage/' + member.photo" :alt="member.name" class="w-full h-full object-cover"/>
+                  </div>
+                  <div x-show="!member.photo" class="w-9 h-9 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 text-white flex items-center justify-center text-xs font-bold flex-shrink-0 shadow-sm">
+                    <span x-text="member.name.charAt(0).toUpperCase()"></span>
+                  </div>
                   <div class="min-w-0">
-                    <p class="text-sm font-semibold text-primary-900 dark:text-white truncate max-w-[200px]">{{ $memberName }}</p>
+                    <p class="text-sm font-semibold text-primary-900 dark:text-white truncate max-w-[200px]" x-text="member.name"></p>
                   </div>
                 </div>
               </td>
               <td>
-                @if($memberPhone && $memberPhone !== '-')
-                  <span class="text-xs font-mono text-primary-700 dark:text-primary-300">{{ $memberPhone }}</span>
-                @else
-                  <span class="text-xs text-primary-300 dark:text-primary-600 italic">-</span>
-                @endif
+                <span class="text-xs font-mono text-primary-700 dark:text-primary-300" x-text="member.phone || '-'"></span>
               </td>
               <td>
-                <span class="badge {{ $statusBadge['class'] }}">{{ $statusBadge['label'] }}</span>
+                <span class="badge" :class="member.status_badge_class" x-text="member.status_badge_label"></span>
               </td>
               <td class="text-right whitespace-nowrap">
                 <div class="flex items-center justify-end gap-1.5">
-                  <a href="{{ route('admin.members.show', encryptId($memberNo ?? 'FTN-' . str_pad((string)$rowNum, 5, '0', STR_PAD_LEFT))) }}"
+                  <a :href="'/admin/members/' + member.member_number"
                      class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-sm transition-colors"
                      title="View Profile">
                     <i class="fa-solid fa-eye text-xs"></i>
                   </a>
-                  <a href="{{ route('admin.members.show', encryptId($memberNo ?? 'FTN-' . str_pad((string)$rowNum, 5, '0', STR_PAD_LEFT))) }}#tab-loans"
+                  <a :href="'/admin/members/' + member.member_number + '#tab-loans'"
                      class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-orange-50 hover:bg-orange-100 dark:bg-orange-900/30 dark:hover:bg-orange-900/50 text-orange-700 dark:text-orange-300 text-sm transition-colors border border-orange-200 dark:border-orange-800/40"
                      title="Loans">
                     <i class="fa-solid fa-hand-holding-dollar text-xs"></i>
                   </a>
-                  <a href="{{ route('admin.members.show', encryptId($memberNo ?? 'FTN-' . str_pad((string)$rowNum, 5, '0', STR_PAD_LEFT))) }}#tab-savings"
+                  <a :href="'/admin/members/' + member.member_number + '#tab-savings'"
                      class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-green-50 hover:bg-green-100 dark:bg-green-900/30 dark:hover:bg-green-900/50 text-green-700 dark:text-green-300 text-sm transition-colors border border-green-200 dark:border-green-800/40"
                      title="Savings">
                     <i class="fa-solid fa-piggy-bank text-xs"></i>
                   </a>
-                  <a href="{{ route('admin.members.show', encryptId($memberNo ?? 'FTN-' . str_pad((string)$rowNum, 5, '0', STR_PAD_LEFT))) }}#tab-investments"
+                  <a :href="'/admin/members/' + member.member_number + '#tab-investments'"
                      class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/30 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 text-sm transition-colors border border-purple-200 dark:border-purple-800/40"
                      title="Investments">
                     <i class="fa-solid fa-chart-line text-xs"></i>
                   </a>
-                  <a href="{{ route('admin.members.show', encryptId($memberNo ?? 'FTN-' . str_pad((string)$rowNum, 5, '0', STR_PAD_LEFT))) }}#tab-shares"
+                  <a :href="'/admin/members/' + member.member_number + '#tab-shares'"
                      class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-sm transition-colors border border-blue-200 dark:border-blue-800/40"
                      title="Shares">
                     <i class="fa-solid fa-certificate text-xs"></i>
                   </a>
-                  <a href="{{ route('admin.members.show', encryptId($memberNo ?? 'FTN-' . str_pad((string)$rowNum, 5, '0', STR_PAD_LEFT))) }}#tab-swf"
+                  <a :href="'/admin/members/' + member.member_number + '#tab-swf'"
                      class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-pink-50 hover:bg-pink-100 dark:bg-pink-900/30 dark:hover:bg-pink-900/50 text-pink-700 dark:text-pink-300 text-sm transition-colors border border-pink-200 dark:border-pink-800/40"
                      title="SWF">
                     <i class="fa-solid fa-hand-holding-heart text-xs"></i>
@@ -169,25 +140,19 @@
                 </div>
               </td>
             </tr>
-          @empty
-            <tr>
-              <td colspan="6" class="text-center py-16 text-primary-500 dark:text-primary-400">
-                <i class="fa-solid fa-user-slash text-4xl mb-4 block opacity-30"></i>
-                <p class="text-sm font-semibold mb-1">No members found</p>
-                <p class="text-xs">
-                  @if($searchQuery)
-                    Try adjusting your search terms or
-                  @endif
-                  <a href="{{ route('admin.users.create') }}" class="text-primary-600 dark:text-primary-400 underline hover:no-underline">create a new member</a>
-                </p>
-              </td>
-            </tr>
-          @endforelse
+          </template>
+          <tr x-show="filteredMembers.length === 0">
+            <td colspan="6" class="text-center py-16 text-primary-500 dark:text-primary-400">
+              <i class="fa-solid fa-user-slash text-4xl mb-4 block opacity-30"></i>
+              <p class="text-sm font-semibold mb-1">No members found</p>
+              <p class="text-xs">Try adjusting your search terms</p>
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
 
-    @if($members->hasPages())
+    @if(false && $members->hasPages())
       <div class="mt-6 pt-5 border-t border-primary-100 dark:border-primary-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <p class="text-xs text-primary-600 dark:text-primary-400">
           Showing <span class="font-bold text-primary-900 dark:text-white">{{ $members->firstItem() ?? 0 }}</span> to
@@ -350,6 +315,25 @@
   function membersList() {
     return {
       searchQuery: @json($searchQuery ?? ''),
+      allMembers: @json($allMembers ?? []),
+      get filteredMembers() {
+        if (!this.searchQuery || this.searchQuery.trim() === '') {
+          return this.allMembers;
+        }
+        
+        const query = this.searchQuery.toLowerCase().trim();
+        return this.allMembers.filter(member => {
+          const memberNo = (member.member_number || '').toLowerCase();
+          const name = (member.name || '').toLowerCase();
+          const phone = (member.phone || '').toLowerCase();
+          const email = (member.email || '').toLowerCase();
+          
+          return memberNo.includes(query) || 
+                 name.includes(query) || 
+                 phone.includes(query) || 
+                 email.includes(query);
+        });
+      },
       clearSearch() {
         this.searchQuery = '';
       },
