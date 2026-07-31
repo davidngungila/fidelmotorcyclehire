@@ -214,6 +214,28 @@ class InvestmentController extends Controller
         $totalProfit = $totalCurrentValue - $totalInvested;
         $overallReturn = $totalInvested > 0 ? (($totalCurrentValue - $totalInvested) / $totalInvested) * 100 : 0;
 
+        $enrichedInvestments = $investments->map(function ($inv) {
+            $productName = $inv->investmentProduct ? $inv->investmentProduct->name : 'Unknown Product';
+            $duration = '';
+            if ($inv->investment_date && $inv->maturity_date) {
+                $duration = $inv->investment_date->diffInMonths($inv->maturity_date) . ' months';
+            }
+            $actualReturn = $inv->actual_return ?? 0;
+            $amount = $inv->amount ?? 0;
+            $profit = $actualReturn - $amount;
+            $profitPct = $amount > 0 ? (($profit / $amount) * 100) : 0;
+            $status = $this->dashboardService->depositStatusBadge($inv->status ?? null);
+
+            return (object) [
+                'investment' => $inv,
+                'product_name' => $productName,
+                'duration' => $duration,
+                'profit' => $profit,
+                'profit_pct' => $profitPct,
+                'status' => $status,
+            ];
+        });
+
         ActivityLog::create([
             'user_id' => Auth::id(),
             'subject_type' => 'investment',
@@ -235,7 +257,7 @@ class InvestmentController extends Controller
                 'email' => $user->email ?? null,
             ],
             'memberNumber' => $memberNumber,
-            'investments' => $investments,
+            'investments' => $enrichedInvestments,
             'totalInvested' => $totalInvested,
             'totalCurrentValue' => $totalCurrentValue,
             'totalProfit' => $totalProfit,

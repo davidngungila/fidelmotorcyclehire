@@ -85,26 +85,14 @@
 
   <!-- Investments List -->
   @if(isset($investments) && $investments->count() > 0)
-    @foreach($investments as $investment)
+    @foreach($investments as $item)
       @php
-        if ($investment->investmentProduct) {
-          $productName = $investment->investmentProduct->name;
-        } else {
-          $productName = 'Unknown Product';
-        }
-        $status = $dashboardService->depositStatusBadge($investment->status ?? null);
-        $duration = '';
-        if ($investment->investment_date && $investment->maturity_date) {
-          $duration = $investment->investment_date->diffInMonths($investment->maturity_date) . ' months';
-        }
-        $actualReturn = $investment->actual_return ?? 0;
-        $amount = $investment->amount ?? 0;
-        $profit = $actualReturn - $amount;
-        if ($amount > 0) {
-          $profitPct = ($profit / $amount) * 100;
-        } else {
-          $profitPct = 0;
-        }
+        $investment = $item->investment;
+        $productName = $item->product_name;
+        $duration = $item->duration;
+        $profit = $item->profit;
+        $profitPct = $item->profit_pct;
+        $status = $item->status;
       @endphp
       <div class="glass p-6 rounded-2xl">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
@@ -125,19 +113,19 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
           <div class="bg-teal-50 dark:bg-teal-900/30 rounded-xl p-4">
             <p class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase mb-1">Amount Invested</p>
-            <p class="text-lg font-black text-primary-900 dark:text-white">{{ $fmt($investment->amount ?? 0) }}</p>
+            <p class="text-lg font-black text-primary-900 dark:text-white">{{ $fmt($investment->amount) }}</p>
           </div>
           <div class="bg-teal-50 dark:bg-teal-900/30 rounded-xl p-4">
             <p class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase mb-1">Interest Rate</p>
-            <p class="text-lg font-black text-primary-900 dark:text-white">{{ number_format($investment->interest_rate ?? 0, 2) }}%</p>
+            <p class="text-lg font-black text-primary-900 dark:text-white">{{ number_format($investment->interest_rate, 2) }}%</p>
           </div>
           <div class="bg-teal-50 dark:bg-teal-900/30 rounded-xl p-4">
             <p class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase mb-1">Expected Return</p>
-            <p class="text-lg font-black text-primary-900 dark:text-white">{{ $fmt($investment->expected_return ?? 0) }}</p>
+            <p class="text-lg font-black text-primary-900 dark:text-white">{{ $fmt($investment->expected_return) }}</p>
           </div>
           <div class="bg-teal-50 dark:bg-teal-900/30 rounded-xl p-4">
             <p class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase mb-1">Actual Return</p>
-            <p class="text-lg font-black text-primary-900 dark:text-white">{{ $fmt($investment->actual_return ?? 0) }}</p>
+            <p class="text-lg font-black text-primary-900 dark:text-white">{{ $fmt($investment->actual_return) }}</p>
           </div>
         </div>
 
