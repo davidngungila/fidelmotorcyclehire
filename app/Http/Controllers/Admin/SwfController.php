@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Contracts\GoogleSheetRepositoryInterface;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\SwfMember;
 use App\Services\AdminDashboardService;
 use App\Services\EncryptedIdService;
 use App\Services\MemberService;
@@ -14,65 +14,39 @@ use App\Traits\FlashMessages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\View\View;
 
 class SwfController extends Controller
 {
     use FlashMessages;
 
     public function __construct(
-        protected GoogleSheetRepositoryInterface $googleSheetRepository,
         protected MemberService $memberService,
         protected AdminDashboardService $dashboardService,
         protected EncryptedIdService $encryptedIdService,
     ) {
     }
 
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         $perPage = (int) $request->input('per_page', 15);
-        $sortColumn = $request->input('sort', 'member_number');
+        $sortColumn = $request->input('sort', 'membership_number');
         $sortDirection = $request->input('sort_direction', 'asc');
         $searchQuery = $request->input('q', '');
 
-        $allMembers = $this->googleSheetRepository->getAllMembers();
+        $query = SwfMember::with(['user', 'contributions', 'benefits']);
 
-        $swfList = [];
-        foreach ($allMembers as $member) {
-            $memberNo = $member['member_number'] ?? ($member['MemberNumber'] ?? null);
-            if (! $memberNo) {
-                continue;
-            }
-            $swf = $this->googleSheetRepository->getMemberSwf($memberNo);
-
-            $swfList[] = [
-                'member_number' => $memberNo,
-                'member_name' => $member['name'] ?? ($member['Name'] ?? 'Unknown'),
-                'member_status' => $member['status'] ?? 'Active',
-                'member_branch' => $member['branch'] ?? ($member['Branch'] ?? '-'),
-                'total_contribution' => (float) ($swf['total_contribution'] ?? 0),
-                'benefits' => (float) ($swf['benefits'] ?? 0),
-                'current_balance' => (float) ($swf['current_balance'] ?? 0),
-                'contributions_count' => count($swf['contribution_history'] ?? []),
-            ];
+        if (!empty($searchQuery)) {
+            $query->whereHas('user', function ($q) use ($searchQuery) {
+                $q->where('name', 'like', "%{$searchQuery}%")
+                  ->orWhere('email', 'like', "%{$searchQuery}%")
+                  ->orWhere('member_number', 'like', "%{$searchQuery}%");
+            })->orWhere('membership_number', 'like', "%{$searchQuery}%");
         }
 
-        if (! empty($searchQuery)) {
-            $swfList = array_values(array_filter($swfList, static function ($s) use ($searchQuery): bool {
-                $query = strtolower(trim($searchQuery));
-                $haystack = strtolower(implode(' ', [
-                    $s['member_number'] ?? '',
-                    $s['member_name'] ?? '',
-                    $s['member_branch'] ?? '',
-                ]));
+        $swfMembers = $query->orderBy($sortColumn, $sortDirection)->paginate($perPage);
 
-                return str_contains($haystack, $query);
-            }));
-        }
-
-        $swfList = $this->memberService->sort($swfList, $sortColumn, $sortDirection);
-        $paginated = $this->memberService->paginateArray($swfList, $perPage);
-
-        $paginated->appends([
+        $swfMembers->appends([
             'q' => $searchQuery,
             'per_page' => $perPage,
             'sort' => $sortColumn,
@@ -89,12 +63,12 @@ class SwfController extends Controller
                 'per_page' => $perPage,
                 'sort' => $sortColumn,
                 'sort_direction' => $sortDirection,
-                'total_count' => count($swfList),
+                'total_count' => $swfMembers->total(),
             ],
         ]);
 
         return view('admin.swf.index', [
-            'swf' => $paginated,
+            'swf' => $swfMembers,
             'searchQuery' => $searchQuery,
             'perPage' => $perPage,
             'sortColumn' => $sortColumn,
@@ -104,60 +78,57 @@ class SwfController extends Controller
         ]);
     }
 
-    public function show(Request $request, string $encryptedMemberNumber)
+    public function show(Request $request, int $id): View
     {
-        $memberNumber = $this->encryptedIdService->decrypt($encryptedMemberNumber);
-        
         Gate::authorize('admin-only');
 
-        $member = $this->googleSheetRepository->getMemberByNumber($memberNumber);
+        $swfMember = SwfMember::with(['user', 'contributions', 'benefits'])->findOrFail($id);
 
-        if (! $member) {
-            $this->error("Member {$memberNumber} not found.");
-
-            return redirect()->route('admin.swf.index');
-        }
-
-        $swf = $this->googleSheetRepository->getMemberSwf($memberNumber);
-
-        $totalContribution = (float) ($swf['total_contribution'] ?? 0);
-        $benefits = (float) ($swf['benefits'] ?? 0);
-        $currentBalance = (float) ($swf['current_balance'] ?? 0);
-        $contributionHistory = $swf['contribution_history'] ?? [];
-
-        $benefitsSummary = [];
-        if ($benefits > 0) {
-            $benefitsSummary[] = [
-                'type' => 'Emergency Assistance',
-                'amount' => $benefits * 0.6,
-                'date' => '2024-03-15',
-                'status' => 'Paid',
+        $totalContribution = $swfMember->total_contributions;
+        $benefits = $swfMember->total_benefits_received;
+        $currentBalance = $swfMember->total_contributions - $swfMember->total_benefits_received;
+        $contributionHistory = $swfMember->contributions->map(function ($contribution) {
+            return [
+                'date' => $contribution->contribution_date->format('Y-m-d'),
+                'amount' => $contribution->amount,
+                'payment_method' => $contribution->payment_method,
+                'reference_number' => $contribution->reference_number,
             ];
-            $benefitsSummary[] = [
-                'type' => 'Education Bursary',
-                'amount' => $benefits * 0.4,
-                'date' => '2024-01-10',
-                'status' => 'Paid',
+        })->toArray();
+
+        $benefitsSummary = $swfMember->benefits->map(function ($benefit) {
+            return [
+                'type' => $benefit->name,
+                'amount' => $benefit->pivot->amount,
+                'date' => $benefit->pivot->received_date,
+                'status' => $benefit->pivot->status,
             ];
-        }
+        })->toArray();
 
         ActivityLog::create([
             'user_id' => Auth::id(),
-            'subject_type' => 'swf',
-            'subject_id' => null,
-            'description' => "Admin viewed member SWF: {$memberNumber}",
+            'subject_type' => 'swf_member',
+            'subject_id' => $swfMember->id,
+            'description' => "Admin viewed SWF member: {$swfMember->membership_number}",
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
             'properties' => [
-                'member_name' => $member['name'] ?? null,
+                'membership_number' => $swfMember->membership_number,
+                'user_name' => $swfMember->user->name,
                 'current_balance' => $currentBalance,
             ],
         ]);
 
         return view('admin.swf.show', [
-            'member' => $member,
-            'memberNumber' => $memberNumber,
-            'swf' => $swf,
+            'member' => $swfMember->user,
+            'memberNumber' => $swfMember->membership_number,
+            'swf' => [
+                'total_contribution' => $totalContribution,
+                'benefits' => $benefits,
+                'current_balance' => $currentBalance,
+                'contribution_history' => $contributionHistory,
+                'enrollment_date' => $swfMember->join_date,
+            ],
             'totalContribution' => $totalContribution,
             'benefits' => $benefits,
             'currentBalance' => $currentBalance,

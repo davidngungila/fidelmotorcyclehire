@@ -154,7 +154,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/deposits/{encryptedCertificateNumber}', [AdminDepositController::class, 'show'])->name('deposits.show');
 
     Route::get('/swf', [AdminSwfController::class, 'index'])->name('swf.index');
-    Route::get('/swf/{encryptedMemberNumber}', [AdminSwfController::class, 'show'])->name('swf.show');
+    Route::get('/swf/{id}', [AdminSwfController::class, 'show'])->name('swf.show');
 
     Route::prefix('swf')->name('swf.')->group(function () {
         Route::get('/members/create', [\App\Http\Controllers\Admin\SwfMemberController::class, 'create'])->name('members.create');

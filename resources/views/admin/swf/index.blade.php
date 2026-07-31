@@ -85,54 +85,42 @@
         <tbody>
           @forelse($swf as $index => $item)
             @php
-              $memberNo = $item['member_number'];
-              $memberName = $item['member_name'];
-              $memberBranch = $item['member_branch'];
-              $memberStatus = $dashboardService->memberStatusBadge($item['member_status'] ?? null);
-              $totalContribution = $item['total_contribution'] ?? 0;
-              $benefitsPaid = $item['benefits_paid'] ?? 0;
-              $currentBalance = $item['current_balance'] ?? 0;
-              $enrollmentDate = $item['enrollment_date'] ?? '-';
+              $memberNo = $item->membership_number;
+              $memberName = $item->user->name ?? 'Unknown';
+              $memberBranch = $item->user->branch ?? '-';
+              $memberStatus = $dashboardService->memberStatusBadge($item->user->status ?? null);
+              $totalContribution = $item->total_contributions ?? 0;
+              $benefitsPaid = $item->total_benefits_received ?? 0;
+              $currentBalance = $item->total_contributions - $item->total_benefits_received;
+              $enrollmentDate = $item->join_date ? $item->join_date->format('Y-m-d') : '-';
               $rowNum = ($swf->currentPage() - 1) * $swf->perPage() + $index + 1;
             @endphp
             <tr class="group">
               <td class="text-xs text-primary-400 dark:text-primary-500 font-mono">{{ $rowNum }}.</td>
               <td>
-                <div class="flex items-center gap-2.5">
-                  <div class="w-9 h-9 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 text-white flex items-center justify-center text-xs font-bold flex-shrink-0 shadow-sm">
-                    {{ strtoupper(substr($memberName, 0, 1) ?? 'M') }}
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xs font-bold">
+                    {{ substr($memberName, 0, 1) }}
                   </div>
-                  <div class="min-w-0">
-                    <p class="text-sm font-semibold text-primary-900 dark:text-white truncate max-w-[180px]">{{ $memberName }}</p>
-                    <div class="flex items-center gap-2 mt-0.5">
-                      <span class="font-mono text-[11px] text-primary-500 dark:text-primary-400">{{ $memberNo }}</span>
-                      <span class="text-[10px] text-primary-400"><i class="fa-solid fa-location-dot"></i> {{ $memberBranch }}</span>
-                    </div>
+                  <div>
+                    <p class="text-xs font-bold text-primary-900 dark:text-white">{{ $memberName }}</p>
+                    <p class="text-[10px] text-primary-500 dark:text-primary-400">{{ $memberNo }}</p>
                   </div>
                 </div>
               </td>
-              <td class="text-right">
-                <span class="font-black text-sm text-primary-900 dark:text-white">{{ $fmt($totalContribution) }}</span>
+              <td class="text-right whitespace-nowrap text-xs font-bold text-primary-800 dark:text-primary-200 tabular-nums">
+                {{ $fmt($totalContribution) }}
               </td>
-              <td class="text-right">
-                <span class="font-bold text-xs text-orange-600 dark:text-orange-400 inline-flex items-center gap-1">
-                  <i class="fa-solid fa-hand-holding-heart text-[10px]"></i>
-                  {{ $fmt($benefitsPaid) }}
-                </span>
+              <td class="text-right whitespace-nowrap text-xs font-bold text-amber-600 dark:text-amber-400 tabular-nums">
+                {{ $fmt($benefitsPaid) }}
               </td>
-              <td class="text-right">
-                <span class="font-black text-sm text-purple-700 dark:text-purple-400">{{ $fmt($currentBalance) }}</span>
+              <td class="text-right whitespace-nowrap text-xs font-bold {{ $currentBalance > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }} tabular-nums">
+                {{ $fmt($currentBalance) }}
               </td>
-              <td>
-                @if($enrollmentDate !== '-')
-                  <span class="font-mono text-[11px] text-primary-700 dark:text-primary-300">{{ $enrollmentDate }}</span>
-                @else
-                  <span class="text-[11px] italic text-primary-300 dark:text-primary-600">-</span>
-                @endif
-              </td>
+              <td><span class="text-xs">{{ $enrollmentDate }}</span></td>
               <td><span class="badge {{ $memberStatus['class'] }}">{{ $memberStatus['label'] }}</span></td>
               <td class="text-right whitespace-nowrap">
-                <a href="{{ route('admin.swf.show', encryptId($memberNo)) }}"
+                <a href="{{ route('admin.swf.members.show', $item->id) }}"
                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/40 dark:hover:bg-purple-900/60 text-purple-700 dark:text-purple-300 text-[11px] font-bold transition-colors">
                   <i class="fa-solid fa-eye text-[10px]"></i> View
                 </a>
