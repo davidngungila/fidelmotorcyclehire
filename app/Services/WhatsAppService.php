@@ -58,7 +58,7 @@ class WhatsAppService
     /**
      * Send a template message with media (image/document)
      */
-    public function sendMediaMessage(array $recipients, string $template, array $media, bool $test = false): array
+    public function sendMediaMessage(array $recipients, string $template, array $media, ?string $reference = null, bool $test = false): array
     {
         $url = $test ? $this->testUrl : $this->baseUrl;
 
@@ -69,13 +69,17 @@ class WhatsAppService
             'header' => $media,
         ];
 
+        if ($reference !== null) {
+            $payload['reference'] = $reference;
+        }
+
         return $this->sendRequest($url, $payload);
     }
 
     /**
      * Send a personalized template message with media
      */
-    public function sendPersonalizedMediaMessage(array $recipients, string $template, array $personalisation, array $media, bool $test = false): array
+    public function sendPersonalizedMediaMessage(array $recipients, string $template, array $personalisation, array $media, ?string $reference = null, bool $test = false): array
     {
         $url = $test ? $this->testUrl : $this->baseUrl;
 
@@ -86,6 +90,10 @@ class WhatsAppService
             'personalisation' => $personalisation,
             'header' => $media,
         ];
+
+        if ($reference !== null) {
+            $payload['reference'] = $reference;
+        }
 
         return $this->sendRequest($url, $payload);
     }
@@ -151,7 +159,7 @@ class WhatsAppService
     /**
      * Schedule a message for future delivery
      */
-    public function scheduleMessage(array $recipients, string $template, string $date, string $time, ?array $personalisation = null, ?string $repeat = null, ?string $startDate = null, ?string $endDate = null): array
+    public function scheduleMessage(array $recipients, string $template, string $date, string $time, ?array $attributes = null, ?string $repeat = null, ?string $startDate = null, ?string $endDate = null, ?string $document = null, ?string $reference = null): array
     {
         $payload = [
             'to' => $recipients,
@@ -161,8 +169,8 @@ class WhatsAppService
             'time' => $time,
         ];
 
-        if ($personalisation !== null) {
-            $payload['attributes'] = $personalisation;
+        if ($attributes !== null) {
+            $payload['attributes'] = $attributes;
         }
 
         if ($repeat !== null) {
@@ -175,6 +183,14 @@ class WhatsAppService
 
         if ($endDate !== null) {
             $payload['end_date'] = $endDate;
+        }
+
+        if ($document !== null) {
+            $payload['document'] = $document;
+        }
+
+        if ($reference !== null) {
+            $payload['reference'] = $reference;
         }
 
         return $this->sendRequest($this->baseUrl, $payload);

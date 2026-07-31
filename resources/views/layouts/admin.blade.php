@@ -308,6 +308,40 @@
       </div>
 
       <div x-show="!sidebarCollapsed">
+        <p class="text-primary-500 text-[10px] font-bold uppercase tracking-widest px-3 pt-4 pb-1">Communication</p>
+      </div>
+
+      <div x-data="{ open: {{ request()->routeIs('admin.communication.*') ? 'true' : 'false' }} }" class="sidebar-dropdown">
+        <button @click="open = !open"
+                class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-primary-200 hover:text-white transition-all duration-150
+                       {{ request()->routeIs('admin.communication.*') ? 'active' : '' }}">
+          <i class="fa-solid fa-comments w-4 text-center flex-shrink-0"></i>
+          <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap flex-1 text-left">Communication</span>
+          <i x-show="!sidebarCollapsed" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'" class="fa-solid text-[10px] transition-transform"></i>
+        </button>
+        <div x-show="open" x-transition class="mt-1 space-y-0.5 pl-6">
+          <a href="{{ route('admin.communication.sms') }}"
+             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
+                    {{ request()->routeIs('admin.communication.sms') ? 'active' : '' }}">
+            <i class="fa-solid fa-message w-4 text-center flex-shrink-0"></i>
+            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">SMS</span>
+          </a>
+          <a href="{{ route('admin.communication.email') }}"
+             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
+                    {{ request()->routeIs('admin.communication.email') ? 'active' : '' }}">
+            <i class="fa-solid fa-envelope w-4 text-center flex-shrink-0"></i>
+            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Email</span>
+          </a>
+          <a href="{{ route('admin.communication.whatsapp') }}"
+             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
+                    {{ request()->routeIs('admin.communication.whatsapp') ? 'active' : '' }}">
+            <i class="fa-brands fa-whatsapp w-4 text-center flex-shrink-0"></i>
+            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">WhatsApp</span>
+          </a>
+        </div>
+      </div>
+
+      <div x-show="!sidebarCollapsed">
         <p class="text-primary-500 text-[10px] font-bold uppercase tracking-widest px-3 pt-4 pb-1">System</p>
       </div>
 
