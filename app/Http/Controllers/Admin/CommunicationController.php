@@ -91,7 +91,14 @@ class CommunicationController extends Controller
     public function testWhatsAppPage(): View
     {
         $whatsappSettings = \App\Models\WhatsAppSettings::first() ?? new \App\Models\WhatsAppSettings();
-        $templates = \App\Models\WhatsAppTemplate::where('is_active', true)->get();
+        $templates = \App\Models\WhatsAppTemplate::where('is_active', true)->get()->map(function($tmpl) {
+            return [
+                'name' => $tmpl->name,
+                'label' => $tmpl->description ?: ucfirst(str_replace('_', ' ', $tmpl->name)),
+                'parameters' => $tmpl->parameters ?? [],
+            ];
+        })->toArray();
+        
         return view('admin.communication.test-whatsapp', [
             'whatsappSettings' => $whatsappSettings,
             'templates' => $templates,

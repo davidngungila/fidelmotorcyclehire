@@ -156,13 +156,7 @@
       personalisationData: {},
       testMode: true,
       sending: false,
-      templates: @json($templates->map(function($tmpl) {
-        return [
-          'name' => $tmpl->name,
-          'label' => $tmpl->description ?: ucfirst(str_replace('_', ' ', $tmpl->name)),
-          'parameters' => $tmpl->parameters ?? [],
-        ];
-      })->toArray()),
+      templates: @json($templates),
       onTemplateChange() {
         if (this.selectedTemplate && this.selectedTemplate !== 'custom') {
           this.template = this.selectedTemplate;
