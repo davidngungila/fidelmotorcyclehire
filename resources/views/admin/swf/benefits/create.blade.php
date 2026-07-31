@@ -61,7 +61,8 @@
           </div>
 
           <div class="md:col-span-2 flex items-center gap-3">
-            <input type="checkbox" name="requires_approval" id="requires_approval" class="w-4 h-4 rounded border-primary-300 text-primary-600 focus:ring-primary-500" checked>
+            <input type="hidden" name="requires_approval" value="0">
+            <input type="checkbox" name="requires_approval" id="requires_approval" value="1" class="w-4 h-4 rounded border-primary-300 text-primary-600 focus:ring-primary-500" checked>
             <label for="requires_approval" class="text-sm" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Requires Admin Approval</label>
             <p class="text-xs" :class="darkMode ? 'text-primary-400' : 'text-primary-600'">If checked, granting this benefit requires admin approval</p>
           </div>
