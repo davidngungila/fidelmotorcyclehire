@@ -42,9 +42,15 @@
   <!-- Summary Cards -->
   @if(isset($totalInvested))
     @php
-      $profitClass = $totalProfit >= 0 ? 'bg-green-100 dark:bg-green-900/40' : 'bg-red-100 dark:bg-red-900/40';
-      $profitIcon = $totalProfit >= 0 ? 'fa-arrow-trend-up text-green-600 dark:text-green-400' : 'fa-arrow-trend-down text-red-600 dark:text-red-400';
-      $profitTextClass = $totalProfit >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+      if ($totalProfit >= 0) {
+        $profitClass = 'bg-green-100 dark:bg-green-900/40';
+        $profitIcon = 'fa-arrow-trend-up text-green-600 dark:text-green-400';
+        $profitTextClass = 'text-green-600 dark:text-green-400';
+      } else {
+        $profitClass = 'bg-red-100 dark:bg-red-900/40';
+        $profitIcon = 'fa-arrow-trend-down text-red-600 dark:text-red-400';
+        $profitTextClass = 'text-red-600 dark:text-red-400';
+      }
     @endphp
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <div class="glass p-5 rounded-2xl">
