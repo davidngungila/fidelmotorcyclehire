@@ -38,7 +38,6 @@ class ProfileController extends Controller
 
         return view('member.profile.show', compact(
             'user',
-            'member',
             'initials',
             'fullName',
             'swfBalance'
@@ -60,7 +59,6 @@ class ProfileController extends Controller
 
         return view('member.profile.edit', compact(
             'user',
-            'member',
             'fullName'
         ));
     }
