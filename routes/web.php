@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\NotificationController as AdminNotificationController;
 use App\Http\Controllers\Admin\MemberController as AdminMemberController;
 use App\Http\Controllers\Admin\MemberTypeController as AdminMemberTypeController;
 use App\Http\Controllers\Admin\LoanController as AdminLoanController;
@@ -67,6 +68,8 @@ Route::middleware('auth')->group(function () {
 
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
 
     Route::get('/members', [AdminMemberController::class, 'index'])->name('members.index');
     Route::get('/members/template', [AdminMemberController::class, 'downloadTemplate'])->name('members.template');

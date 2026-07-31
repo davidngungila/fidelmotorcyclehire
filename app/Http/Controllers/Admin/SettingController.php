@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\EmailSettings;
 use App\Models\GoogleSheetsConfig;
+use App\Models\SmsSettings;
 use App\Traits\FlashMessages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -57,6 +58,7 @@ class SettingController extends Controller
         ];
 
         $emailSettings = EmailSettings::first() ?? new EmailSettings();
+        $smsSettings = SmsSettings::first() ?? new SmsSettings();
 
         ActivityLog::create([
             'user_id' => Auth::id(),
@@ -71,13 +73,14 @@ class SettingController extends Controller
             'googleSheetsSettings' => $googleSheetsSettings,
             'securitySettings' => $securitySettings,
             'emailSettings' => $emailSettings,
+            'smsSettings' => $smsSettings,
         ]);
     }
 
     public function update(Request $request)
     {
         $validated = $request->validate([
-            'tab' => ['required', 'in:general,notifications,google_sheets,security,email'],
+            'tab' => ['required', 'in:general,notifications,google_sheets,security,email,sms'],
             'app_name' => ['nullable', 'string', 'max:255'],
             'support_email' => ['nullable', 'email'],
             'timezone' => ['nullable', 'string'],
@@ -111,6 +114,13 @@ class SettingController extends Controller
             'mail_from_address' => ['nullable', 'email'],
             'mail_from_name' => ['nullable', 'string'],
             'is_active' => ['nullable', 'boolean'],
+            // SMS settings
+            'sms_provider' => ['nullable', 'string', 'in:twilio,africalking,nexmo'],
+            'sms_api_key' => ['nullable', 'string'],
+            'sms_api_secret' => ['nullable', 'string'],
+            'sms_sender_id' => ['nullable', 'string'],
+            'sms_phone_number' => ['nullable', 'string'],
+            'sms_is_active' => ['nullable', 'boolean'],
         ]);
 
         $tab = $validated['tab'];
@@ -146,6 +156,36 @@ class SettingController extends Controller
             ]);
 
             $this->success('Email settings saved successfully.');
+            return redirect()->back();
+        }
+
+        // Handle SMS settings separately
+        if ($tab === 'sms') {
+            $smsSettings = SmsSettings::first();
+            if (! $smsSettings) {
+                $smsSettings = new SmsSettings();
+            }
+            
+            $smsSettings->fill([
+                'provider' => $validated['sms_provider'] ?? 'twilio',
+                'api_key' => $validated['sms_api_key'] ?? null,
+                'api_secret' => $validated['sms_api_secret'] ?? null,
+                'sender_id' => $validated['sms_sender_id'] ?? null,
+                'phone_number' => $validated['sms_phone_number'] ?? null,
+                'is_active' => $validated['sms_is_active'] ?? false,
+            ]);
+            $smsSettings->save();
+
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'description' => 'Admin updated SMS settings',
+                'subject_type' => 'sms_settings',
+                'subject_id' => $smsSettings->id,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            $this->success('SMS settings saved successfully.');
             return redirect()->back();
         }
 

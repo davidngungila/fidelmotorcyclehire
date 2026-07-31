@@ -74,6 +74,13 @@
         <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Dashboard</span>
       </a>
 
+      <a href="{{ route('admin.notifications.index') }}"
+         class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-primary-200 hover:text-white transition-all duration-150 group
+                {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}">
+        <i class="fa-solid fa-bell w-4 text-center flex-shrink-0"></i>
+        <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Notifications</span>
+      </a>
+
       <div x-show="!sidebarCollapsed">
         <p class="text-primary-500 text-[10px] font-bold uppercase tracking-widest px-3 pt-4 pb-1">Members Management</p>
       </div>

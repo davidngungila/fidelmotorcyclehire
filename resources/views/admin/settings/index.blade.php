@@ -464,6 +464,84 @@
         </form>
       </div>
 
+      <div x-show="activeTab === 'sms'" x-transition:enter="transition ease-out duration-200"
+           x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0">
+        <form method="POST" action="{{ route('admin.settings.update') }}" class="space-y-6" x-data="{ on: {{ $smsSettings->is_active ?? false }}}">
+          @csrf
+          @method('PUT')
+          <input type="hidden" name="tab" value="sms">
+
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-400 to-green-600 text-white flex items-center justify-center text-xl shadow-md">
+              <i class="fa-solid fa-comment-sms"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-lg" :class="darkMode ? 'text-white' : 'text-primary-900'">SMS Configuration</h3>
+              <p class="text-xs mt-0.5" :class="darkMode ? 'text-primary-400' : 'text-primary-600'">Configure SMS gateway for notifications</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">SMS Provider</label>
+              <select name="sms_provider" class="form-input">
+                <option value="twilio" {{ $smsSettings->provider === 'twilio' ? 'selected' : '' }}>Twilio</option>
+                <option value="africalking" {{ $smsSettings->provider === 'africalking' ? 'selected' : '' }}>Africa's Talking</option>
+                <option value="nexmo" {{ $smsSettings->provider === 'nexmo' ? 'selected' : '' }}>Nexmo (Vonage)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">API Key</label>
+              <input type="text" name="sms_api_key" value="{{ $smsSettings->api_key ?? '' }}"
+                     class="form-input" placeholder="Enter API key">
+            </div>
+
+            <div>
+              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">API Secret</label>
+              <input type="password" name="sms_api_secret" value="{{ $smsSettings->api_secret ?? '' }}"
+                     class="form-input" placeholder="Enter API secret">
+            </div>
+
+            <div>
+              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Sender ID</label>
+              <input type="text" name="sms_sender_id" value="{{ $smsSettings->sender_id ?? '' }}"
+                     class="form-input" placeholder="e.g. FEEDTAN">
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Phone Number</label>
+              <input type="text" name="sms_phone_number" value="{{ $smsSettings->phone_number ?? '' }}"
+                     class="form-input" placeholder="e.g. +255123456789">
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between p-4 rounded-xl bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-900/50">
+            <div>
+              <p class="font-bold text-sm" :class="darkMode ? 'text-white' : 'text-primary-900'">Enable SMS Notifications</p>
+              <p class="text-xs mt-0.5" :class="darkMode ? 'text-primary-400' : 'text-primary-600'">Allow sending SMS alerts to members</p>
+            </div>
+            <div class="relative">
+              <input type="hidden" name="sms_is_active" :value="on ? 1 : 0">
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" class="sr-only peer" :checked="on" @change="on = !on; $el.previousElementSibling.value = on ? 1 : 0">
+                <div class="w-12 h-7 rounded-full transition-colors bg-gray-200 dark:bg-gray-700 peer-checked:bg-green-600"></div>
+                <div class="absolute left-0.5 top-0.5 w-6 h-6 bg-white rounded-full shadow-md transition-transform peer-checked:translate-x-5 flex items-center justify-center">
+                  <i :class="on ? 'fa-solid fa-check text-green-600' : 'fa-solid fa-xmark text-gray-400'" class="text-[10px]"></i>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="pt-6 mt-6 border-t border-primary-100 dark:border-primary-900/50 flex justify-end">
+            <button type="submit"
+                    class="px-6 py-2.5 rounded-xl bg-green-600 hover:bg-green-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95">
+              <i class="fa-solid fa-comment-sms mr-1.5 text-[13px]"></i> Save SMS Settings
+            </button>
+          </div>
+        </form>
+      </div>
+
     </div>
   </div>
 </div>
@@ -481,6 +559,7 @@
         { key: 'google_sheets', label: 'Google Sheets', icon: 'fa-brands fa-google' },
         { key: 'security', label: 'Security', icon: 'fa-solid fa-shield-halved' },
         { key: 'email', label: 'Email', icon: 'fa-solid fa-envelope' },
+        { key: 'sms', label: 'SMS', icon: 'fa-solid fa-comment-sms' },
       ]
     }
   }
