@@ -22,6 +22,7 @@ use App\Models\MemberType;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\EncryptedIdService;
+use App\Services\MailConfigService;
 use App\Traits\FlashMessages;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -34,6 +35,7 @@ class UserController extends Controller
 
     public function __construct(
         protected EncryptedIdService $encryptedIdService,
+        protected MailConfigService $mailConfigService,
     ) {
     }
 
@@ -1005,20 +1007,13 @@ class UserController extends Controller
 
             // Send email with new password
             try {
-                \Mail::send([], [], function($message) use ($user, $newPassword) {
-                    $emailBody = "Dear {$user->name},\n\n";
-                    $emailBody .= "Your password has been reset by the administrator.\n\n";
-                    $emailBody .= "Your new password is: {$newPassword}\n\n";
-                    $emailBody .= "Please login to the Members Portal and change your password immediately for security reasons.\n\n";
-                    $emailBody .= "Login URL: " . url('/login') . "\n\n";
-                    $emailBody .= "If you did not request this password reset, please contact the administrator immediately.\n\n";
-                    $emailBody .= "Regards,\n";
-                    $emailBody .= "Members Portal Team";
-                    
+                // Configure mail settings from database before sending
+                $this->mailConfigService->configureFromDatabase();
+                
+                \Mail::raw("Your password has been reset to: {$newPassword}\n\nPlease login and change your password immediately.", function($message) use ($user) {
                     $message->to($user->email)
                             ->subject('Password Reset - Members Portal')
-                            ->from(config('mail.from.address', 'noreply@feedtancmg.org'), config('mail.from.name', 'Members Portal'))
-                            ->setBody($emailBody);
+                            ->from(config('mail.from.address', 'noreply@feedtancmg.org'), config('mail.from.name', 'Members Portal'));
                 });
                 
                 \Log::info('Password reset email sent successfully', [
@@ -1092,6 +1087,9 @@ class UserController extends Controller
 
                     // Send email with new password
                     try {
+                        // Configure mail settings from database before sending
+                        $this->mailConfigService->configureFromDatabase();
+                        
                         \Mail::raw("Your password has been reset to: {$newPassword}\n\nPlease login and change your password immediately.", function($message) use ($user) {
                             $message->to($user->email)
                                     ->subject('Password Reset - Members Portal')
