@@ -131,15 +131,36 @@
                 <span class="badge {{ $statusBadge['class'] }}">{{ $statusBadge['label'] }}</span>
               </td>
               <td class="text-right whitespace-nowrap">
-                <div class="flex items-center justify-end gap-2">
+                <div class="flex items-center justify-end gap-1.5">
                   <a href="{{ route('admin.members.show', encryptId($memberNo ?? 'FTN-' . str_pad((string)$rowNum, 5, '0', STR_PAD_LEFT))) }}"
-                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-[11px] font-bold transition-colors">
-                    <i class="fa-solid fa-eye text-[10px]"></i> View Profile
+                     class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-sm transition-colors"
+                     title="View Profile">
+                    <i class="fa-solid fa-eye text-xs"></i>
                   </a>
                   <a href="{{ route('admin.members.show', encryptId($memberNo ?? 'FTN-' . str_pad((string)$rowNum, 5, '0', STR_PAD_LEFT))) }}#tab-loans"
-                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-50 hover:bg-orange-100 dark:bg-orange-900/30 dark:hover:bg-orange-900/50 text-orange-700 dark:text-orange-300 text-[11px] font-bold transition-colors border border-orange-200 dark:border-orange-800/40">
-                    <i class="fa-solid fa-hand-holding-dollar text-[10px]"></i> Loans
-                    <span class="badge badge-orange !text-[9px] !py-0.5 !px-1.5 ml-0.5">View</span>
+                     class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-orange-50 hover:bg-orange-100 dark:bg-orange-900/30 dark:hover:bg-orange-900/50 text-orange-700 dark:text-orange-300 text-sm transition-colors border border-orange-200 dark:border-orange-800/40"
+                     title="Loans">
+                    <i class="fa-solid fa-hand-holding-dollar text-xs"></i>
+                  </a>
+                  <a href="{{ route('admin.members.show', encryptId($memberNo ?? 'FTN-' . str_pad((string)$rowNum, 5, '0', STR_PAD_LEFT))) }}#tab-savings"
+                     class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-green-50 hover:bg-green-100 dark:bg-green-900/30 dark:hover:bg-green-900/50 text-green-700 dark:text-green-300 text-sm transition-colors border border-green-200 dark:border-green-800/40"
+                     title="Savings">
+                    <i class="fa-solid fa-piggy-bank text-xs"></i>
+                  </a>
+                  <a href="{{ route('admin.members.show', encryptId($memberNo ?? 'FTN-' . str_pad((string)$rowNum, 5, '0', STR_PAD_LEFT))) }}#tab-investments"
+                     class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/30 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 text-sm transition-colors border border-purple-200 dark:border-purple-800/40"
+                     title="Investments">
+                    <i class="fa-solid fa-chart-line text-xs"></i>
+                  </a>
+                  <a href="{{ route('admin.members.show', encryptId($memberNo ?? 'FTN-' . str_pad((string)$rowNum, 5, '0', STR_PAD_LEFT))) }}#tab-shares"
+                     class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-sm transition-colors border border-blue-200 dark:border-blue-800/40"
+                     title="Shares">
+                    <i class="fa-solid fa-certificate text-xs"></i>
+                  </a>
+                  <a href="{{ route('admin.members.show', encryptId($memberNo ?? 'FTN-' . str_pad((string)$rowNum, 5, '0', STR_PAD_LEFT))) }}#tab-swf"
+                     class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-pink-50 hover:bg-pink-100 dark:bg-pink-900/30 dark:hover:bg-pink-900/50 text-pink-700 dark:text-pink-300 text-sm transition-colors border border-pink-200 dark:border-pink-800/40"
+                     title="SWF">
+                    <i class="fa-solid fa-hand-holding-heart text-xs"></i>
                   </a>
                 </div>
               </td>
