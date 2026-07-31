@@ -41,6 +41,9 @@
 
   <!-- Summary Cards -->
   @if(isset($totalInvested))
+    @php
+      $totalProfitPrefix = $totalProfit >= 0 ? '+' : '';
+    @endphp
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <div class="glass p-5 rounded-2xl">
         <div class="flex items-center gap-3 mb-3">
@@ -68,7 +71,7 @@
           <p class="text-xs font-bold text-green-600 dark:text-green-400 uppercase">Total Profit</p>
         </div>
         <p class="text-2xl font-black text-green-600 dark:text-green-400">
-          {{ $totalProfit >= 0 ? '+' : '' }}{{ $fmt($totalProfit) }}
+          {{ $totalProfitPrefix }}{{ $fmt($totalProfit) }}
         </p>
       </div>
       <div class="glass p-5 rounded-2xl">
