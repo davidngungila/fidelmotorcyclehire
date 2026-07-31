@@ -106,7 +106,11 @@
             </p>
           </div>
           <div class="flex items-center gap-3">
-            <span class="badge {{ $status['class'] }}">{{ $status['label'] }}</span>
+            @php
+              $statusClass = $status['class'];
+              $statusLabel = $status['label'];
+            @endphp
+            <span class="badge {{ $statusClass }}">{{ $statusLabel }}</span>
           </div>
         </div>
 
@@ -153,17 +157,23 @@
 
         <div class="flex items-center gap-4">
           <div class="flex-1">
+            @php
+              $profitBadgeClass = $profit >= 0 ? 'badge-green' : 'badge-red';
+              $profitPrefix = $profit >= 0 ? '+' : '';
+              $profitFillClass = $profit >= 0 ? 'bg-teal-500' : 'bg-red-500';
+              $profitTextClass = $profit >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+            @endphp
             <div class="flex items-center justify-between mb-1">
               <span class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase">Profit/Loss</span>
-              <span class="badge {{ $profit >= 0 ? 'badge-green' : 'badge-red' }}">
-                {{ $profit >= 0 ? '+' : '' }}{{ number_format($profitPct, 2) }}%
+              <span class="badge {{ $profitBadgeClass }}">
+                {{ $profitPrefix }}{{ number_format($profitPct, 2) }}%
               </span>
             </div>
             <div class="progress-bar">
-              <div class="progress-fill {{ $profit >= 0 ? 'bg-teal-500' : 'bg-red-500' }}" style="width: {{ min(abs($profitPct), 100) }}%"></div>
+              <div class="progress-fill {{ $profitFillClass }}" style="width: {{ min(abs($profitPct), 100) }}%"></div>
             </div>
-            <p class="text-xs font-bold {{ $profit >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }} mt-1">
-              {{ $profit >= 0 ? '+' : '' }}{{ $fmt($profit) }}
+            <p class="text-xs font-bold {{ $profitTextClass }} mt-1">
+              {{ $profitPrefix }}{{ $fmt($profit) }}
             </p>
           </div>
         </div>
