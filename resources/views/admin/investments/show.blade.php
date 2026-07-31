@@ -94,7 +94,10 @@
               {{ $investment->investment_number }}
             </h3>
             <p class="text-xs text-primary-500 dark:text-primary-400 mt-1">
-              {{ $investment->investmentProduct->name ?? 'Unknown Product' }}
+              @php
+                $productName = $investment->investmentProduct ? $investment->investmentProduct->name : 'Unknown Product';
+              @endphp
+              {{ $productName }}
             </p>
           </div>
           <div class="flex items-center gap-3">
