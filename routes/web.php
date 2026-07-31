@@ -235,10 +235,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::put('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
 
     Route::prefix('communication')->name('communication.')->group(function () {
-        Route::get('/sms', [AdminCommunicationController::class, 'sms'])->name('sms');
-        Route::get('/email', [AdminCommunicationController::class, 'email'])->name('email');
-        Route::get('/whatsapp', [AdminCommunicationController::class, 'whatsapp'])->name('whatsapp');
-        Route::post('/whatsapp/send', [AdminCommunicationController::class, 'sendWhatsApp'])->name('whatsapp.send');
+        Route::get('/sms', [\App\Http\Controllers\Admin\CommunicationController::class, 'sms'])->name('sms');
+        Route::get('/email', [\App\Http\Controllers\Admin\CommunicationController::class, 'email'])->name('email');
+        Route::get('/whatsapp', [\App\Http\Controllers\Admin\CommunicationController::class, 'whatsapp'])->name('whatsapp');
+        Route::post('/whatsapp/send', [\App\Http\Controllers\Admin\CommunicationController::class, 'sendWhatsApp'])->name('whatsapp.send');
     });
 });
 
