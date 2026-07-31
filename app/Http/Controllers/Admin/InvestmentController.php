@@ -267,8 +267,12 @@ class InvestmentController extends Controller
                 $duration = $inv->investment_date->diffInMonths($inv->maturity_date) . ' months';
             }
             $actualReturn = $inv->actual_return ?? 0;
+            $expectedReturn = $inv->expected_return ?? 0;
             $amount = $inv->amount ?? 0;
-            $profit = $actualReturn - $amount;
+            
+            // Use expected_return for profit calculation if actual_return equals amount (new investment)
+            $returnValue = ($actualReturn == $amount) ? $expectedReturn : $actualReturn;
+            $profit = $returnValue - $amount;
             $profitPct = $amount > 0 ? (($profit / $amount) * 100) : 0;
             $status = $this->dashboardService->depositStatusBadge($inv->status ?? null);
 
