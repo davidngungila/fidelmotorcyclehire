@@ -25,17 +25,43 @@
         <form method="POST" action="{{ route('admin.investments.store') }}" @submit.prevent="submitForm">
           @csrf
 
-          <!-- Member Selection -->
+          <!-- Member -->
           <div class="mb-6">
             <label class="block text-sm font-bold text-primary-900 dark:text-white mb-2">
               Member <span class="text-red-500">*</span>
             </label>
-            <select name="member_number" required class="form-input w-full" x-model="form.member_number" @change="onMemberChange">
-              <option value="">Select a member</option>
-              @foreach($members as $member)
-                <option value="{{ $member->member_number }}">{{ $member->full_name }} ({{ $member->member_number }})</option>
-              @endforeach
-            </select>
+            <div class="relative">
+              <input type="text" 
+                     placeholder="Search member by name or member number..."
+                     class="form-input w-full"
+                     x-model="memberSearch"
+                     @input="filterMembers"
+                     @focus="showMemberDropdown = true"
+                     @blur="setTimeout(() => showMemberDropdown = false, 200)"/>
+              <input type="hidden" name="member_number" x-model="form.member_number" required/>
+              <button x-show="form.member_number" @click="clearMember" class="absolute right-3 top-1/2 -translate-y-1/2 text-primary-400 hover:text-primary-600">
+                <i class="fa-solid fa-xmark text-xs"></i>
+              </button>
+            </div>
+            
+            <!-- Dropdown Results -->
+            <div x-show="showMemberDropdown && filteredMembers.length > 0" 
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-95"
+                 class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 max-h-60 overflow-y-auto">
+              <template x-for="member in filteredMembers" :key="member.member_number">
+                <div @click="selectMember(member)" 
+                     class="px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-0">
+                  <div class="font-semibold text-sm text-primary-900 dark:text-white" x-text="member.full_name"></div>
+                  <div class="text-xs text-primary-500 dark:text-primary-400" x-text="member.member_number"></div>
+                </div>
+              </template>
+            </div>
+            
             @error('member_number')
               <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>
             @enderror
@@ -215,6 +241,39 @@
       },
       selectedProduct: null,
       submitting: false,
+      memberSearch: '',
+      showMemberDropdown: false,
+      filteredMembers: [],
+      allMembers: @json($members),
+      
+      init() {
+        this.filteredMembers = this.allMembers;
+      },
+      
+      filterMembers() {
+        const search = this.memberSearch.toLowerCase();
+        if (!search) {
+          this.filteredMembers = this.allMembers;
+        } else {
+          this.filteredMembers = this.allMembers.filter(member => 
+            member.full_name.toLowerCase().includes(search) ||
+            member.member_number.toLowerCase().includes(search)
+          );
+        }
+        this.showMemberDropdown = true;
+      },
+      
+      selectMember(member) {
+        this.form.member_number = member.member_number;
+        this.memberSearch = member.full_name + ' (' + member.member_number + ')';
+        this.showMemberDropdown = false;
+      },
+      
+      clearMember() {
+        this.form.member_number = '';
+        this.memberSearch = '';
+        this.filteredMembers = this.allMembers;
+      },
       
       onMemberChange() {
         // Handle member selection if needed
