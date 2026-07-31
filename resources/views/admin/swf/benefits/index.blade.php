@@ -80,17 +80,17 @@
 
         <div>
           <label class="form-label uppercase tracking-wider text-xs" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Select Benefit</label>
-          <select name="swf_benefit_id" class="form-input" required>
+          <select name="swf_benefit_id" id="swf_benefit_id" class="form-input" required x-on:change="autoFillAmount($el.value)">
             <option value="">-- Select Benefit --</option>
             @foreach($benefits as $benefit)
-              <option value="{{ $benefit->id }}">{{ $benefit->name }}</option>
+              <option value="{{ $benefit->id }}" data-max-amount="{{ $benefit->max_amount }}">{{ $benefit->name }}</option>
             @endforeach
           </select>
         </div>
 
         <div>
           <label class="form-label uppercase tracking-wider text-xs" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Amount (TSh)</label>
-          <input type="number" name="amount" step="0.01" min="0" class="form-input" placeholder="e.g., 50000" required>
+          <input type="number" name="amount" id="amount" step="0.01" min="0" class="form-input" placeholder="e.g., 50000" required>
         </div>
 
         <div>
@@ -106,3 +106,17 @@
   </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+  function autoFillAmount(benefitId) {
+    const select = document.getElementById('swf_benefit_id');
+    const selectedOption = select.options[select.selectedIndex];
+    const maxAmount = selectedOption.getAttribute('data-max-amount');
+    
+    if (maxAmount) {
+      document.getElementById('amount').value = maxAmount;
+    }
+  }
+</script>
+@endpush
