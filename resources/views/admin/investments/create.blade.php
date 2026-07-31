@@ -1,0 +1,239 @@
+@extends('layouts.admin')
+
+@section('breadcrumb', 'Members › Investments › New Investment')
+@section('page_title', 'Create New Investment')
+
+@section('content')
+
+<div x-data="investmentForm()" class="space-y-6">
+  <div class="glass p-6">
+    <form method="POST" action="{{ route('admin.investments.store') }}" @submit.prevent="submitForm">
+      @csrf
+
+      <!-- Member Selection -->
+      <div class="mb-6">
+        <label class="block text-sm font-bold text-primary-900 dark:text-white mb-2">
+          Member <span class="text-red-500">*</span>
+        </label>
+        <select name="member_number" required class="form-input w-full" x-model="form.member_number" @change="onMemberChange">
+          <option value="">Select a member</option>
+          @foreach($members as $member)
+            <option value="{{ $member->member_number }}">{{ $member->full_name }} ({{ $member->member_number }})</option>
+          @endforeach
+        </select>
+        @error('member_number')
+          <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>
+        @enderror
+      </div>
+
+      <!-- Investment Product -->
+      <div class="mb-6">
+        <label class="block text-sm font-bold text-primary-900 dark:text-white mb-2">
+          Investment Product <span class="text-red-500">*</span>
+        </label>
+        <select name="investment_product_id" required class="form-input w-full" x-model="form.investment_product_id" @change="onProductChange">
+          <option value="">Select a product</option>
+          @foreach($products as $product)
+            <option value="{{ $product->id }}" 
+                    data-interest-rate="{{ $product->interest_rate }}"
+                    data-min-investment="{{ $product->min_investment }}"
+                    data-max-investment="{{ $product->max_investment }}"
+                    data-duration="{{ $product->duration_months }}">
+              {{ $product->name }} - {{ $product->interest_rate }}% ({{ $product->duration_months }} months)
+            </option>
+          @endforeach
+        </select>
+        @error('investment_product_id')
+          <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>
+        @enderror
+      </div>
+
+      <!-- Product Details (shown when product is selected) -->
+      <div x-show="selectedProduct" class="mb-6 p-4 rounded-xl bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800/40">
+        <h4 class="text-sm font-bold text-teal-700 dark:text-teal-300 mb-2">Product Details</h4>
+        <div class="grid grid-cols-2 gap-4 text-xs">
+          <div>
+            <span class="text-teal-600 dark:text-teal-400">Interest Rate:</span>
+            <span class="font-bold text-teal-900 dark:text-teal-100" x-text="selectedProduct.interest_rate + '%'"></span>
+          </div>
+          <div>
+            <span class="text-teal-600 dark:text-teal-400">Duration:</span>
+            <span class="font-bold text-teal-900 dark:text-teal-100" x-text="selectedProduct.duration + ' months'"></span>
+          </div>
+          <div>
+            <span class="text-teal-600 dark:text-teal-400">Min Investment:</span>
+            <span class="font-bold text-teal-900 dark:text-teal-100" x-text="formatCurrency(selectedProduct.min_investment)"></span>
+          </div>
+          <div>
+            <span class="text-teal-600 dark:text-teal-400">Max Investment:</span>
+            <span class="font-bold text-teal-900 dark:text-teal-100" x-text="formatCurrency(selectedProduct.max_investment)"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Amount -->
+      <div class="mb-6">
+        <label class="block text-sm font-bold text-primary-900 dark:text-white mb-2">
+          Investment Amount (TSh) <span class="text-red-500">*</span>
+        </label>
+        <input type="number" name="amount" required min="0" step="0.01"
+               class="form-input w-full"
+               x-model="form.amount"
+               placeholder="Enter investment amount"/>
+        @error('amount')
+          <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>
+        @enderror
+      </div>
+
+      <!-- Investment Date -->
+      <div class="mb-6">
+        <label class="block text-sm font-bold text-primary-900 dark:text-white mb-2">
+          Investment Date <span class="text-red-500">*</span>
+        </label>
+        <input type="date" name="investment_date" required
+               class="form-input w-full"
+               x-model="form.investment_date"
+               @change="calculateMaturityDate"/>
+        @error('investment_date')
+          <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>
+        @enderror
+      </div>
+
+      <!-- Maturity Date -->
+      <div class="mb-6">
+        <label class="block text-sm font-bold text-primary-900 dark:text-white mb-2">
+          Maturity Date <span class="text-primary-500 text-xs font-normal">(Auto-calculated if left blank)</span>
+        </label>
+        <input type="date" name="maturity_date"
+               class="form-input w-full"
+               x-model="form.maturity_date"/>
+        @error('maturity_date')
+          <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>
+        @enderror
+      </div>
+
+      <!-- Notes -->
+      <div class="mb-6">
+        <label class="block text-sm font-bold text-primary-900 dark:text-white mb-2">
+          Notes
+        </label>
+        <textarea name="notes" rows="3"
+                  class="form-input w-full"
+                  x-model="form.notes"
+                  placeholder="Optional notes..."></textarea>
+        @error('notes')
+          <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>
+        @enderror
+      </div>
+
+      <!-- Expected Return Preview -->
+      <div x-show="form.amount && selectedProduct" class="mb-6 p-4 rounded-xl bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800/40">
+        <h4 class="text-sm font-bold text-primary-700 dark:text-primary-300 mb-2">Investment Summary</h4>
+        <div class="grid grid-cols-2 gap-4 text-xs">
+          <div>
+            <span class="text-primary-600 dark:text-primary-400">Invested Amount:</span>
+            <span class="font-bold text-primary-900 dark:text-white" x-text="formatCurrency(form.amount)"></span>
+          </div>
+          <div>
+            <span class="text-primary-600 dark:text-primary-400">Expected Return:</span>
+            <span class="font-bold text-green-600 dark:text-green-400" x-text="formatCurrency(calculateExpectedReturn())"></span>
+          </div>
+          <div>
+            <span class="text-primary-600 dark:text-primary-400">Expected Profit:</span>
+            <span class="font-bold text-green-600 dark:text-green-400" x-text="formatCurrency(calculateExpectedReturn() - form.amount)"></span>
+          </div>
+          <div>
+            <span class="text-primary-600 dark:text-primary-400">Return Percentage:</span>
+            <span class="font-bold text-primary-900 dark:text-white" x-text="selectedProduct.interest_rate + '%'"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Submit Buttons -->
+      <div class="flex items-center justify-end gap-3 pt-4 border-t border-primary-100 dark:border-primary-900/50">
+        <a href="{{ route('admin.investments.index') }}"
+           class="px-5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-bold transition-all">
+          Cancel
+        </a>
+        <button type="submit"
+                :disabled="submitting"
+                class="px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 disabled:bg-teal-400 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95 flex items-center gap-2">
+          <i x-show="!submitting" class="fa-solid fa-plus text-[13px]"></i>
+          <i x-show="submitting" class="fa-solid fa-spinner fa-spin text-[13px]"></i>
+          <span x-text="submitting ? 'Creating...' : 'Create Investment'"></span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+@endsection
+
+@push('scripts')
+<script>
+  function investmentForm() {
+    return {
+      form: {
+        member_number: '',
+        investment_product_id: '',
+        amount: '',
+        investment_date: new Date().toISOString().split('T')[0],
+        maturity_date: '',
+        notes: ''
+      },
+      selectedProduct: null,
+      submitting: false,
+      
+      onMemberChange() {
+        // Handle member selection if needed
+      },
+      
+      onProductChange() {
+        const select = document.querySelector('select[name="investment_product_id"]');
+        const option = select.options[select.selectedIndex];
+        
+        if (option && option.value) {
+          this.selectedProduct = {
+            interest_rate: parseFloat(option.dataset.interestRate) || 0,
+            min_investment: parseFloat(option.dataset.minInvestment) || 0,
+            max_investment: parseFloat(option.dataset.maxInvestment) || 0,
+            duration: parseInt(option.dataset.duration) || 0
+          };
+          this.calculateMaturityDate();
+        } else {
+          this.selectedProduct = null;
+        }
+      },
+      
+      calculateMaturityDate() {
+        if (this.form.investment_date && this.selectedProduct && this.selectedProduct.duration > 0) {
+          const investmentDate = new Date(this.form.investment_date);
+          const maturityDate = new Date(investmentDate);
+          maturityDate.setMonth(maturityDate.getMonth() + this.selectedProduct.duration);
+          this.form.maturity_date = maturityDate.toISOString().split('T')[0];
+        }
+      },
+      
+      calculateExpectedReturn() {
+        if (!this.form.amount || !this.selectedProduct) return 0;
+        const amount = parseFloat(this.form.amount);
+        const rate = this.selectedProduct.interest_rate / 100;
+        return amount * (1 + rate);
+      },
+      
+      formatCurrency(value) {
+        if (!value) return '0.00 TSh';
+        return new Intl.NumberFormat('en-TZ', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }).format(value) + ' TSh';
+      },
+      
+      submitForm() {
+        this.submitting = true;
+        this.$el.submit();
+      }
+    };
+  }
+</script>
+@endpush

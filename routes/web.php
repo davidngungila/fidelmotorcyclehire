@@ -157,6 +157,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/swf/{encryptedMemberNumber}', [AdminSwfController::class, 'show'])->name('swf.show');
 
     Route::get('/investments', [AdminInvestmentController::class, 'index'])->name('investments.index');
+    Route::get('/investments/create', [AdminInvestmentController::class, 'create'])->name('investments.create');
+    Route::post('/investments', [AdminInvestmentController::class, 'store'])->name('investments.store');
     Route::get('/investments/{encryptedMemberNumber}', [AdminInvestmentController::class, 'show'])->name('investments.show');
 
     Route::get('/investment-products', [App\Http\Controllers\Admin\InvestmentProductController::class, 'index'])->name('investment-products.index');

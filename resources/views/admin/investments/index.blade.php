@@ -28,6 +28,10 @@
         @endif
       </div>
     </form>
+    <a href="{{ route('admin.investments.create') }}"
+       class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95 whitespace-nowrap">
+      <i class="fa-solid fa-plus text-[13px]"></i> New Investment
+    </a>
   </div>
 
   <div class="glass p-5">

@@ -93,6 +93,103 @@ class InvestmentController extends Controller
         ]);
     }
 
+    public function create(Request $request)
+    {
+        Gate::authorize('admin-only');
+
+        $members = \App\Models\Member::all(['id', 'member_number', 'full_name']);
+        $products = InvestmentProduct::active()->get();
+
+        return view('admin.investments.create', [
+            'members' => $members,
+            'products' => $products,
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        Gate::authorize('admin-only');
+
+        $validated = $request->validate([
+            'member_number' => ['required', 'exists:members,member_number'],
+            'investment_product_id' => ['required', 'exists:investment_products,id'],
+            'amount' => ['required', 'numeric', 'min:0'],
+            'investment_date' => ['required', 'date'],
+            'maturity_date' => ['nullable', 'date', 'after:investment_date'],
+            'notes' => ['nullable', 'string'],
+        ]);
+
+        $member = \App\Models\Member::where('member_number', $validated['member_number'])->first();
+        $product = InvestmentProduct::find($validated['investment_product_id']);
+
+        if (!$member) {
+            $this->error('Member not found');
+            return redirect()->back()->withInput();
+        }
+
+        if (!$product) {
+            $this->error('Investment product not found');
+            return redirect()->back()->withInput();
+        }
+
+        // Validate amount against product limits
+        if ($product->min_investment && $validated['amount'] < $product->min_investment) {
+            $this->error("Minimum investment for this product is {$product->min_investment}");
+            return redirect()->back()->withInput();
+        }
+
+        if ($product->max_investment && $validated['amount'] > $product->max_investment) {
+            $this->error("Maximum investment for this product is {$product->max_investment}");
+            return redirect()->back()->withInput();
+        }
+
+        // Calculate maturity date if not provided
+        if (empty($validated['maturity_date']) && $product->duration_months) {
+            $maturityDate = \Carbon\Carbon::parse($validated['investment_date'])->addMonths($product->duration_months);
+            $validated['maturity_date'] = $maturityDate->format('Y-m-d');
+        }
+
+        // Generate investment number
+        $investmentNumber = 'INV-' . strtoupper(uniqid());
+
+        // Calculate expected return
+        $interestRate = $product->interest_rate ?? 0;
+        $expectedReturn = $validated['amount'] * (1 + ($interestRate / 100));
+
+        $investment = Investment::create([
+            'user_id' => $member->user_id,
+            'investment_product_id' => $validated['investment_product_id'],
+            'member_number' => $validated['member_number'],
+            'investment_number' => $investmentNumber,
+            'amount' => $validated['amount'],
+            'investment_date' => $validated['investment_date'],
+            'maturity_date' => $validated['maturity_date'] ?? null,
+            'interest_rate' => $interestRate,
+            'expected_return' => $expectedReturn,
+            'actual_return' => $validated['amount'], // Initially same as invested amount
+            'status' => 'active',
+            'notes' => $validated['notes'] ?? null,
+        ]);
+
+        ActivityLog::create([
+            'user_id' => Auth::id(),
+            'subject_type' => 'investment',
+            'subject_id' => $investment->id,
+            'description' => "Admin created investment for member {$validated['member_number']}",
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'properties' => [
+                'member_number' => $validated['member_number'],
+                'investment_number' => $investmentNumber,
+                'amount' => $validated['amount'],
+                'product' => $product->name,
+            ],
+        ]);
+
+        $this->success('Investment created successfully');
+        return redirect()->route('admin.investments.index');
+    }
+
     public function show(Request $request, string $encryptedMemberNumber)
     {
         Gate::authorize('admin-only');
