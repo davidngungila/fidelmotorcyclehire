@@ -62,12 +62,22 @@ class InvestmentController extends Controller
         $investments->through(function ($inv) {
             $memberNo = $inv->member_number ?? '-';
             
-            // Try to get member name from user relationship
-            $memberName = 'Unknown';
+            // Try to get member name from user relationship first
+            $memberName = null;
             if ($inv->user && !empty($inv->user->name)) {
                 $memberName = $inv->user->name;
-            } else {
-                // If user relationship is missing or empty, use member_number
+            }
+            
+            // If not found via relationship, try to find user by member_number
+            if (empty($memberName) && !empty($memberNo) && $memberNo !== '-') {
+                $user = User::where('member_number', $memberNo)->first();
+                if ($user && !empty($user->name)) {
+                    $memberName = $user->name;
+                }
+            }
+            
+            // If still not found, use member_number as fallback
+            if (empty($memberName)) {
                 $memberName = $memberNo;
             }
             
