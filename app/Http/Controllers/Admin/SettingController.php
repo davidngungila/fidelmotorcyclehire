@@ -9,7 +9,9 @@ use App\Models\ActivityLog;
 use App\Models\EmailSettings;
 use App\Models\GoogleSheetsConfig;
 use App\Models\SmsSettings;
+use App\Services\SmsService;
 use App\Traits\FlashMessages;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -227,5 +229,40 @@ class SettingController extends Controller
         $this->success(ucfirst(str_replace('_', ' ', $tab)) . ' settings saved successfully.');
 
         return redirect()->back();
+    }
+
+    public function testSms(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'phone' => ['required', 'string'],
+            'message' => ['required', 'string'],
+        ]);
+
+        $smsService = new SmsService();
+        
+        if (! $smsService->isActive()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'SMS service is not configured or inactive. Please configure SMS settings first.',
+            ], 400);
+        }
+
+        $result = $smsService->sendSingle($validated['phone'], $validated['message']);
+
+        ActivityLog::create([
+            'user_id' => Auth::id(),
+            'description' => 'Admin sent test SMS',
+            'subject_type' => 'sms_test',
+            'subject_id' => null,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'properties' => [
+                'phone' => $validated['phone'],
+                'message' => $validated['message'],
+                'result' => $result,
+            ],
+        ]);
+
+        return response()->json($result);
     }
 }
