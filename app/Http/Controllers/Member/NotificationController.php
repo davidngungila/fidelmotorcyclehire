@@ -46,19 +46,12 @@ class NotificationController extends Controller
                 'date' => $n->created_at->format('Y-m-d H:i:s'),
                 'priority' => $n->priority,
                 'is_read' => $n->is_read,
+                'is_unread' => !$n->is_read,
                 'read_at' => $n->read_at ? $n->read_at->format('Y-m-d H:i:s') : null,
             ];
         })->toArray();
 
-        $enriched = array_map(static function (array $n) use ($readNotifications): array {
-            $id = (string) ($n['id'] ?? '');
-            $isRead = in_array($id, $readNotifications, true) || ($n['is_read'] ?? false);
-
-            return array_merge($n, [
-                'is_read' => $isRead,
-                'is_unread' => ! $isRead,
-            ]);
-        }, $dbNotifications);
+        $enriched = $dbNotifications;
 
         $allUnread = array_values(array_filter($enriched, static fn(array $n): bool => ! $n['is_read']));
 
