@@ -27,6 +27,7 @@
   $deposits = $deposits ?? [];
   $swf = $swf ?? [];
   $investments = $investments ?? [];
+  $shares = $shares ?? [];
 
   $savingsBalance = $savings['balance'] ?? ($savings[0]['balance'] ?? 0);
   $savingsInterest = $savings['interest_earned'] ?? ($savings[0]['interest_earned'] ?? 0);
@@ -669,6 +670,106 @@
       @endif
     </div>
   </div>
+
+  <div x-show="activeTab === 'shares'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
+    <div class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="glass p-5" style="background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(59,130,246,0.02));">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+              <i class="fa-solid fa-certificate"></i>
+            </div>
+            <p class="text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">Total Shares</p>
+          </div>
+          <p class="text-2xl font-bold text-primary-900 dark:text-white">{{ $fmtInt($shares['total_shares'] ?? ($shares[0]['total_shares'] ?? 0)) }}</p>
+        </div>
+        <div class="glass p-5" style="background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(34,197,94,0.02));">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 flex items-center justify-center">
+              <i class="fa-solid fa-money-bill-wave"></i>
+            </div>
+            <p class="text-[11px] font-bold uppercase tracking-wider text-green-600 dark:text-green-400">Share Value</p>
+          </div>
+          <p class="text-2xl font-bold text-primary-900 dark:text-white">{{ $fmt($shares['share_value'] ?? ($shares[0]['share_value'] ?? 0)) }}</p>
+        </div>
+        <div class="glass p-5" style="background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(139,92,246,0.02));">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+              <i class="fa-solid fa-sack-dollar"></i>
+            </div>
+            <p class="text-[11px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">Total Value</p>
+          </div>
+          <p class="text-2xl font-bold text-primary-900 dark:text-white">{{ $fmt($shares['total_value'] ?? ($shares[0]['total_value'] ?? 0)) }}</p>
+        </div>
+      </div>
+
+      <div class="glass p-6">
+        <h3 class="font-bold text-primary-900 dark:text-white text-sm mb-5 flex items-center gap-2">
+          <i class="fa-solid fa-history text-blue-500 text-xs"></i>
+          Share Transaction History
+        </h3>
+        <div class="overflow-x-auto -webkit-scrollbar [&::-webkit-scrollbar]:hidden rounded-xl">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Share Type</th>
+                <th class="text-right">Quantity</th>
+                <th class="text-right">Price per Share</th>
+                <th class="text-right">Total Amount</th>
+                <th class="text-right">Balance</th>
+              </tr>
+            </thead>
+            <tbody>
+              @forelse($shares['transactions'] ?? ($shares[0]['transactions'] ?? []) as $tx)
+                @php
+                  $txDate = $tx['date'] ?? ($tx['Date'] ?? '-');
+                  $txType = $tx['type'] ?? ($tx['Type'] ?? 'Purchase');
+                  $txShareType = $tx['share_type'] ?? ($tx['ShareType'] ?? 'Ordinary');
+                  $txQty = $tx['quantity'] ?? ($tx['Quantity'] ?? 0);
+                  $txPrice = $tx['price_per_share'] ?? ($tx['PricePerShare'] ?? 0);
+                  $txAmount = $tx['total_amount'] ?? ($tx['TotalAmount'] ?? 0);
+                  $txBalance = $tx['balance'] ?? ($tx['Balance'] ?? 0);
+                  $isPurchase = str_contains(strtolower((string)$txType), 'purchase') || str_contains(strtolower((string)$txType), 'buy');
+                @endphp
+                <tr>
+                  <td class="text-xs font-mono text-primary-700 dark:text-primary-300">{{ $txDate }}</td>
+                  <td>
+                    <span :class="[
+                      '{{ $isPurchase }}' === '1'
+                        ? 'badge badge-green'
+                        : 'badge badge-red'
+                    ]">
+                      <i :class="'{{ $isPurchase }}' === '1' ? 'fa-solid fa-arrow-down' : 'fa-solid fa-arrow-up'" class="mr-1 text-[9px]"></i>
+                      {{ ucfirst((string)$txType) }}
+                    </span>
+                  </td>
+                  <td class="text-xs text-primary-700 dark:text-primary-300">{{ $txShareType }}</td>
+                  <td class="text-right text-xs font-mono font-bold text-primary-700 dark:text-primary-300">{{ $fmtInt($txQty) }}</td>
+                  <td class="text-right text-xs font-bold text-primary-900 dark:text-white">{{ $fmt($txPrice) }}</td>
+                  <td class="text-right">
+                    <span class="text-xs font-bold {{ $isPurchase ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
+                      {{ $isPurchase ? '+' : '-' }}{{ $fmt($txAmount) }}
+                    </span>
+                  </td>
+                  <td class="text-right text-xs font-bold text-primary-900 dark:text-white">{{ $fmtInt($txBalance) }}</td>
+                </tr>
+              @empty
+                <tr>
+                  <td colspan="7" class="text-center py-12 text-primary-500 dark:text-primary-400">
+                    <i class="fa-solid fa-certificate text-3xl mb-3 block opacity-30"></i>
+                    <p class="text-sm font-semibold mb-1">No share transactions yet</p>
+                    <p class="text-xs">Share purchase and sale history will appear here</p>
+                  </td>
+                </tr>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 @endsection
@@ -684,6 +785,7 @@
         { id: 'savings', label: 'Savings & Deposits', icon: 'fa-solid fa-piggy-bank', badge: null },
         { id: 'swf', label: 'SWF', icon: 'fa-solid fa-shield-halved', badge: null },
         { id: 'investments', label: 'Investments', icon: 'fa-solid fa-chart-line', badge: {{ count($investments) }} },
+        { id: 'shares', label: 'Shares', icon: 'fa-solid fa-certificate', badge: null },
       ],
       init() {
         const hash = window.location.hash.replace('#tab-', '');
