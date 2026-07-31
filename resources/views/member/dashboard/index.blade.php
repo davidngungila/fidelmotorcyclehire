@@ -187,7 +187,7 @@
             </div>
             @forelse($activeLoans as $loan)
                 <div class="p-4 border-b border-primary-100 dark:border-dark-border last:border-b-0 hover:bg-primary-50/30 dark:hover:bg-primary-900/10 transition-colors">
-                    <div class="flex items-start justify-between gap-3 mb-3">
+                    <div class="flex items-center justify-between">
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2 mb-1">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-primary-50 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-800/60">
@@ -199,31 +199,11 @@
                                 {{ $loan['loan_product'] }}
                             </h4>
                         </div>
-                        <div class="text-right">
+                        <div class="text-right ml-4">
                             <p class="text-xs font-bold text-primary-900 dark:text-white tabular-nums">
                                 {{ fmtTsh($loan['outstanding_balance'] ?? 0) }}
                             </p>
                             <p class="text-[10px] text-primary-500 dark:text-primary-400">Outstanding</p>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-3 gap-3 text-[10px]">
-                        <div>
-                            <p class="text-primary-500 dark:text-primary-400 mb-0.5">Principal</p>
-                            <p class="font-semibold text-primary-800 dark:text-primary-200 tabular-nums">
-                                {{ fmtTsh($loan['loan_amount'] ?? 0) }}
-                            </p>
-                        </div>
-                        <div>
-                            <p class="text-primary-500 dark:text-primary-400 mb-0.5">Installment</p>
-                            <p class="font-semibold text-primary-800 dark:text-primary-200 tabular-nums">
-                                {{ fmtTsh($loan['installment'] ?? 0) }}
-                            </p>
-                        </div>
-                        <div>
-                            <p class="text-primary-500 dark:text-primary-400 mb-0.5">Interest</p>
-                            <p class="font-semibold text-primary-800 dark:text-primary-200 tabular-nums">
-                                {{ $loan['interest_rate'] ?? 0 }}%
-                            </p>
                         </div>
                     </div>
                 </div>
