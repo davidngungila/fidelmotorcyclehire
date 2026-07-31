@@ -94,8 +94,8 @@
                     @forelse($processedHistory as $idx => $c)
                         @php
                             $striped = $idx % 2 === 1;
-                            $runningBalance = $totalContribution - array_slice($processedHistory, 0, $idx + 1);
-                            $currentRunningBalance = array_sum(array_column($runningBalance, 'amount_float'));
+                            $contributionsUpToNow = array_slice($processedHistory, 0, $idx + 1);
+                            $currentRunningBalance = array_sum(array_column($contributionsUpToNow, 'amount_float'));
                         @endphp
                         <tr class="{{ $striped ? 'bg-primary-50/50 dark:bg-primary-900/10' : '' }} hover:!bg-primary-100/50 dark:hover:!bg-primary-900/20 transition-colors">
                             <td class="whitespace-nowrap text-xs font-semibold text-primary-800 dark:text-primary-200 tabular-nums">
