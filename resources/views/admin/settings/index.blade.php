@@ -466,7 +466,7 @@
 
       <div x-show="activeTab === 'sms'" x-transition:enter="transition ease-out duration-200"
            x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0">
-        <form method="POST" action="{{ route('admin.settings.update') }}" class="space-y-6" x-data="{ on: {{ $smsSettings->is_active ?? false }}}">
+        <form method="POST" action="{{ route('admin.settings.update') }}" class="space-y-6">
           @csrf
           @method('PUT')
           <input type="hidden" name="tab" value="sms">
@@ -503,12 +503,12 @@
               <p class="text-xs mt-0.5" :class="darkMode ? 'text-primary-400' : 'text-primary-600'">Allow sending SMS alerts to members</p>
             </div>
             <div class="relative">
-              <input type="hidden" name="sms_is_active" :value="on ? 1 : 0">
+              <input type="hidden" name="sms_is_active" :value="smsActive ? 1 : 0">
               <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" class="sr-only peer" :checked="on" @change="on = !on; $el.previousElementSibling.value = on ? 1 : 0">
+                <input type="checkbox" class="sr-only peer" :checked="smsActive" @change="smsActive = !smsActive; $el.previousElementSibling.value = smsActive ? 1 : 0">
                 <div class="w-12 h-7 rounded-full transition-colors bg-gray-200 dark:bg-gray-700 peer-checked:bg-green-600"></div>
                 <div class="absolute left-0.5 top-0.5 w-6 h-6 bg-white rounded-full shadow-md transition-transform peer-checked:translate-x-5 flex items-center justify-center">
-                  <i :class="on ? 'fa-solid fa-check text-green-600' : 'fa-solid fa-xmark text-gray-400'" class="text-[10px]"></i>
+                  <i :class="smsActive ? 'fa-solid fa-check text-green-600' : 'fa-solid fa-xmark text-gray-400'" class="text-[10px]"></i>
                 </div>
               </label>
             </div>
@@ -582,6 +582,7 @@
   function settingsTabs() {
     return {
       activeTab: 'general',
+      smsActive: {{ $smsSettings->is_active ?? false }},
       testSmsModalOpen: false,
       testSmsPhone: '',
       testSmsMessage: 'This is a test message from FEEDTAN Members Portal.',
