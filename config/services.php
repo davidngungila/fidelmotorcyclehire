@@ -42,4 +42,11 @@ return [
         'sync_interval' => env('GOOGLE_SHEETS_SYNC_INTERVAL', 360),
     ],
 
+    'whatsapp' => [
+        'base_url' => env('WHATSAPP_BASE_URL', 'https://messaging-service.co.tz/api/whatsapp/v2/text/single'),
+        'test_url' => env('WHATSAPP_TEST_URL', 'https://messaging-service.co.tz/api/whatsapp/v2/test/text/single'),
+        'api_key' => env('WHATSAPP_API_KEY'),
+        'account' => env('WHATSAPP_ACCOUNT'),
+    ],
+
 ];
