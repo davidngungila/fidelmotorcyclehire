@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\Investment;
 use App\Models\InvestmentProduct;
+use App\Models\User;
 use App\Services\AdminDashboardService;
 use App\Services\EncryptedIdService;
 use App\Services\MemberService;
