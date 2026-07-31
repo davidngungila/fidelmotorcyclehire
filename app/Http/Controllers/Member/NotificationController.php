@@ -98,7 +98,6 @@ class NotificationController extends Controller
 
         return view('member.notifications.index', compact(
             'displayNotifications',
-            'notifications',
             'enriched',
             'unreadCount',
             'announcementCount',

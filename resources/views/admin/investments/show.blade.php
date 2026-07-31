@@ -87,14 +87,24 @@
   @if(isset($investments) && $investments->count() > 0)
     @foreach($investments as $investment)
       @php
-        $productName = $investment->investmentProduct ? $investment->investmentProduct->name : 'Unknown Product';
+        if ($investment->investmentProduct) {
+          $productName = $investment->investmentProduct->name;
+        } else {
+          $productName = 'Unknown Product';
+        }
         $status = $dashboardService->depositStatusBadge($investment->status ?? null);
         $duration = '';
         if ($investment->investment_date && $investment->maturity_date) {
           $duration = $investment->investment_date->diffInMonths($investment->maturity_date) . ' months';
         }
-        $profit = ($investment->actual_return ?? 0) - ($investment->amount ?? 0);
-        $profitPct = $investment->amount > 0 ? (($profit / $investment->amount) * 100) : 0;
+        $actualReturn = $investment->actual_return ?? 0;
+        $amount = $investment->amount ?? 0;
+        $profit = $actualReturn - $amount;
+        if ($amount > 0) {
+          $profitPct = ($profit / $amount) * 100;
+        } else {
+          $profitPct = 0;
+        }
       @endphp
       <div class="glass p-6 rounded-2xl">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
