@@ -21,6 +21,7 @@ use App\Models\MemberProfile;
 use App\Models\MemberType;
 use App\Models\Role;
 use App\Models\User;
+use App\Notifications\AdminPasswordResetNotification;
 use App\Services\EncryptedIdService;
 use App\Services\MailConfigService;
 use App\Traits\FlashMessages;
@@ -1010,11 +1011,7 @@ class UserController extends Controller
                 // Configure mail settings from database before sending
                 $this->mailConfigService->configureFromDatabase();
                 
-                \Mail::raw("Your password has been reset to: {$newPassword}\n\nPlease login and change your password immediately.", function($message) use ($user) {
-                    $message->to($user->email)
-                            ->subject('Password Reset - Members Portal')
-                            ->from(config('mail.from.address', 'noreply@feedtancmg.org'), config('mail.from.name', 'Members Portal'));
-                });
+                $user->notify(new AdminPasswordResetNotification($newPassword));
                 
                 \Log::info('Password reset email sent successfully', [
                     'user_id' => $user->id,
@@ -1090,11 +1087,7 @@ class UserController extends Controller
                         // Configure mail settings from database before sending
                         $this->mailConfigService->configureFromDatabase();
                         
-                        \Mail::raw("Your password has been reset to: {$newPassword}\n\nPlease login and change your password immediately.", function($message) use ($user) {
-                            $message->to($user->email)
-                                    ->subject('Password Reset - Members Portal')
-                                    ->from(config('mail.from.address', 'noreply@feedtancmg.org'), config('mail.from.name', 'Members Portal'));
-                        });
+                        $user->notify(new AdminPasswordResetNotification($newPassword));
                         
                         \Log::info('Password reset email sent successfully (bulk)', [
                             'user_id' => $user->id,
