@@ -128,11 +128,11 @@
                 <div class="flex items-center justify-between mb-1">
                     <span class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase">Profit/Loss</span>
                     <span class="badge {{ $profitBadgeClass }}">
-                        {{ $profitPrefix }}{{ number_format($profitPct, 2) }}%
+                        {{ $profitPrefix }}{{ number_format($profit_pct, 2) }}%
                     </span>
                 </div>
                 <div class="progress-bar">
-                    <div class="progress-fill {{ $profitFillClass }}" style="width: {{ min(abs($profitPct), 100) }}%"></div>
+                    <div class="progress-fill {{ $profitFillClass }}" style="width: {{ min(abs($profit_pct), 100) }}%"></div>
                 </div>
                 <p class="text-xs font-bold {{ $profitTextClass }} mt-1">
                     {{ $profitPrefix }}{{ fmtTshInv($profit) }}
