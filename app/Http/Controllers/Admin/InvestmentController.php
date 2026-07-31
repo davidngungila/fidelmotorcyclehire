@@ -37,7 +37,9 @@ class InvestmentController extends Controller
         $searchQuery = $request->input('q', '');
         $statusFilter = $request->input('status', '');
 
-        $query = Investment::with(['user', 'investmentProduct']);
+        $query = Investment::with(['user', 'investmentProduct'])
+            ->leftJoin('users', 'investments.user_id', '=', 'users.id')
+            ->select('investments.*', 'users.name as user_name', 'users.member_number as user_member_number');
 
         // Search
         if (!empty($searchQuery)) {
@@ -61,20 +63,15 @@ class InvestmentController extends Controller
         // Enrich investments with calculated values while preserving pagination
         $investments->through(function ($inv) {
             $memberNo = $inv->member_number ?? '-';
-            $memberName = 'Unknown';
             
-            // Try to get member name from user relationship
-            if ($inv->user && $inv->user->name) {
+            // Use joined user_name first, then fall back to relationship
+            $memberName = $inv->user_name ?? 'Unknown';
+            if (empty($memberName) && $inv->user && $inv->user->name) {
                 $memberName = $inv->user->name;
-            } else {
-                // If user relationship is missing, try to find user by member_number
-                $user = \App\Models\User::where('member_number', $memberNo)->first();
-                if ($user && $user->name) {
-                    $memberName = $user->name;
-                } else {
-                    // Fallback to member_number if no name found
-                    $memberName = $memberNo;
-                }
+            }
+            // If still empty, use member_number as fallback
+            if (empty($memberName) || $memberName === 'Unknown') {
+                $memberName = $memberNo;
             }
             
             $product = $inv->investmentProduct ? $inv->investmentProduct->code : 'Unknown';
