@@ -6,173 +6,196 @@
 @section('content')
 
 <div x-data="investmentForm()" class="space-y-6">
-  <div class="glass p-6">
-    <form method="POST" action="{{ route('admin.investments.store') }}" @submit.prevent="submitForm">
-      @csrf
+  <div class="flex items-center gap-4">
+    <a href="{{ route('admin.investments.index') }}"
+       class="p-2.5 rounded-xl bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 transition-colors">
+      <i class="fa-solid fa-arrow-left text-sm"></i>
+    </a>
+    <div>
+      <p class="text-sm text-primary-600 dark:text-primary-400">
+        Create a new investment for a member
+      </p>
+    </div>
+  </div>
 
-      <!-- Member Selection -->
-      <div class="mb-6">
-        <label class="block text-sm font-bold text-primary-900 dark:text-white mb-2">
-          Member <span class="text-red-500">*</span>
-        </label>
-        <select name="member_number" required class="form-input w-full" x-model="form.member_number" @change="onMemberChange">
-          <option value="">Select a member</option>
-          @foreach($members as $member)
-            <option value="{{ $member->member_number }}">{{ $member->full_name }} ({{ $member->member_number }})</option>
-          @endforeach
-        </select>
-        @error('member_number')
-          <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>
-        @enderror
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <!-- Main Form Area -->
+    <div class="lg:col-span-3">
+      <div class="glass p-6 rounded-2xl">
+        <form method="POST" action="{{ route('admin.investments.store') }}" @submit.prevent="submitForm">
+          @csrf
+
+          <!-- Member Selection -->
+          <div class="mb-6">
+            <label class="block text-sm font-bold text-primary-900 dark:text-white mb-2">
+              Member <span class="text-red-500">*</span>
+            </label>
+            <select name="member_number" required class="form-input w-full" x-model="form.member_number" @change="onMemberChange">
+              <option value="">Select a member</option>
+              @foreach($members as $member)
+                <option value="{{ $member->member_number }}">{{ $member->full_name }} ({{ $member->member_number }})</option>
+              @endforeach
+            </select>
+            @error('member_number')
+              <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>
+            @enderror
+          </div>
+
+          <!-- Investment Product -->
+          <div class="mb-6">
+            <label class="block text-sm font-bold text-primary-900 dark:text-white mb-2">
+              Investment Product <span class="text-red-500">*</span>
+            </label>
+            <select name="investment_product_id" required class="form-input w-full" x-model="form.investment_product_id" @change="onProductChange">
+              <option value="">Select a product</option>
+              @foreach($products as $product)
+                <option value="{{ $product->id }}" 
+                        data-interest-rate="{{ $product->interest_rate }}"
+                        data-min-investment="{{ $product->min_investment }}"
+                        data-max-investment="{{ $product->max_investment }}"
+                        data-duration="{{ $product->duration_months }}">
+                  {{ $product->name }} - {{ $product->interest_rate }}% ({{ $product->duration_months }} months)
+                </option>
+              @endforeach
+            </select>
+            @error('investment_product_id')
+              <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>
+            @enderror
+          </div>
+
+          <!-- Amount -->
+          <div class="mb-6">
+            <label class="block text-sm font-bold text-primary-900 dark:text-white mb-2">
+              Investment Amount (TSh) <span class="text-red-500">*</span>
+            </label>
+            <input type="number" name="amount" required min="0" step="0.01"
+                   class="form-input w-full"
+                   x-model="form.amount"
+                   placeholder="Enter investment amount"/>
+            @error('amount')
+              <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>
+            @enderror
+          </div>
+
+          <!-- Investment Date -->
+          <div class="mb-6">
+            <label class="block text-sm font-bold text-primary-900 dark:text-white mb-2">
+              Investment Date <span class="text-red-500">*</span>
+            </label>
+            <input type="date" name="investment_date" required
+                   class="form-input w-full"
+                   x-model="form.investment_date"
+                   @change="calculateMaturityDate"/>
+            @error('investment_date')
+              <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>
+            @enderror
+          </div>
+
+          <!-- Maturity Date -->
+          <div class="mb-6">
+            <label class="block text-sm font-bold text-primary-900 dark:text-white mb-2">
+              Maturity Date <span class="text-primary-500 text-xs font-normal">(Auto-calculated if left blank)</span>
+            </label>
+            <input type="date" name="maturity_date"
+                   class="form-input w-full"
+                   x-model="form.maturity_date"/>
+            @error('maturity_date')
+              <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>
+            @enderror
+          </div>
+
+          <!-- Notes -->
+          <div class="mb-6">
+            <label class="block text-sm font-bold text-primary-900 dark:text-white mb-2">
+              Notes
+            </label>
+            <textarea name="notes" rows="3"
+                      class="form-input w-full"
+                      x-model="form.notes"
+                      placeholder="Optional notes..."></textarea>
+            @error('notes')
+              <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>
+            @enderror
+          </div>
+
+          <!-- Submit Buttons -->
+          <div class="flex items-center justify-end gap-3 pt-4 border-t border-primary-100 dark:border-primary-900/50">
+            <a href="{{ route('admin.investments.index') }}"
+               class="px-5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-bold transition-all">
+              Cancel
+            </a>
+            <button type="submit"
+                    :disabled="submitting"
+                    class="px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 disabled:bg-teal-400 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95 flex items-center gap-2">
+              <i x-show="!submitting" class="fa-solid fa-plus text-[13px]"></i>
+              <i x-show="submitting" class="fa-solid fa-spinner fa-spin text-[13px]"></i>
+              <span x-text="submitting ? 'Creating...' : 'Create Investment'"></span>
+            </button>
+          </div>
+        </form>
       </div>
+    </div>
 
-      <!-- Investment Product -->
-      <div class="mb-6">
-        <label class="block text-sm font-bold text-primary-900 dark:text-white mb-2">
-          Investment Product <span class="text-red-500">*</span>
-        </label>
-        <select name="investment_product_id" required class="form-input w-full" x-model="form.investment_product_id" @change="onProductChange">
-          <option value="">Select a product</option>
-          @foreach($products as $product)
-            <option value="{{ $product->id }}" 
-                    data-interest-rate="{{ $product->interest_rate }}"
-                    data-min-investment="{{ $product->min_investment }}"
-                    data-max-investment="{{ $product->max_investment }}"
-                    data-duration="{{ $product->duration_months }}">
-              {{ $product->name }} - {{ $product->interest_rate }}% ({{ $product->duration_months }} months)
-            </option>
-          @endforeach
-        </select>
-        @error('investment_product_id')
-          <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>
-        @enderror
-      </div>
-
-      <!-- Product Details (shown when product is selected) -->
-      <div x-show="selectedProduct" 
-           x-transition:enter="transition ease-out duration-200"
-           x-transition:enter-start="opacity-0 transform -translate-y-2"
-           x-transition:enter-end="opacity-100 transform translate-y-0"
-           class="mb-6 p-4 rounded-xl bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800/40">
-        <h4 class="text-sm font-bold text-teal-700 dark:text-teal-300 mb-2">Product Details</h4>
-        <div class="grid grid-cols-2 gap-4 text-xs">
-          <div>
-            <span class="text-teal-600 dark:text-teal-400">Interest Rate:</span>
-            <span class="font-bold text-teal-900 dark:text-teal-100" x-text="(selectedProduct.interest_rate || 0).toFixed(1) + '%'"></span>
-          </div>
-          <div>
-            <span class="text-teal-600 dark:text-teal-400">Duration:</span>
-            <span class="font-bold text-teal-900 dark:text-teal-100" x-text="(selectedProduct.duration || 0) + ' months'"></span>
-          </div>
-          <div>
-            <span class="text-teal-600 dark:text-teal-400">Min Investment:</span>
-            <span class="font-bold text-teal-900 dark:text-teal-100" x-text="formatCurrency(selectedProduct.min_investment || 0)"></span>
-          </div>
-          <div>
-            <span class="text-teal-600 dark:text-teal-400">Max Investment:</span>
-            <span class="font-bold text-teal-900 dark:text-teal-100" x-text="formatCurrency(selectedProduct.max_investment || 0)"></span>
+    <!-- Right Sidebar -->
+    <div class="lg:col-span-1">
+      <div class="glass p-5 rounded-2xl sticky top-6 space-y-6">
+        <!-- Product Details -->
+        <div x-show="selectedProduct" class="p-4 rounded-xl bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800/40">
+          <h4 class="text-sm font-bold text-teal-700 dark:text-teal-300 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-chart-line text-xs"></i> Product Details
+          </h4>
+          <div class="space-y-3 text-xs">
+            <div class="flex items-center justify-between">
+              <span class="text-teal-600 dark:text-teal-400">Interest Rate:</span>
+              <span class="font-bold text-teal-900 dark:text-teal-100" x-text="selectedProduct.interest_rate + '%'"></span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-teal-600 dark:text-teal-400">Duration:</span>
+              <span class="font-bold text-teal-900 dark:text-teal-100" x-text="selectedProduct.duration + ' months'"></span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-teal-600 dark:text-teal-400">Min Investment:</span>
+              <span class="font-bold text-teal-900 dark:text-teal-100" x-text="formatCurrency(selectedProduct.min_investment)"></span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-teal-600 dark:text-teal-400">Max Investment:</span>
+              <span class="font-bold text-teal-900 dark:text-teal-100" x-text="formatCurrency(selectedProduct.max_investment)"></span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Amount -->
-      <div class="mb-6">
-        <label class="block text-sm font-bold text-primary-900 dark:text-white mb-2">
-          Investment Amount (TSh) <span class="text-red-500">*</span>
-        </label>
-        <input type="number" name="amount" required min="0" step="0.01"
-               class="form-input w-full"
-               x-model="form.amount"
-               @input="calculateExpectedReturn"
-               placeholder="Enter investment amount"/>
-        @error('amount')
-          <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>
-        @enderror
-      </div>
-
-      <!-- Investment Date -->
-      <div class="mb-6">
-        <label class="block text-sm font-bold text-primary-900 dark:text-white mb-2">
-          Investment Date <span class="text-red-500">*</span>
-        </label>
-        <input type="date" name="investment_date" required
-               class="form-input w-full"
-               x-model="form.investment_date"
-               @change="calculateMaturityDate"/>
-        @error('investment_date')
-          <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>
-        @enderror
-      </div>
-
-      <!-- Maturity Date -->
-      <div class="mb-6">
-        <label class="block text-sm font-bold text-primary-900 dark:text-white mb-2">
-          Maturity Date <span class="text-primary-500 text-xs font-normal">(Auto-calculated if left blank)</span>
-        </label>
-        <input type="date" name="maturity_date"
-               class="form-input w-full"
-               x-model="form.maturity_date"/>
-        @error('maturity_date')
-          <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>
-        @enderror
-      </div>
-
-      <!-- Notes -->
-      <div class="mb-6">
-        <label class="block text-sm font-bold text-primary-900 dark:text-white mb-2">
-          Notes
-        </label>
-        <textarea name="notes" rows="3"
-                  class="form-input w-full"
-                  x-model="form.notes"
-                  placeholder="Optional notes..."></textarea>
-        @error('notes')
-          <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>
-        @enderror
-      </div>
-
-      <!-- Expected Return Preview -->
-      <div x-show="form.amount && selectedProduct" 
-           x-transition:enter="transition ease-out duration-200"
-           x-transition:enter-start="opacity-0 transform -translate-y-2"
-           x-transition:enter-end="opacity-100 transform translate-y-0"
-           class="mb-6 p-4 rounded-xl bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800/40">
-        <h4 class="text-sm font-bold text-primary-700 dark:text-primary-300 mb-2">Investment Summary</h4>
-        <div class="grid grid-cols-2 gap-4 text-xs">
-          <div>
-            <span class="text-primary-600 dark:text-primary-400">Invested Amount:</span>
-            <span class="font-bold text-primary-900 dark:text-white" x-text="formatCurrency(parseFloat(form.amount) || 0)"></span>
-          </div>
-          <div>
-            <span class="text-primary-600 dark:text-primary-400">Expected Return:</span>
-            <span class="font-bold text-green-600 dark:text-green-400" x-text="formatCurrency(calculateExpectedReturn())"></span>
-          </div>
-          <div>
-            <span class="text-primary-600 dark:text-primary-400">Expected Profit:</span>
-            <span class="font-bold text-green-600 dark:text-green-400" x-text="formatCurrency(calculateExpectedReturn() - (parseFloat(form.amount) || 0))"></span>
-          </div>
-          <div>
-            <span class="text-primary-600 dark:text-primary-400">Return Percentage:</span>
-            <span class="font-bold text-primary-900 dark:text-white" x-text="(selectedProduct.interest_rate || 0).toFixed(1) + '%'"></span>
+        <!-- Investment Summary -->
+        <div x-show="form.amount && selectedProduct" class="p-4 rounded-xl bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800/40">
+          <h4 class="text-sm font-bold text-primary-700 dark:text-primary-300 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-calculator text-xs"></i> Investment Summary
+          </h4>
+          <div class="space-y-3 text-xs">
+            <div class="flex items-center justify-between">
+              <span class="text-primary-600 dark:text-primary-400">Invested Amount:</span>
+              <span class="font-bold text-primary-900 dark:text-white" x-text="formatCurrency(form.amount)"></span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-primary-600 dark:text-primary-400">Expected Return:</span>
+              <span class="font-bold text-green-600 dark:text-green-400" x-text="formatCurrency(calculateExpectedReturn())"></span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-primary-600 dark:text-primary-400">Expected Profit:</span>
+              <span class="font-bold text-green-600 dark:text-green-400" x-text="formatCurrency(calculateExpectedReturn() - form.amount)"></span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-primary-600 dark:text-primary-400">Return Percentage:</span>
+              <span class="font-bold text-primary-900 dark:text-white" x-text="selectedProduct.interest_rate + '%'"></span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Submit Buttons -->
-      <div class="flex items-center justify-end gap-3 pt-4 border-t border-primary-100 dark:border-primary-900/50">
-        <a href="{{ route('admin.investments.index') }}"
-           class="px-5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-bold transition-all">
-          Cancel
-        </a>
-        <button type="submit"
-                :disabled="submitting"
-                class="px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 disabled:bg-teal-400 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95 flex items-center gap-2">
-          <i x-show="!submitting" class="fa-solid fa-plus text-[13px]"></i>
-          <i x-show="submitting" class="fa-solid fa-spinner fa-spin text-[13px]"></i>
-          <span x-text="submitting ? 'Creating...' : 'Create Investment'"></span>
-        </button>
+        <!-- Empty State -->
+        <div x-show="!selectedProduct" class="p-4 rounded-xl bg-gray-50 dark:bg-gray-900/20 border border-gray-200 dark:border-gray-800/40 text-center">
+          <i class="fa-solid fa-chart-line text-3xl text-gray-300 dark:text-gray-600 mb-3 block"></i>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Select a product to view details</p>
+        </div>
       </div>
-    </form>
+    </div>
   </div>
 </div>
 
@@ -231,7 +254,7 @@
       },
       
       formatCurrency(value) {
-        if (!value) return '0.00 TSh';
+        if (!value && value !== 0) return '0.00 TSh';
         return new Intl.NumberFormat('en-TZ', {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2
