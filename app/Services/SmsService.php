@@ -38,7 +38,7 @@ class SmsService
             $url = $this->baseUrl . '/link/sms/v2/text/single';
             
             $response = Http::get($url, [
-                'token' => $this->settings->api_key,
+                'token' => $this->settings->api_token,
                 'from' => $senderId,
                 'to' => $to,
                 'text' => $message,
@@ -105,7 +105,7 @@ class SmsService
             $url = $this->baseUrl . '/link/sms/v2/text/multi';
             
             $response = Http::get($url, [
-                'token' => $this->settings->api_key,
+                'token' => $this->settings->api_token,
                 'from' => $senderId,
                 'to' => implode(',', $formattedRecipients),
                 'text' => $message,
@@ -154,7 +154,7 @@ class SmsService
      */
     public function testConnection(): array
     {
-        if (! $this->settings || ! $this->settings->api_key) {
+        if (! $this->settings || ! $this->settings->api_token) {
             return [
                 'success' => false,
                 'message' => 'SMS settings not configured',
@@ -165,7 +165,7 @@ class SmsService
             $url = $this->baseUrl . '/api/sms/v2/test/text/single';
             
             $response = Http::asJson()->withHeaders([
-                'Authorization' => 'Bearer ' . $this->settings->api_key,
+                'Authorization' => 'Bearer ' . $this->settings->api_token,
                 'Accept' => 'application/json',
             ])->post($url, [
                 'from' => $this->settings->sender_id ?? 'FEEDTAN',
