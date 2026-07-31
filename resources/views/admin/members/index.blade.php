@@ -78,17 +78,7 @@
               Full Name
               <i class="fa-solid ml-1.5 text-[10px] {{ $memberService->getSortDirectionIcon($sortColumn, 'name', $sortDirection) }}"></i>
             </th>
-            <th class="cursor-pointer select-none" @click="sortBy('gender')">
-              Gender
-              <i class="fa-solid ml-1.5 text-[10px] {{ $memberService->getSortDirectionIcon($sortColumn, 'gender', $sortDirection) }}"></i>
-            </th>
             <th>Phone</th>
-            <th>Email</th>
-            <th>Member Type</th>
-            <th class="cursor-pointer select-none" @click="sortBy('branch')">
-              Branch
-              <i class="fa-solid ml-1.5 text-[10px] {{ $memberService->getSortDirectionIcon($sortColumn, 'branch', $sortDirection) }}"></i>
-            </th>
             <th>Status</th>
             <th class="text-right">Actions</th>
           </tr>
@@ -98,10 +88,7 @@
             @php
               $memberNo = $member['member_number'] ?? ($member['MemberNumber'] ?? null);
               $memberName = $member['name'] ?? ($member['Name'] ?? 'Unknown');
-              $memberGender = $member['gender'] ?? ($member['Gender'] ?? '-');
               $memberPhone = $member['phone'] ?? ($member['Phone'] ?? '-');
-              $memberEmail = $member['email'] ?? ($member['Email'] ?? '-');
-              $memberBranch = $member['branch'] ?? ($member['Branch'] ?? '-');
               $statusBadge = $dashboardService->memberStatusBadge($member['status'] ?? null);
               $rowNum = ($members->currentPage() - 1) * $members->perPage() + $index + 1;
             @endphp
@@ -130,22 +117,8 @@
                   @endif
                   <div class="min-w-0">
                     <p class="text-sm font-semibold text-primary-900 dark:text-white truncate max-w-[200px]">{{ $memberName }}</p>
-                    @if($memberEmail && $memberEmail !== '-')
-                      <p class="text-[11px] text-primary-500 dark:text-primary-400 truncate max-w-[200px]">{{ $memberEmail }}</p>
-                    @endif
                   </div>
                 </div>
-              </td>
-              <td>
-                <span class="text-xs text-primary-700 dark:text-primary-300">
-                  @if(strtolower((string)$memberGender) === 'male' || strtolower((string)$memberGender) === 'm')
-                    <i class="fa-solid fa-mars text-blue-500 mr-1"></i> Male
-                  @elseif(strtolower((string)$memberGender) === 'female' || strtolower((string)$memberGender) === 'f')
-                    <i class="fa-solid fa-venus text-pink-500 mr-1"></i> Female
-                  @else
-                    {{ $memberGender }}
-                  @endif
-                </span>
               </td>
               <td>
                 @if($memberPhone && $memberPhone !== '-')
@@ -153,35 +126,6 @@
                 @else
                   <span class="text-xs text-primary-300 dark:text-primary-600 italic">-</span>
                 @endif
-              </td>
-              <td>
-                @if($memberEmail && $memberEmail !== '-')
-                  <span class="text-xs text-primary-700 dark:text-primary-300 max-w-[180px] truncate block">{{ $memberEmail }}</span>
-                @else
-                  <span class="text-xs text-primary-300 dark:text-primary-600 italic">-</span>
-                @endif
-              </td>
-              <td>
-                @if(isset($member['member_type_id']) && $member['member_type_id'])
-                  @php
-                    $memberType = \App\Models\MemberType::find($member['member_type_id']);
-                  @endphp
-                  @if($memberType)
-                    <span class="inline-flex items-center px-2 py-1 rounded-lg bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 text-xs font-bold">
-                      {{ $memberType->name }}
-                    </span>
-                  @else
-                    <span class="text-xs text-primary-300 dark:text-primary-600 italic">-</span>
-                  @endif
-                @else
-                  <span class="text-xs text-primary-300 dark:text-primary-600 italic">-</span>
-                @endif
-              </td>
-              <td>
-                <span class="inline-flex items-center gap-1 text-xs text-primary-700 dark:text-primary-300">
-                  <i class="fa-solid fa-location-dot text-[10px] text-primary-400"></i>
-                  {{ $memberBranch }}
-                </span>
               </td>
               <td>
                 <span class="badge {{ $statusBadge['class'] }}">{{ $statusBadge['label'] }}</span>
@@ -202,7 +146,7 @@
             </tr>
           @empty
             <tr>
-              <td colspan="9" class="text-center py-16 text-primary-500 dark:text-primary-400">
+              <td colspan="6" class="text-center py-16 text-primary-500 dark:text-primary-400">
                 <i class="fa-solid fa-user-slash text-4xl mb-4 block opacity-30"></i>
                 <p class="text-sm font-semibold mb-1">No members found</p>
                 <p class="text-xs">
