@@ -13,7 +13,7 @@
 <div x-data="investmentsList()" class="space-y-6">
 
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-    <form method="GET" action="{{ route('admin.investments.index') }}" class="flex-1 max-w-2xl" x-ref="searchForm">
+    <form method="GET" action="{{ route('admin.investments.index') }}" class="flex-1 max-w-3xl" x-ref="searchForm">
       <div class="relative">
         <i class="fa-solid fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-primary-400"></i>
         <input type="text" name="q" value="{{ $searchQuery ?? '' }}"
