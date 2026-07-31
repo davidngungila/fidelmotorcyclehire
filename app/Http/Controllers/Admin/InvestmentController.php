@@ -37,9 +37,7 @@ class InvestmentController extends Controller
         $searchQuery = $request->input('q', '');
         $statusFilter = $request->input('status', '');
 
-        $query = Investment::with(['user', 'investmentProduct'])
-            ->leftJoin('users', 'investments.member_number', '=', 'users.member_number')
-            ->select('investments.*', 'users.name as user_name', 'users.member_number as user_member_number');
+        $query = Investment::with(['user', 'investmentProduct']);
 
         // Search
         if (!empty($searchQuery)) {
@@ -64,13 +62,12 @@ class InvestmentController extends Controller
         $investments->through(function ($inv) {
             $memberNo = $inv->member_number ?? '-';
             
-            // Use joined user_name first, then fall back to relationship
-            $memberName = $inv->user_name ?? '';
-            if (trim($memberName) === '' && $inv->user && $inv->user->name) {
+            // Try to get member name from user relationship
+            $memberName = 'Unknown';
+            if ($inv->user && !empty($inv->user->name)) {
                 $memberName = $inv->user->name;
-            }
-            // If still empty, use member_number as fallback
-            if (trim($memberName) === '') {
+            } else {
+                // If user relationship is missing or empty, use member_number
                 $memberName = $memberNo;
             }
             
