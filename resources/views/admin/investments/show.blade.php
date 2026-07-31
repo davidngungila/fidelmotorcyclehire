@@ -88,6 +88,13 @@
     @foreach($investments as $investment)
       @php
         $productName = $investment->investmentProduct ? $investment->investmentProduct->name : 'Unknown Product';
+        $status = $dashboardService->depositStatusBadge($investment->status ?? null);
+        $duration = '';
+        if ($investment->investment_date && $investment->maturity_date) {
+          $duration = $investment->investment_date->diffInMonths($investment->maturity_date) . ' months';
+        }
+        $profit = ($investment->actual_return ?? 0) - ($investment->amount ?? 0);
+        $profitPct = $investment->amount > 0 ? (($profit / $investment->amount) * 100) : 0;
       @endphp
       <div class="glass p-6 rounded-2xl">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
@@ -101,9 +108,6 @@
             </p>
           </div>
           <div class="flex items-center gap-3">
-            @php
-              $status = $dashboardService->depositStatusBadge($investment->status ?? null);
-            @endphp
             <span class="badge {{ $status['class'] }}">{{ $status['label'] }}</span>
           </div>
         </div>
@@ -138,12 +142,6 @@
           </div>
           <div class="bg-primary-50 dark:bg-primary-900/30 rounded-xl p-4">
             <p class="text-[10px] font-bold text-primary-600 dark:text-primary-400 uppercase mb-1">Duration</p>
-            @php
-              $duration = '';
-              if ($investment->investment_date && $investment->maturity_date) {
-                $duration = $investment->investment_date->diffInMonths($investment->maturity_date) . ' months';
-              }
-            @endphp
             <p class="text-sm font-bold text-primary-900 dark:text-white">{{ $duration ?: '-' }}</p>
           </div>
         </div>
@@ -159,10 +157,6 @@
           <div class="flex-1">
             <div class="flex items-center justify-between mb-1">
               <span class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase">Profit/Loss</span>
-              @php
-                $profit = ($investment->actual_return ?? 0) - ($investment->amount ?? 0);
-                $profitPct = $investment->amount > 0 ? (($profit / $investment->amount) * 100) : 0;
-              @endphp
               <span class="badge {{ $profit >= 0 ? 'badge-green' : 'badge-red' }}">
                 {{ $profit >= 0 ? '+' : '' }}{{ number_format($profitPct, 2) }}%
               </span>
