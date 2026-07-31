@@ -1092,20 +1092,9 @@ class UserController extends Controller
 
                     // Send email with new password
                     try {
-                        \Mail::send([], [], function($message) use ($user, $newPassword) {
-                            $emailBody = "Dear {$user->name},\n\n";
-                            $emailBody .= "Your password has been reset by the administrator.\n\n";
-                            $emailBody .= "Your new password is: {$newPassword}\n\n";
-                            $emailBody .= "Please login to the Members Portal and change your password immediately for security reasons.\n\n";
-                            $emailBody .= "Login URL: " . url('/login') . "\n\n";
-                            $emailBody .= "If you did not request this password reset, please contact the administrator immediately.\n\n";
-                            $emailBody .= "Regards,\n";
-                            $emailBody .= "Members Portal Team";
-                            
+                        \Mail::raw("Your password has been reset to: {$newPassword}\n\nPlease login and change your password immediately.", function($message) use ($user) {
                             $message->to($user->email)
-                                    ->subject('Password Reset - Members Portal')
-                                    ->from(config('mail.from.address', 'noreply@feedtancmg.org'), config('mail.from.name', 'Members Portal'))
-                                    ->setBody($emailBody);
+                                    ->subject('Password Reset - Members Portal');
                         });
                         
                         \Log::info('Password reset email sent successfully (bulk)', [
@@ -1117,7 +1106,6 @@ class UserController extends Controller
                             'user_id' => $user->id,
                             'user_email' => $user->email,
                             'error' => $e->getMessage(),
-                            'trace' => $e->getTraceAsString(),
                         ]);
                     }
 
@@ -1161,14 +1149,21 @@ class UserController extends Controller
                 'success_count' => $successCount,
                 'failure_count' => $failureCount,
             ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
         } catch (\Exception $e) {
             \Log::error('Bulk password reset failed: ' . $e->getMessage(), [
                 'exception' => $e,
+                'trace' => $e->getTraceAsString(),
             ]);
             
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to perform bulk password reset: ' . $e->getMessage(),
+                'message' => 'Failed to reset passwords: ' . $e->getMessage(),
             ], 500);
         }
     }
