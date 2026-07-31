@@ -132,7 +132,7 @@ class NotificationController extends Controller
         return redirect()->back();
     }
 
-    public function markRead(Request $request, string $id): RedirectResponse
+    public function markRead(Request $request, string $id): RedirectResponse|JsonResponse
     {
         Gate::authorize('member-only');
 
@@ -188,6 +188,14 @@ class NotificationController extends Controller
                 'properties' => ['member_number' => $memberNumber],
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
+            ]);
+        }
+
+        // Return JSON for AJAX requests
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Notification marked as read',
             ]);
         }
 

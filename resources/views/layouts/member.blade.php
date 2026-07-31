@@ -204,7 +204,7 @@
                 </div>
               </template>
               <template x-for="notif in notifications.slice(0, 5)" :key="notif.id">
-                <a :href="'{{ route('member.notifications.index') }}'" 
+                <a @click="markAsRead(notif.id)" :href="'{{ route('member.notifications.index') }}'" 
                    class="p-3 border-b transition-colors cursor-pointer block"
                    :class="darkMode ? 'border-[#1a3328] hover:bg-primary-900/30' : 'border-primary-50 hover:bg-primary-50'">
                   <div class="flex items-start gap-3">
@@ -326,6 +326,29 @@ function fetchNotifications() {
     .catch(error => {
       console.error('Error fetching notifications:', error);
     });
+}
+
+function markAsRead(notificationId) {
+  fetch(`{{ route('member.notifications.read', ':id') }}`.replace(':id', notificationId), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    // Update local state
+    const notif = this.notifications.find(n => n.id === notificationId);
+    if (notif) {
+      notif.is_read = true;
+      notif.is_unread = false;
+      this.unreadCount = Math.max(0, this.unreadCount - 1);
+    }
+  })
+  .catch(error => {
+    console.error('Error marking notification as read:', error);
+  });
 }
 
 function getNotificationIcon(category) {
