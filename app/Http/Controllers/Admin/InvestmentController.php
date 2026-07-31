@@ -61,7 +61,22 @@ class InvestmentController extends Controller
         // Enrich investments with calculated values while preserving pagination
         $investments->through(function ($inv) {
             $memberNo = $inv->member_number ?? '-';
-            $memberName = $inv->user ? $inv->user->name : 'Unknown';
+            $memberName = 'Unknown';
+            
+            // Try to get member name from user relationship
+            if ($inv->user && $inv->user->name) {
+                $memberName = $inv->user->name;
+            } else {
+                // If user relationship is missing, try to find user by member_number
+                $user = \App\Models\User::where('member_number', $memberNo)->first();
+                if ($user && $user->name) {
+                    $memberName = $user->name;
+                } else {
+                    // Fallback to member_number if no name found
+                    $memberName = $memberNo;
+                }
+            }
+            
             $product = $inv->investmentProduct ? $inv->investmentProduct->code : 'Unknown';
             $amountInvested = $inv->amount ?? 0;
             $currentValue = $inv->actual_return ?? 0;
