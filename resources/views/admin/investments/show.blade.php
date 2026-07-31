@@ -36,7 +36,7 @@
           </div>
         </div>
         <div class="flex items-center gap-3">
-          <a href="{{ route('admin.members.show, encryptId($memberNumber)) }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-xs font-bold transition-colors">
+          <a href="{{ route('admin.members.show', encryptId($memberNumber)) }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-xs font-bold transition-colors">
             <i class="fa-solid fa-arrow-left text-[10px]"></i> Back to Profile
           </a>
         </div>
@@ -101,6 +101,25 @@
         $profit = $item->profit;
         $profitPct = $item->profit_pct;
         $status = $item->status;
+        
+        // Fix for status - handle different data types
+        if (is_array($status)) {
+            $statusClass = $status['class'] ?? 'badge-gray';
+            $statusLabel = $status['label'] ?? 'Unknown';
+        } elseif (is_object($status)) {
+            $statusClass = $status->class ?? 'badge-gray';
+            $statusLabel = $status->label ?? 'Unknown';
+        } else {
+            // If status is a string
+            $statusLabel = ucfirst($status ?? 'Unknown');
+            $statusClass = match($status) {
+                'active' => 'badge-green',
+                'pending' => 'badge-yellow', 
+                'completed' => 'badge-blue',
+                'failed' => 'badge-red',
+                default => 'badge-gray'
+            };
+        }
       @endphp
       <div class="glass p-6 rounded-2xl">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
@@ -114,10 +133,6 @@
             </p>
           </div>
           <div class="flex items-center gap-3">
-            @php
-              $statusClass = $status['class'];
-              $statusLabel = $status['label'];
-            @endphp
             <span class="badge {{ $statusClass }}">{{ $statusLabel }}</span>
           </div>
         </div>
