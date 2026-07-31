@@ -18,9 +18,9 @@
     </div>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <!-- Main Form Area -->
-    <div class="lg:col-span-3">
+    <div class="lg:col-span-2">
       <div class="glass p-6 rounded-2xl">
         <form method="POST" action="{{ route('admin.investments.store') }}" @submit.prevent="submitForm">
           @csrf
