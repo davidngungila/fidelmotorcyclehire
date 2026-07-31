@@ -265,4 +265,13 @@ class SettingController extends Controller
 
         return response()->json($result);
     }
+
+    public function testSmsPage(Request $request)
+    {
+        $smsSettings = SmsSettings::first() ?? new SmsSettings();
+
+        return view('admin.settings.test-sms', [
+            'smsSettings' => $smsSettings,
+        ]);
+    }
 }

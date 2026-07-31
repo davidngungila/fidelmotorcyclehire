@@ -519,58 +519,14 @@
                     class="px-6 py-2.5 rounded-xl bg-green-600 hover:bg-green-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95">
               <i class="fa-solid fa-comment-sms mr-1.5 text-[13px]"></i> Save SMS Settings
             </button>
-            <button type="button" @click="showTestSmsModal()"
-                    class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95">
+            <a href="{{ route('admin.settings.test-sms-page') }}"
+                    class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95 inline-flex items-center">
               <i class="fa-solid fa-paper-plane mr-1.5 text-[13px]"></i> Test SMS
-            </button>
+            </a>
           </div>
         </form>
       </div>
 
-    </div>
-  </div>
-</div>
-
-<!-- Test SMS Modal -->
-<div x-show="testSmsModalOpen" x-transition:enter="transition ease-out duration-200"
-     x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-     x-transition:leave="transition ease-in duration-150"
-     x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-     class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-  <div class="bg-white dark:bg-dark-bg rounded-2xl shadow-2xl w-full max-w-md">
-    <div class="p-6">
-      <div class="flex items-center justify-between mb-6">
-        <h3 class="text-lg font-bold text-primary-900 dark:text-white">Send Test SMS</h3>
-        <button @click="testSmsModalOpen = false" class="text-primary-500 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-200">
-          <i class="fa-solid fa-xmark text-xl"></i>
-        </button>
-      </div>
-      
-      <div class="space-y-4">
-        <div>
-          <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Phone Number</label>
-          <input type="text" x-model="testSmsPhone" class="form-input" placeholder="e.g. 255123456789">
-          <p class="text-xs mt-1" :class="darkMode ? 'text-primary-400' : 'text-primary-600'">Enter phone number without + sign</p>
-        </div>
-        
-        <div>
-          <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Test Message</label>
-          <textarea x-model="testSmsMessage" rows="3" class="form-input" placeholder="Enter your test message here"></textarea>
-        </div>
-      </div>
-      
-      <div class="flex gap-3 mt-6">
-        <button @click="testSmsModalOpen = false"
-                class="flex-1 px-4 py-2.5 rounded-xl border border-primary-200 dark:border-primary-700 text-primary-700 dark:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/30 text-sm font-bold transition-all">
-          Cancel
-        </button>
-        <button @click="sendTestSms()" :disabled="sendingTestSms"
-                class="flex-1 px-4 py-2.5 rounded-xl bg-green-600 hover:bg-green-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
-          <i x-show="!sendingTestSms" class="fa-solid fa-paper-plane mr-1.5"></i>
-          <i x-show="sendingTestSms" class="fa-solid fa-spinner fa-spin mr-1.5"></i>
-          <span x-text="sendingTestSms ? 'Sending...' : 'Send Test'"></span>
-        </button>
-      </div>
     </div>
   </div>
 </div>
@@ -583,10 +539,6 @@
     return {
       activeTab: 'general',
       smsActive: {{ json_encode($smsSettings->is_active ?? false) }},
-      testSmsModalOpen: false,
-      testSmsPhone: '',
-      testSmsMessage: 'This is a test message from FEEDTAN Members Portal.',
-      sendingTestSms: false,
       tabs: [
         { key: 'general', label: 'General', icon: 'fa-solid fa-gear' },
         { key: 'notifications', label: 'Notifications', icon: 'fa-solid fa-bell' },
@@ -594,63 +546,7 @@
         { key: 'security', label: 'Security', icon: 'fa-solid fa-shield-halved' },
         { key: 'email', label: 'Email', icon: 'fa-solid fa-envelope' },
         { key: 'sms', label: 'SMS', icon: 'fa-solid fa-comment-sms' },
-      ],
-      showTestSmsModal() {
-        this.testSmsModalOpen = true;
-      },
-      async sendTestSms() {
-        if (!this.testSmsPhone || !this.testSmsMessage) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Please enter both phone number and message.',
-          });
-          return;
-        }
-
-        this.sendingTestSms = true;
-
-        try {
-          const response = await fetch('{{ route('admin.settings.test-sms') }}', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            },
-            body: JSON.stringify({
-              phone: this.testSmsPhone,
-              message: this.testSmsMessage,
-            }),
-          });
-
-          const data = await response.json();
-
-          if (data.success) {
-            Swal.fire({
-              icon: 'success',
-              title: 'Success',
-              text: data.message || 'Test SMS sent successfully!',
-              timer: 3000,
-              showConfirmButton: false,
-            });
-            this.testSmsModalOpen = false;
-          } else {
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: data.message || 'Failed to send test SMS',
-            });
-          }
-        } catch (error) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Failed to send test SMS. Please try again.',
-          });
-        } finally {
-          this.sendingTestSms = false;
-        }
-      }
+      ]
     }
   }
 </script>
