@@ -95,4 +95,61 @@ class InvestmentController extends Controller
             'dashboardService' => $this->dashboardService,
         ]);
     }
+
+    public function show(Request $request, string $encryptedId): View
+    {
+        Gate::authorize('member-only');
+
+        $user = Auth::user();
+        $memberNumber = $user->member_number;
+
+        $investmentId = app('App\Services\EncryptedIdService')->decrypt($encryptedId);
+
+        $investment = Investment::with(['investmentProduct'])
+            ->where('id', $investmentId)
+            ->where('member_number', $memberNumber)
+            ->first();
+
+        if (!$investment) {
+            $this->error('Investment not found');
+            return redirect()->route('member.investments.index');
+        }
+
+        $productName = $investment->investmentProduct ? $investment->investmentProduct->name : 'Unknown Product';
+        $duration = '';
+        if ($investment->investment_date && $investment->maturity_date) {
+            $duration = $investment->investment_date->diffInMonths($investment->maturity_date) . ' months';
+        }
+        $actualReturn = $investment->actual_return ?? 0;
+        $expectedReturn = $investment->expected_return ?? 0;
+        $amount = $investment->amount ?? 0;
+        
+        // Use expected_return for profit calculation if actual_return equals amount (new investment)
+        $returnValue = ($actualReturn == $amount) ? $expectedReturn : $actualReturn;
+        $profit = $returnValue - $amount;
+        $profitPct = $amount > 0 ? (($profit / $amount) * 100) : 0;
+        $status = $this->dashboardService->depositStatusBadge($investment->status ?? null);
+
+        ActivityLog::create([
+            'user_id' => $user->id,
+            'subject_type' => 'investment',
+            'subject_id' => $investment->id,
+            'description' => 'Member viewed investment details',
+            'properties' => [
+                'member_number' => $memberNumber,
+                'investment_number' => $investment->investment_number,
+            ],
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return view('member.investments.show', [
+            'investment' => $investment,
+            'product_name' => $productName,
+            'duration' => $duration,
+            'profit' => $profit,
+            'profit_pct' => $profitPct,
+            'status' => $status,
+        ]);
+    }
 }

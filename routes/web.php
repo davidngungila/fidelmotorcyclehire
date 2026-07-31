@@ -260,6 +260,7 @@ Route::prefix('member')->middleware(['auth', 'role:member', 'member.isolation'])
     Route::get('/swf', [MemberSwfController::class, 'index'])->name('swf.index');
 
     Route::get('/investments', [MemberInvestmentController::class, 'index'])->name('investments.index');
+    Route::get('/investments/{encryptedId}', [MemberInvestmentController::class, 'show'])->name('investments.show');
 
     Route::get('/statements', [MemberStatementController::class, 'index'])->name('statements.index');
     Route::get('/statements/download/{type}', [MemberStatementController::class, 'download'])->name('statements.download');

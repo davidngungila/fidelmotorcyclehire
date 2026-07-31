@@ -149,7 +149,7 @@
                 </div>
 
                 <div class="mt-auto pt-3">
-                    <a href="{{ route('admin.investments.show', app('App\Services\EncryptedIdService')->encrypt($inv->member_number)) }}"
+                    <a href="{{ route('member.investments.show', app('App\Services\EncryptedIdService')->encrypt($inv->id)) }}"
                        class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-br from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-lg shadow-teal-500/20 hover:shadow-teal-500/30 transition-all">
                         <i class="fa-solid fa-circle-info text-xs"></i>
                         View Details
