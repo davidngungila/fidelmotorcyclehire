@@ -209,7 +209,7 @@
         member_number: '',
         investment_product_id: '',
         amount: '',
-        investment_date: new Date().toISOString().split('T')[0],
+        investment_date: '',
         maturity_date: '',
         notes: ''
       },
