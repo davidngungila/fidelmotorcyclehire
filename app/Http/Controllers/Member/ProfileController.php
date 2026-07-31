@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Member;
 
-use App\Contracts\GoogleSheetRepositoryInterface;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\SwfMember;
 use App\Traits\FlashMessages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,26 +19,29 @@ class ProfileController extends Controller
 {
     use FlashMessages;
 
-    public function __construct(
-        protected GoogleSheetRepositoryInterface $repository,
-    ) {}
-
     public function show(Request $request): View
     {
         Gate::authorize('member-only');
 
         $user = Auth::user();
-        $memberNumber = $user->member_number;
-        $member = !empty($memberNumber) ? $this->repository->getMemberByNumber($memberNumber) : null;
+        
+        // Get SWF data from database
+        $swfMember = $user->swfMember;
+        if ($swfMember) {
+            $swfBalance = $swfMember->total_contributions - $swfMember->total_benefits_received;
+        } else {
+            $swfBalance = 0;
+        }
 
-        $fullName = $member['name'] ?? $user->name;
+        $fullName = $user->name;
         $initials = $this->extractInitials($fullName);
 
         return view('member.profile.show', compact(
             'user',
             'member',
             'initials',
-            'fullName'
+            'fullName',
+            'swfBalance'
         ));
     }
 
@@ -52,10 +55,8 @@ class ProfileController extends Controller
         Gate::authorize('member-only');
 
         $user = Auth::user();
-        $memberNumber = $user->member_number;
-        $member = !empty($memberNumber) ? $this->repository->getMemberByNumber($memberNumber) : null;
 
-        $fullName = $member['name'] ?? $user->name;
+        $fullName = $user->name;
 
         return view('member.profile.edit', compact(
             'user',

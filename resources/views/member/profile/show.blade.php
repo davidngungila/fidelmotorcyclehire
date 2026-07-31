@@ -8,22 +8,22 @@
         return 'TSh ' . number_format((float)$val, 2, '.', ',');
     }
 
-    $displayName = $fullName ?? $member['name'] ?? $user->name ?? 'Member User';
+    $displayName = $fullName ?? $user->name ?? 'Member User';
     $displayInitials = $initials ?? strtoupper(substr($displayName, 0, 1));
-    $displayMemberNumber = $member['member_number'] ?? $user->member_number ?? 'FTN-00001';
-    $status = $member['status'] ?? $user->status ?? 'Active';
+    $displayMemberNumber = $user->member_number ?? 'FTN-00001';
+    $status = $user->status ?? 'Active';
     $statusActive = strtolower($status) === 'active';
 
-    $fullNameVal = $member['name'] ?? $user->name ?? '—';
-    $genderVal = $member['gender'] ?? $user->gender ?? '—';
-    $phoneVal = $member['phone'] ?? $user->phone ?? '—';
-    $emailVal = $member['email'] ?? $user->email ?? '—';
-    $addressVal = $member['address'] ?? $user->address ?? '—';
-    $occupationVal = $member['occupation'] ?? $user->occupation ?? '—';
-    $employerVal = $member['employer'] ?? $user->employer ?? '—';
+    $fullNameVal = $user->name ?? '—';
+    $genderVal = $user->gender ?? '—';
+    $phoneVal = $user->phone ?? '—';
+    $emailVal = $user->email ?? '—';
+    $addressVal = $user->address ?? '—';
+    $occupationVal = $user->occupation ?? '—';
+    $employerVal = $user->employer ?? '—';
 
-    $branchVal = $member['branch'] ?? $user->branch ?? '—';
-    $regDateVal = $member['registration_date'] ?? optional($user->registration_date)->format('Y-m-d') ?? '—';
+    $branchVal = $user->branch ?? '—';
+    $regDateVal = optional($user->created_at)->format('Y-m-d') ?? '—';
     if ($regDateVal !== '—' && is_string($regDateVal)) {
         $regDateFormatted = \Carbon\Carbon::parse($regDateVal)->format('F j, Y');
     } else {
