@@ -141,7 +141,7 @@
                 <div class="flex items-center justify-between">
                   <div>
                     <h4 class="font-bold text-sm" :class="darkMode ? 'text-white' : 'text-primary-900'">{{ $benefit->name }}</h4>
-                    <p class="text-xs mt-1" :class="darkMode ? 'text-primary-400' : 'text-primary-600'">{{ $benefit->pivot->received_date ? $benefit->pivot->received_date->format('M j, Y') : '-' }}</p>
+                    <p class="text-xs mt-1" :class="darkMode ? 'text-primary-400' : 'text-primary-600'">{{ $benefit->pivot->received_date ? \Carbon\Carbon::parse($benefit->pivot->received_date)->format('M j, Y') : '-' }}</p>
                   </div>
                   <div class="text-right">
                     <p class="font-bold text-amber-600 dark:text-amber-400">{{ $fmt($benefit->pivot->amount) }}</p>
