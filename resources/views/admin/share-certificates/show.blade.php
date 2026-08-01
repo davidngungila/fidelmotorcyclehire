@@ -180,46 +180,46 @@ function previewCertificate() {
   }
   
   preview.innerHTML = `
-    <div style="${backgroundStyle} min-height: 400px; padding: 40px; position: relative;">
-      <div style="background: rgba(255, 255, 255, 0.95); padding: 30px; border-radius: 10px; position: relative; z-index: 1;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="font-size: 24px; font-weight: bold; color: #1e40af; margin-bottom: 10px;">Share Certificate</h1>
-          <p style="color: #6b7280;">Certificate of Ownership</p>
+    <div style="${backgroundStyle} min-height: 500px; padding: 50px; position: relative;">
+      <div style="background: rgba(255, 255, 255, 0.98); padding: 50px; border-radius: 15px; position: relative; z-index: 1; border: 3px solid #1e40af;">
+        <div style="text-align: center; margin-bottom: 40px;">
+          <h1 style="font-size: 28px; font-weight: bold; color: #1e40af; margin-bottom: 5px; letter-spacing: 2px;">FEEDTAN COMMUNITY MICROFINANCE GROUP</h1>
+          <div style="width: 200px; height: 3px; background: #1e40af; margin: 15px auto;"></div>
+          <h2 style="font-size: 22px; font-weight: bold; color: #1f2937; margin-bottom: 30px; letter-spacing: 3px;">CERTIFICATE OF OWNERSHIP</h2>
         </div>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+        <div style="text-align: center; margin-bottom: 40px;">
+          <p style="color: #6b7280; font-size: 16px; margin-bottom: 15px; font-style: italic;">THIS CERTIFICATE IS PROUDLY PRESENTED TO</p>
+          <h3 style="font-family: 'Georgia', 'Times New Roman', serif; font-size: 32px; font-weight: bold; color: #1e40af; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px;">${certificateData.user_name}</h3>
+        </div>
+        
+        <div style="text-align: justify; margin-bottom: 40px; line-height: 1.8;">
+          <p style="color: #374151; font-size: 15px;">
+            In recognition of your ownership of <strong>${certificateData.number_of_shares} shares</strong> in <strong>${certificateData.share_product}</strong> of FEEDTAN COMMUNITY MICROFINANCE GROUP. This certificate confirms that you are the registered owner of the shares specified herein, issued in accordance with the Constitution, Share Policy, and applicable laws of the organization.
+          </p>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 30px; padding: 20px; background: #f9fafb; border-radius: 10px;">
           <div>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Certificate Number:</p>
-            <p style="font-weight: 600; color: #1f2937;">${certificateData.certificate_number}</p>
+            <p style="color: #6b7280; font-size: 13px; margin-bottom: 5px; font-weight: 600;">CERTIFICATE NUMBER</p>
+            <p style="font-weight: 700; color: #1f2937; font-size: 16px;">${certificateData.certificate_number}</p>
           </div>
           <div>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Status:</p>
-            <p style="font-weight: 600; color: #1f2937;">${certificateData.status}</p>
+            <p style="color: #6b7280; font-size: 13px; margin-bottom: 5px; font-weight: 600;">STATUS</p>
+            <p style="font-weight: 700; color: #1f2937; font-size: 16px;">${certificateData.status}</p>
           </div>
           <div>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Shareholder:</p>
-            <p style="font-weight: 600; color: #1f2937;">${certificateData.user_name}</p>
+            <p style="color: #6b7280; font-size: 13px; margin-bottom: 5px; font-weight: 600;">ISSUE DATE</p>
+            <p style="font-weight: 700; color: #1f2937; font-size: 16px;">${certificateData.issue_date}</p>
           </div>
           <div>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Share Product:</p>
-            <p style="font-weight: 600; color: #1f2937;">${certificateData.share_product}</p>
-          </div>
-          <div>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Number of Shares:</p>
-            <p style="font-weight: 600; color: #1f2937;">${certificateData.number_of_shares}</p>
-          </div>
-          <div>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Issue Date:</p>
-            <p style="font-weight: 600; color: #1f2937;">${certificateData.issue_date}</p>
-          </div>
-          <div>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Expiry Date:</p>
-            <p style="font-weight: 600; color: #1f2937;">${certificateData.expiry_date}</p>
+            <p style="color: #6b7280; font-size: 13px; margin-bottom: 5px; font-weight: 600;">EXPIRY DATE</p>
+            <p style="font-weight: 700; color: #1f2937; font-size: 16px;">${certificateData.expiry_date}</p>
           </div>
         </div>
         
         <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid #e5e7eb;">
-          <p style="color: #6b7280; font-size: 12px;">This certificate certifies that the above-named person is the registered owner of the stated number of shares.</p>
+          <p style="color: #6b7280; font-size: 12px; font-style: italic;">This document is valid only when signed by authorized officers of FeedTan Community Microfinance Group.</p>
         </div>
       </div>
     </div>
@@ -245,46 +245,46 @@ function printCertificate() {
   }
   
   const printContent = `
-    <div style="${backgroundStyle} min-height: 400px; padding: 40px; position: relative;">
-      <div style="background: rgba(255, 255, 255, 0.95); padding: 30px; border-radius: 10px; position: relative; z-index: 1;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="font-size: 24px; font-weight: bold; color: #1e40af; margin-bottom: 10px;">Share Certificate</h1>
-          <p style="color: #6b7280;">Certificate of Ownership</p>
+    <div style="${backgroundStyle} min-height: 500px; padding: 50px; position: relative;">
+      <div style="background: rgba(255, 255, 255, 0.98); padding: 50px; border-radius: 15px; position: relative; z-index: 1; border: 3px solid #1e40af;">
+        <div style="text-align: center; margin-bottom: 40px;">
+          <h1 style="font-size: 28px; font-weight: bold; color: #1e40af; margin-bottom: 5px; letter-spacing: 2px;">FEEDTAN COMMUNITY MICROFINANCE GROUP</h1>
+          <div style="width: 200px; height: 3px; background: #1e40af; margin: 15px auto;"></div>
+          <h2 style="font-size: 22px; font-weight: bold; color: #1f2937; margin-bottom: 30px; letter-spacing: 3px;">CERTIFICATE OF OWNERSHIP</h2>
         </div>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+        <div style="text-align: center; margin-bottom: 40px;">
+          <p style="color: #6b7280; font-size: 16px; margin-bottom: 15px; font-style: italic;">THIS CERTIFICATE IS PROUDLY PRESENTED TO</p>
+          <h3 style="font-family: 'Georgia', 'Times New Roman', serif; font-size: 32px; font-weight: bold; color: #1e40af; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px;">${certificateData.user_name}</h3>
+        </div>
+        
+        <div style="text-align: justify; margin-bottom: 40px; line-height: 1.8;">
+          <p style="color: #374151; font-size: 15px;">
+            In recognition of your ownership of <strong>${certificateData.number_of_shares} shares</strong> in <strong>${certificateData.share_product}</strong> of FEEDTAN COMMUNITY MICROFINANCE GROUP. This certificate confirms that you are the registered owner of the shares specified herein, issued in accordance with the Constitution, Share Policy, and applicable laws of the organization.
+          </p>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 30px; padding: 20px; background: #f9fafb; border-radius: 10px;">
           <div>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Certificate Number:</p>
-            <p style="font-weight: 600; color: #1f2937;">${certificateData.certificate_number}</p>
+            <p style="color: #6b7280; font-size: 13px; margin-bottom: 5px; font-weight: 600;">CERTIFICATE NUMBER</p>
+            <p style="font-weight: 700; color: #1f2937; font-size: 16px;">${certificateData.certificate_number}</p>
           </div>
           <div>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Status:</p>
-            <p style="font-weight: 600; color: #1f2937;">${certificateData.status}</p>
+            <p style="color: #6b7280; font-size: 13px; margin-bottom: 5px; font-weight: 600;">STATUS</p>
+            <p style="font-weight: 700; color: #1f2937; font-size: 16px;">${certificateData.status}</p>
           </div>
           <div>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Shareholder:</p>
-            <p style="font-weight: 600; color: #1f2937;">${certificateData.user_name}</p>
+            <p style="color: #6b7280; font-size: 13px; margin-bottom: 5px; font-weight: 600;">ISSUE DATE</p>
+            <p style="font-weight: 700; color: #1f2937; font-size: 16px;">${certificateData.issue_date}</p>
           </div>
           <div>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Share Product:</p>
-            <p style="font-weight: 600; color: #1f2937;">${certificateData.share_product}</p>
-          </div>
-          <div>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Number of Shares:</p>
-            <p style="font-weight: 600; color: #1f2937;">${certificateData.number_of_shares}</p>
-          </div>
-          <div>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Issue Date:</p>
-            <p style="font-weight: 600; color: #1f2937;">${certificateData.issue_date}</p>
-          </div>
-          <div>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Expiry Date:</p>
-            <p style="font-weight: 600; color: #1f2937;">${certificateData.expiry_date}</p>
+            <p style="color: #6b7280; font-size: 13px; margin-bottom: 5px; font-weight: 600;">EXPIRY DATE</p>
+            <p style="font-weight: 700; color: #1f2937; font-size: 16px;">${certificateData.expiry_date}</p>
           </div>
         </div>
         
         <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid #e5e7eb;">
-          <p style="color: #6b7280; font-size: 12px;">This certificate certifies that the above-named person is the registered owner of the stated number of shares.</p>
+          <p style="color: #6b7280; font-size: 12px; font-style: italic;">This document is valid only when signed by authorized officers of FeedTan Community Microfinance Group.</p>
         </div>
       </div>
     </div>
