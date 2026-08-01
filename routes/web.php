@@ -240,6 +240,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/share-products', [AdminShareProductController::class, 'index'])->name('share-products.index');
     Route::get('/share-products/create', [AdminShareProductController::class, 'create'])->name('share-products.create');
     Route::post('/share-products', [AdminShareProductController::class, 'store'])->name('share-products.store');
+    Route::get('/share-products/{id}', [AdminShareProductController::class, 'show'])->name('share-products.show');
     Route::get('/share-products/{id}/edit', [AdminShareProductController::class, 'edit'])->name('share-products.edit');
     Route::put('/share-products/{id}', [AdminShareProductController::class, 'update'])->name('share-products.update');
     Route::delete('/share-products/{id}', [AdminShareProductController::class, 'destroy'])->name('share-products.destroy');
@@ -247,6 +248,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/share-purchases', [AdminSharePurchaseController::class, 'index'])->name('share-purchases.index');
     Route::get('/share-purchases/create', [AdminSharePurchaseController::class, 'create'])->name('share-purchases.create');
     Route::post('/share-purchases', [AdminSharePurchaseController::class, 'store'])->name('share-purchases.store');
+    Route::get('/share-purchases/{id}', [AdminSharePurchaseController::class, 'show'])->name('share-purchases.show');
     Route::get('/share-purchases/{id}/edit', [AdminSharePurchaseController::class, 'edit'])->name('share-purchases.edit');
     Route::put('/share-purchases/{id}', [AdminSharePurchaseController::class, 'update'])->name('share-purchases.update');
     Route::delete('/share-purchases/{id}', [AdminSharePurchaseController::class, 'destroy'])->name('share-purchases.destroy');
@@ -254,6 +256,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/share-certificates', [AdminShareCertificateController::class, 'index'])->name('share-certificates.index');
     Route::get('/share-certificates/create', [AdminShareCertificateController::class, 'create'])->name('share-certificates.create');
     Route::post('/share-certificates', [AdminShareCertificateController::class, 'store'])->name('share-certificates.store');
+    Route::get('/share-certificates/{id}', [AdminShareCertificateController::class, 'show'])->name('share-certificates.show');
     Route::get('/share-certificates/{id}/edit', [AdminShareCertificateController::class, 'edit'])->name('share-certificates.edit');
     Route::put('/share-certificates/{id}', [AdminShareCertificateController::class, 'update'])->name('share-certificates.update');
     Route::delete('/share-certificates/{id}', [AdminShareCertificateController::class, 'destroy'])->name('share-certificates.destroy');
@@ -261,6 +264,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/share-transfers', [AdminShareTransferController::class, 'index'])->name('share-transfers.index');
     Route::get('/share-transfers/create', [AdminShareTransferController::class, 'create'])->name('share-transfers.create');
     Route::post('/share-transfers', [AdminShareTransferController::class, 'store'])->name('share-transfers.store');
+    Route::get('/share-transfers/{id}', [AdminShareTransferController::class, 'show'])->name('share-transfers.show');
     Route::get('/share-transfers/{id}/edit', [AdminShareTransferController::class, 'edit'])->name('share-transfers.edit');
     Route::put('/share-transfers/{id}', [AdminShareTransferController::class, 'update'])->name('share-transfers.update');
     Route::delete('/share-transfers/{id}', [AdminShareTransferController::class, 'destroy'])->name('share-transfers.destroy');
@@ -268,6 +272,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/share-dividends', [AdminShareDividendController::class, 'index'])->name('share-dividends.index');
     Route::get('/share-dividends/create', [AdminShareDividendController::class, 'create'])->name('share-dividends.create');
     Route::post('/share-dividends', [AdminShareDividendController::class, 'store'])->name('share-dividends.store');
+    Route::get('/share-dividends/{id}', [AdminShareDividendController::class, 'show'])->name('share-dividends.show');
     Route::get('/share-dividends/{id}/edit', [AdminShareDividendController::class, 'edit'])->name('share-dividends.edit');
     Route::put('/share-dividends/{id}', [AdminShareDividendController::class, 'update'])->name('share-dividends.update');
     Route::delete('/share-dividends/{id}', [AdminShareDividendController::class, 'destroy'])->name('share-dividends.destroy');
@@ -275,6 +280,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/share-transactions', [AdminShareTransactionController::class, 'index'])->name('share-transactions.index');
     Route::get('/share-transactions/create', [AdminShareTransactionController::class, 'create'])->name('share-transactions.create');
     Route::post('/share-transactions', [AdminShareTransactionController::class, 'store'])->name('share-transactions.store');
+    Route::get('/share-transactions/{id}', [AdminShareTransactionController::class, 'show'])->name('share-transactions.show');
     Route::get('/share-transactions/{id}/edit', [AdminShareTransactionController::class, 'edit'])->name('share-transactions.edit');
     Route::put('/share-transactions/{id}', [AdminShareTransactionController::class, 'update'])->name('share-transactions.update');
     Route::delete('/share-transactions/{id}', [AdminShareTransactionController::class, 'destroy'])->name('share-transactions.destroy');
