@@ -43,7 +43,7 @@
             <td class="py-3 px-4 text-sm text-primary-300">{{ ucfirst($transaction->transaction_type) }}</td>
             <td class="py-3 px-4 text-sm text-primary-300">{{ $transaction->number_of_shares }}</td>
             <td class="py-3 px-4 text-sm text-primary-300">{{ number_format($transaction->total_amount, 2) }}</td>
-            <td class="py-3 px-4 text-sm text-primary-300">{{ $transaction->transaction_date->format('M d, Y') }}</td>
+            <td class="py-3 px-4 text-sm text-primary-300">{{ $transaction->transaction_date ? $transaction->transaction_date->format('M d, Y') : 'N/A' }}</td>
             <td class="py-3 px-4">
               @if($transaction->status === 'completed')
                 <span class="badge badge-green text-[10px]">Completed</span>

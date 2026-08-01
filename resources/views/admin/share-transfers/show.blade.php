@@ -57,7 +57,7 @@
           </div>
           <div class="flex justify-between">
             <span class="text-sm text-primary-400">Transfer Date:</span>
-            <span class="text-sm text-white font-medium">{{ $shareTransfer->transfer_date->format('M d, Y') }}</span>
+            <span class="text-sm text-white font-medium">{{ $shareTransfer->transfer_date ? $shareTransfer->transfer_date->format('M d, Y') : 'N/A' }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-sm text-primary-400">Created At:</span>

@@ -61,7 +61,7 @@
           </div>
           <div class="flex justify-between">
             <span class="text-sm text-primary-400">Issue Date:</span>
-            <span class="text-sm text-white font-medium">{{ $shareCertificate->issue_date->format('M d, Y') }}</span>
+            <span class="text-sm text-white font-medium">{{ $shareCertificate->issue_date ? $shareCertificate->issue_date->format('M d, Y') : 'N/A' }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-sm text-primary-400">Expiry Date:</span>

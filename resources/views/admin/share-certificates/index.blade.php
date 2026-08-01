@@ -42,7 +42,7 @@
             <td class="py-3 px-4 text-sm text-primary-300">{{ $certificate->user->name ?? 'N/A' }}</td>
             <td class="py-3 px-4 text-sm text-primary-300">{{ $certificate->shareProduct->name ?? 'N/A' }}</td>
             <td class="py-3 px-4 text-sm text-primary-300">{{ $certificate->number_of_shares }}</td>
-            <td class="py-3 px-4 text-sm text-primary-300">{{ $certificate->issue_date->format('M d, Y') }}</td>
+            <td class="py-3 px-4 text-sm text-primary-300">{{ $certificate->issue_date ? $certificate->issue_date->format('M d, Y') : 'N/A' }}</td>
             <td class="py-3 px-4 text-sm text-primary-300">{{ $certificate->expiry_date ? $certificate->expiry_date->format('M d, Y') : 'N/A' }}</td>
             <td class="py-3 px-4">
               @if($certificate->status === 'active')

@@ -43,7 +43,7 @@
             <td class="py-3 px-4 text-sm text-primary-300">{{ $purchase->number_of_shares }}</td>
             <td class="py-3 px-4 text-sm text-primary-300">{{ number_format($purchase->price_per_share, 2) }}</td>
             <td class="py-3 px-4 text-sm text-primary-300">{{ number_format($purchase->total_amount, 2) }}</td>
-            <td class="py-3 px-4 text-sm text-primary-300">{{ $purchase->purchase_date->format('M d, Y') }}</td>
+            <td class="py-3 px-4 text-sm text-primary-300">{{ $purchase->purchase_date ? $purchase->purchase_date->format('M d, Y') : 'N/A' }}</td>
             <td class="py-3 px-4">
               @if($purchase->payment_status === 'paid')
                 <span class="badge badge-green text-[10px]">Paid</span>

@@ -41,7 +41,7 @@
             <td class="py-3 px-4 text-sm text-primary-300">{{ $transfer->toUser->name ?? 'N/A' }}</td>
             <td class="py-3 px-4 text-sm text-primary-300">{{ $transfer->shareCertificate->certificate_number ?? 'N/A' }}</td>
             <td class="py-3 px-4 text-sm text-primary-300">{{ $transfer->number_of_shares }}</td>
-            <td class="py-3 px-4 text-sm text-primary-300">{{ $transfer->transfer_date->format('M d, Y') }}</td>
+            <td class="py-3 px-4 text-sm text-primary-300">{{ $transfer->transfer_date ? $transfer->transfer_date->format('M d, Y') : 'N/A' }}</td>
             <td class="py-3 px-4">
               @if($transfer->status === 'completed')
                 <span class="badge badge-green text-[10px]">Completed</span>

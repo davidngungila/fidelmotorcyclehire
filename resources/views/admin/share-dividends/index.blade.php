@@ -43,7 +43,7 @@
             <td class="py-3 px-4 text-sm text-primary-300">{{ $dividend->number_of_shares }}</td>
             <td class="py-3 px-4 text-sm text-primary-300">{{ number_format($dividend->dividend_per_share, 2) }}</td>
             <td class="py-3 px-4 text-sm text-primary-300">{{ number_format($dividend->total_dividend, 2) }}</td>
-            <td class="py-3 px-4 text-sm text-primary-300">{{ $dividend->declaration_date->format('M d, Y') }}</td>
+            <td class="py-3 px-4 text-sm text-primary-300">{{ $dividend->declaration_date ? $dividend->declaration_date->format('M d, Y') : 'N/A' }}</td>
             <td class="py-3 px-4">
               @if($dividend->status === 'paid')
                 <span class="badge badge-green text-[10px]">Paid</span>

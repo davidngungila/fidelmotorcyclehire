@@ -63,7 +63,7 @@
           </div>
           <div class="flex justify-between">
             <span class="text-sm text-primary-400">Declaration Date:</span>
-            <span class="text-sm text-white font-medium">{{ $shareDividend->declaration_date->format('M d, Y') }}</span>
+            <span class="text-sm text-white font-medium">{{ $shareDividend->declaration_date ? $shareDividend->declaration_date->format('M d, Y') : 'N/A' }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-sm text-primary-400">Payment Date:</span>

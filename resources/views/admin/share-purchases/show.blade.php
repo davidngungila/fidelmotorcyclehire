@@ -59,7 +59,7 @@
           </div>
           <div class="flex justify-between">
             <span class="text-sm text-primary-400">Purchase Date:</span>
-            <span class="text-sm text-white font-medium">{{ $sharePurchase->purchase_date->format('M d, Y') }}</span>
+            <span class="text-sm text-white font-medium">{{ $sharePurchase->purchase_date ? $sharePurchase->purchase_date->format('M d, Y') : 'N/A' }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-sm text-primary-400">Created At:</span>
