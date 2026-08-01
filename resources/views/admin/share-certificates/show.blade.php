@@ -163,7 +163,7 @@ const certificateData = {
   status: '{{ ucfirst($shareCertificate->status) }}'
 };
 
-const certificateBackground = '{{ Illuminate\Support\Facades\Cache::get('share_settings')['certificate_background'] ?? '' }}';
+const certificateBackground = '{{ \Illuminate\Support\Facades\Cache::get('share_settings', [])['certificate_background'] ?? '' }}';
 
 function previewCertificate() {
   const modal = document.getElementById('certificateModal');
