@@ -44,10 +44,12 @@ class Transaction extends Model
             ->map(function ($transaction, $index) {
                 static $runningBalance = 0;
                 
-                // Calculate running balance
-                if (in_array($transaction->transaction_type, ['deposit', 'Flexi-Deposit', 'RDA-Deposit', 'Opening Balance'])) {
+                // Calculate running balance - case-insensitive comparison
+                $type = strtolower($transaction->transaction_type);
+                
+                if (in_array($type, ['deposit', 'flexi-deposit', 'rda-deposit', 'opening balance'])) {
                     $runningBalance += (float) $transaction->amount;
-                } elseif (in_array($transaction->transaction_type, ['withdrawal', 'Withdrawal'])) {
+                } elseif (in_array($type, ['withdrawal'])) {
                     $runningBalance -= (float) $transaction->amount;
                 }
                 
