@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\SavingPlan;
 use App\Models\User;
+use App\Services\EncryptedIdService;
 use App\Traits\FlashMessages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +14,11 @@ use Carbon\Carbon;
 class SavingPlanController extends Controller
 {
     use FlashMessages;
+
+    public function __construct(
+        protected EncryptedIdService $encryptedIdService,
+    ) {
+    }
 
     public function index(Request $request)
     {
@@ -101,20 +107,25 @@ class SavingPlanController extends Controller
         return redirect()->route('admin.saving-plans.index');
     }
 
-    public function edit(SavingPlan $savingPlan)
+    public function show(string $encryptedId)
     {
+        $id = $this->encryptedIdService->decrypt($encryptedId);
+        $savingPlan = SavingPlan::with('user')->findOrFail($id);
+        return view('admin.saving-plans.show', compact('savingPlan'));
+    }
+
+    public function edit(string $encryptedId)
+    {
+        $id = $this->encryptedIdService->decrypt($encryptedId);
+        $savingPlan = SavingPlan::findOrFail($id);
         $members = User::where('role', 'member')->get();
         return view('admin.saving-plans.edit', compact('savingPlan', 'members'));
     }
 
-    public function show(SavingPlan $savingPlan)
+    public function update(Request $request, string $encryptedId)
     {
-        $savingPlan->load('user');
-        return view('admin.saving-plans.show', compact('savingPlan'));
-    }
-
-    public function update(Request $request, SavingPlan $savingPlan)
-    {
+        $id = $this->encryptedIdService->decrypt($encryptedId);
+        $savingPlan = SavingPlan::findOrFail($id);
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'user_id' => 'required|exists:users,id',
@@ -177,8 +188,10 @@ class SavingPlanController extends Controller
         return redirect()->route('admin.saving-plans.index');
     }
 
-    public function destroy(SavingPlan $savingPlan)
+    public function destroy(string $encryptedId)
     {
+        $id = $this->encryptedIdService->decrypt($encryptedId);
+        $savingPlan = SavingPlan::findOrFail($id);
         $savingPlan->delete();
 
         $this->success('Saving plan deleted successfully.');

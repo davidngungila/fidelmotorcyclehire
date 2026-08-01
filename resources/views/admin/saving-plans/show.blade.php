@@ -65,7 +65,7 @@
           </div>
           <div class="p-4 rounded-xl bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-800/50">
             <p class="text-xs text-primary-600 dark:text-primary-400 mb-1">Created</p>
-            <p class="text-sm font-bold text-primary-900 dark:text-white">{{ $savingPlan->created_at->format('M j, Y') }}</p>
+            <p class="text-sm font-bold text-primary-900 dark:text-white">{{ $savingPlan->created_at ? $savingPlan->created_at->format('M j, Y') : '—' }}</p>
           </div>
         </div>
       </div>

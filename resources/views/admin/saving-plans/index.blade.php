@@ -100,15 +100,15 @@
               </td>
               <td class="text-right">
                 <div class="flex items-center justify-end gap-2">
-                  <a href="{{ route('admin.saving-plans.show', $savingPlan->id) }}"
+                  <a href="{{ route('admin.saving-plans.show', app('App\Services\EncryptedIdService')->encrypt($savingPlan->id)) }}"
                      class="w-8 h-8 rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-600 flex items-center justify-center transition-all active:scale-95">
                     <i class="fa-solid fa-eye text-xs"></i>
                   </a>
-                  <a href="{{ route('admin.saving-plans.edit', $savingPlan->id) }}"
+                  <a href="{{ route('admin.saving-plans.edit', app('App\Services\EncryptedIdService')->encrypt($savingPlan->id)) }}"
                      class="w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center transition-all active:scale-95">
                     <i class="fa-solid fa-pen text-xs"></i>
                   </a>
-                  <form method="POST" action="{{ route('admin.saving-plans.destroy', $savingPlan->id) }}" class="inline">
+                  <form method="POST" action="{{ route('admin.saving-plans.destroy', app('App\Services\EncryptedIdService')->encrypt($savingPlan->id)) }}" class="inline">
                     @csrf
                     @method('DELETE')
                     <button type="submit"
