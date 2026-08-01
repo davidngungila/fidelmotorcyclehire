@@ -52,21 +52,22 @@ class SavingPlanController extends Controller
         $user = User::findOrFail($validated['user_id']);
         
         // Calculate periodic amount
-        $periodicAmount = $validated['goal'] / $validated['period_value'];
+        $periodicAmount = $validated['goal'] / (int) $validated['period_value'];
         
         // Calculate target date based on period type and value
         $startDate = Carbon::parse($validated['start_date']);
+        $periods = (int) $validated['period_value'];
         $targetDate = match($validated['period_type']) {
-            'daily' => $startDate->copy()->addDays($validated['period_value']),
-            'weekly' => $startDate->copy()->addWeeks($validated['period_value']),
-            'monthly' => $startDate->copy()->addMonths($validated['period_value']),
+            'daily' => $startDate->copy()->addDays($periods),
+            'weekly' => $startDate->copy()->addWeeks($periods),
+            'monthly' => $startDate->copy()->addMonths($periods),
         };
         
         // Generate payment schedule
         $paymentSchedule = [];
         $currentDate = $startDate->copy();
         
-        for ($i = 1; $i <= $validated['period_value']; $i++) {
+        for ($i = 1; $i <= $periods; $i++) {
             $paymentSchedule[] = [
                 'period_number' => $i,
                 'due_date' => $currentDate->format('Y-m-d'),
@@ -121,21 +122,22 @@ class SavingPlanController extends Controller
         $user = User::findOrFail($validated['user_id']);
         
         // Recalculate periodic amount
-        $periodicAmount = $validated['goal'] / $validated['period_value'];
+        $periodicAmount = $validated['goal'] / (int) $validated['period_value'];
         
         // Recalculate target date
         $startDate = Carbon::parse($validated['start_date']);
+        $periods = (int) $validated['period_value'];
         $targetDate = match($validated['period_type']) {
-            'daily' => $startDate->copy()->addDays($validated['period_value']),
-            'weekly' => $startDate->copy()->addWeeks($validated['period_value']),
-            'monthly' => $startDate->copy()->addMonths($validated['period_value']),
+            'daily' => $startDate->copy()->addDays($periods),
+            'weekly' => $startDate->copy()->addWeeks($periods),
+            'monthly' => $startDate->copy()->addMonths($periods),
         };
         
         // Regenerate payment schedule
         $paymentSchedule = [];
         $currentDate = $startDate->copy();
         
-        for ($i = 1; $i <= $validated['period_value']; $i++) {
+        for ($i = 1; $i <= $periods; $i++) {
             $paymentSchedule[] = [
                 'period_number' => $i,
                 'due_date' => $currentDate->format('Y-m-d'),
