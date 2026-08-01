@@ -430,12 +430,6 @@ class UserController extends Controller
         
         $user = User::with(['roles', 'memberProfile', 'memberType'])->findOrFail($id);
 
-        // If user is a member without complete profile, redirect to registration flow
-        if ($user->role === 'member' && !$user->memberProfile) {
-            return redirect()->route('admin.users.create')
-                ->with('info', 'This member has not completed registration. Please complete the registration process.');
-        }
-
         ActivityLog::create([
             'user_id' => Auth::id(),
             'subject_type' => 'user',
