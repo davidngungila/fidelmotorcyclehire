@@ -180,48 +180,46 @@ function previewCertificate() {
   }
   
   preview.innerHTML = `
-    <div style="${backgroundStyle} min-height: 500px; padding: 50px; position: relative;">
-      <div style="background: rgba(255, 255, 255, 0.98); padding: 40px; border-radius: 15px; position: relative; z-index: 1; box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
-        <div style="text-align: center; margin-bottom: 40px; border-bottom: 3px solid #1e40af; padding-bottom: 20px;">
-          <h1 style="font-size: 28px; font-weight: bold; color: #1e40af; margin-bottom: 8px; letter-spacing: 1px;">FeedTan Community Microfinance Group</h1>
-          <h2 style="font-size: 22px; font-weight: 600; color: #3b82f6; margin-bottom: 5px;">Share Certificate</h2>
-          <p style="color: #6b7280; font-size: 14px; font-style: italic;">Certificate of Ownership</p>
+    <div style="${backgroundStyle} min-height: 400px; padding: 40px; position: relative;">
+      <div style="background: rgba(255, 255, 255, 0.95); padding: 30px; border-radius: 10px; position: relative; z-index: 1;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h1 style="font-size: 24px; font-weight: bold; color: #1e40af; margin-bottom: 10px;">Share Certificate</h1>
+          <p style="color: #6b7280;">Certificate of Ownership</p>
         </div>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 30px;">
-          <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #1e40af;">
-            <p style="color: #64748b; font-size: 12px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">Certificate Number</p>
-            <p style="font-weight: 700; color: #1e2937; font-size: 16px;">${certificateData.certificate_number}</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+          <div>
+            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Certificate Number:</p>
+            <p style="font-weight: 600; color: #1f2937;">${certificateData.certificate_number}</p>
           </div>
-          <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #10b981;">
-            <p style="color: #64748b; font-size: 12px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">Status</p>
-            <p style="font-weight: 700; color: #1e2937; font-size: 16px;">${certificateData.status}</p>
+          <div>
+            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Status:</p>
+            <p style="font-weight: 600; color: #1f2937;">${certificateData.status}</p>
           </div>
-          <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #3b82f6;">
-            <p style="color: #64748b; font-size: 12px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">Shareholder Name</p>
-            <p style="font-weight: 700; color: #1e2937; font-size: 16px;">${certificateData.user_name}</p>
+          <div>
+            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Shareholder:</p>
+            <p style="font-weight: 600; color: #1f2937;">${certificateData.user_name}</p>
           </div>
-          <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #8b5cf6;">
-            <p style="color: #64748b; font-size: 12px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">Share Product</p>
-            <p style="font-weight: 700; color: #1e2937; font-size: 16px;">${certificateData.share_product}</p>
+          <div>
+            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Share Product:</p>
+            <p style="font-weight: 600; color: #1f2937;">${certificateData.share_product}</p>
           </div>
-          <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #f59e0b;">
-            <p style="color: #64748b; font-size: 12px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">Number of Shares</p>
-            <p style="font-weight: 700; color: #1e2937; font-size: 18px;">${certificateData.number_of_shares}</p>
+          <div>
+            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Number of Shares:</p>
+            <p style="font-weight: 600; color: #1f2937;">${certificateData.number_of_shares}</p>
           </div>
-          <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #ef4444;">
-            <p style="color: #64748b; font-size: 12px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">Issue Date</p>
-            <p style="font-weight: 700; color: #1e2937; font-size: 16px;">${certificateData.issue_date}</p>
+          <div>
+            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Issue Date:</p>
+            <p style="font-weight: 600; color: #1f2937;">${certificateData.issue_date}</p>
           </div>
-          <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #6366f1; grid-column: span 2;">
-            <p style="color: #64748b; font-size: 12px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">Expiry Date</p>
-            <p style="font-weight: 700; color: #1e2937; font-size: 16px;">${certificateData.expiry_date}</p>
+          <div>
+            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Expiry Date:</p>
+            <p style="font-weight: 600; color: #1f2937;">${certificateData.expiry_date}</p>
           </div>
         </div>
         
-        <div style="text-align: center; margin-top: 30px; padding-top: 25px; border-top: 2px solid #e5e7eb;">
-          <p style="color: #4b5563; font-size: 13px; line-height: 1.6; margin-bottom: 10px;">This certificate certifies that the above-named person is the registered owner of the stated number of shares in FeedTan Community Microfinance Group.</p>
-          <p style="color: #9ca3af; font-size: 11px;">This document is valid only when signed and sealed by authorized officers.</p>
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid #e5e7eb;">
+          <p style="color: #6b7280; font-size: 12px;">This certificate certifies that the above-named person is the registered owner of the stated number of shares.</p>
         </div>
       </div>
     </div>
@@ -247,48 +245,46 @@ function printCertificate() {
   }
   
   const printContent = `
-    <div style="${backgroundStyle} min-height: 500px; padding: 50px; position: relative;">
-      <div style="background: rgba(255, 255, 255, 0.98); padding: 40px; border-radius: 15px; position: relative; z-index: 1; box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
-        <div style="text-align: center; margin-bottom: 40px; border-bottom: 3px solid #1e40af; padding-bottom: 20px;">
-          <h1 style="font-size: 28px; font-weight: bold; color: #1e40af; margin-bottom: 8px; letter-spacing: 1px;">FeedTan Community Microfinance Group</h1>
-          <h2 style="font-size: 22px; font-weight: 600; color: #3b82f6; margin-bottom: 5px;">Share Certificate</h2>
-          <p style="color: #6b7280; font-size: 14px; font-style: italic;">Certificate of Ownership</p>
+    <div style="${backgroundStyle} min-height: 400px; padding: 40px; position: relative;">
+      <div style="background: rgba(255, 255, 255, 0.95); padding: 30px; border-radius: 10px; position: relative; z-index: 1;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h1 style="font-size: 24px; font-weight: bold; color: #1e40af; margin-bottom: 10px;">Share Certificate</h1>
+          <p style="color: #6b7280;">Certificate of Ownership</p>
         </div>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 30px;">
-          <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #1e40af;">
-            <p style="color: #64748b; font-size: 12px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">Certificate Number</p>
-            <p style="font-weight: 700; color: #1e2937; font-size: 16px;">${certificateData.certificate_number}</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+          <div>
+            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Certificate Number:</p>
+            <p style="font-weight: 600; color: #1f2937;">${certificateData.certificate_number}</p>
           </div>
-          <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #10b981;">
-            <p style="color: #64748b; font-size: 12px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">Status</p>
-            <p style="font-weight: 700; color: #1e2937; font-size: 16px;">${certificateData.status}</p>
+          <div>
+            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Status:</p>
+            <p style="font-weight: 600; color: #1f2937;">${certificateData.status}</p>
           </div>
-          <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #3b82f6;">
-            <p style="color: #64748b; font-size: 12px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">Shareholder Name</p>
-            <p style="font-weight: 700; color: #1e2937; font-size: 16px;">${certificateData.user_name}</p>
+          <div>
+            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Shareholder:</p>
+            <p style="font-weight: 600; color: #1f2937;">${certificateData.user_name}</p>
           </div>
-          <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #8b5cf6;">
-            <p style="color: #64748b; font-size: 12px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">Share Product</p>
-            <p style="font-weight: 700; color: #1e2937; font-size: 16px;">${certificateData.share_product}</p>
+          <div>
+            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Share Product:</p>
+            <p style="font-weight: 600; color: #1f2937;">${certificateData.share_product}</p>
           </div>
-          <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #f59e0b;">
-            <p style="color: #64748b; font-size: 12px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">Number of Shares</p>
-            <p style="font-weight: 700; color: #1e2937; font-size: 18px;">${certificateData.number_of_shares}</p>
+          <div>
+            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Number of Shares:</p>
+            <p style="font-weight: 600; color: #1f2937;">${certificateData.number_of_shares}</p>
           </div>
-          <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #ef4444;">
-            <p style="color: #64748b; font-size: 12px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">Issue Date</p>
-            <p style="font-weight: 700; color: #1e2937; font-size: 16px;">${certificateData.issue_date}</p>
+          <div>
+            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Issue Date:</p>
+            <p style="font-weight: 600; color: #1f2937;">${certificateData.issue_date}</p>
           </div>
-          <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #6366f1; grid-column: span 2;">
-            <p style="color: #64748b; font-size: 12px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">Expiry Date</p>
-            <p style="font-weight: 700; color: #1e2937; font-size: 16px;">${certificateData.expiry_date}</p>
+          <div>
+            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Expiry Date:</p>
+            <p style="font-weight: 600; color: #1f2937;">${certificateData.expiry_date}</p>
           </div>
         </div>
         
-        <div style="text-align: center; margin-top: 30px; padding-top: 25px; border-top: 2px solid #e5e7eb;">
-          <p style="color: #4b5563; font-size: 13px; line-height: 1.6; margin-bottom: 10px;">This certificate certifies that the above-named person is the registered owner of the stated number of shares in FeedTan Community Microfinance Group.</p>
-          <p style="color: #9ca3af; font-size: 11px;">This document is valid only when signed and sealed by authorized officers.</p>
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid #e5e7eb;">
+          <p style="color: #6b7280; font-size: 12px;">This certificate certifies that the above-named person is the registered owner of the stated number of shares.</p>
         </div>
       </div>
     </div>
