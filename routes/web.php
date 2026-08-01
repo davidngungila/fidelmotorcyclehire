@@ -135,6 +135,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/saving-plans', [App\Http\Controllers\Admin\SavingPlanController::class, 'index'])->name('saving-plans.index');
     Route::get('/saving-plans/create', [App\Http\Controllers\Admin\SavingPlanController::class, 'create'])->name('saving-plans.create');
     Route::post('/saving-plans', [App\Http\Controllers\Admin\SavingPlanController::class, 'store'])->name('saving-plans.store');
+    Route::get('/saving-plans/{id}', [App\Http\Controllers\Admin\SavingPlanController::class, 'show'])->name('saving-plans.show');
     Route::get('/saving-plans/{id}/edit', [App\Http\Controllers\Admin\SavingPlanController::class, 'edit'])->name('saving-plans.edit');
     Route::put('/saving-plans/{id}', [App\Http\Controllers\Admin\SavingPlanController::class, 'update'])->name('saving-plans.update');
     Route::delete('/saving-plans/{id}', [App\Http\Controllers\Admin\SavingPlanController::class, 'destroy'])->name('saving-plans.destroy');

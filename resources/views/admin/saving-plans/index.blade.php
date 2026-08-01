@@ -56,12 +56,12 @@
           <tr>
             <th class="w-12">#</th>
             <th>Name</th>
-            <th>Member Number</th>
-            <th>Membership</th>
+            <th>Member</th>
+            <th>Period</th>
+            <th>Goal</th>
+            <th>Per Period</th>
             <th>Target Date</th>
             <th>Status</th>
-            <th class="text-right">Monthly Goal</th>
-            <th class="text-right">Goal</th>
             <th class="text-right">Actions</th>
           </tr>
         </thead>
@@ -72,18 +72,20 @@
               <td>
                 <span class="font-semibold text-primary-600">{{ $savingPlan->name }}</span>
               </td>
-              <td>{{ $savingPlan->member_number }}</td>
               <td>
-                @php
-                  $membershipColors = [
-                    'individual' => 'bg-blue-100 text-blue-700',
-                    'corporate' => 'bg-purple-100 text-purple-700',
-                    'group' => 'bg-orange-100 text-orange-700',
-                  ];
-                  $color = $membershipColors[$savingPlan->membership] ?? 'bg-gray-100 text-gray-700';
-                @endphp
-                <span class="badge {{ $color }} text-[10px]">{{ ucfirst($savingPlan->membership) }}</span>
+                <div class="text-sm">
+                  <p class="font-semibold text-primary-900 dark:text-white">{{ $savingPlan->user ? $savingPlan->user->name : '—' }}</p>
+                  <p class="text-xs text-primary-500">{{ $savingPlan->member_number }}</p>
+                </div>
               </td>
+              <td>
+                <div class="text-sm">
+                  <p class="font-semibold text-primary-900 dark:text-white capitalize">{{ $savingPlan->period_type }}</p>
+                  <p class="text-xs text-primary-500">{{ $savingPlan->period_value }} periods</p>
+                </div>
+              </td>
+              <td class="text-right font-semibold">{{ number_format($savingPlan->goal, 2) }}</td>
+              <td class="text-right font-semibold">{{ number_format($savingPlan->periodic_amount, 2) }}</td>
               <td>{{ $savingPlan->target_date ? $savingPlan->target_date->format('M d, Y') : '-' }}</td>
               <td>
                 @php
@@ -96,10 +98,12 @@
                 @endphp
                 <span class="badge {{ $statusColor }} text-[10px]">{{ ucfirst($savingPlan->status ?? 'active') }}</span>
               </td>
-              <td class="text-right font-semibold">{{ number_format($savingPlan->monthly_goal, 2) }}</td>
-              <td class="text-right font-semibold">{{ number_format($savingPlan->goal, 2) }}</td>
               <td class="text-right">
                 <div class="flex items-center justify-end gap-2">
+                  <a href="{{ route('admin.saving-plans.show', $savingPlan->id) }}"
+                     class="w-8 h-8 rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-600 flex items-center justify-center transition-all active:scale-95">
+                    <i class="fa-solid fa-eye text-xs"></i>
+                  </a>
                   <a href="{{ route('admin.saving-plans.edit', $savingPlan->id) }}"
                      class="w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center transition-all active:scale-95">
                     <i class="fa-solid fa-pen text-xs"></i>

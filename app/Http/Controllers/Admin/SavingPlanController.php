@@ -16,7 +16,7 @@ class SavingPlanController extends Controller
 
     public function index(Request $request)
     {
-        $query = SavingPlan::query();
+        $query = SavingPlan::with('user');
 
         if ($request->filled('member_number')) {
             $query->byMemberNumber($request->member_number);
@@ -105,6 +105,12 @@ class SavingPlanController extends Controller
     {
         $members = User::where('role', 'member')->get();
         return view('admin.saving-plans.edit', compact('savingPlan', 'members'));
+    }
+
+    public function show(SavingPlan $savingPlan)
+    {
+        $savingPlan->load('user');
+        return view('admin.saving-plans.show', compact('savingPlan'));
     }
 
     public function update(Request $request, SavingPlan $savingPlan)
