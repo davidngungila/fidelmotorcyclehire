@@ -134,8 +134,9 @@ class SavingController extends Controller
         
         $members = User::where('role', 'member')->get();
         $savingPlans = \App\Models\SavingPlan::with('user')->where('status', 'active')->get();
+        $products = \App\Models\SavingsProduct::active()->get();
         
-        return view('admin.savings.create', compact('members', 'savingPlans'));
+        return view('admin.savings.create', compact('members', 'savingPlans', 'products'));
     }
 
     public function store(Request $request)
@@ -149,6 +150,7 @@ class SavingController extends Controller
             'date' => 'required|date',
             'reference_no' => 'nullable|string|max:255',
             'saving_plan_id' => 'nullable|exists:saving_plans,id',
+            'product_id' => 'nullable|exists:savings_products,id',
         ]);
 
         // Validate that saving plan belongs to the selected member
@@ -167,6 +169,7 @@ class SavingController extends Controller
                 'amount' => $validated['amount'],
                 'reference_no' => $validated['reference_no'] ?? null,
                 'saving_plan_id' => $validated['saving_plan_id'] ?? null,
+                'product_id' => $validated['product_id'] ?? null,
             ]);
 
             ActivityLog::create([
@@ -181,6 +184,7 @@ class SavingController extends Controller
                     'transaction_type' => $validated['transaction_type'],
                     'amount' => $validated['amount'],
                     'saving_plan_id' => $validated['saving_plan_id'] ?? null,
+                    'product_id' => $validated['product_id'] ?? null,
                 ],
             ]);
 

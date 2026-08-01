@@ -13,6 +13,7 @@ class Transaction extends Model
         'reference_no',
         'amount',
         'saving_plan_id',
+        'product_id',
     ];
 
     protected $casts = [
@@ -62,5 +63,10 @@ class Transaction extends Model
     public function savingPlan()
     {
         return $this->belongsTo(SavingPlan::class);
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(SavingsProduct::class, 'product_id');
     }
 }
