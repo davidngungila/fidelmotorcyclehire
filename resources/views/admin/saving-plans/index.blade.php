@@ -108,15 +108,11 @@
                      class="w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center transition-all active:scale-95">
                     <i class="fa-solid fa-pen text-xs"></i>
                   </a>
-                  <form method="POST" action="{{ route('admin.saving-plans.destroy', app('App\Services\EncryptedIdService')->encrypt($savingPlan->id)) }}" class="inline">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit"
-                            class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center transition-all active:scale-95"
-                            onclick="return confirm('Are you sure you want to delete this saving plan?')">
-                      <i class="fa-solid fa-trash text-xs"></i>
-                    </button>
-                  </form>
+                  <button type="button"
+                          class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center transition-all active:scale-95"
+                          onclick="confirmDelete('{{ route('admin.saving-plans.destroy', app('App\Services\EncryptedIdService')->encrypt($savingPlan->id)) }}', '{{ csrf_token() }}')">
+                    <i class="fa-solid fa-trash text-xs"></i>
+                  </button>
                 </div>
               </td>
             </tr>
@@ -148,6 +144,40 @@ function savingPlansList() {
       this.$refs.searchForm.submit();
     }
   }
+}
+
+function confirmDelete(url, token) {
+  Swal.fire({
+    title: 'Are you sure?',
+    text: 'Are you sure you want to delete this saving plan? This action cannot be undone.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#ef4444',
+    cancelButtonColor: '#6b7280',
+    confirmButtonText: 'Yes, delete it!',
+    cancelButtonText: 'Cancel'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = url;
+      
+      const csrfInput = document.createElement('input');
+      csrfInput.type = 'hidden';
+      csrfInput.name = '_token';
+      csrfInput.value = token;
+      form.appendChild(csrfInput);
+      
+      const methodInput = document.createElement('input');
+      methodInput.type = 'hidden';
+      methodInput.name = '_method';
+      methodInput.value = 'DELETE';
+      form.appendChild(methodInput);
+      
+      document.body.appendChild(form);
+      form.submit();
+    }
+  });
 }
 </script>
 
