@@ -135,6 +135,14 @@ class LoanController extends Controller
                 'work_experience' => 'nullable|integer|min:0',
             ]);
 
+            // Handle empty string values for nullable numeric fields
+            if ($request->has('other_income') && $request->input('other_income') === '') {
+                $validated['other_income'] = null;
+            }
+            if ($request->has('work_experience') && $request->input('work_experience') === '') {
+                $validated['work_experience'] = null;
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Basic information saved successfully.',
@@ -242,6 +250,17 @@ class LoanController extends Controller
                 'preferred_repayment_date' => 'nullable|integer|in:1,5,10,15,20,25,30',
                 'collateral_value' => 'nullable|numeric|min:0',
             ]);
+
+            // Handle empty string values for nullable numeric fields
+            if ($request->has('other_income') && $request->input('other_income') === '') {
+                $validated['other_income'] = null;
+            }
+            if ($request->has('work_experience') && $request->input('work_experience') === '') {
+                $validated['work_experience'] = null;
+            }
+            if ($request->has('collateral_value') && $request->input('collateral_value') === '') {
+                $validated['collateral_value'] = null;
+            }
 
             // Generate sequential loan number
             $today = date('Ymd');
