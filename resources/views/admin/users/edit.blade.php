@@ -222,7 +222,6 @@
           <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
             <i class="fa-solid fa-id-card text-primary-500 text-xs"></i> Membership Details
           </h3>
-          @if($user->memberProfile)
           <form id="membershipDetailsForm" @submit.prevent="saveMembershipDetails" class="space-y-5">
             @csrf
             @method('PUT')
@@ -238,35 +237,35 @@
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Membership Category</label>
-                <input type="text" name="membership_category" value="{{ $user->memberProfile->membership_category }}" class="form-input">
+                <input type="text" name="membership_category" value="{{ $user->memberProfile->membership_category ?? '' }}" class="form-input">
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Occupation</label>
-                <input type="text" name="occupation" value="{{ $user->memberProfile->occupation }}" class="form-input">
+                <input type="text" name="occupation" value="{{ $user->memberProfile->occupation ?? '' }}" class="form-input">
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Employer/Business</label>
-                <input type="text" name="employer_business" value="{{ $user->memberProfile->employer_business }}" class="form-input">
+                <input type="text" name="employer_business" value="{{ $user->memberProfile->employer_business ?? '' }}" class="form-input">
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Monthly Income</label>
-                <input type="number" name="monthly_income" value="{{ $user->memberProfile->monthly_income }}" class="form-input">
+                <input type="number" name="monthly_income" value="{{ $user->memberProfile->monthly_income ?? '' }}" class="form-input">
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Introduced By</label>
-                <input type="text" name="introduced_by" value="{{ $user->memberProfile->introduced_by }}" class="form-input">
+                <input type="text" name="introduced_by" value="{{ $user->memberProfile->introduced_by ?? '' }}" class="form-input">
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Joining Fee</label>
-                <input type="number" name="joining_fee" value="{{ $user->memberProfile->joining_fee }}" class="form-input">
+                <input type="number" name="joining_fee" value="{{ $user->memberProfile->joining_fee ?? '' }}" class="form-input">
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Shares Purchased</label>
-                <input type="number" name="shares_purchased" value="{{ $user->memberProfile->shares_purchased }}" class="form-input">
+                <input type="number" name="shares_purchased" value="{{ $user->memberProfile->shares_purchased ?? '' }}" class="form-input">
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Initial Savings Deposit</label>
-                <input type="number" name="initial_savings_deposit" value="{{ $user->memberProfile->initial_savings_deposit }}" class="form-input">
+                <input type="number" name="initial_savings_deposit" value="{{ $user->memberProfile->initial_savings_deposit ?? '' }}" class="form-input">
               </div>
             </div>
             <div class="flex justify-end">
@@ -275,11 +274,6 @@
               </button>
             </div>
           </form>
-          @else
-          <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl text-yellow-700 dark:text-yellow-300 text-sm">
-            <i class="fa-solid fa-info-circle mr-2"></i> This member has not completed the registration process. Membership details are not available.
-          </div>
-          @endif
         </div>
 
         <!-- Tab 4: Account Information -->
@@ -321,26 +315,25 @@
           <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
             <i class="fa-solid fa-users text-primary-500 text-xs"></i> Next of Kin
           </h3>
-          @if($user->memberProfile)
           <form id="nextOfKinForm" @submit.prevent="saveNextOfKin" class="space-y-5">
             @csrf
             @method('PUT')
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Full Name</label>
-                <input type="text" name="kin_full_name" value="{{ $user->memberProfile->kin_full_name }}" class="form-input">
+                <input type="text" name="kin_full_name" value="{{ $user->memberProfile->kin_full_name ?? '' }}" class="form-input">
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Relationship</label>
-                <input type="text" name="kin_relationship" value="{{ $user->memberProfile->kin_relationship }}" class="form-input">
+                <input type="text" name="kin_relationship" value="{{ $user->memberProfile->kin_relationship ?? '' }}" class="form-input">
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Phone Number</label>
-                <input type="text" name="kin_phone_number" value="{{ $user->memberProfile->kin_phone_number }}" class="form-input">
+                <input type="text" name="kin_phone_number" value="{{ $user->memberProfile->kin_phone_number ?? '' }}" class="form-input">
               </div>
               <div class="md:col-span-2">
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Address</label>
-                <textarea name="kin_address" rows="2" class="form-input">{{ $user->memberProfile->kin_address }}</textarea>
+                <textarea name="kin_address" rows="2" class="form-input">{{ $user->memberProfile->kin_address ?? '' }}</textarea>
               </div>
             </div>
             <div class="flex justify-end">
@@ -349,11 +342,6 @@
               </button>
             </div>
           </form>
-          @else
-          <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl text-yellow-700 dark:text-yellow-300 text-sm">
-            <i class="fa-solid fa-info-circle mr-2"></i> This member has not completed the registration process. Next of kin information is not available.
-          </div>
-          @endif
         </div>
 
         <!-- Tab 6: Banking & Mobile Money -->
@@ -361,22 +349,21 @@
           <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
             <i class="fa-solid fa-building-columns text-primary-500 text-xs"></i> Banking & Mobile Money
           </h3>
-          @if($user->memberProfile)
           <form id="bankingInfoForm" @submit.prevent="saveBankingInfo" class="space-y-5">
             @csrf
             @method('PUT')
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Bank Name</label>
-                <input type="text" name="bank_name" value="{{ $user->memberProfile->bank_name }}" class="form-input">
+                <input type="text" name="bank_name" value="{{ $user->memberProfile->bank_name ?? '' }}" class="form-input">
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Bank Account Number</label>
-                <input type="text" name="bank_account_number" value="{{ $user->memberProfile->bank_account_number }}" class="form-input font-mono">
+                <input type="text" name="bank_account_number" value="{{ $user->memberProfile->bank_account_number ?? '' }}" class="form-input font-mono">
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Account Name</label>
-                <input type="text" name="account_name" value="{{ $user->memberProfile->account_name }}" class="form-input">
+                <input type="text" name="account_name" value="{{ $user->memberProfile->account_name ?? '' }}" class="form-input">
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Mobile Money Network</label>
@@ -390,7 +377,7 @@
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Mobile Wallet Number</label>
-                <input type="text" name="mobile_wallet_number" value="{{ $user->memberProfile->mobile_wallet_number }}" class="form-input font-mono">
+                <input type="text" name="mobile_wallet_number" value="{{ $user->memberProfile->mobile_wallet_number ?? '' }}" class="form-input font-mono">
               </div>
             </div>
             <div class="flex justify-end">
@@ -399,11 +386,6 @@
               </button>
             </div>
           </form>
-          @else
-          <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl text-yellow-700 dark:text-yellow-300 text-sm">
-            <i class="fa-solid fa-info-circle mr-2"></i> This member has not completed the registration process. Banking information is not available.
-          </div>
-          @endif
         </div>
 
         <!-- Tab 7: Documents -->
@@ -411,7 +393,6 @@
           <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
             <i class="fa-solid fa-file text-primary-500 text-xs"></i> Documents
           </h3>
-          @if($user->memberProfile)
           <form id="documentsInfoForm" @submit.prevent="saveDocumentsInfo" class="space-y-5">
             @csrf
             @method('PUT')
@@ -419,21 +400,21 @@
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Passport Photo</label>
                 <input type="file" name="passport_photo" accept="image/*" class="form-input">
-                @if($user->memberProfile->passport_photo)
+                @if($user->memberProfile && $user->memberProfile->passport_photo)
                   <p class="mt-2 text-xs text-primary-600 dark:text-primary-400">Current: {{ $user->memberProfile->passport_photo }}</p>
                 @endif
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">National ID Copy</label>
                 <input type="file" name="national_id_copy" class="form-input">
-                @if($user->memberProfile->national_id_copy)
+                @if($user->memberProfile && $user->memberProfile->national_id_copy)
                   <p class="mt-2 text-xs text-primary-600 dark:text-primary-400">Current: {{ $user->memberProfile->national_id_copy }}</p>
                 @endif
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Signature</label>
                 <input type="file" name="signature" accept="image/*" class="form-input">
-                @if($user->memberProfile->signature)
+                @if($user->memberProfile && $user->memberProfile->signature)
                   <p class="mt-2 text-xs text-primary-600 dark:text-primary-400">Current: {{ $user->memberProfile->signature }}</p>
                 @endif
               </div>
@@ -444,11 +425,6 @@
               </button>
             </div>
           </form>
-          @else
-          <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl text-yellow-700 dark:text-yellow-300 text-sm">
-            <i class="fa-solid fa-info-circle mr-2"></i> This member has not completed the registration process. Documents are not available.
-          </div>
-          @endif
         </div>
 
         <!-- Tab 8: Additional Information -->
@@ -456,14 +432,13 @@
           <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
             <i class="fa-solid fa-note-sticky text-primary-500 text-xs"></i> Additional Information
           </h3>
-          @if($user->memberProfile)
           <form id="additionalInfoForm" @submit.prevent="saveAdditionalInfo" class="space-y-5">
             @csrf
             @method('PUT')
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div class="md:col-span-2">
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Notes</label>
-                <textarea name="notes" rows="4" class="form-input">{{ $user->memberProfile->notes }}</textarea>
+                <textarea name="notes" rows="4" class="form-input">{{ $user->memberProfile->notes ?? '' }}</textarea>
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Tags (comma separated)</label>
@@ -476,11 +451,6 @@
               </button>
             </div>
           </form>
-          @else
-          <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl text-yellow-700 dark:text-yellow-300 text-sm">
-            <i class="fa-solid fa-info-circle mr-2"></i> This member has not completed the registration process. Additional information is not available.
-          </div>
-          @endif
         </div>
       </div>
     </div>
