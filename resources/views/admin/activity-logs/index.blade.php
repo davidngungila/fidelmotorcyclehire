@@ -157,16 +157,7 @@
                 </td>
 
                 <td class="pt-3 text-right">
-                  <button @click="viewDetails($event)"
-                          :data-log-id="{{ $log->id }}"
-                          :data-created-at="{{ $log->created_at ? $log->created_at->format('d M Y H:i:s') : '-' }}"
-                          :data-user-name="{{ addslashes($userName) }}"
-                          :data-user-email="{{ addslashes($userEmail) }}"
-                          :data-description="{{ addslashes($log->description) }}"
-                          :data-subject="{{ addslashes($subjectLabel) }}"
-                          :data-ip-address="{{ addslashes($log->ip_address ?? '-') }}"
-                          :data-user-agent="{{ addslashes($log->user_agent ?? '-') }}"
-                          :data-properties="{{ json_encode($propertiesJson) }}"
+                  <button @click="viewDetails({{ $log->id }}, '{{ $log->created_at ? $log->created_at->format('d M Y H:i:s') : '-' }}', '{{ addslashes($userName) }}', '{{ addslashes($userEmail) }}', '{{ addslashes($log->description) }}', '{{ addslashes($subjectLabel) }}', '{{ addslashes($log->ip_address ?? '-') }}', '{{ addslashes($log->user_agent ?? '-') }}', {{ json_encode($propertiesJson) }})"
                           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-50 hover:bg-primary-100 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-[11px] font-bold transition-colors">
                     <i class="fa-solid fa-eye text-[10px]"></i> View Details
                   </button>
@@ -267,17 +258,16 @@
         params.delete('page');
         window.location.href = window.location.pathname + '?' + params.toString();
       },
-      viewDetails(event) {
-        const button = event.target.closest('button');
+      viewDetails(id, createdAt, userName, userEmail, description, subject, ipAddress, userAgent, properties) {
         const logData = {
-          created_at: button.dataset.createdAt,
-          user_name: button.dataset.userName,
-          user_email: button.dataset.userEmail,
-          description: button.dataset.description,
-          subject: button.dataset.subject,
-          ip_address: button.dataset.ipAddress,
-          user_agent: button.dataset.userAgent,
-          properties: button.dataset.properties && button.dataset.properties !== '' ? button.dataset.properties : null
+          created_at: createdAt,
+          user_name: userName,
+          user_email: userEmail,
+          description: description,
+          subject: subject,
+          ip_address: ipAddress,
+          user_agent: userAgent,
+          properties: properties && properties !== '' ? properties : null
         };
 
         let htmlContent = `
