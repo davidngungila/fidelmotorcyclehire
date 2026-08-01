@@ -466,6 +466,17 @@ function loanCreateForm() {
         principalAmountInput.min = minAmount;
         principalAmountInput.max = maxAmount;
         
+        // Set term months min and max
+        const minTerm = selectedOption.getAttribute('data-min-term');
+        const maxTerm = selectedOption.getAttribute('data-max-term');
+        const termInput = document.getElementById('term_months');
+        
+        if (termInput.value === '' || parseInt(termInput.value) < parseInt(minTerm)) {
+          termInput.value = minTerm;
+        }
+        termInput.min = minTerm;
+        termInput.max = maxTerm;
+        
         // Update loan summary and calculate
         this.updateLoanSummary();
       } else {
@@ -474,6 +485,8 @@ function loanCreateForm() {
         document.getElementById('principal_amount').value = '';
         document.getElementById('principal_amount').min = 0;
         document.getElementById('principal_amount').max = '';
+        document.getElementById('term_months').min = 0;
+        document.getElementById('term_months').max = '';
         
         this.loanSummary.productName = 'Not selected';
         this.repaymentSummary = {
@@ -717,7 +730,20 @@ document.addEventListener('DOMContentLoaded', function() {
       principalInput.addEventListener('input', () => data.updateLoanSummary());
     }
     if (termInput) {
-      termInput.addEventListener('input', () => data.updateLoanSummary());
+      termInput.addEventListener('input', () => {
+        // Validate term is within min/max range
+        const min = parseInt(termInput.min) || 0;
+        const max = parseInt(termInput.max) || 999;
+        let value = parseInt(termInput.value);
+        
+        if (value < min) {
+          termInput.value = min;
+        } else if (value > max) {
+          termInput.value = max;
+        }
+        
+        data.updateLoanSummary();
+      });
     }
     if (frequencySelect) {
       frequencySelect.addEventListener('change', () => data.updateLoanSummary());
