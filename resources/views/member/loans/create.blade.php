@@ -260,64 +260,76 @@
       </div>
     </div>
 
-    <!-- Progress Sidebar -->
+    <!-- Loan Details Summary Sidebar -->
     <div class="lg:col-span-1">
       <div class="glass p-5 rounded-2xl sticky top-6">
-        <h3 class="font-bold text-primary-900 dark:text-white text-sm mb-4">Application Progress</h3>
-        <div class="space-y-4">
-          <div class="flex items-center gap-3">
-            <div :class="currentTab >= 1 ? 'bg-primary-600' : 'bg-primary-200 dark:bg-primary-800'" class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold transition-colors flex-shrink-0">1</div>
-            <div class="flex-1">
-              <p :class="currentTab >= 1 ? 'text-primary-900 dark:text-white font-semibold' : 'text-primary-500'" class="text-sm transition-colors">Basic Info</p>
-              <p class="text-[10px] text-primary-400">Personal & employment details</p>
+        <h3 class="font-bold text-primary-900 dark:text-white text-sm mb-4">Loan Summary</h3>
+        
+        <!-- Product Info -->
+        <div class="mb-4 p-3 rounded-xl bg-primary-50 dark:bg-primary-900/20">
+          <p class="text-[10px] text-primary-500 uppercase tracking-wider mb-1">Selected Product</p>
+          <p class="text-sm font-bold text-primary-900 dark:text-white" x-text="loanSummary.productName || 'Not selected'"></p>
+        </div>
+        
+        <!-- Loan Amount -->
+        <div class="mb-4">
+          <p class="text-[10px] text-primary-500 uppercase tracking-wider mb-1">Loan Amount</p>
+          <p class="text-lg font-bold text-primary-900 dark:text-white" x-text="'TSh ' + formatNumber(loanSummary.principalAmount)"></p>
+        </div>
+        
+        <!-- Interest Rate -->
+        <div class="mb-4">
+          <p class="text-[10px] text-primary-500 uppercase tracking-wider mb-1">Interest Rate</p>
+          <p class="text-lg font-bold text-primary-900 dark:text-white" x-text="loanSummary.interestRate + '%'"></p>
+        </div>
+        
+        <!-- Term -->
+        <div class="mb-4">
+          <p class="text-[10px] text-primary-500 uppercase tracking-wider mb-1">Loan Term</p>
+          <p class="text-lg font-bold text-primary-900 dark:text-white" x-text="loanSummary.termMonths + ' months'"></p>
+        </div>
+        
+        <!-- Repayment Summary -->
+        <div class="p-4 rounded-xl bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-900/20 border border-primary-200 dark:border-primary-800 mb-4">
+          <h4 class="font-bold text-primary-900 dark:text-white text-xs mb-3">Repayment Breakdown</h4>
+          <div class="space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="text-xs text-primary-600 dark:text-primary-400">Monthly Payment</span>
+              <span class="text-sm font-bold text-primary-900 dark:text-white" x-text="'TSh ' + formatNumber(repaymentSummary.monthlyPayment)"></span>
             </div>
-          </div>
-          <div class="flex items-center gap-3">
-            <div :class="currentTab >= 2 ? 'bg-primary-600' : 'bg-primary-200 dark:bg-primary-800'" class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold transition-colors flex-shrink-0">2</div>
-            <div class="flex-1">
-              <p :class="currentTab >= 2 ? 'text-primary-900 dark:text-white font-semibold' : 'text-primary-500'" class="text-sm transition-colors">Loan Details</p>
-              <p class="text-[10px] text-primary-400">Amount, interest & term</p>
+            <div class="flex justify-between items-center">
+              <span class="text-xs text-primary-600 dark:text-primary-400">Total Interest</span>
+              <span class="text-sm font-bold text-primary-900 dark:text-white" x-text="'TSh ' + formatNumber(repaymentSummary.totalInterest)"></span>
             </div>
-          </div>
-          <div class="flex items-center gap-3">
-            <div :class="currentTab >= 3 ? 'bg-primary-600' : 'bg-primary-200 dark:bg-primary-800'" class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold transition-colors flex-shrink-0">3</div>
-            <div class="flex-1">
-              <p :class="currentTab >= 3 ? 'text-primary-900 dark:text-white font-semibold' : 'text-primary-500'" class="text-sm transition-colors">Collateral</p>
-              <p class="text-[10px] text-primary-400">Security & guarantor info</p>
+            <div class="flex justify-between items-center">
+              <span class="text-xs text-primary-600 dark:text-primary-400">Total Repayment</span>
+              <span class="text-sm font-bold text-primary-900 dark:text-white" x-text="'TSh ' + formatNumber(repaymentSummary.totalRepayment)"></span>
             </div>
-          </div>
-          <div class="flex items-center gap-3">
-            <div :class="currentTab >= 4 ? 'bg-primary-600' : 'bg-primary-200 dark:bg-primary-800'" class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold transition-colors flex-shrink-0">4</div>
-            <div class="flex-1">
-              <p :class="currentTab >= 4 ? 'text-primary-900 dark:text-white font-semibold' : 'text-primary-500'" class="text-sm transition-colors">Additional</p>
-              <p class="text-[10px] text-primary-400">Notes & final review</p>
+            <div class="pt-2 border-t border-primary-200 dark:border-primary-800">
+              <div class="flex justify-between items-center">
+                <span class="text-xs text-primary-600 dark:text-primary-400">Debt-to-Income</span>
+                <span class="text-sm font-bold" :class="repaymentSummary.debtToIncome <= 40 ? 'text-green-600' : 'text-red-600'" x-text="repaymentSummary.debtToIncome + '%'"></span>
+              </div>
             </div>
           </div>
         </div>
-        <div class="mt-6 pt-4 border-t border-primary-100 dark:border-primary-900/50">
-          <div class="flex items-center justify-between text-xs text-primary-600 dark:text-primary-400 mb-2">
-            <span>Completion</span>
-            <span x-text="progress + '%'"></span>
-          </div>
-          <div class="w-full bg-primary-100 dark:bg-primary-900/40 rounded-full h-3">
-            <div :style="'width: ' + progress + '%'" class="bg-primary-600 h-3 rounded-full transition-all duration-300"></div>
-          </div>
-          <div class="mt-3 grid grid-cols-2 gap-2 text-[10px]">
-            <div class="p-2 rounded-lg bg-primary-50 dark:bg-primary-900/20">
-              <p class="text-primary-500">Steps Completed</p>
-              <p class="font-bold text-primary-900 dark:text-white" x-text="currentTab + ' / 4'"></p>
-            </div>
-            <div class="p-2 rounded-lg bg-primary-50 dark:bg-primary-900/20">
-              <p class="text-primary-500">Est. Time</p>
-              <p class="font-bold text-primary-900 dark:text-white">~5 min</p>
-            </div>
-          </div>
+        
+        <!-- Repayment Frequency -->
+        <div class="mb-4">
+          <p class="text-[10px] text-primary-500 uppercase tracking-wider mb-1">Repayment Frequency</p>
+          <p class="text-sm font-bold text-primary-900 dark:text-white" x-text="loanSummary.repaymentFrequency || 'Monthly'"></p>
+        </div>
+        
+        <!-- Preferred Date -->
+        <div class="mb-4">
+          <p class="text-[10px] text-primary-500 uppercase tracking-wider mb-1">Preferred Repayment Date</p>
+          <p class="text-sm font-bold text-primary-900 dark:text-white" x-text="loanSummary.preferredDate || 'Not selected'"></p>
         </div>
       </div>
       
       <!-- Repayment Schedule Preview -->
       <div x-show="repaymentSchedule.length > 0" class="glass p-5 rounded-2xl sticky top-72 mt-4">
-        <h3 class="font-bold text-primary-900 dark:text-white text-sm mb-4">Repayment Schedule Preview</h3>
+        <h3 class="font-bold text-primary-900 dark:text-white text-sm mb-4">Repayment Schedule</h3>
         <div class="max-h-64 overflow-y-auto">
           <table class="w-full text-xs">
             <thead class="sticky top-0 bg-white dark:bg-gray-800">
@@ -360,6 +372,14 @@ function loanCreateForm() {
     isSaving: false,
     isSubmitting: false,
     loanData: {},
+    loanSummary: {
+      productName: '',
+      principalAmount: 0,
+      interestRate: 0,
+      termMonths: 0,
+      repaymentFrequency: 'Monthly',
+      preferredDate: ''
+    },
     repaymentSummary: {
       monthlyPayment: 0,
       totalInterest: 0,
@@ -372,11 +392,39 @@ function loanCreateForm() {
       return parseFloat(num).toLocaleString('en-TZ', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     },
     
+    updateLoanSummary() {
+      // Get product name
+      const productSelect = document.getElementById('loan_product_id');
+      const selectedOption = productSelect.options[productSelect.selectedIndex];
+      this.loanSummary.productName = selectedOption && selectedOption.value ? selectedOption.text : 'Not selected';
+      
+      // Get loan details
+      this.loanSummary.principalAmount = parseFloat(document.getElementById('principal_amount')?.value) || 0;
+      this.loanSummary.interestRate = parseFloat(document.getElementById('interest_rate')?.value) || 0;
+      this.loanSummary.termMonths = parseInt(document.getElementById('term_months')?.value) || 0;
+      
+      // Get repayment frequency
+      const frequencySelect = document.querySelector('select[name="repayment_frequency"]');
+      this.loanSummary.repaymentFrequency = frequencySelect ? frequencySelect.options[frequencySelect.selectedIndex].text : 'Monthly';
+      
+      // Get preferred date
+      const dateSelect = document.querySelector('select[name="preferred_repayment_date"]');
+      this.loanSummary.preferredDate = dateSelect ? dateSelect.options[dateSelect.selectedIndex].text : 'Not selected';
+      
+      // Trigger repayment calculation
+      this.calculateRepayment();
+    },
+    
     calculateRepayment() {
       const principal = parseFloat(document.getElementById('principal_amount')?.value) || 0;
       const interestRate = parseFloat(document.getElementById('interest_rate')?.value) || 0;
       const termMonths = parseInt(document.getElementById('term_months')?.value) || 0;
       const monthlyIncome = parseFloat(this.loanData.monthly_income) || 0;
+      
+      // Update loan summary
+      this.loanSummary.principalAmount = principal;
+      this.loanSummary.interestRate = interestRate;
+      this.loanSummary.termMonths = termMonths;
       
       if (principal > 0 && interestRate > 0 && termMonths > 0) {
         // Calculate monthly payment using amortization formula
@@ -450,7 +498,8 @@ function loanCreateForm() {
         principalAmountInput.min = minAmount;
         principalAmountInput.max = maxAmount;
         
-        this.calculateRepayment();
+        // Update loan summary and calculate
+        this.updateLoanSummary();
       } else {
         document.getElementById('interest_rate').value = '';
         document.getElementById('term_months').value = '';
@@ -458,6 +507,7 @@ function loanCreateForm() {
         document.getElementById('principal_amount').min = 0;
         document.getElementById('principal_amount').max = '';
         
+        this.loanSummary.productName = 'Not selected';
         this.repaymentSummary = {
           monthlyPayment: 0,
           totalInterest: 0,
@@ -488,7 +538,7 @@ function loanCreateForm() {
         if (data.success) {
           this.loanData = { ...this.loanData, ...data.loan_data };
           this.progress = 50;
-          this.calculateRepayment();
+          this.updateLoanSummary();
           Swal.fire({
             icon: 'success',
             title: 'Saved!',
@@ -680,11 +730,37 @@ function loanCreateForm() {
   };
 }
 
-// Auto-fill on page load
+// Auto-fill on page load and add event listeners
 document.addEventListener('DOMContentLoaded', function() {
   const form = document.querySelector('[x-data]');
   if (form && form.__x) {
-    form.__x.$data.updateLoanDetails();
+    const data = form.__x.$data;
+    
+    // Initial update
+    data.updateLoanDetails();
+    
+    // Add event listeners for real-time updates
+    const principalInput = document.getElementById('principal_amount');
+    const interestInput = document.getElementById('interest_rate');
+    const termInput = document.getElementById('term_months');
+    const frequencySelect = document.querySelector('select[name="repayment_frequency"]');
+    const dateSelect = document.querySelector('select[name="preferred_repayment_date"]');
+    
+    if (principalInput) {
+      principalInput.addEventListener('input', () => data.updateLoanSummary());
+    }
+    if (interestInput) {
+      interestInput.addEventListener('input', () => data.updateLoanSummary());
+    }
+    if (termInput) {
+      termInput.addEventListener('input', () => data.updateLoanSummary());
+    }
+    if (frequencySelect) {
+      frequencySelect.addEventListener('change', () => data.updateLoanSummary());
+    }
+    if (dateSelect) {
+      dateSelect.addEventListener('change', () => data.updateLoanSummary());
+    }
   }
 });
 </script>
