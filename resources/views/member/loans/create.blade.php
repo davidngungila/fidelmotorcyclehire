@@ -137,7 +137,7 @@
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Interest Rate (%) *</label>
-                <input type="number" name="interest_rate" id="interest_rate" value="{{ old('interest_rate') }}" required min="0" max="100" step="0.01" placeholder="Auto-filled from product" class="form-input" @input="calculateRepayment">
+                <input type="number" name="interest_rate" id="interest_rate" value="{{ old('interest_rate') }}" required min="0" max="100" step="0.01" placeholder="Auto-filled from product" class="form-input" readonly>
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Term (Months) *</label>
@@ -709,16 +709,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Add event listeners for real-time updates
     const principalInput = document.getElementById('principal_amount');
-    const interestInput = document.getElementById('interest_rate');
     const termInput = document.getElementById('term_months');
     const frequencySelect = document.querySelector('select[name="repayment_frequency"]');
     const dateSelect = document.querySelector('select[name="preferred_repayment_date"]');
     
     if (principalInput) {
       principalInput.addEventListener('input', () => data.updateLoanSummary());
-    }
-    if (interestInput) {
-      interestInput.addEventListener('input', () => data.updateLoanSummary());
     }
     if (termInput) {
       termInput.addEventListener('input', () => data.updateLoanSummary());
