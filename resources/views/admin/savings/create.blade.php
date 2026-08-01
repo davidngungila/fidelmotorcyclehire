@@ -38,6 +38,21 @@
       @enderror
     </div>
 
+    <div>
+      <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Saving Plan (Optional)</label>
+      <select name="saving_plan_id" class="form-input py-2.5 px-4">
+        <option value="">No saving plan</option>
+        @foreach($savingPlans as $plan)
+          <option value="{{ $plan->id }}" data-member="{{ $plan->member_number }}">
+            {{ $plan->name }} - {{ $plan->user ? $plan->user->name : 'Unknown' }} ({{ $plan->member_number }})
+          </option>
+        @endforeach
+      </select>
+      @error('saving_plan_id')
+        <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
+      @enderror
+    </div>
+
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div>
         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Amount (TSh)</label>

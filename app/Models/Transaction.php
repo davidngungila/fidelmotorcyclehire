@@ -12,6 +12,7 @@ class Transaction extends Model
         'transaction_type',
         'reference_no',
         'amount',
+        'saving_plan_id',
     ];
 
     protected $casts = [
@@ -56,5 +57,10 @@ class Transaction extends Model
             })
             ->sortByDesc('date')
             ->values();
+    }
+
+    public function savingPlan()
+    {
+        return $this->belongsTo(SavingPlan::class);
     }
 }

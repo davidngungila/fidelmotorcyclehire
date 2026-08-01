@@ -133,8 +133,9 @@ class SavingController extends Controller
         Gate::authorize('admin-only');
         
         $members = User::where('role', 'member')->get();
+        $savingPlans = \App\Models\SavingPlan::with('user')->where('status', 'active')->get();
         
-        return view('admin.savings.create', compact('members'));
+        return view('admin.savings.create', compact('members', 'savingPlans'));
     }
 
     public function store(Request $request)
@@ -147,7 +148,16 @@ class SavingController extends Controller
             'amount' => 'required|numeric|min:0',
             'date' => 'required|date',
             'reference_no' => 'nullable|string|max:255',
+            'saving_plan_id' => 'nullable|exists:saving_plans,id',
         ]);
+
+        // Validate that saving plan belongs to the selected member
+        if (!empty($validated['saving_plan_id'])) {
+            $savingPlan = \App\Models\SavingPlan::find($validated['saving_plan_id']);
+            if ($savingPlan && $savingPlan->member_number !== $validated['member_number']) {
+                return back()->with('error', 'The selected saving plan does not belong to this member.');
+            }
+        }
 
         try {
             $transaction = Transaction::create([
@@ -156,6 +166,7 @@ class SavingController extends Controller
                 'transaction_type' => $validated['transaction_type'],
                 'amount' => $validated['amount'],
                 'reference_no' => $validated['reference_no'] ?? null,
+                'saving_plan_id' => $validated['saving_plan_id'] ?? null,
             ]);
 
             ActivityLog::create([
@@ -169,6 +180,7 @@ class SavingController extends Controller
                     'member_number' => $validated['member_number'],
                     'transaction_type' => $validated['transaction_type'],
                     'amount' => $validated['amount'],
+                    'saving_plan_id' => $validated['saving_plan_id'] ?? null,
                 ],
             ]);
 
