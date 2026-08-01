@@ -28,6 +28,7 @@ use App\Http\Controllers\Member\DashboardController as MemberDashboardController
 use App\Http\Controllers\Member\ProfileController as MemberProfileController;
 use App\Http\Controllers\Member\LoanController as MemberLoanController;
 use App\Http\Controllers\Member\SavingController as MemberSavingController;
+use App\Http\Controllers\Member\ErrorController as MemberErrorController;
 use App\Http\Controllers\Member\DepositController as MemberDepositController;
 use App\Http\Controllers\Member\SwfController as MemberSwfController;
 use App\Http\Controllers\Member\InvestmentController as MemberInvestmentController;
@@ -265,13 +266,19 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
 
 Route::prefix('member')->middleware(['auth', 'role:member', 'member.isolation'])->name('member.')->group(function () {
     Route::get('/dashboard', [MemberDashboardController::class, 'index'])->name('dashboard');
-    Route::get('/error', function () {
-        return view('member.error', [
-            'title' => session('error_title') ?? 'Something went wrong',
-            'message' => session('error_message') ?? 'An error occurred while processing your request. Please try again later.',
-            'details' => session('error_details') ?? null,
-        ]);
-    })->name('error');
+    
+    // Error routes
+    Route::get('/error', [MemberErrorController::class, 'show'])->name('error');
+    Route::get('/error/http/{code}', [MemberErrorController::class, 'http'])->name('error.http');
+    Route::get('/error/authentication/{key}', [MemberErrorController::class, 'authentication'])->name('error.authentication');
+    Route::get('/error/authorization/{key}', [MemberErrorController::class, 'authorization'])->name('error.authorization');
+    Route::get('/error/validation/{key}', [MemberErrorController::class, 'validation'])->name('error.validation');
+    Route::get('/error/file-upload/{key}', [MemberErrorController::class, 'fileUpload'])->name('error.file-upload');
+    Route::get('/error/database/{key}', [MemberErrorController::class, 'database'])->name('error.database');
+    Route::get('/error/payment/{key}', [MemberErrorController::class, 'payment'])->name('error.payment');
+    Route::get('/error/network/{key}', [MemberErrorController::class, 'network'])->name('error.network');
+    Route::get('/error/system/{key}', [MemberErrorController::class, 'system'])->name('error.system');
+    
     Route::get('/profile', [MemberProfileController::class, 'index'])->name('profile.index');
     Route::get('/profile/show', [MemberProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/edit', [MemberProfileController::class, 'edit'])->name('profile.edit');

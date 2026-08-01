@@ -7,9 +7,15 @@
 
 <div class="flex items-center justify-center min-h-[60vh]">
   <div class="text-center max-w-lg">
-    <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
-      <i class="fa-solid fa-triangle-exclamation text-4xl text-red-500"></i>
+    <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-{{ $color ?? 'red' }}-100 dark:bg-{{ $color ?? 'red' }}-900/20 flex items-center justify-center">
+      <i class="fa-solid {{ $icon ?? 'fa-triangle-exclamation' }} text-4xl text-{{ $color ?? 'red' }}-500"></i>
     </div>
+    
+    @if(isset($code))
+      <div class="inline-block px-4 py-2 rounded-full bg-{{ $color ?? 'red' }}-100 dark:bg-{{ $color ?? 'red' }}-900/20 mb-4">
+        <span class="text-lg font-bold text-{{ $color ?? 'red' }}-600 dark:text-{{ $color ?? 'red' }}-400">{{ $code }}</span>
+      </div>
+    @endif
     
     <h1 class="text-3xl lg:text-4xl font-bold text-primary-900 dark:text-white mb-4">
       {{ $title ?? 'Something went wrong' }}
