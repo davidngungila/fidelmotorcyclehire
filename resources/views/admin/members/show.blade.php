@@ -108,6 +108,9 @@
             </div>
           </div>
           <div class="flex items-center gap-2">
+            <button type="button" onclick="previewMembershipCertificate()" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/40 dark:hover:bg-purple-900/60 text-purple-700 dark:text-purple-300 text-xs font-bold transition-colors">
+              <i class="fa-solid fa-certificate text-[11px]"></i> Certificate
+            </button>
             <a href="tel:{{ $memberPhone }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/40 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-300 text-xs font-bold transition-colors">
               <i class="fa-solid fa-phone text-[11px]"></i> Call
             </a>
@@ -772,6 +775,28 @@
   </div>
 </div>
 
+<!-- Membership Certificate Preview Modal -->
+<div id="membershipCertificateModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+  <div class="bg-white dark:bg-dark-card rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-auto">
+    <div class="p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Membership Certificate Preview</h3>
+        <button onclick="closeMembershipModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+          <i class="fa-solid fa-times text-xl"></i>
+        </button>
+      </div>
+      <div class="flex gap-3 mb-4">
+        <button onclick="printMembershipCertificate()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-sm font-semibold transition-all">
+          <i class="fa-solid fa-print"></i> Print
+        </button>
+      </div>
+      <div id="membershipCertificatePreview" class="border border-gray-200 dark:border-gray-700 rounded-lg p-8">
+        <!-- Certificate content will be loaded here -->
+      </div>
+    </div>
+  </div>
+</div>
+
 @endsection
 
 @push('scripts')
@@ -802,6 +827,149 @@
         }
       }
     };
+  }
+
+  // Membership Certificate Functions
+  @php
+  $settings = \Illuminate\Support\Facades\Cache::get('share_settings', []);
+  $certificateBackgroundPath = $settings['certificate_background'] ?? '';
+  $certificateBackgroundUrl = $certificateBackgroundPath ? asset('storage/' . $certificateBackgroundPath) : '';
+  @endphp
+
+  const memberData = {
+    member_number: '{{ $memberNo }}',
+    member_name: '{{ $memberName }}',
+    registration_date: '{{ $memberRegDate }}',
+    branch: '{{ $memberBranch }}',
+    status: '{{ $memberStatus ?? 'Active' }}'
+  };
+
+  const certificateBackgroundUrl = '{{ $certificateBackgroundUrl }}';
+
+  function previewMembershipCertificate() {
+    const modal = document.getElementById('membershipCertificateModal');
+    const preview = document.getElementById('membershipCertificatePreview');
+    
+    let backgroundStyle = '';
+    if (certificateBackgroundUrl) {
+      backgroundStyle = `background-image: url('${certificateBackgroundUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat;`;
+    }
+    
+    preview.innerHTML = `
+      <div style="${backgroundStyle} min-height: 500px; padding: 40px; position: relative;">
+        <div style="background: rgba(255, 255, 255, 0.95); padding: 40px; border-radius: 10px; position: relative; z-index: 1;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="font-size: 28px; font-weight: bold; color: #1e40af; margin-bottom: 10px; font-family: 'Times New Roman', serif;">Certificate of Membership</h1>
+            <p style="color: #6b7280; font-size: 14px;">FEED TAN CMG SACCO</p>
+          </div>
+          
+          <div style="text-align: center; margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 8px;">
+            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">This is to certify that</p>
+            <h2 style="font-size: 24px; font-weight: bold; color: #1e40af; margin: 10px 0; font-family: 'Georgia', serif;">${memberData.member_name}</h2>
+            <p style="color: #6b7280; font-size: 14px;">is a registered member of</p>
+            <h3 style="font-size: 18px; font-weight: bold; color: #0369a1; margin-top: 10px;">FEED TAN CMG SACCO</h3>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+            <div>
+              <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Membership Number:</p>
+              <p style="font-weight: 600; color: #1f2937; font-size: 16px;">${memberData.member_number}</p>
+            </div>
+            <div>
+              <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Registration Date:</p>
+              <p style="font-weight: 600; color: #1f2937; font-size: 16px;">${memberData.registration_date}</p>
+            </div>
+            <div>
+              <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Branch:</p>
+              <p style="font-weight: 600; color: #1f2937; font-size: 16px;">${memberData.branch}</p>
+            </div>
+            <div>
+              <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Status:</p>
+              <p style="font-weight: 600; color: #1f2937; font-size: 16px;">${memberData.status}</p>
+            </div>
+          </div>
+          
+          <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid #e5e7eb;">
+            <p style="color: #6b7280; font-size: 12px; margin-bottom: 5px;">This certificate confirms the membership status and entitles the holder to all rights and privileges of membership.</p>
+            <p style="color: #9ca3af; font-size: 10px; margin-top: 10px;">Issued by FEED TAN CMG SACCO • ${new Date().toLocaleDateString()}</p>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  function closeMembershipModal() {
+    const modal = document.getElementById('membershipCertificateModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
+  function printMembershipCertificate() {
+    let backgroundStyle = '';
+    if (certificateBackgroundUrl) {
+      backgroundStyle = `background-image: url('${certificateBackgroundUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat;`;
+    }
+    
+    const printContent = `
+      <div style="${backgroundStyle} min-height: 500px; padding: 40px; position: relative;">
+        <div style="background: rgba(255, 255, 255, 0.95); padding: 40px; border-radius: 10px; position: relative; z-index: 1;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="font-size: 28px; font-weight: bold; color: #1e40af; margin-bottom: 10px; font-family: 'Times New Roman', serif;">Certificate of Membership</h1>
+            <p style="color: #6b7280; font-size: 14px;">FEED TAN CMG SACCO</p>
+          </div>
+          
+          <div style="text-align: center; margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 8px;">
+            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">This is to certify that</p>
+            <h2 style="font-size: 24px; font-weight: bold; color: #1e40af; margin: 10px 0; font-family: 'Georgia', serif;">${memberData.member_name}</h2>
+            <p style="color: #6b7280; font-size: 14px;">is a registered member of</p>
+            <h3 style="font-size: 18px; font-weight: bold; color: #0369a1; margin-top: 10px;">FEED TAN CMG SACCO</h3>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+            <div>
+              <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Membership Number:</p>
+              <p style="font-weight: 600; color: #1f2937; font-size: 16px;">${memberData.member_number}</p>
+            </div>
+            <div>
+              <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Registration Date:</p>
+              <p style="font-weight: 600; color: #1f2937; font-size: 16px;">${memberData.registration_date}</p>
+            </div>
+            <div>
+              <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Branch:</p>
+              <p style="font-weight: 600; color: #1f2937; font-size: 16px;">${memberData.branch}</p>
+            </div>
+            <div>
+              <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Status:</p>
+              <p style="font-weight: 600; color: #1f2937; font-size: 16px;">${memberData.status}</p>
+            </div>
+          </div>
+          
+          <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid #e5e7eb;">
+            <p style="color: #6b7280; font-size: 12px; margin-bottom: 5px;">This certificate confirms the membership status and entitles the holder to all rights and privileges of membership.</p>
+            <p style="color: #9ca3af; font-size: 10px; margin-top: 10px;">Issued by FEED TAN CMG SACCO • ${new Date().toLocaleDateString()}</p>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Membership Certificate - ${memberData.member_number}</title>
+          <style>
+            body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+            @media print { body { margin: 0; } }
+          </style>
+        </head>
+        <body>${printContent}</body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
   }
 </script>
 @endpush
