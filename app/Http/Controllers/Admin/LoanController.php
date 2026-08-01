@@ -7,13 +7,16 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\Loan;
+use App\Models\SmsSettings;
 use App\Services\AdminDashboardService;
 use App\Services\EncryptedIdService;
 use App\Services\MemberService;
+use App\Services\SmsService;
 use App\Traits\FlashMessages;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
 
 class LoanController extends Controller
@@ -578,6 +581,9 @@ class LoanController extends Controller
             'balance' => $validated['total_amount_due'],
         ]);
 
+        // Send SMS notification if enabled
+        $this->sendDisbursementSms($loan, $validated);
+
         ActivityLog::create([
             'user_id' => Auth::id(),
             'description' => 'Admin disbursed loan: ' . $loan->loan_number,
@@ -588,6 +594,78 @@ class LoanController extends Controller
         $this->success('Loan disbursed successfully.');
 
         return redirect()->back();
+    }
+
+    private function sendDisbursementSms(Loan $loan, array $disbursementData)
+    {
+        // Check if SMS notifications are enabled in settings
+        $settings = Cache::get('admin_settings', []);
+        $smsNotificationsEnabled = $settings['sms_notifications'] ?? false;
+        
+        // Also check if SMS service is active
+        $smsSettings = SmsSettings::first();
+        if (!$smsSettings || !$smsSettings->is_active) {
+            return;
+        }
+
+        if (!$smsNotificationsEnabled) {
+            return;
+        }
+
+        // Check if member has a phone number
+        $memberPhone = $loan->user->phone ?? null;
+        if (empty($memberPhone)) {
+            return;
+        }
+
+        $smsService = new SmsService();
+        
+        // Format phone number (ensure it starts with country code if needed)
+        $phone = $this->formatPhoneNumber($memberPhone);
+        
+        // Create SMS message
+        $message = $this->createDisbursementSmsMessage($loan, $disbursementData);
+        
+        // Send SMS
+        try {
+            $smsService->sendSingle($phone, $message);
+        } catch (\Exception $e) {
+            // Log error but don't fail the disbursement process
+            \Log::error('Failed to send disbursement SMS', [
+                'loan_number' => $loan->loan_number,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    private function formatPhoneNumber(string $phone): string
+    {
+        // Remove any non-numeric characters
+        $phone = preg_replace('/[^0-9]/', '', $phone);
+        
+        // If number starts with 0, replace with Tanzania country code
+        if (str_starts_with($phone, '0')) {
+            $phone = '255' . substr($phone, 1);
+        }
+        
+        // If number doesn't start with country code, add it
+        if (!str_starts_with($phone, '255')) {
+            $phone = '255' . $phone;
+        }
+        
+        return $phone;
+    }
+
+    private function createDisbursementSmsMessage(Loan $loan, array $disbursementData): string
+    {
+        $memberName = $loan->user->name ?? 'Dear Member';
+        $loanNumber = $loan->loan_number;
+        $amount = number_format($loan->principal_amount, 2);
+        $disbursementDate = $disbursementData['disbursement_date']->format('d/m/Y');
+        $maturityDate = $disbursementData['maturity_date']->format('d/m/Y');
+        $monthlyPayment = number_format($disbursementData['monthly_payment'], 2);
+        
+        return "Dear {$memberName}, Your loan {$loanNumber} of TSh {$amount} has been successfully disbursed on {$disbursementDate}. Monthly payment: TSh {$monthlyPayment}. Maturity date: {$maturityDate}. Start making repayments from next month. Thank you, FEEDTAN DIGITAL.";
     }
 
     public function recordPayment(Request $request, string $encryptedLoanNumber)
