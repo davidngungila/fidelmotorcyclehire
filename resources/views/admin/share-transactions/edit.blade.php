@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
-@section('breadcrumb', 'System › Share Transactions › Edit')
-@section('page_title', 'Edit Share Transaction')
+@section('breadcrumb', 'System › Share Transactions › #' . $shareTransaction->id . ' › Edit')
+@section('page_title', 'Edit Share Transaction #' . $shareTransaction->id)
 
 @section('content')
 <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-primary-100 dark:border-primary-800 p-8">

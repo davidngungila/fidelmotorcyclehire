@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
-@section('breadcrumb', 'System › Share Dividends › Details')
-@section('page_title', 'Share Dividend Details')
+@section('breadcrumb', 'System › Share Dividends › ' . $shareDividend->id)
+@section('page_title', 'Share Dividend #' . $shareDividend->id)
 
 @section('content')
 

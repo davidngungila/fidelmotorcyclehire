@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
-@section('breadcrumb', 'System › Share Dividends › Edit')
-@section('page_title', 'Edit Share Dividend')
+@section('breadcrumb', 'System › Share Dividends › #' . $shareDividend->id . ' › Edit')
+@section('page_title', 'Edit Share Dividend #' . $shareDividend->id)
 
 @section('content')
 <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-primary-100 dark:border-primary-800 p-8">

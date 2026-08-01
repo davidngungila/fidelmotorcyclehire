@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
-@section('breadcrumb', 'System › Share Purchases › Details')
-@section('page_title', 'Share Purchase Details')
+@section('breadcrumb', 'System › Share Purchases › ' . $sharePurchase->id)
+@section('page_title', 'Share Purchase #' . $sharePurchase->id)
 
 @section('content')
 

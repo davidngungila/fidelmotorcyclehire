@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
-@section('breadcrumb', 'System › Share Transfers › Details')
-@section('page_title', 'Share Transfer Details')
+@section('breadcrumb', 'System › Share Transfers › ' . $shareTransfer->id)
+@section('page_title', 'Share Transfer #' . $shareTransfer->id)
 
 @section('content')
 

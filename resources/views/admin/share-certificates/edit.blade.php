@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
-@section('breadcrumb', 'System › Share Certificates › Edit')
-@section('page_title', 'Edit Share Certificate')
+@section('breadcrumb', 'System › Share Certificates › ' . $shareCertificate->certificate_number . ' › Edit')
+@section('page_title', 'Edit Share Certificate: ' . $shareCertificate->certificate_number)
 
 @section('content')
 <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-primary-100 dark:border-primary-800 p-8">

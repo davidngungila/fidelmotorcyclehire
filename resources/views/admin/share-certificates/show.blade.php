@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
-@section('breadcrumb', 'System › Share Certificates › Details')
-@section('page_title', 'Share Certificate Details')
+@section('breadcrumb', 'System › Share Certificates › ' . $shareCertificate->certificate_number)
+@section('page_title', 'Share Certificate: ' . $shareCertificate->certificate_number)
 
 @section('content')
 
