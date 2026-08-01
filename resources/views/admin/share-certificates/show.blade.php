@@ -88,8 +88,8 @@
       <div class="space-y-2">
         @foreach($shareCertificate->shareTransfers as $transfer)
         <div class="flex items-center justify-between p-3 bg-primary-800/30 rounded-lg">
-          <span class="text-sm text-white">{{ $transfer->fromUser->name }} → {{ $transfer->toUser->name }}</span>
-          <span class="text-sm text-primary-300">{{ $transfer->transfer_date->format('M d, Y') }}</span>
+          <span class="text-sm text-white">{{ $transfer->fromUser->name ?? 'N/A' }} → {{ $transfer->toUser->name ?? 'N/A' }}</span>
+          <span class="text-sm text-primary-300">{{ $transfer->transfer_date ? $transfer->transfer_date->format('M d, Y') : 'N/A' }}</span>
         </div>
         @endforeach
       </div>
@@ -103,7 +103,7 @@
         @foreach($shareCertificate->shareDividends as $dividend)
         <div class="flex items-center justify-between p-3 bg-primary-800/30 rounded-lg">
           <span class="text-sm text-white">{{ number_format($dividend->total_dividend, 2) }}</span>
-          <span class="text-sm text-primary-300">{{ $dividend->declaration_date->format('M d, Y') }}</span>
+          <span class="text-sm text-primary-300">{{ $dividend->declaration_date ? $dividend->declaration_date->format('M d, Y') : 'N/A' }}</span>
         </div>
         @endforeach
       </div>
