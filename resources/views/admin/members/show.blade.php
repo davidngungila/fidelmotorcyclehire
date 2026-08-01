@@ -863,9 +863,9 @@
             <p style="color: #1f2937; font-size: 14px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">FEED TAN CMG SACCO</p>
           </div>
           
-          <div style="text-align: center; margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.4); border-radius: 8px; backdrop-filter: blur(2px);">
+          <div style="text-align: center; margin-bottom: 0; padding: 20px; background: rgba(255, 255, 255, 0.4); border-radius: 8px; backdrop-filter: blur(2px);">
             <p style="color: #1f2937; font-size: 14px; margin-bottom: 5px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">This is to certify that</p>
-            <h2 style="font-size: 24px; font-weight: bold; color: #1e40af; margin: 10px 0; font-family: 'Georgia', serif; text-shadow: 2px 2px 4px rgba(255,255,255,0.8);">${memberData.member_name}</h2>
+            <h2 style="font-size: 28px; font-weight: bold; color: #1e40af; margin: 10px 0; font-family: 'Brush Script MT', 'Great Vibes', cursive; text-shadow: 2px 2px 4px rgba(255,255,255,0.8);">${memberData.member_name}</h2>
             <p style="color: #1f2937; font-size: 14px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">is a registered member of</p>
             <h3 style="font-size: 18px; font-weight: bold; color: #0369a1; margin-top: 10px; text-shadow: 2px 2px 4px rgba(255,255,255,0.8);">FEED TAN CMG SACCO</h3>
           </div>
@@ -911,9 +911,9 @@
             <p style="color: #1f2937; font-size: 14px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">FEED TAN CMG SACCO</p>
           </div>
           
-          <div style="text-align: center; margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.4); border-radius: 8px; backdrop-filter: blur(2px);">
+          <div style="text-align: center; margin-bottom: 0; padding: 20px; background: rgba(255, 255, 255, 0.4); border-radius: 8px; backdrop-filter: blur(2px);">
             <p style="color: #1f2937; font-size: 14px; margin-bottom: 5px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">This is to certify that</p>
-            <h2 style="font-size: 24px; font-weight: bold; color: #1e40af; margin: 10px 0; font-family: 'Georgia', serif; text-shadow: 2px 2px 4px rgba(255,255,255,0.8);">${memberData.member_name}</h2>
+            <h2 style="font-size: 28px; font-weight: bold; color: #1e40af; margin: 10px 0; font-family: 'Brush Script MT', 'Great Vibes', cursive; text-shadow: 2px 2px 4px rgba(255,255,255,0.8);">${memberData.member_name}</h2>
             <p style="color: #1f2937; font-size: 14px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">is a registered member of</p>
             <h3 style="font-size: 18px; font-weight: bold; color: #0369a1; margin-top: 10px; text-shadow: 2px 2px 4px rgba(255,255,255,0.8);">FEED TAN CMG SACCO</h3>
           </div>
