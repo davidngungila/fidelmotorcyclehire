@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Traits\FlashMessages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class SavingPlanController extends Controller
 {
@@ -41,21 +42,57 @@ class SavingPlanController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'user_id' => 'required|exists:users,id',
-            'monthly_goal' => 'required|numeric|min:0',
             'goal' => 'required|numeric|min:0',
-            'target_date' => 'nullable|date',
+            'period_type' => 'required|in:daily,weekly,monthly',
+            'period_value' => 'required|integer|min:1',
+            'start_date' => 'required|date',
             'status' => 'nullable|string|in:active,completed,paused',
         ]);
 
         $user = User::findOrFail($validated['user_id']);
         
+        // Calculate periodic amount
+        $periodicAmount = $validated['goal'] / $validated['period_value'];
+        
+        // Calculate target date based on period type and value
+        $startDate = Carbon::parse($validated['start_date']);
+        $targetDate = match($validated['period_type']) {
+            'daily' => $startDate->copy()->addDays($validated['period_value']),
+            'weekly' => $startDate->copy()->addWeeks($validated['period_value']),
+            'monthly' => $startDate->copy()->addMonths($validated['period_value']),
+        };
+        
+        // Generate payment schedule
+        $paymentSchedule = [];
+        $currentDate = $startDate->copy();
+        
+        for ($i = 1; $i <= $validated['period_value']; $i++) {
+            $paymentSchedule[] = [
+                'period_number' => $i,
+                'due_date' => $currentDate->format('Y-m-d'),
+                'amount' => round($periodicAmount, 2),
+                'status' => 'pending',
+            ];
+            
+            $currentDate = match($validated['period_type']) {
+                'daily' => $currentDate->addDay(),
+                'weekly' => $currentDate->addWeek(),
+                'monthly' => $currentDate->addMonth(),
+            };
+        }
+        
         SavingPlan::create([
             'name' => $validated['name'],
+            'user_id' => $validated['user_id'],
             'member_number' => $user->member_number,
-            'membership' => 'individual', // Default to individual
-            'monthly_goal' => $validated['monthly_goal'],
+            'membership' => 'individual',
             'goal' => $validated['goal'],
-            'target_date' => $validated['target_date'] ?? null,
+            'period_type' => $validated['period_type'],
+            'period_value' => $validated['period_value'],
+            'start_date' => $validated['start_date'],
+            'target_date' => $targetDate,
+            'periodic_amount' => $periodicAmount,
+            'payment_schedule' => $paymentSchedule,
             'status' => $validated['status'] ?? 'active',
         ]);
 
@@ -74,21 +111,57 @@ class SavingPlanController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'user_id' => 'required|exists:users,id',
-            'monthly_goal' => 'required|numeric|min:0',
             'goal' => 'required|numeric|min:0',
-            'target_date' => 'nullable|date',
+            'period_type' => 'required|in:daily,weekly,monthly',
+            'period_value' => 'required|integer|min:1',
+            'start_date' => 'required|date',
             'status' => 'nullable|string|in:active,completed,paused',
         ]);
 
         $user = User::findOrFail($validated['user_id']);
         
+        // Recalculate periodic amount
+        $periodicAmount = $validated['goal'] / $validated['period_value'];
+        
+        // Recalculate target date
+        $startDate = Carbon::parse($validated['start_date']);
+        $targetDate = match($validated['period_type']) {
+            'daily' => $startDate->copy()->addDays($validated['period_value']),
+            'weekly' => $startDate->copy()->addWeeks($validated['period_value']),
+            'monthly' => $startDate->copy()->addMonths($validated['period_value']),
+        };
+        
+        // Regenerate payment schedule
+        $paymentSchedule = [];
+        $currentDate = $startDate->copy();
+        
+        for ($i = 1; $i <= $validated['period_value']; $i++) {
+            $paymentSchedule[] = [
+                'period_number' => $i,
+                'due_date' => $currentDate->format('Y-m-d'),
+                'amount' => round($periodicAmount, 2),
+                'status' => 'pending',
+            ];
+            
+            $currentDate = match($validated['period_type']) {
+                'daily' => $currentDate->addDay(),
+                'weekly' => $currentDate->addWeek(),
+                'monthly' => $currentDate->addMonth(),
+            };
+        }
+        
         $savingPlan->update([
             'name' => $validated['name'],
+            'user_id' => $validated['user_id'],
             'member_number' => $user->member_number,
             'membership' => 'individual',
-            'monthly_goal' => $validated['monthly_goal'],
             'goal' => $validated['goal'],
-            'target_date' => $validated['target_date'] ?? null,
+            'period_type' => $validated['period_type'],
+            'period_value' => $validated['period_value'],
+            'start_date' => $validated['start_date'],
+            'target_date' => $targetDate,
+            'periodic_amount' => $periodicAmount,
+            'payment_schedule' => $paymentSchedule,
             'status' => $validated['status'] ?? 'active',
         ]);
 

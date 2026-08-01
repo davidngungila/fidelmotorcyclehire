@@ -8,18 +8,25 @@ class SavingPlan extends Model
 {
     protected $fillable = [
         'name',
+        'user_id',
         'member_number',
         'membership',
-        'monthly_goal',
         'goal',
+        'period_type', // 'daily', 'weekly', 'monthly'
+        'period_value', // number of periods (e.g., 12 months, 52 weeks)
+        'start_date',
         'target_date',
+        'periodic_amount', // calculated amount to save each period
+        'payment_schedule', // JSON array of scheduled payments
         'status',
     ];
 
     protected $casts = [
-        'monthly_goal' => 'decimal:2',
         'goal' => 'decimal:2',
+        'periodic_amount' => 'decimal:2',
+        'start_date' => 'date',
         'target_date' => 'date',
+        'payment_schedule' => 'array',
     ];
 
     public function scopeByMemberNumber($query, $memberNumber)
@@ -35,5 +42,10 @@ class SavingPlan extends Model
     public function scopeByMemberId($query, $memberId)
     {
         return $query->where('member_number', $memberId);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }
