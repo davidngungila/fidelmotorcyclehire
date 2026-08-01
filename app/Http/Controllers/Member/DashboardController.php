@@ -36,7 +36,9 @@ class DashboardController extends Controller
         $member = $user; // Use user object directly since we're not using Google Sheets
         
         // Use database loans instead of Google Sheets
-        $dbLoans = \App\Models\Loan::where('member_number', $memberNumber)->active()->get();
+        $dbLoans = \App\Models\Loan::where('member_number', $memberNumber)
+            ->whereIn('status', ['active', 'approved', 'disbursed'])
+            ->get();
         
         // Convert database loans to the format expected
         $loans = $dbLoans->map(function ($loan) {
@@ -159,7 +161,8 @@ class DashboardController extends Controller
 
         // Filter active loans for dashboard display
         $activeLoans = array_filter($loans, function(array $loan): bool {
-            return strtolower($loan['status'] ?? '') === 'active';
+            $status = strtolower($loan['status'] ?? '');
+            return in_array($status, ['active', 'approved', 'disbursed']);
         });
 
         $recentTransactions = $this->consolidateRecentTransactions($loans, $savings, $deposits, $swf, $investments);
