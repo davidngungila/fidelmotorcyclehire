@@ -175,38 +175,37 @@
           <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
             <i class="fa-solid fa-address-book text-primary-500 text-xs"></i> Contact Information
           </h3>
-          @if($user->memberProfile)
           <form id="contactInfoForm" @submit.prevent="saveContactInfo" class="space-y-5">
             @csrf
             @method('PUT')
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Phone Number</label>
-                <input type="text" name="phone_number" value="{{ $user->memberProfile->phone_number }}" class="form-input">
+                <input type="text" name="phone_number" value="{{ $user->memberProfile->phone_number ?? '' }}" class="form-input">
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Alternative Phone</label>
-                <input type="text" name="alternative_phone" value="{{ $user->memberProfile->alternative_phone }}" class="form-input">
+                <input type="text" name="alternative_phone" value="{{ $user->memberProfile->alternative_phone ?? '' }}" class="form-input">
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Region</label>
-                <input type="text" name="region" value="{{ $user->memberProfile->region }}" class="form-input">
+                <input type="text" name="region" value="{{ $user->memberProfile->region ?? '' }}" class="form-input">
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">District</label>
-                <input type="text" name="district" value="{{ $user->memberProfile->district }}" class="form-input">
+                <input type="text" name="district" value="{{ $user->memberProfile->district ?? '' }}" class="form-input">
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Ward</label>
-                <input type="text" name="ward" value="{{ $user->memberProfile->ward }}" class="form-input">
+                <input type="text" name="ward" value="{{ $user->memberProfile->ward ?? '' }}" class="form-input">
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Street/Village</label>
-                <input type="text" name="street_village" value="{{ $user->memberProfile->street_village }}" class="form-input">
+                <input type="text" name="street_village" value="{{ $user->memberProfile->street_village ?? '' }}" class="form-input">
               </div>
               <div class="md:col-span-2">
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Physical Address</label>
-                <textarea name="physical_address" rows="2" class="form-input">{{ $user->memberProfile->physical_address }}</textarea>
+                <textarea name="physical_address" rows="2" class="form-input">{{ $user->memberProfile->physical_address ?? '' }}</textarea>
               </div>
             </div>
             <div class="flex justify-end">
@@ -216,11 +215,6 @@
               </button>
             </div>
           </form>
-          @else
-          <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl text-yellow-700 dark:text-yellow-300 text-sm">
-            <i class="fa-solid fa-info-circle mr-2"></i> This member has not completed the registration process. Contact information is not available.
-          </div>
-          @endif
         </div>
 
         <!-- Tab 3: Membership Details -->

@@ -568,7 +568,19 @@ class UserController extends Controller
                 return $value !== '' && $value !== null;
             });
             
-            $profile = MemberProfile::where('user_id', $id)->firstOrFail();
+            $profile = MemberProfile::where('user_id', $id)->first();
+            
+            // Create profile if it doesn't exist
+            if (!$profile) {
+                $user = User::findOrFail($id);
+                $profile = MemberProfile::create([
+                    'user_id' => $id,
+                    'first_name' => '',
+                    'middle_name' => '',
+                    'last_name' => '',
+                    'status' => 'pending',
+                ]);
+            }
             
             $profileUpdateData = [];
             
@@ -593,7 +605,7 @@ class UserController extends Controller
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Member profile not found.'
+                'message' => 'User not found.'
             ], 404);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
