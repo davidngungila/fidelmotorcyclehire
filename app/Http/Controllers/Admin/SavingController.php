@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Contracts\GoogleSheetRepositoryInterface;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\Transaction;
+use App\Models\User;
 use App\Services\AdminDashboardService;
 use App\Services\EncryptedIdService;
 use App\Services\MemberService;
@@ -14,13 +15,13 @@ use App\Traits\FlashMessages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\View\View;
 
 class SavingController extends Controller
 {
     use FlashMessages;
 
     public function __construct(
-        protected GoogleSheetRepositoryInterface $googleSheetRepository,
         protected MemberService $memberService,
         protected AdminDashboardService $dashboardService,
         protected EncryptedIdService $encryptedIdService,
@@ -29,41 +30,53 @@ class SavingController extends Controller
 
     public function index(Request $request)
     {
+        Gate::authorize('admin-only');
+
         $perPage = (int) $request->input('per_page', 15);
         $sortColumn = $request->input('sort', 'member_number');
         $sortDirection = $request->input('sort_direction', 'asc');
         $searchQuery = $request->input('q', '');
 
-        $allMembers = $this->googleSheetRepository->getAllMembers();
-
+        // Get all members with their transactions from database
+        $users = User::where('role', 'member')->get();
+        
         $savingsList = [];
-        foreach ($allMembers as $member) {
-            $memberNo = $member['member_number'] ?? ($member['MemberNumber'] ?? null);
+        foreach ($users as $user) {
+            $memberNo = $user->member_number;
             if (! $memberNo) {
                 continue;
             }
-            $savings = $this->googleSheetRepository->getMemberSavings($memberNo);
-
-            $balance = (float) ($savings['balance'] ?? 0);
-            $interestEarned = (float) ($savings['interest_earned'] ?? 0);
-            $runningBalance = (float) ($savings['running_balance'] ?? ($balance + $interestEarned));
-            $transactions = $savings['transactions'] ?? [];
-
-            $lastTransaction = null;
-            if (! empty($transactions)) {
-                $lastTransaction = $transactions[0]['date'] ?? null;
+            
+            $transactions = Transaction::byMemberCode($memberNo)->orderBy('date', 'desc')->get();
+            
+            // Calculate balance from transactions
+            $balance = 0;
+            $interestEarned = 0;
+            foreach ($transactions as $txn) {
+                $type = strtolower($txn->transaction_type);
+                if (in_array($type, ['deposit', 'flexi-deposit', 'rda-deposit', 'opening balance', 'interest'])) {
+                    $balance += (float) $txn->amount;
+                    if ($type === 'interest') {
+                        $interestEarned += (float) $txn->amount;
+                    }
+                } elseif (in_array($type, ['withdrawal', 'withdrawal'])) {
+                    $balance -= (float) $txn->amount;
+                }
             }
+            
+            $runningBalance = $balance + $interestEarned;
+            $lastTransaction = $transactions->first() ? $transactions->first()->date->format('Y-m-d') : '-';
 
             $savingsList[] = [
                 'member_number' => $memberNo,
-                'member_name' => $member['name'] ?? ($member['Name'] ?? 'Unknown'),
-                'member_status' => $member['status'] ?? 'Active',
-                'member_branch' => $member['branch'] ?? ($member['Branch'] ?? '-'),
+                'member_name' => $user->name,
+                'member_status' => $user->status ?? 'Active',
+                'member_branch' => $user->branch ?? '-',
                 'balance' => $balance,
                 'interest_earned' => $interestEarned,
                 'running_balance' => $runningBalance,
-                'last_transaction' => $lastTransaction ?? '-',
-                'transactions_count' => count($transactions),
+                'last_transaction' => $lastTransaction,
+                'transactions_count' => $transactions->count(),
             ];
         }
 
@@ -115,26 +128,90 @@ class SavingController extends Controller
         ]);
     }
 
+    public function create()
+    {
+        Gate::authorize('admin-only');
+        
+        $members = User::where('role', 'member')->get();
+        
+        return view('admin.savings.create', compact('members'));
+    }
+
+    public function store(Request $request)
+    {
+        Gate::authorize('admin-only');
+
+        $validated = $request->validate([
+            'member_number' => 'required|string|exists:users,member_number',
+            'transaction_type' => 'required|string|in:deposit,withdrawal,interest,flexi-deposit,rda-deposit,opening balance',
+            'amount' => 'required|numeric|min:0',
+            'date' => 'required|date',
+            'reference_no' => 'nullable|string|max:255',
+        ]);
+
+        try {
+            $transaction = Transaction::create([
+                'date' => $validated['date'],
+                'membercode' => $validated['member_number'],
+                'transaction_type' => $validated['transaction_type'],
+                'amount' => $validated['amount'],
+                'reference_no' => $validated['reference_no'] ?? null,
+            ]);
+
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'subject_type' => 'transaction',
+                'subject_id' => $transaction->id,
+                'description' => "Admin added transaction for member {$validated['member_number']}",
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'properties' => [
+                    'member_number' => $validated['member_number'],
+                    'transaction_type' => $validated['transaction_type'],
+                    'amount' => $validated['amount'],
+                ],
+            ]);
+
+            $this->success('Transaction added successfully!');
+            return redirect()->route('admin.savings.index');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to add transaction: ' . $e->getMessage());
+        }
+    }
+
     public function show(Request $request, string $encryptedMemberNumber)
     {
         $memberNumber = $this->encryptedIdService->decrypt($encryptedMemberNumber);
         
         Gate::authorize('admin-only');
 
-        $member = $this->googleSheetRepository->getMemberByNumber($memberNumber);
+        $user = User::where('member_number', $memberNumber)->first();
 
-        if (! $member) {
+        if (! $user) {
             $this->error("Member {$memberNumber} not found.");
-
             return redirect()->route('admin.savings.index');
         }
 
-        $savings = $this->googleSheetRepository->getMemberSavings($memberNumber);
+        $transactions = Transaction::byMemberCode($memberNumber)
+            ->orderBy('date', 'desc')
+            ->get();
 
-        $balance = (float) ($savings['balance'] ?? 0);
-        $interestEarned = (float) ($savings['interest_earned'] ?? 0);
-        $runningBalance = (float) ($savings['running_balance'] ?? ($balance + $interestEarned));
-        $transactions = $savings['transactions'] ?? [];
+        // Calculate balance from transactions
+        $balance = 0;
+        $interestEarned = 0;
+        foreach ($transactions as $txn) {
+            $type = strtolower($txn->transaction_type);
+            if (in_array($type, ['deposit', 'flexi-deposit', 'rda-deposit', 'opening balance', 'interest'])) {
+                $balance += (float) $txn->amount;
+                if ($type === 'interest') {
+                    $interestEarned += (float) $txn->amount;
+                }
+            } elseif (in_array($type, ['withdrawal', 'withdrawal'])) {
+                $balance -= (float) $txn->amount;
+            }
+        }
+
+        $runningBalance = $balance + $interestEarned;
 
         ActivityLog::create([
             'user_id' => Auth::id(),
@@ -144,16 +221,15 @@ class SavingController extends Controller
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
             'properties' => [
-                'member_name' => $member['name'] ?? null,
+                'member_name' => $user->name,
                 'balance' => $balance,
-                'transactions_count' => count($transactions),
+                'transactions_count' => $transactions->count(),
             ],
         ]);
 
         return view('admin.savings.show', [
-            'member' => $member,
+            'member' => $user,
             'memberNumber' => $memberNumber,
-            'savings' => $savings,
             'balance' => $balance,
             'interestEarned' => $interestEarned,
             'runningBalance' => $runningBalance,

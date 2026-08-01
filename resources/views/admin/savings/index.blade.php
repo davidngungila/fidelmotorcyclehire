@@ -28,6 +28,10 @@
         @endif
       </div>
     </form>
+    <a href="{{ route('admin.savings.create') }}"
+       class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-xs font-bold transition-all shadow-sm hover:shadow-md">
+      <i class="fa-solid fa-plus text-[11px]"></i> Add Transaction
+    </a>
   </div>
 
   <div class="glass p-5">

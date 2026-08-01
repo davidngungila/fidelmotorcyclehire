@@ -19,29 +19,17 @@
       @enderror
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div>
-        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Member Number</label>
-        <input type="text" name="member_number" required
-               placeholder="Enter member number"
-               class="form-input py-2.5 px-4">
-        @error('member_number')
-          <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
-        @enderror
-      </div>
-
-      <div>
-        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Membership</label>
-        <select name="membership" required class="form-input py-2.5 px-4">
-          <option value="">Select membership type</option>
-          <option value="individual">Individual</option>
-          <option value="corporate">Corporate</option>
-          <option value="group">Group</option>
-        </select>
-        @error('membership')
-          <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
-        @enderror
-      </div>
+    <div>
+      <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Member</label>
+      <select name="user_id" required class="form-input py-2.5 px-4">
+        <option value="">Select a member</option>
+        @foreach($members as $member)
+          <option value="{{ $member->id }}">{{ $member->name }} ({{ $member->member_number }})</option>
+        @endforeach
+      </select>
+      @error('user_id')
+        <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
+      @enderror
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

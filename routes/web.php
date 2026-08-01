@@ -120,6 +120,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::delete('/loan-products/{encryptedId}', [AdminLoanProductController::class, 'destroy'])->name('loan-products.destroy');
 
     Route::get('/savings', [AdminSavingController::class, 'index'])->name('savings.index');
+    Route::get('/savings/create', [AdminSavingController::class, 'create'])->name('savings.create');
+    Route::post('/savings', [AdminSavingController::class, 'store'])->name('savings.store');
     Route::get('/savings/{encryptedMemberNumber}', [AdminSavingController::class, 'show'])->name('savings.show');
 
     Route::get('/products', [App\Http\Controllers\Admin\ProductController::class, 'index'])->name('products.index');
