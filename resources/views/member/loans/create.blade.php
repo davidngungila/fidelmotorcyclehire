@@ -326,38 +326,6 @@
           <p class="text-sm font-bold text-primary-900 dark:text-white" x-text="loanSummary.preferredDate || 'Not selected'"></p>
         </div>
       </div>
-      
-      <!-- Repayment Schedule Preview -->
-      <div x-show="repaymentSchedule.length > 0" class="glass p-5 rounded-2xl sticky top-72 mt-4">
-        <h3 class="font-bold text-primary-900 dark:text-white text-sm mb-4">Repayment Schedule</h3>
-        <div class="max-h-64 overflow-y-auto">
-          <table class="w-full text-xs">
-            <thead class="sticky top-0 bg-white dark:bg-gray-800">
-              <tr class="text-left text-primary-500">
-                <th class="pb-2">#</th>
-                <th class="pb-2">Due Date</th>
-                <th class="pb-2">Payment</th>
-                <th class="pb-2">Balance</th>
-              </tr>
-            </thead>
-            <tbody>
-              <template x-for="(payment, index) in repaymentSchedule.slice(0, 6)" :key="index">
-                <tr class="border-b border-primary-100 dark:border-primary-800">
-                  <td class="py-2" x-text="payment.installment"></td>
-                  <td class="py-2" x-text="payment.dueDate"></td>
-                  <td class="py-2 font-bold" x-text="'TSh ' + formatNumber(payment.amount)"></td>
-                  <td class="py-2" x-text="'TSh ' + formatNumber(payment.balance)"></td>
-                </tr>
-              </template>
-              <tr x-show="repaymentSchedule.length > 6">
-                <td colspan="4" class="py-2 text-center text-primary-500">
-                  + <span x-text="repaymentSchedule.length - 6"></span> more payments
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
     </div>
   </div>
 </div>
