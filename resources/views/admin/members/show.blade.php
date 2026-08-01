@@ -857,21 +857,21 @@
     
     preview.innerHTML = `
       <div style="${backgroundStyle} min-height: 500px; padding: 40px; position: relative;">
-        <div style="background: rgba(255, 255, 255, 0.95); padding: 40px; border-radius: 10px; position: relative; z-index: 1;">
+        <div style="background: rgba(255, 255, 255, 0.3); padding: 40px; border-radius: 10px; position: relative; z-index: 1; backdrop-filter: blur(2px);">
           <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="font-size: 28px; font-weight: bold; color: #1e40af; margin-bottom: 10px; font-family: 'Times New Roman', serif;">Certificate of Membership</h1>
-            <p style="color: #6b7280; font-size: 14px;">FEED TAN CMG SACCO</p>
+            <h1 style="font-size: 28px; font-weight: bold; color: #1e40af; margin-bottom: 10px; font-family: 'Times New Roman', serif; text-shadow: 2px 2px 4px rgba(255,255,255,0.8);">Certificate of Membership</h1>
+            <p style="color: #1f2937; font-size: 14px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">FEED TAN CMG SACCO</p>
           </div>
           
-          <div style="text-align: center; margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 8px;">
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">This is to certify that</p>
-            <h2 style="font-size: 24px; font-weight: bold; color: #1e40af; margin: 10px 0; font-family: 'Georgia', serif;">${memberData.member_name}</h2>
-            <p style="color: #6b7280; font-size: 14px;">is a registered member of</p>
-            <h3 style="font-size: 18px; font-weight: bold; color: #0369a1; margin-top: 10px;">FEED TAN CMG SACCO</h3>
+          <div style="text-align: center; margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.4); border-radius: 8px; backdrop-filter: blur(2px);">
+            <p style="color: #1f2937; font-size: 14px; margin-bottom: 5px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">This is to certify that</p>
+            <h2 style="font-size: 24px; font-weight: bold; color: #1e40af; margin: 10px 0; font-family: 'Georgia', serif; text-shadow: 2px 2px 4px rgba(255,255,255,0.8);">${memberData.member_name}</h2>
+            <p style="color: #1f2937; font-size: 14px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">is a registered member of</p>
+            <h3 style="font-size: 18px; font-weight: bold; color: #0369a1; margin-top: 10px; text-shadow: 2px 2px 4px rgba(255,255,255,0.8);">FEED TAN CMG SACCO</h3>
           </div>
           
-          <div style="text-align: center; margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 8px;">
-            <p style="color: #1f2937; font-size: 16px; line-height: 1.6;">
+          <div style="text-align: center; margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.4); border-radius: 8px; backdrop-filter: blur(2px);">
+            <p style="color: #1f2937; font-size: 16px; line-height: 1.6; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">
               Membership Number: <strong>${memberData.member_number}</strong> • 
               Registration Date: <strong>${memberData.registration_date}</strong> • 
               Branch: <strong>${memberData.branch}</strong> • 
@@ -879,9 +879,9 @@
             </p>
           </div>
           
-          <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid #e5e7eb;">
-            <p style="color: #6b7280; font-size: 12px; margin-bottom: 5px;">This certificate confirms the membership status and entitles the holder to all rights and privileges of membership.</p>
-            <p style="color: #9ca3af; font-size: 10px; margin-top: 10px;">Issued by FEED TAN CMG SACCO • ${new Date().toLocaleDateString()}</p>
+          <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid rgba(255,255,255,0.5);">
+            <p style="color: #1f2937; font-size: 12px; margin-bottom: 5px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">This certificate confirms the membership status and entitles the holder to all rights and privileges of membership.</p>
+            <p style="color: #1f2937; font-size: 10px; margin-top: 10px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">Issued by FEED TAN CMG SACCO • ${new Date().toLocaleDateString()}</p>
           </div>
         </div>
       </div>
@@ -905,21 +905,21 @@
     
     const printContent = `
       <div style="${backgroundStyle} min-height: 500px; padding: 40px; position: relative;">
-        <div style="background: rgba(255, 255, 255, 0.95); padding: 40px; border-radius: 10px; position: relative; z-index: 1;">
+        <div style="background: rgba(255, 255, 255, 0.3); padding: 40px; border-radius: 10px; position: relative; z-index: 1; backdrop-filter: blur(2px);">
           <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="font-size: 28px; font-weight: bold; color: #1e40af; margin-bottom: 10px; font-family: 'Times New Roman', serif;">Certificate of Membership</h1>
-            <p style="color: #6b7280; font-size: 14px;">FEED TAN CMG SACCO</p>
+            <h1 style="font-size: 28px; font-weight: bold; color: #1e40af; margin-bottom: 10px; font-family: 'Times New Roman', serif; text-shadow: 2px 2px 4px rgba(255,255,255,0.8);">Certificate of Membership</h1>
+            <p style="color: #1f2937; font-size: 14px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">FEED TAN CMG SACCO</p>
           </div>
           
-          <div style="text-align: center; margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 8px;">
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">This is to certify that</p>
-            <h2 style="font-size: 24px; font-weight: bold; color: #1e40af; margin: 10px 0; font-family: 'Georgia', serif;">${memberData.member_name}</h2>
-            <p style="color: #6b7280; font-size: 14px;">is a registered member of</p>
-            <h3 style="font-size: 18px; font-weight: bold; color: #0369a1; margin-top: 10px;">FEED TAN CMG SACCO</h3>
+          <div style="text-align: center; margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.4); border-radius: 8px; backdrop-filter: blur(2px);">
+            <p style="color: #1f2937; font-size: 14px; margin-bottom: 5px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">This is to certify that</p>
+            <h2 style="font-size: 24px; font-weight: bold; color: #1e40af; margin: 10px 0; font-family: 'Georgia', serif; text-shadow: 2px 2px 4px rgba(255,255,255,0.8);">${memberData.member_name}</h2>
+            <p style="color: #1f2937; font-size: 14px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">is a registered member of</p>
+            <h3 style="font-size: 18px; font-weight: bold; color: #0369a1; margin-top: 10px; text-shadow: 2px 2px 4px rgba(255,255,255,0.8);">FEED TAN CMG SACCO</h3>
           </div>
           
-          <div style="text-align: center; margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 8px;">
-            <p style="color: #1f2937; font-size: 16px; line-height: 1.6;">
+          <div style="text-align: center; margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.4); border-radius: 8px; backdrop-filter: blur(2px);">
+            <p style="color: #1f2937; font-size: 16px; line-height: 1.6; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">
               Membership Number: <strong>${memberData.member_number}</strong> • 
               Registration Date: <strong>${memberData.registration_date}</strong> • 
               Branch: <strong>${memberData.branch}</strong> • 
@@ -927,9 +927,9 @@
             </p>
           </div>
           
-          <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid #e5e7eb;">
-            <p style="color: #6b7280; font-size: 12px; margin-bottom: 5px;">This certificate confirms the membership status and entitles the holder to all rights and privileges of membership.</p>
-            <p style="color: #9ca3af; font-size: 10px; margin-top: 10px;">Issued by FEED TAN CMG SACCO • ${new Date().toLocaleDateString()}</p>
+          <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid rgba(255,255,255,0.5);">
+            <p style="color: #1f2937; font-size: 12px; margin-bottom: 5px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">This certificate confirms the membership status and entitles the holder to all rights and privileges of membership.</p>
+            <p style="color: #1f2937; font-size: 10px; margin-top: 10px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">Issued by FEED TAN CMG SACCO • ${new Date().toLocaleDateString()}</p>
           </div>
         </div>
       </div>
