@@ -870,23 +870,13 @@
             <h3 style="font-size: 18px; font-weight: bold; color: #0369a1; margin-top: 10px;">FEED TAN CMG SACCO</h3>
           </div>
           
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
-            <div>
-              <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Membership Number:</p>
-              <p style="font-weight: 600; color: #1f2937; font-size: 16px;">${memberData.member_number}</p>
-            </div>
-            <div>
-              <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Registration Date:</p>
-              <p style="font-weight: 600; color: #1f2937; font-size: 16px;">${memberData.registration_date}</p>
-            </div>
-            <div>
-              <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Branch:</p>
-              <p style="font-weight: 600; color: #1f2937; font-size: 16px;">${memberData.branch}</p>
-            </div>
-            <div>
-              <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Status:</p>
-              <p style="font-weight: 600; color: #1f2937; font-size: 16px;">${memberData.status}</p>
-            </div>
+          <div style="text-align: center; margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 8px;">
+            <p style="color: #1f2937; font-size: 16px; line-height: 1.6;">
+              Membership Number: <strong>${memberData.member_number}</strong> • 
+              Registration Date: <strong>${memberData.registration_date}</strong> • 
+              Branch: <strong>${memberData.branch}</strong> • 
+              Status: <strong>${memberData.status}</strong>
+            </p>
           </div>
           
           <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid #e5e7eb;">
@@ -928,23 +918,13 @@
             <h3 style="font-size: 18px; font-weight: bold; color: #0369a1; margin-top: 10px;">FEED TAN CMG SACCO</h3>
           </div>
           
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
-            <div>
-              <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Membership Number:</p>
-              <p style="font-weight: 600; color: #1f2937; font-size: 16px;">${memberData.member_number}</p>
-            </div>
-            <div>
-              <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Registration Date:</p>
-              <p style="font-weight: 600; color: #1f2937; font-size: 16px;">${memberData.registration_date}</p>
-            </div>
-            <div>
-              <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Branch:</p>
-              <p style="font-weight: 600; color: #1f2937; font-size: 16px;">${memberData.branch}</p>
-            </div>
-            <div>
-              <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Status:</p>
-              <p style="font-weight: 600; color: #1f2937; font-size: 16px;">${memberData.status}</p>
-            </div>
+          <div style="text-align: center; margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 8px;">
+            <p style="color: #1f2937; font-size: 16px; line-height: 1.6;">
+              Membership Number: <strong>${memberData.member_number}</strong> • 
+              Registration Date: <strong>${memberData.registration_date}</strong> • 
+              Branch: <strong>${memberData.branch}</strong> • 
+              Status: <strong>${memberData.status}</strong>
+            </p>
           </div>
           
           <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid #e5e7eb;">
