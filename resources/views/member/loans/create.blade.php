@@ -47,7 +47,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div class="md:col-span-2">
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Loan Product</label>
-                <select name="loan_product_id" id="loan_product_id" class="form-input" onchange="updateLoanDetails()">
+                <select name="loan_product_id" id="loan_product_id" class="form-input" @change="updateLoanDetails()">
                   <option value="">Select a loan product (optional)</option>
                   @foreach(\App\Models\LoanProduct::active()->get() as $product)
                     <option value="{{ $product->id }}" 
