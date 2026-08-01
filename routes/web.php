@@ -154,6 +154,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::post('/transactions/import', [App\Http\Controllers\Admin\TransactionController::class, 'import'])->name('transactions.import');
 
     Route::get('/deposits', [AdminDepositController::class, 'index'])->name('deposits.index');
+    Route::get('/deposits/create', [AdminDepositController::class, 'create'])->name('deposits.create');
+    Route::post('/deposits', [AdminDepositController::class, 'store'])->name('deposits.store');
     Route::get('/deposits/{encryptedCertificateNumber}', [AdminDepositController::class, 'show'])->name('deposits.show');
 
     Route::prefix('swf')->name('swf.')->group(function () {
