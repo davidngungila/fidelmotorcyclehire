@@ -166,9 +166,9 @@ const certificateData = {
 @php
 $settings = \Illuminate\Support\Facades\Cache::get('share_settings', []);
 $certificateBackgroundPath = $settings['certificate_background'] ?? '';
+$certificateBackgroundUrl = $certificateBackgroundPath ? asset('storage/' . $certificateBackgroundPath) : '';
 @endphp
-const certificateBackgroundPath = '{{ $certificateBackgroundPath }}';
-const certificateBackgroundUrl = certificateBackgroundPath ? '{{ asset('storage/') }}' + certificateBackgroundPath : '';
+const certificateBackgroundUrl = '{{ $certificateBackgroundUrl }}';
 
 function previewCertificate() {
   const modal = document.getElementById('certificateModal');
