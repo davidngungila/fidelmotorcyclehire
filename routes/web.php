@@ -236,6 +236,81 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
 
     Route::get('/activity-logs', [AdminActivityLogController::class, 'index'])->name('activity-logs.index');
 
+    // Shares routes
+    Route::get('/share-products', [AdminShareProductController::class, 'index'])->name('share-products.index');
+    Route::get('/share-products/create', [AdminShareProductController::class, 'create'])->name('share-products.create');
+    Route::post('/share-products', [AdminShareProductController::class, 'store'])->name('share-products.store');
+    Route::get('/share-products/{id}/edit', [AdminShareProductController::class, 'edit'])->name('share-products.edit');
+    Route::put('/share-products/{id}', [AdminShareProductController::class, 'update'])->name('share-products.update');
+    Route::delete('/share-products/{id}', [AdminShareProductController::class, 'destroy'])->name('share-products.destroy');
+
+    Route::get('/share-purchases', [AdminSharePurchaseController::class, 'index'])->name('share-purchases.index');
+    Route::get('/share-purchases/create', [AdminSharePurchaseController::class, 'create'])->name('share-purchases.create');
+    Route::post('/share-purchases', [AdminSharePurchaseController::class, 'store'])->name('share-purchases.store');
+    Route::get('/share-purchases/{id}/edit', [AdminSharePurchaseController::class, 'edit'])->name('share-purchases.edit');
+    Route::put('/share-purchases/{id}', [AdminSharePurchaseController::class, 'update'])->name('share-purchases.update');
+    Route::delete('/share-purchases/{id}', [AdminSharePurchaseController::class, 'destroy'])->name('share-purchases.destroy');
+
+    Route::get('/share-certificates', [AdminShareCertificateController::class, 'index'])->name('share-certificates.index');
+    Route::get('/share-certificates/create', [AdminShareCertificateController::class, 'create'])->name('share-certificates.create');
+    Route::post('/share-certificates', [AdminShareCertificateController::class, 'store'])->name('share-certificates.store');
+    Route::get('/share-certificates/{id}/edit', [AdminShareCertificateController::class, 'edit'])->name('share-certificates.edit');
+    Route::put('/share-certificates/{id}', [AdminShareCertificateController::class, 'update'])->name('share-certificates.update');
+    Route::delete('/share-certificates/{id}', [AdminShareCertificateController::class, 'destroy'])->name('share-certificates.destroy');
+
+    Route::get('/share-transfers', [AdminShareTransferController::class, 'index'])->name('share-transfers.index');
+    Route::get('/share-transfers/create', [AdminShareTransferController::class, 'create'])->name('share-transfers.create');
+    Route::post('/share-transfers', [AdminShareTransferController::class, 'store'])->name('share-transfers.store');
+    Route::get('/share-transfers/{id}/edit', [AdminShareTransferController::class, 'edit'])->name('share-transfers.edit');
+    Route::put('/share-transfers/{id}', [AdminShareTransferController::class, 'update'])->name('share-transfers.update');
+    Route::delete('/share-transfers/{id}', [AdminShareTransferController::class, 'destroy'])->name('share-transfers.destroy');
+
+    Route::get('/share-dividends', [AdminShareDividendController::class, 'index'])->name('share-dividends.index');
+    Route::get('/share-dividends/create', [AdminShareDividendController::class, 'create'])->name('share-dividends.create');
+    Route::post('/share-dividends', [AdminShareDividendController::class, 'store'])->name('share-dividends.store');
+    Route::get('/share-dividends/{id}/edit', [AdminShareDividendController::class, 'edit'])->name('share-dividends.edit');
+    Route::put('/share-dividends/{id}', [AdminShareDividendController::class, 'update'])->name('share-dividends.update');
+    Route::delete('/share-dividends/{id}', [AdminShareDividendController::class, 'destroy'])->name('share-dividends.destroy');
+
+    Route::get('/share-transactions', [AdminShareTransactionController::class, 'index'])->name('share-transactions.index');
+    Route::get('/share-transactions/create', [AdminShareTransactionController::class, 'create'])->name('share-transactions.create');
+    Route::post('/share-transactions', [AdminShareTransactionController::class, 'store'])->name('share-transactions.store');
+    Route::get('/share-transactions/{id}/edit', [AdminShareTransactionController::class, 'edit'])->name('share-transactions.edit');
+    Route::put('/share-transactions/{id}', [AdminShareTransactionController::class, 'update'])->name('share-transactions.update');
+    Route::delete('/share-transactions/{id}', [AdminShareTransactionController::class, 'destroy'])->name('share-transactions.destroy');
+
+    Route::get('/share-reports', [AdminShareReportController::class, 'index'])->name('share-reports.index');
+
+    Route::get('/share-settings', [AdminShareSettingController::class, 'index'])->name('share-settings.index');
+    Route::put('/share-settings', [AdminShareSettingController::class, 'update'])->name('share-settings.update');
+
+    // Accounting routes
+    Route::get('/accounting/dashboard', [AdminAccountingController::class, 'dashboard'])->name('accounting.dashboard');
+    Route::get('/accounting/chart-of-accounts', [AdminAccountingController::class, 'chartOfAccounts'])->name('accounting.chart-of-accounts');
+    Route::get('/accounting/journal-entries', [AdminAccountingController::class, 'journalEntries'])->name('accounting.journal-entries');
+    Route::get('/accounting/general-ledger', [AdminAccountingController::class, 'generalLedger'])->name('accounting.general-ledger');
+    Route::get('/accounting/trial-balance', [AdminAccountingController::class, 'trialBalance'])->name('accounting.trial-balance');
+    Route::get('/accounting/balance-sheet', [AdminAccountingController::class, 'balanceSheet'])->name('accounting.balance-sheet');
+    Route::get('/accounting/income-statement', [AdminAccountingController::class, 'incomeStatement'])->name('accounting.income-statement');
+    Route::get('/accounting/cash-flow', [AdminAccountingController::class, 'cashFlow'])->name('accounting.cash-flow');
+    Route::get('/accounting/fixed-assets', [AdminAccountingController::class, 'fixedAssets'])->name('accounting.fixed-assets');
+    Route::get('/accounting/depreciation', [AdminAccountingController::class, 'depreciation'])->name('accounting.depreciation');
+    Route::get('/accounting/bank-accounts', [AdminAccountingController::class, 'bankAccounts'])->name('accounting.bank-accounts');
+    Route::get('/accounting/bank-reconciliation', [AdminAccountingController::class, 'bankReconciliation'])->name('accounting.bank-reconciliation');
+    Route::get('/accounting/receipts', [AdminAccountingController::class, 'receipts'])->name('accounting.receipts');
+    Route::get('/accounting/payments', [AdminAccountingController::class, 'payments'])->name('accounting.payments');
+    Route::get('/accounting/expenses', [AdminAccountingController::class, 'expenses'])->name('accounting.expenses');
+    Route::get('/accounting/revenue', [AdminAccountingController::class, 'revenue'])->name('accounting.revenue');
+    Route::get('/accounting/accounts-receivable', [AdminAccountingController::class, 'accountsReceivable'])->name('accounting.accounts-receivable');
+    Route::get('/accounting/accounts-payable', [AdminAccountingController::class, 'accountsPayable'])->name('accounting.accounts-payable');
+    Route::get('/accounting/budgets', [AdminAccountingController::class, 'budgets'])->name('accounting.budgets');
+    Route::get('/accounting/financial-periods', [AdminAccountingController::class, 'financialPeriods'])->name('accounting.financial-periods');
+    Route::get('/accounting/closing-entries', [AdminAccountingController::class, 'closingEntries'])->name('accounting.closing-entries');
+    Route::get('/accounting/tax-management', [AdminAccountingController::class, 'taxManagement'])->name('accounting.tax-management');
+    Route::get('/accounting/audit-trail', [AdminAccountingController::class, 'auditTrail'])->name('accounting.audit-trail');
+    Route::get('/accounting/financial-reports', [AdminAccountingController::class, 'financialReports'])->name('accounting.financial-reports');
+    Route::get('/accounting/settings', [AdminAccountingController::class, 'settings'])->name('accounting.settings');
+
     Route::get('/roles', [AdminRoleController::class, 'index'])->name('roles.index');
     Route::get('/roles/create', [AdminRoleController::class, 'create'])->name('roles.create');
     Route::post('/roles', [AdminRoleController::class, 'store'])->name('roles.store');
