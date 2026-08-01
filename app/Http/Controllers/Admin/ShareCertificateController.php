@@ -45,22 +45,28 @@ class ShareCertificateController extends Controller
             ->with('success', 'Share certificate created successfully.');
     }
 
-    public function show(ShareCertificate $shareCertificate)
+    public function show($encryptedId)
     {
-        $shareCertificate->load(['user', 'shareProduct', 'sharePurchase', 'shareTransfers', 'shareDividends']);
+        $id = decrypt($encryptedId);
+        $shareCertificate = ShareCertificate::with(['user', 'shareProduct', 'sharePurchase', 'shareTransfers', 'shareDividends'])->findOrFail($id);
         return view('admin.share-certificates.show', compact('shareCertificate'));
     }
 
-    public function edit(ShareCertificate $shareCertificate)
+    public function edit($encryptedId)
     {
+        $id = decrypt($encryptedId);
+        $shareCertificate = ShareCertificate::findOrFail($id);
         $users = User::where('role', 'member')->get();
         $shareProducts = ShareProduct::where('status', 'active')->get();
         $sharePurchases = SharePurchase::where('payment_status', 'paid')->get();
         return view('admin.share-certificates.edit', compact('shareCertificate', 'users', 'shareProducts', 'sharePurchases'));
     }
 
-    public function update(Request $request, ShareCertificate $shareCertificate)
+    public function update(Request $request, $encryptedId)
     {
+        $id = decrypt($encryptedId);
+        $shareCertificate = ShareCertificate::findOrFail($id);
+        
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
             'share_product_id' => 'required|exists:share_products,id',
@@ -79,8 +85,10 @@ class ShareCertificateController extends Controller
             ->with('success', 'Share certificate updated successfully.');
     }
 
-    public function destroy(ShareCertificate $shareCertificate)
+    public function destroy($encryptedId)
     {
+        $id = decrypt($encryptedId);
+        $shareCertificate = ShareCertificate::findOrFail($id);
         $shareCertificate->delete();
 
         return redirect()->route('admin.share-certificates.index')

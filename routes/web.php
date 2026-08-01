@@ -264,10 +264,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/share-certificates', [AdminShareCertificateController::class, 'index'])->name('share-certificates.index');
     Route::get('/share-certificates/create', [AdminShareCertificateController::class, 'create'])->name('share-certificates.create');
     Route::post('/share-certificates', [AdminShareCertificateController::class, 'store'])->name('share-certificates.store');
-    Route::get('/share-certificates/{shareCertificate}', [AdminShareCertificateController::class, 'show'])->name('share-certificates.show');
-    Route::get('/share-certificates/{shareCertificate}/edit', [AdminShareCertificateController::class, 'edit'])->name('share-certificates.edit');
-    Route::put('/share-certificates/{shareCertificate}', [AdminShareCertificateController::class, 'update'])->name('share-certificates.update');
-    Route::delete('/share-certificates/{shareCertificate}', [AdminShareCertificateController::class, 'destroy'])->name('share-certificates.destroy');
+    Route::get('/share-certificates/{encryptedId}', [AdminShareCertificateController::class, 'show'])->name('share-certificates.show');
+    Route::get('/share-certificates/{encryptedId}/edit', [AdminShareCertificateController::class, 'edit'])->name('share-certificates.edit');
+    Route::put('/share-certificates/{encryptedId}', [AdminShareCertificateController::class, 'update'])->name('share-certificates.update');
+    Route::delete('/share-certificates/{encryptedId}', [AdminShareCertificateController::class, 'destroy'])->name('share-certificates.destroy');
 
     Route::get('/share-transfers', [AdminShareTransferController::class, 'index'])->name('share-transfers.index');
     Route::get('/share-transfers/create', [AdminShareTransferController::class, 'create'])->name('share-transfers.create');
