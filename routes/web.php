@@ -265,6 +265,13 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
 
 Route::prefix('member')->middleware(['auth', 'role:member', 'member.isolation'])->name('member.')->group(function () {
     Route::get('/dashboard', [MemberDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/error', function () {
+        return view('member.error', [
+            'title' => session('error_title') ?? 'Something went wrong',
+            'message' => session('error_message') ?? 'An error occurred while processing your request. Please try again later.',
+            'details' => session('error_details') ?? null,
+        ]);
+    })->name('error');
     Route::get('/profile', [MemberProfileController::class, 'index'])->name('profile.index');
     Route::get('/profile/show', [MemberProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/edit', [MemberProfileController::class, 'edit'])->name('profile.edit');
