@@ -83,8 +83,35 @@
                 </select>
               </div>
               <div class="md:col-span-2">
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Purpose Description</label>
-                <textarea name="purpose_description" rows="3" placeholder="Describe the purpose of the loan (optional)" class="form-input">{{ old('purpose_description') }}</textarea>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Purpose Description *</label>
+                <textarea name="purpose_description" rows="3" placeholder="Describe the purpose of the loan in detail" required class="form-input">{{ old('purpose_description') }}</textarea>
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Employment Status *</label>
+                <select name="employment_status" required class="form-input">
+                  <option value="">Select employment status</option>
+                  <option value="employed" {{ old('employment_status') === 'employed' ? 'selected' : '' }}>Employed</option>
+                  <option value="self-employed" {{ old('employment_status') === 'self-employed' ? 'selected' : '' }}>Self-Employed</option>
+                  <option value="business-owner" {{ old('employment_status') === 'business-owner' ? 'selected' : '' }}>Business Owner</option>
+                  <option value="retired" {{ old('employment_status') === 'retired' ? 'selected' : '' }}>Retired</option>
+                  <option value="unemployed" {{ old('employment_status') === 'unemployed' ? 'selected' : '' }}>Unemployed</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Employer Name</label>
+                <input type="text" name="employer_name" value="{{ old('employer_name') }}" placeholder="Current employer" class="form-input">
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Monthly Income (TSh) *</label>
+                <input type="number" name="monthly_income" value="{{ old('monthly_income') }}" required min="0" step="0.01" placeholder="Enter monthly income" class="form-input">
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Other Income (TSh)</label>
+                <input type="number" name="other_income" value="{{ old('other_income') }}" min="0" step="0.01" placeholder="Additional income sources" class="form-input">
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Work Experience (Years)</label>
+                <input type="number" name="work_experience" value="{{ old('work_experience') }}" min="0" placeholder="Years of experience" class="form-input">
               </div>
             </div>
             <div class="flex items-center justify-end gap-3 pt-4">
@@ -106,25 +133,65 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Principal Amount (TSh) *</label>
-                <input type="number" name="principal_amount" id="principal_amount" value="{{ old('principal_amount') }}" required min="0" step="0.01" placeholder="Enter loan amount" class="form-input">
+                <input type="number" name="principal_amount" id="principal_amount" value="{{ old('principal_amount') }}" required min="0" step="0.01" placeholder="Enter loan amount" class="form-input" @input="calculateRepayment">
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Interest Rate (%) *</label>
-                <input type="number" name="interest_rate" id="interest_rate" value="{{ old('interest_rate') }}" required min="0" max="100" step="0.01" placeholder="Auto-filled from product" class="form-input">
+                <input type="number" name="interest_rate" id="interest_rate" value="{{ old('interest_rate') }}" required min="0" max="100" step="0.01" placeholder="Auto-filled from product" class="form-input" @input="calculateRepayment">
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Term (Months) *</label>
-                <input type="number" name="term_months" id="term_months" value="{{ old('term_months') }}" required min="1" placeholder="Auto-filled from product" class="form-input">
+                <input type="number" name="term_months" id="term_months" value="{{ old('term_months') }}" required min="1" placeholder="Auto-filled from product" class="form-input" @input="calculateRepayment">
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Repayment Frequency</label>
-                <select name="repayment_frequency" class="form-input">
+                <select name="repayment_frequency" class="form-input" @change="calculateRepayment">
                   <option value="monthly">Monthly</option>
                   <option value="biweekly">Bi-weekly</option>
                   <option value="weekly">Weekly</option>
                 </select>
               </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Preferred Repayment Date</label>
+                <select name="preferred_repayment_date" class="form-input">
+                  <option value="1">1st of month</option>
+                  <option value="5">5th of month</option>
+                  <option value="10">10th of month</option>
+                  <option value="15">15th of month</option>
+                  <option value="20">20th of month</option>
+                  <option value="25">25th of month</option>
+                  <option value="30">30th of month</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Collateral Value (TSh)</label>
+                <input type="number" name="collateral_value" value="{{ old('collateral_value') }}" min="0" step="0.01" placeholder="Estimated collateral value" class="form-input">
+              </div>
             </div>
+            
+            <!-- Repayment Summary Preview -->
+            <div x-show="repaymentSummary.monthlyPayment > 0" class="p-4 rounded-xl bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-800">
+              <h4 class="font-bold text-primary-900 dark:text-white text-xs mb-3">Repayment Summary</h4>
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div>
+                  <p class="text-[10px] text-primary-600 dark:text-primary-400">Monthly Payment</p>
+                  <p class="text-sm font-bold text-primary-900 dark:text-white" x-text="'TSh ' + formatNumber(repaymentSummary.monthlyPayment)"></p>
+                </div>
+                <div>
+                  <p class="text-[10px] text-primary-600 dark:text-primary-400">Total Interest</p>
+                  <p class="text-sm font-bold text-primary-900 dark:text-white" x-text="'TSh ' + formatNumber(repaymentSummary.totalInterest)"></p>
+                </div>
+                <div>
+                  <p class="text-[10px] text-primary-600 dark:text-primary-400">Total Repayment</p>
+                  <p class="text-sm font-bold text-primary-900 dark:text-white" x-text="'TSh ' + formatNumber(repaymentSummary.totalRepayment)"></p>
+                </div>
+                <div>
+                  <p class="text-[10px] text-primary-600 dark:text-primary-400">Debt-to-Income</p>
+                  <p class="text-sm font-bold" :class="repaymentSummary.debtToIncome <= 40 ? 'text-green-600' : 'text-red-600'" x-text="repaymentSummary.debtToIncome + '%'"></p>
+                </div>
+              </div>
+            </div>
+            
             <div class="flex items-center justify-end gap-3 pt-4">
               <button type="button" @click="currentTab = 1" class="px-6 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-bold transition-colors">
                 Back
@@ -197,22 +264,34 @@
     <div class="lg:col-span-1">
       <div class="glass p-5 rounded-2xl sticky top-6">
         <h3 class="font-bold text-primary-900 dark:text-white text-sm mb-4">Application Progress</h3>
-        <div class="space-y-3">
+        <div class="space-y-4">
           <div class="flex items-center gap-3">
-            <div :class="currentTab >= 1 ? 'bg-primary-600' : 'bg-primary-200 dark:bg-primary-800'" class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold transition-colors">1</div>
-            <span :class="currentTab >= 1 ? 'text-primary-900 dark:text-white font-semibold' : 'text-primary-500'" class="text-sm transition-colors">Basic Info</span>
+            <div :class="currentTab >= 1 ? 'bg-primary-600' : 'bg-primary-200 dark:bg-primary-800'" class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold transition-colors flex-shrink-0">1</div>
+            <div class="flex-1">
+              <p :class="currentTab >= 1 ? 'text-primary-900 dark:text-white font-semibold' : 'text-primary-500'" class="text-sm transition-colors">Basic Info</p>
+              <p class="text-[10px] text-primary-400">Personal & employment details</p>
+            </div>
           </div>
           <div class="flex items-center gap-3">
-            <div :class="currentTab >= 2 ? 'bg-primary-600' : 'bg-primary-200 dark:bg-primary-800'" class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold transition-colors">2</div>
-            <span :class="currentTab >= 2 ? 'text-primary-900 dark:text-white font-semibold' : 'text-primary-500'" class="text-sm transition-colors">Loan Details</span>
+            <div :class="currentTab >= 2 ? 'bg-primary-600' : 'bg-primary-200 dark:bg-primary-800'" class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold transition-colors flex-shrink-0">2</div>
+            <div class="flex-1">
+              <p :class="currentTab >= 2 ? 'text-primary-900 dark:text-white font-semibold' : 'text-primary-500'" class="text-sm transition-colors">Loan Details</p>
+              <p class="text-[10px] text-primary-400">Amount, interest & term</p>
+            </div>
           </div>
           <div class="flex items-center gap-3">
-            <div :class="currentTab >= 3 ? 'bg-primary-600' : 'bg-primary-200 dark:bg-primary-800'" class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold transition-colors">3</div>
-            <span :class="currentTab >= 3 ? 'text-primary-900 dark:text-white font-semibold' : 'text-primary-500'" class="text-sm transition-colors">Collateral</span>
+            <div :class="currentTab >= 3 ? 'bg-primary-600' : 'bg-primary-200 dark:bg-primary-800'" class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold transition-colors flex-shrink-0">3</div>
+            <div class="flex-1">
+              <p :class="currentTab >= 3 ? 'text-primary-900 dark:text-white font-semibold' : 'text-primary-500'" class="text-sm transition-colors">Collateral</p>
+              <p class="text-[10px] text-primary-400">Security & guarantor info</p>
+            </div>
           </div>
           <div class="flex items-center gap-3">
-            <div :class="currentTab >= 4 ? 'bg-primary-600' : 'bg-primary-200 dark:bg-primary-800'" class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold transition-colors">4</div>
-            <span :class="currentTab >= 4 ? 'text-primary-900 dark:text-white font-semibold' : 'text-primary-500'" class="text-sm transition-colors">Additional</span>
+            <div :class="currentTab >= 4 ? 'bg-primary-600' : 'bg-primary-200 dark:bg-primary-800'" class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold transition-colors flex-shrink-0">4</div>
+            <div class="flex-1">
+              <p :class="currentTab >= 4 ? 'text-primary-900 dark:text-white font-semibold' : 'text-primary-500'" class="text-sm transition-colors">Additional</p>
+              <p class="text-[10px] text-primary-400">Notes & final review</p>
+            </div>
           </div>
         </div>
         <div class="mt-6 pt-4 border-t border-primary-100 dark:border-primary-900/50">
@@ -220,9 +299,51 @@
             <span>Completion</span>
             <span x-text="progress + '%'"></span>
           </div>
-          <div class="w-full bg-primary-100 dark:bg-primary-900/40 rounded-full h-2">
-            <div :style="'width: ' + progress + '%'" class="bg-primary-600 h-2 rounded-full transition-all duration-300"></div>
+          <div class="w-full bg-primary-100 dark:bg-primary-900/40 rounded-full h-3">
+            <div :style="'width: ' + progress + '%'" class="bg-primary-600 h-3 rounded-full transition-all duration-300"></div>
           </div>
+          <div class="mt-3 grid grid-cols-2 gap-2 text-[10px]">
+            <div class="p-2 rounded-lg bg-primary-50 dark:bg-primary-900/20">
+              <p class="text-primary-500">Steps Completed</p>
+              <p class="font-bold text-primary-900 dark:text-white" x-text="currentTab + ' / 4'"></p>
+            </div>
+            <div class="p-2 rounded-lg bg-primary-50 dark:bg-primary-900/20">
+              <p class="text-primary-500">Est. Time</p>
+              <p class="font-bold text-primary-900 dark:text-white">~5 min</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Repayment Schedule Preview -->
+      <div x-show="repaymentSchedule.length > 0" class="glass p-5 rounded-2xl sticky top-72 mt-4">
+        <h3 class="font-bold text-primary-900 dark:text-white text-sm mb-4">Repayment Schedule Preview</h3>
+        <div class="max-h-64 overflow-y-auto">
+          <table class="w-full text-xs">
+            <thead class="sticky top-0 bg-white dark:bg-gray-800">
+              <tr class="text-left text-primary-500">
+                <th class="pb-2">#</th>
+                <th class="pb-2">Due Date</th>
+                <th class="pb-2">Payment</th>
+                <th class="pb-2">Balance</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="(payment, index) in repaymentSchedule.slice(0, 6)" :key="index">
+                <tr class="border-b border-primary-100 dark:border-primary-800">
+                  <td class="py-2" x-text="payment.installment"></td>
+                  <td class="py-2" x-text="payment.dueDate"></td>
+                  <td class="py-2 font-bold" x-text="'TSh ' + formatNumber(payment.amount)"></td>
+                  <td class="py-2" x-text="'TSh ' + formatNumber(payment.balance)"></td>
+                </tr>
+              </template>
+              <tr x-show="repaymentSchedule.length > 6">
+                <td colspan="4" class="py-2 text-center text-primary-500">
+                  + <span x-text="repaymentSchedule.length - 6"></span> more payments
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -239,6 +360,77 @@ function loanCreateForm() {
     isSaving: false,
     isSubmitting: false,
     loanData: {},
+    repaymentSummary: {
+      monthlyPayment: 0,
+      totalInterest: 0,
+      totalRepayment: 0,
+      debtToIncome: 0
+    },
+    repaymentSchedule: [],
+    
+    formatNumber(num) {
+      return parseFloat(num).toLocaleString('en-TZ', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    },
+    
+    calculateRepayment() {
+      const principal = parseFloat(document.getElementById('principal_amount')?.value) || 0;
+      const interestRate = parseFloat(document.getElementById('interest_rate')?.value) || 0;
+      const termMonths = parseInt(document.getElementById('term_months')?.value) || 0;
+      const monthlyIncome = parseFloat(this.loanData.monthly_income) || 0;
+      
+      if (principal > 0 && interestRate > 0 && termMonths > 0) {
+        // Calculate monthly payment using amortization formula
+        const monthlyRate = interestRate / 100 / 12;
+        const monthlyPayment = principal * (monthlyRate * Math.pow(1 + monthlyRate, termMonths)) / (Math.pow(1 + monthlyRate, termMonths) - 1);
+        const totalRepayment = monthlyPayment * termMonths;
+        const totalInterest = totalRepayment - principal;
+        const debtToIncome = monthlyIncome > 0 ? ((monthlyPayment / monthlyIncome) * 100).toFixed(1) : 0;
+        
+        this.repaymentSummary = {
+          monthlyPayment: monthlyPayment.toFixed(2),
+          totalInterest: totalInterest.toFixed(2),
+          totalRepayment: totalRepayment.toFixed(2),
+          debtToIncome: debtToIncome
+        };
+        
+        // Generate repayment schedule
+        this.generateRepaymentSchedule(principal, monthlyRate, termMonths, monthlyPayment);
+      } else {
+        this.repaymentSummary = {
+          monthlyPayment: 0,
+          totalInterest: 0,
+          totalRepayment: 0,
+          debtToIncome: 0
+        };
+        this.repaymentSchedule = [];
+      }
+    },
+    
+    generateRepaymentSchedule(principal, monthlyRate, termMonths, monthlyPayment) {
+      const schedule = [];
+      let balance = principal;
+      const startDate = new Date();
+      
+      for (let i = 1; i <= termMonths; i++) {
+        const interestPortion = balance * monthlyRate;
+        const principalPortion = monthlyPayment - interestPortion;
+        balance = Math.max(0, balance - principalPortion);
+        
+        const dueDate = new Date(startDate);
+        dueDate.setMonth(dueDate.getMonth() + i);
+        
+        schedule.push({
+          installment: i,
+          dueDate: dueDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+          amount: monthlyPayment.toFixed(2),
+          principal: principalPortion.toFixed(2),
+          interest: interestPortion.toFixed(2),
+          balance: balance.toFixed(2)
+        });
+      }
+      
+      this.repaymentSchedule = schedule;
+    },
     
     updateLoanDetails() {
       const select = document.getElementById('loan_product_id');
@@ -257,12 +449,22 @@ function loanCreateForm() {
         }
         principalAmountInput.min = minAmount;
         principalAmountInput.max = maxAmount;
+        
+        this.calculateRepayment();
       } else {
         document.getElementById('interest_rate').value = '';
         document.getElementById('term_months').value = '';
         document.getElementById('principal_amount').value = '';
         document.getElementById('principal_amount').min = 0;
         document.getElementById('principal_amount').max = '';
+        
+        this.repaymentSummary = {
+          monthlyPayment: 0,
+          totalInterest: 0,
+          totalRepayment: 0,
+          debtToIncome: 0
+        };
+        this.repaymentSchedule = [];
       }
     },
     
@@ -286,6 +488,7 @@ function loanCreateForm() {
         if (data.success) {
           this.loanData = { ...this.loanData, ...data.loan_data };
           this.progress = 50;
+          this.calculateRepayment();
           Swal.fire({
             icon: 'success',
             title: 'Saved!',

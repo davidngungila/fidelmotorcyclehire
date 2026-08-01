@@ -127,7 +127,12 @@ class LoanController extends Controller
                 'member_number' => 'required|string|max:50',
                 'application_date' => 'required|date',
                 'purpose' => 'required|in:business,education,agriculture,personal,emergency,other',
-                'purpose_description' => 'nullable|string',
+                'purpose_description' => 'required|string',
+                'employment_status' => 'required|in:employed,self-employed,business-owner,retired,unemployed',
+                'employer_name' => 'nullable|string|max:255',
+                'monthly_income' => 'required|numeric|min:0',
+                'other_income' => 'nullable|numeric|min:0',
+                'work_experience' => 'nullable|integer|min:0',
             ]);
 
             return response()->json([
@@ -224,11 +229,18 @@ class LoanController extends Controller
                 'term_months' => 'required|integer|min:1',
                 'application_date' => 'required|date',
                 'purpose' => 'required|in:business,education,agriculture,personal,emergency,other',
-                'purpose_description' => 'nullable|string',
+                'purpose_description' => 'required|string',
+                'employment_status' => 'required|in:employed,self-employed,business-owner,retired,unemployed',
+                'employer_name' => 'nullable|string|max:255',
+                'monthly_income' => 'required|numeric|min:0',
+                'other_income' => 'nullable|numeric|min:0',
+                'work_experience' => 'nullable|integer|min:0',
                 'collateral' => 'nullable|string',
                 'guarantor' => 'nullable|string',
                 'notes' => 'nullable|string',
                 'repayment_frequency' => 'nullable|in:monthly,biweekly,weekly',
+                'preferred_repayment_date' => 'nullable|integer|in:1,5,10,15,20,25,30',
+                'collateral_value' => 'nullable|numeric|min:0',
             ]);
 
             // Generate sequential loan number
@@ -255,6 +267,7 @@ class LoanController extends Controller
                     'member_number' => $memberNumber,
                     'loan_amount' => $validated['principal_amount'],
                     'purpose' => $validated['purpose'],
+                    'monthly_income' => $validated['monthly_income'],
                 ],
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),

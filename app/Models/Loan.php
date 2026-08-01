@@ -31,6 +31,14 @@ class Loan extends Model
         'collateral',
         'guarantor',
         'notes',
+        'repayment_frequency',
+        'preferred_repayment_date',
+        'collateral_value',
+        'employment_status',
+        'employer_name',
+        'monthly_income',
+        'other_income',
+        'work_experience',
     ];
 
     protected $casts = [
