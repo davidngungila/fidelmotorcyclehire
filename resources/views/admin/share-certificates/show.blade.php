@@ -163,15 +163,20 @@ const certificateData = {
   status: '{{ ucfirst($shareCertificate->status) }}'
 };
 
-const certificateBackground = '{{ \Illuminate\Support\Facades\Cache::get('share_settings', [])['certificate_background'] ?? '' }}';
+@php
+$settings = \Illuminate\Support\Facades\Cache::get('share_settings', []);
+$certificateBackgroundPath = $settings['certificate_background'] ?? '';
+@endphp
+const certificateBackgroundPath = '{{ $certificateBackgroundPath }}';
+const certificateBackgroundUrl = certificateBackgroundPath ? '{{ asset('storage/') }}' + certificateBackgroundPath : '';
 
 function previewCertificate() {
   const modal = document.getElementById('certificateModal');
   const preview = document.getElementById('certificatePreview');
   
   let backgroundStyle = '';
-  if (certificateBackground) {
-    backgroundStyle = `background-image: url('{{ asset('storage/' . certificateBackground) }}'); background-size: cover; background-position: center; background-repeat: no-repeat;`;
+  if (certificateBackgroundUrl) {
+    backgroundStyle = `background-image: url('${certificateBackgroundUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat;`;
   }
   
   preview.innerHTML = `
@@ -235,8 +240,8 @@ function printCertificate() {
   const preview = document.getElementById('certificatePreview');
   
   let backgroundStyle = '';
-  if (certificateBackground) {
-    backgroundStyle = `background-image: url('{{ asset('storage/' . certificateBackground) }}'); background-size: cover; background-position: center; background-repeat: no-repeat;`;
+  if (certificateBackgroundUrl) {
+    backgroundStyle = `background-image: url('${certificateBackgroundUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat;`;
   }
   
   const printContent = `
