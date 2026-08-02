@@ -1108,4 +1108,21 @@ class LoanController extends Controller
             return redirect()->back();
         }
     }
+
+    public function appreciationCertificate($encryptedLoanNumber)
+    {
+        Gate::authorize('admin-only');
+
+        $loanNumber = $this->encryptedIdService->decrypt($encryptedLoanNumber);
+        $loan = Loan::where('loan_number', $loanNumber)->with('user')->firstOrFail();
+
+        $settings = Cache::get('share_settings', []);
+        $certificateBackgroundPath = $settings['certificate_background'] ?? '';
+        $certificateBackgroundUrl = $certificateBackgroundPath ? asset('storage/' . $certificateBackgroundPath) : '';
+
+        return view('admin.loans.appreciation-certificate', [
+            'loan' => $loan,
+            'certificateBackgroundUrl' => $certificateBackgroundUrl,
+        ]);
+    }
 }

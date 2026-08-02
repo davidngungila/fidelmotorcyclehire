@@ -341,6 +341,21 @@
           </div>
         </div>
       </div>
+      @elseif(in_array($loan['status'], ['paid', 'settled', 'closed']))
+      <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-5">
+        <div class="flex items-start gap-3">
+          <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center flex-shrink-0">
+            <i class="fa-solid fa-award text-blue-600 dark:text-blue-400"></i>
+          </div>
+          <div class="flex-1">
+            <h4 class="font-bold text-blue-800 dark:text-blue-300 text-sm mb-1">Loan Completed</h4>
+            <p class="text-xs text-blue-700 dark:text-blue-400">This loan has been fully paid and settled. The borrower has completed all repayment obligations.</p>
+          </div>
+        </div>
+      </div>
+      <button type="button" onclick="generateAppreciationCertificate()" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold transition-colors">
+        <i class="fa-solid fa-certificate text-xs"></i> Generate Appreciation Certificate
+      </button>
       @else
       <div class="bg-gray-50 dark:bg-gray-900/20 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
         <div class="flex items-start gap-3">
@@ -695,6 +710,11 @@
         document.getElementById('disburseForm').submit();
       }
     });
+  }
+
+  function generateAppreciationCertificate() {
+    const loanNumber = '{{ $loanNo }}';
+    window.open(`/admin/loans/${loanNumber}/appreciation-certificate`, '_blank');
   }
 </script>
 @endpush
