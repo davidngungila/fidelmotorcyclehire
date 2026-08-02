@@ -318,34 +318,20 @@
             
             const certificateHtml = `
                 <div style="${backgroundStyle} min-height: 500px; padding: 40px; position: relative;">
-                    <div style="background: rgba(255, 255, 255, 0.3); padding: 40px; border-radius: 10px; position: relative; z-index: 1; backdrop-filter: blur(2px);">
+                    <div style="padding: 40px; position: relative; z-index: 1;">
                         <div style="text-align: center; margin-bottom: 30px;">
-                            <h1 style="font-size: 28px; font-weight: bold; color: #1e40af; margin-bottom: 10px; font-family: 'Times New Roman', serif; text-shadow: 2px 2px 4px rgba(255,255,255,0.8);">Certificate of Membership</h1>
-                            <p style="color: #1f2937; font-size: 14px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">${data.organization}</p>
+                            <h1 style="font-size: 32px; font-weight: bold; color: #1e40af; margin-bottom: 10px; font-family: 'Times New Roman', serif; text-shadow: 2px 2px 4px rgba(255,255,255,0.8);">CERTIFICATE OF MEMBERSHIP</h1>
+                            <p style="color: #1f2937; font-size: 16px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">${data.organization}</p>
                         </div>
                         
-                        <div style="text-align: center; margin-bottom: 0; padding: 20px; background: rgba(255, 255, 255, 0.4); border-radius: 8px; backdrop-filter: blur(2px);">
-                            <p style="color: #1f2937; font-size: 14px; margin-bottom: 5px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">This is to certify that</p>
-                            <h2 style="font-size: 28px; font-weight: bold; color: #1e40af; margin: 10px 0; font-family: 'Brush Script MT', 'Great Vibes', cursive; text-shadow: 2px 2px 4px rgba(255,255,255,0.8);">${data.name}</h2>
-                            <p style="color: #1f2937; font-size: 14px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">is a registered member of</p>
-                            <h3 style="font-size: 18px; font-weight: bold; color: #0369a1; margin-top: 10px; text-shadow: 2px 2px 4px rgba(255,255,255,0.8);">${data.organization}</h3>
+                        <div style="text-align: center; margin-bottom: 30px;">
+                            <p style="color: #1f2937; font-size: 16px; margin-bottom: 10px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">This is to certify that</p>
+                            <h2 style="font-size: 36px; font-weight: bold; color: #1e40af; margin: 10px 0; font-family: 'Great Vibes', cursive; text-shadow: 2px 2px 4px rgba(255,255,255,0.8);">${data.name}</h2>
+                            <p style="color: #1f2937; font-size: 16px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">is a registered and active member of <strong>${data.organization}</strong>, holding <strong>Membership Number ${data.member_number}</strong>, with a registration date of <strong>${data.registration_date}</strong>. This certificate serves as official proof of membership and entitles the holder to the rights, privileges, and responsibilities of membership in accordance with the Constitution, By-laws, and Policies of ${data.organization}.</p>
                         </div>
                         
-                        <div style="text-align: center; margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.4); border-radius: 8px; backdrop-filter: blur(2px);">
-                            <p style="color: #1f2937; font-size: 16px; line-height: 1.6; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">
-                                <strong>Membership Number:</strong> ${data.member_number}<br>
-                                <strong>Registration Date:</strong> ${data.registration_date}<br>
-                                <strong>Branch:</strong> ${data.branch}<br>
-                                <strong>Status:</strong> ${data.status}
-                            </p>
-                        </div>
-                        
-                        <div style="text-align: center; margin-bottom: 20px; padding: 15px; background: rgba(255, 255, 255, 0.3); border-radius: 8px; backdrop-filter: blur(2px);">
-                            <p style="color: #1f2937; font-size: 14px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">This certificate confirms the membership status and entitles the holder to all rights and privileges of membership.</p>
-                        </div>
-                        
-                        <div style="text-align: center; padding-top: 20px; border-top: 2px solid rgba(255, 255, 255, 0.5);">
-                            <p style="color: #1f2937; font-size: 12px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">Issued by ${data.organization} • ${data.issue_date}</p>
+                        <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid rgba(255,255,255,0.5);">
+                            <p style="color: #1f2937; font-size: 14px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">Issued by ${data.organization} on ${data.issue_date}.</p>
                         </div>
                     </div>
                 </div>
