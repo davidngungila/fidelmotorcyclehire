@@ -44,6 +44,11 @@
                 {{ $product }}
               </span>
               <span class="badge {{ $statusBadge['class'] }}">{{ $statusBadge['label'] }}</span>
+              @if(in_array($loan['status'] ?? '', ['paid', 'settled', 'closed']))
+              <button type="button" onclick="previewAppreciationCertificate()" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 text-xs font-bold hover:bg-purple-200 dark:hover:bg-purple-900/70 transition-colors">
+                <i class="fa-solid fa-certificate text-[10px]"></i> Preview Certificate
+              </button>
+              @endif
             </div>
           </div>
         </div>
@@ -353,9 +358,6 @@
           </div>
         </div>
       </div>
-      <button type="button" onclick="generateAppreciationCertificate()" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold transition-colors">
-        <i class="fa-solid fa-certificate text-xs"></i> Generate Appreciation Certificate
-      </button>
       @else
       <div class="bg-gray-50 dark:bg-gray-900/20 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
         <div class="flex items-start gap-3">
@@ -713,6 +715,11 @@
   }
 
   function generateAppreciationCertificate() {
+    const loanNumber = '{{ $loanNo }}';
+    window.open(`/admin/loans/${loanNumber}/appreciation-certificate`, '_blank');
+  }
+
+  function previewAppreciationCertificate() {
     const loanNumber = '{{ $loanNo }}';
     window.open(`/admin/loans/${loanNumber}/appreciation-certificate`, '_blank');
   }
