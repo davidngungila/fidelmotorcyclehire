@@ -334,155 +334,83 @@
           <i x-show="!sidebarCollapsed" :class="open ? 'fa-chevron-down' : 'fa-chevron-right'" class="fa-solid text-[10px] transition-transform"></i>
         </button>
         <div x-show="open" x-transition class="mt-1 space-y-0.5 pl-6">
-          <a href="{{ route('admin.accounting.dashboard') }}"
+          <a href="{{ route('admin.chart-of-accounts.index') }}"
              class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
-                    {{ request()->routeIs('admin.accounting.dashboard') ? 'active' : '' }}">
-            <i class="fa-solid fa-gauge-high w-4 text-center flex-shrink-0"></i>
-            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Dashboard</span>
-          </a>
-          <a href="{{ route('admin.accounting.chart-of-accounts') }}"
-             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
-                    {{ request()->routeIs('admin.accounting.chart-of-accounts') ? 'active' : '' }}">
+                    {{ request()->routeIs('admin.chart-of-accounts.*') ? 'active' : '' }}">
             <i class="fa-solid fa-sitemap w-4 text-center flex-shrink-0"></i>
             <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Chart of Accounts</span>
           </a>
-          <a href="{{ route('admin.accounting.journal-entries') }}"
+          <a href="{{ route('admin.journal-entries.index') }}"
              class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
-                    {{ request()->routeIs('admin.accounting.journal-entries') ? 'active' : '' }}">
+                    {{ request()->routeIs('admin.journal-entries.*') ? 'active' : '' }}">
             <i class="fa-solid fa-book w-4 text-center flex-shrink-0"></i>
             <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Journal Entries</span>
           </a>
-          <a href="{{ route('admin.accounting.general-ledger') }}"
+          <a href="{{ route('admin.ledger.index') }}"
              class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
-                    {{ request()->routeIs('admin.accounting.general-ledger') ? 'active' : '' }}">
+                    {{ request()->routeIs('admin.ledger.*') ? 'active' : '' }}">
             <i class="fa-solid fa-book-open w-4 text-center flex-shrink-0"></i>
             <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">General Ledger</span>
           </a>
-          <a href="{{ route('admin.accounting.trial-balance') }}"
+          <a href="{{ route('admin.trial-balance.index') }}"
              class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
-                    {{ request()->routeIs('admin.accounting.trial-balance') ? 'active' : '' }}">
+                    {{ request()->routeIs('admin.trial-balance.*') ? 'active' : '' }}">
             <i class="fa-solid fa-scale-balanced w-4 text-center flex-shrink-0"></i>
             <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Trial Balance</span>
           </a>
-          <a href="{{ route('admin.accounting.balance-sheet') }}"
+          <a href="{{ route('admin.balance-sheet.index') }}"
              class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
-                    {{ request()->routeIs('admin.accounting.balance-sheet') ? 'active' : '' }}">
+                    {{ request()->routeIs('admin.balance-sheet.*') ? 'active' : '' }}">
             <i class="fa-solid fa-file-invoice-dollar w-4 text-center flex-shrink-0"></i>
             <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Balance Sheet</span>
           </a>
-          <a href="{{ route('admin.accounting.income-statement') }}"
+          <a href="{{ route('admin.income-statement.index') }}"
              class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
-                    {{ request()->routeIs('admin.accounting.income-statement') ? 'active' : '' }}">
+                    {{ request()->routeIs('admin.income-statement.*') ? 'active' : '' }}">
             <i class="fa-solid fa-file-invoice w-4 text-center flex-shrink-0"></i>
             <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Income Statement</span>
           </a>
-          <a href="{{ route('admin.accounting.cash-flow') }}"
+          <a href="{{ route('admin.cash-flow.index') }}"
              class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
-                    {{ request()->routeIs('admin.accounting.cash-flow') ? 'active' : '' }}">
+                    {{ request()->routeIs('admin.cash-flow.*') ? 'active' : '' }}">
             <i class="fa-solid fa-money-bill-transfer w-4 text-center flex-shrink-0"></i>
             <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Cash Flow Statement</span>
           </a>
-          <a href="{{ route('admin.accounting.fixed-assets') }}"
+          <a href="{{ route('admin.fixed-assets.index') }}"
              class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
-                    {{ request()->routeIs('admin.accounting.fixed-assets') ? 'active' : '' }}">
+                    {{ request()->routeIs('admin.fixed-assets.*') ? 'active' : '' }}">
             <i class="fa-solid fa-building w-4 text-center flex-shrink-0"></i>
             <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Fixed Assets</span>
           </a>
-          <a href="{{ route('admin.accounting.depreciation') }}"
+          <a href="{{ route('admin.bank-accounts.index') }}"
              class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
-                    {{ request()->routeIs('admin.accounting.depreciation') ? 'active' : '' }}">
-            <i class="fa-solid fa-arrow-trend-down w-4 text-center flex-shrink-0"></i>
-            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Depreciation</span>
-          </a>
-          <a href="{{ route('admin.accounting.bank-accounts') }}"
-             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
-                    {{ request()->routeIs('admin.accounting.bank-accounts') ? 'active' : '' }}">
+                    {{ request()->routeIs('admin.bank-accounts.*') ? 'active' : '' }}">
             <i class="fa-solid fa-university w-4 text-center flex-shrink-0"></i>
             <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Bank Accounts</span>
           </a>
-          <a href="{{ route('admin.accounting.bank-reconciliation') }}"
+          <a href="{{ route('admin.receipts.index') }}"
              class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
-                    {{ request()->routeIs('admin.accounting.bank-reconciliation') ? 'active' : '' }}">
-            <i class="fa-solid fa-check-double w-4 text-center flex-shrink-0"></i>
-            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Bank Reconciliation</span>
-          </a>
-          <a href="{{ route('admin.accounting.receipts') }}"
-             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
-                    {{ request()->routeIs('admin.accounting.receipts') ? 'active' : '' }}">
+                    {{ request()->routeIs('admin.receipts.*') ? 'active' : '' }}">
             <i class="fa-solid fa-receipt w-4 text-center flex-shrink-0"></i>
             <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Receipts</span>
           </a>
-          <a href="{{ route('admin.accounting.payments') }}"
+          <a href="{{ route('admin.payments.index') }}"
              class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
-                    {{ request()->routeIs('admin.accounting.payments') ? 'active' : '' }}">
+                    {{ request()->routeIs('admin.payments.*') ? 'active' : '' }}">
             <i class="fa-solid fa-credit-card w-4 text-center flex-shrink-0"></i>
             <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Payments</span>
           </a>
-          <a href="{{ route('admin.accounting.expenses') }}"
+          <a href="{{ route('admin.expenses.index') }}"
              class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
-                    {{ request()->routeIs('admin.accounting.expenses') ? 'active' : '' }}">
+                    {{ request()->routeIs('admin.expenses.*') ? 'active' : '' }}">
             <i class="fa-solid fa-arrow-down w-4 text-center flex-shrink-0"></i>
             <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Expenses</span>
           </a>
-          <a href="{{ route('admin.accounting.revenue') }}"
+          <a href="{{ route('admin.revenues.index') }}"
              class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
-                    {{ request()->routeIs('admin.accounting.revenue') ? 'active' : '' }}">
+                    {{ request()->routeIs('admin.revenues.*') ? 'active' : '' }}">
             <i class="fa-solid fa-arrow-up w-4 text-center flex-shrink-0"></i>
             <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Revenue</span>
-          </a>
-          <a href="{{ route('admin.accounting.accounts-receivable') }}"
-             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
-                    {{ request()->routeIs('admin.accounting.accounts-receivable') ? 'active' : '' }}">
-            <i class="fa-solid fa-hand-holding-dollar w-4 text-center flex-shrink-0"></i>
-            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Accounts Receivable</span>
-          </a>
-          <a href="{{ route('admin.accounting.accounts-payable') }}"
-             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
-                    {{ request()->routeIs('admin.accounting.accounts-payable') ? 'active' : '' }}">
-            <i class="fa-solid fa-money-check-dollar w-4 text-center flex-shrink-0"></i>
-            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Accounts Payable</span>
-          </a>
-          <a href="{{ route('admin.accounting.budgets') }}"
-             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
-                    {{ request()->routeIs('admin.accounting.budgets') ? 'active' : '' }}">
-            <i class="fa-solid fa-piggy-bank w-4 text-center flex-shrink-0"></i>
-            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Budgets</span>
-          </a>
-          <a href="{{ route('admin.accounting.financial-periods') }}"
-             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
-                    {{ request()->routeIs('admin.accounting.financial-periods') ? 'active' : '' }}">
-            <i class="fa-solid fa-calendar-days w-4 text-center flex-shrink-0"></i>
-            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Financial Periods</span>
-          </a>
-          <a href="{{ route('admin.accounting.closing-entries') }}"
-             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
-                    {{ request()->routeIs('admin.accounting.closing-entries') ? 'active' : '' }}">
-            <i class="fa-solid fa-lock w-4 text-center flex-shrink-0"></i>
-            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Closing Entries</span>
-          </a>
-          <a href="{{ route('admin.accounting.tax-management') }}"
-             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
-                    {{ request()->routeIs('admin.accounting.tax-management') ? 'active' : '' }}">
-            <i class="fa-solid fa-percent w-4 text-center flex-shrink-0"></i>
-            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Tax Management</span>
-          </a>
-          <a href="{{ route('admin.accounting.audit-trail') }}"
-             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
-                    {{ request()->routeIs('admin.accounting.audit-trail') ? 'active' : '' }}">
-            <i class="fa-solid fa-clipboard-list w-4 text-center flex-shrink-0"></i>
-            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Audit Trail</span>
-          </a>
-          <a href="{{ route('admin.accounting.financial-reports') }}"
-             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
-                    {{ request()->routeIs('admin.accounting.financial-reports') ? 'active' : '' }}">
-            <i class="fa-solid fa-chart-line w-4 text-center flex-shrink-0"></i>
-            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Financial Reports</span>
-          </a>
-          <a href="{{ route('admin.accounting.settings') }}"
-             class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-primary-300 hover:text-white transition-all duration-150
-                    {{ request()->routeIs('admin.accounting.settings') ? 'active' : '' }}">
-            <i class="fa-solid fa-gear w-4 text-center flex-shrink-0"></i>
-            <span x-show="!sidebarCollapsed" class="font-medium whitespace-nowrap">Accounting Settings</span>
           </a>
         </div>
       </div>
