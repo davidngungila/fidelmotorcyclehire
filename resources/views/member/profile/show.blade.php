@@ -335,16 +335,14 @@
                 </style>
                 <div style="${backgroundStyle} min-height: 500px; padding: 40px; position: relative;">
                     <div style="padding: 40px; position: relative; z-index: 1;">
-                        <div style="text-align: center; margin-bottom: 30px;">
-                            <h1 style="font-size: 32px; font-weight: bold; color: #1e40af; margin-bottom: 10px; font-family: 'Times New Roman', serif; text-shadow: 2px 2px 4px rgba(255,255,255,0.8);">CERTIFICATE OF MEMBERSHIP</h1>
-                            <p style="color: #1f2937; font-size: 16px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">${data.organization}</p>
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <h1 style="font-size: 32px; font-weight: bold; color: #1e40af; margin-bottom: 5px; font-family: 'Times New Roman', serif; text-shadow: 2px 2px 4px rgba(255,255,255,0.8);">CERTIFICATE OF MEMBERSHIP</h1>
                         </div>
                         
                         <div style="text-align: center; margin-bottom: 30px;">
-                            <p style="color: #1f2937; font-size: 16px; margin-bottom: 10px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">This is to certify that</p>
                             <h2 class="great-vibes-regular" style="font-size: 36px; color: #1e40af; margin: 10px 0; text-shadow: 2px 2px 4px rgba(255,255,255,0.8);">${data.name}</h2>
                             <div style="width: 350px; height: 2px; background: linear-gradient(to right, transparent, #1e40af, transparent); margin: 8px auto;"></div>
-                            <p style="color: #1f2937; font-size: 16px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">is a registered and active member of <strong>${data.organization}</strong>, holding <strong>Membership Number ${data.member_number}</strong>, with a registration date of <strong>${data.registration_date}</strong>. This certificate serves as official proof of membership and entitles the holder to the rights, privileges, and responsibilities of membership in accordance with the Constitution, By-laws, and Policies of ${data.organization}.</p>
+                            <p style="color: #1f2937; font-size: 16px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">is a registered and active member, holding <strong>Membership Number ${data.member_number}</strong>, with a registration date of <strong>${data.registration_date}</strong>. This certificate serves as official proof of membership and entitles the holder to the rights, privileges, and responsibilities of membership in accordance with the Constitution, By-laws, and Policies.</p>
                         </div>
                         
                         <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid rgba(255,255,255,0.5);">
