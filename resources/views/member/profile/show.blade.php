@@ -277,6 +277,15 @@
     </div>
 
     <script>
+    // Get certificate background from settings
+    @php
+      $settings = \Illuminate\Support\Facades\Cache::get('share_settings', []);
+      $certificateBackgroundPath = $settings['certificate_background'] ?? '';
+      $certificateBackgroundUrl = $certificateBackgroundPath ? asset('storage/' . $certificateBackgroundPath) : '';
+    @endphp
+
+    const certificateBackgroundUrl = '{{ $certificateBackgroundUrl }}';
+
     function openCertificateModal() {
         const modal = document.getElementById('certificateModal');
         modal.classList.remove('hidden');
@@ -302,8 +311,6 @@
             });
             const data = await response.json();
             
-            // Get certificate background from settings
-            const certificateBackgroundUrl = '';
             let backgroundStyle = '';
             if (certificateBackgroundUrl) {
                 backgroundStyle = `background-image: url('${certificateBackgroundUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat;`;
