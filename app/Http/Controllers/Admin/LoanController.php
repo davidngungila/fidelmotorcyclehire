@@ -693,7 +693,7 @@ class LoanController extends Controller
             'notes' => 'nullable|string',
             'allocate_excess_to' => 'nullable|in:savings,investment,refund',
         ], [
-            'amount.gte' => "Payment amount must be at least the monthly installment of " . number_format($loan->monthly_payment, 2) . " TSh",
+            'amount.gte' => "Payment amount must be at least the monthly installment of " . number_format((float) $loan->monthly_payment, 2) . " TSh",
         ]);
 
         $paymentAmount = (float) $validated['amount'];
