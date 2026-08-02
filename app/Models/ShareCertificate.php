@@ -15,9 +15,10 @@ class ShareCertificate extends Model
         'share_purchase_id',
         'certificate_number',
         'number_of_shares',
+        'share_value_per_share',
         'issue_date',
         'expiry_date',
-        'status',
+        'is_active',
         'notes',
     ];
 
