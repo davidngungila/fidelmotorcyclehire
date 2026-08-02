@@ -886,16 +886,15 @@
             <p style="color: #1f2937; font-size: 16px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">is a registered and active member of <strong>FEED TAN CMG SACCO</strong>, holding <strong>Membership Number ${memberData.member_number}</strong>, with a registration date of <strong>${memberData.registration_date}</strong>. This certificate serves as official proof of membership and entitles the holder to the rights, privileges, and responsibilities of membership in accordance with the Constitution, By-laws, and Policies of FEED TAN CMG SACCO.</p>
           </div>
           
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid rgba(255,255,255,0.5);">
-            <div style="text-align: left;">
-              <p style="color: #1f2937; font-size: 12px; margin-bottom: 5px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">Verification Code:</p>
-              <p style="color: #1e40af; font-size: 14px; font-weight: bold; font-family: monospace; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">${verificationCode}</p>
-              <p style="color: #1f2937; font-size: 10px; margin-top: 5px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">Scan QR code to verify authenticity</p>
-            </div>
-            <div style="text-align: right;">
-              <img src="${qrCodeUrl}" alt="QR Code" style="width: 100px; height: 100px; border: 2px solid rgba(255,255,255,0.5); border-radius: 8px;">
-              <p style="color: #1f2937; font-size: 10px; margin-top: 5px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">Issued by FEED TAN CMG SACCO on ${new Date().toLocaleDateString()}.</p>
-            </div>
+          <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid rgba(255,255,255,0.5);">
+            <img src="${qrCodeUrl}" alt="QR Code" style="width: 100px; height: 100px; border: 2px solid rgba(255,255,255,0.5); border-radius: 8px; margin: 0 auto 15px;">
+            <p style="color: #1f2937; font-size: 12px; margin-bottom: 5px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">Verification Code:</p>
+            <p style="color: #1e40af; font-size: 14px; font-weight: bold; font-family: monospace; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">${verificationCode}</p>
+            <p style="color: #1f2937; font-size: 10px; margin-top: 5px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">Scan QR code to verify authenticity</p>
+          </div>
+          
+          <div style="text-align: center; margin-top: 20px;">
+            <p style="color: #1f2937; font-size: 14px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">Issued by FEED TAN CMG SACCO on ${new Date().toLocaleDateString()}.</p>
           </div>
         </div>
       </div>
