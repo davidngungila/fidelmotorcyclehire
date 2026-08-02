@@ -34,6 +34,18 @@ use App\Http\Controllers\Admin\ShareReportController as AdminShareReportControll
 use App\Http\Controllers\Admin\ShareSettingController as AdminShareSettingController;
 use App\Http\Controllers\Admin\AccountController as AdminAccountController;
 use App\Http\Controllers\Admin\JournalEntryController as AdminJournalEntryController;
+use App\Http\Controllers\Admin\LedgerAccountController as AdminLedgerAccountController;
+use App\Http\Controllers\Admin\TrialBalanceController as AdminTrialBalanceController;
+use App\Http\Controllers\Admin\BalanceSheetController as AdminBalanceSheetController;
+use App\Http\Controllers\Admin\IncomeStatementController as AdminIncomeStatementController;
+use App\Http\Controllers\Admin\CashFlowController as AdminCashFlowController;
+use App\Http\Controllers\Admin\BankAccountController as AdminBankAccountController;
+use App\Http\Controllers\Admin\FixedAssetController as AdminFixedAssetController;
+use App\Http\Controllers\Admin\ReceiptController as AdminReceiptController;
+use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
+use App\Http\Controllers\Admin\ExpenseController as AdminExpenseController;
+use App\Http\Controllers\Admin\RevenueController as AdminRevenueController;
+use App\Http\Controllers\Admin\LoanCompletionCertificateController as AdminLoanCompletionCertificateController;
 use App\Http\Controllers\Member\DashboardController as MemberDashboardController;
 use App\Http\Controllers\Member\ProfileController as MemberProfileController;
 use App\Http\Controllers\Member\LoanController as MemberLoanController;
@@ -44,6 +56,7 @@ use App\Http\Controllers\Member\SwfController as MemberSwfController;
 use App\Http\Controllers\Member\InvestmentController as MemberInvestmentController;
 use App\Http\Controllers\Member\StatementController as MemberStatementController;
 use App\Http\Controllers\Member\NotificationController as MemberNotificationController;
+use App\Http\Controllers\Member\CertificateController as MemberCertificateController;
 use App\Http\Controllers\Member\SavingPlanController as MemberSavingPlanController;
 
 Route::get('/', function () {
@@ -121,6 +134,14 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::post('/loans/{id}/disburse', [AdminLoanController::class, 'disburse'])->name('loans.disburse');
     Route::post('/loans/import-loan-payments', [AdminLoanController::class, 'importLoanPayments'])->name('loans.import-loan-payments');
     Route::post('/loans/import-loans-information', [AdminLoanController::class, 'importLoansInformation'])->name('loans.import-loans-information');
+
+    // Loan Completion Certificates routes
+    Route::get('/loan-completion-certificates', [AdminLoanCompletionCertificateController::class, 'index'])->name('loan-completion-certificates.index');
+    Route::get('/loan-completion-certificates/create/{loanId}', [AdminLoanCompletionCertificateController::class, 'create'])->name('loan-completion-certificates.create');
+    Route::post('/loan-completion-certificates/{loanId}', [AdminLoanCompletionCertificateController::class, 'store'])->name('loan-completion-certificates.store');
+    Route::get('/loan-completion-certificates/{id}', [AdminLoanCompletionCertificateController::class, 'show'])->name('loan-completion-certificates.show');
+    Route::get('/loan-completion-certificates/{id}/print', [AdminLoanCompletionCertificateController::class, 'print'])->name('loan-completion-certificates.print');
+    Route::delete('/loan-completion-certificates/{id}', [AdminLoanCompletionCertificateController::class, 'destroy'])->name('loan-completion-certificates.destroy');
 
     Route::get('/loan-products', [AdminLoanProductController::class, 'index'])->name('loan-products.index');
     Route::get('/loan-products/create', [AdminLoanProductController::class, 'create'])->name('loan-products.create');
@@ -320,6 +341,70 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::post('/journal-entries/{id}/post', [AdminJournalEntryController::class, 'post'])->name('journal-entries.post');
     Route::post('/journal-entries/{id}/void', [AdminJournalEntryController::class, 'void'])->name('journal-entries.void');
 
+    // General Ledger routes
+    Route::get('/ledger', [AdminLedgerAccountController::class, 'index'])->name('ledger.index');
+    Route::get('/ledger/{accountId}', [AdminLedgerAccountController::class, 'show'])->name('ledger.show');
+    Route::post('/ledger/filter', [AdminLedgerAccountController::class, 'accountLedger'])->name('ledger.filter');
+
+    // Trial Balance routes
+    Route::get('/trial-balance', [AdminTrialBalanceController::class, 'index'])->name('trial-balance.index');
+
+    // Balance Sheet routes
+    Route::get('/balance-sheet', [AdminBalanceSheetController::class, 'index'])->name('balance-sheet.index');
+
+    // Income Statement routes
+    Route::get('/income-statement', [AdminIncomeStatementController::class, 'index'])->name('income-statement.index');
+
+    // Cash Flow routes
+    Route::get('/cash-flow', [AdminCashFlowController::class, 'index'])->name('cash-flow.index');
+
+    // Bank Accounts routes
+    Route::get('/bank-accounts', [AdminBankAccountController::class, 'index'])->name('bank-accounts.index');
+    Route::get('/bank-accounts/create', [AdminBankAccountController::class, 'create'])->name('bank-accounts.create');
+    Route::post('/bank-accounts', [AdminBankAccountController::class, 'store'])->name('bank-accounts.store');
+    Route::get('/bank-accounts/{id}', [AdminBankAccountController::class, 'show'])->name('bank-accounts.show');
+    Route::get('/bank-accounts/{id}/edit', [AdminBankAccountController::class, 'edit'])->name('bank-accounts.edit');
+    Route::put('/bank-accounts/{id}', [AdminBankAccountController::class, 'update'])->name('bank-accounts.update');
+    Route::delete('/bank-accounts/{id}', [AdminBankAccountController::class, 'destroy'])->name('bank-accounts.destroy');
+
+    // Fixed Assets routes
+    Route::get('/fixed-assets', [AdminFixedAssetController::class, 'index'])->name('fixed-assets.index');
+    Route::get('/fixed-assets/create', [AdminFixedAssetController::class, 'create'])->name('fixed-assets.create');
+    Route::post('/fixed-assets', [AdminFixedAssetController::class, 'store'])->name('fixed-assets.store');
+    Route::get('/fixed-assets/{id}', [AdminFixedAssetController::class, 'show'])->name('fixed-assets.show');
+    Route::get('/fixed-assets/{id}/edit', [AdminFixedAssetController::class, 'edit'])->name('fixed-assets.edit');
+    Route::put('/fixed-assets/{id}', [AdminFixedAssetController::class, 'update'])->name('fixed-assets.update');
+    Route::delete('/fixed-assets/{id}', [AdminFixedAssetController::class, 'destroy'])->name('fixed-assets.destroy');
+    Route::post('/fixed-assets/{id}/calculate-depreciation', [AdminFixedAssetController::class, 'calculateDepreciation'])->name('fixed-assets.calculate-depreciation');
+
+    // Receipts routes
+    Route::get('/receipts', [AdminReceiptController::class, 'index'])->name('receipts.index');
+    Route::get('/receipts/create', [AdminReceiptController::class, 'create'])->name('receipts.create');
+    Route::post('/receipts', [AdminReceiptController::class, 'store'])->name('receipts.store');
+    Route::get('/receipts/{id}', [AdminReceiptController::class, 'show'])->name('receipts.show');
+    Route::delete('/receipts/{id}', [AdminReceiptController::class, 'destroy'])->name('receipts.destroy');
+
+    // Payments routes
+    Route::get('/payments', [AdminPaymentController::class, 'index'])->name('payments.index');
+    Route::get('/payments/create', [AdminPaymentController::class, 'create'])->name('payments.create');
+    Route::post('/payments', [AdminPaymentController::class, 'store'])->name('payments.store');
+    Route::get('/payments/{id}', [AdminPaymentController::class, 'show'])->name('payments.show');
+    Route::delete('/payments/{id}', [AdminPaymentController::class, 'destroy'])->name('payments.destroy');
+
+    // Expenses routes
+    Route::get('/expenses', [AdminExpenseController::class, 'index'])->name('expenses.index');
+    Route::get('/expenses/create', [AdminExpenseController::class, 'create'])->name('expenses.create');
+    Route::post('/expenses', [AdminExpenseController::class, 'store'])->name('expenses.store');
+    Route::get('/expenses/{id}', [AdminExpenseController::class, 'show'])->name('expenses.show');
+    Route::delete('/expenses/{id}', [AdminExpenseController::class, 'destroy'])->name('expenses.destroy');
+
+    // Revenues routes
+    Route::get('/revenues', [AdminRevenueController::class, 'index'])->name('revenues.index');
+    Route::get('/revenues/create', [AdminRevenueController::class, 'create'])->name('revenues.create');
+    Route::post('/revenues', [AdminRevenueController::class, 'store'])->name('revenues.store');
+    Route::get('/revenues/{id}', [AdminRevenueController::class, 'show'])->name('revenues.show');
+    Route::delete('/revenues/{id}', [AdminRevenueController::class, 'destroy'])->name('revenues.destroy');
+
     // Accounting routes
     Route::get('/accounting/dashboard', [AdminAccountingController::class, 'dashboard'])->name('accounting.dashboard');
     Route::get('/accounting/chart-of-accounts', [AdminAccountingController::class, 'chartOfAccounts'])->name('accounting.chart-of-accounts');
@@ -421,4 +506,10 @@ Route::prefix('member')->middleware(['auth', 'role:member', 'member.isolation'])
     Route::get('/notifications', [MemberNotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/mark-all-read', [MemberNotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
     Route::post('/notifications/{id}/read', [MemberNotificationController::class, 'markRead'])->name('notifications.read');
+
+    Route::get('/certificates', [MemberCertificateController::class, 'index'])->name('certificates.index');
+    Route::get('/certificates/loan/{id}', [MemberCertificateController::class, 'showLoanCertificate'])->name('certificates.loan-show');
+    Route::get('/certificates/loan/{id}/print', [MemberCertificateController::class, 'printLoanCertificate'])->name('certificates.loan-print');
+    Route::get('/certificates/share/{id}', [MemberCertificateController::class, 'showShareCertificate'])->name('certificates.share-show');
+    Route::get('/certificates/share/{id}/print', [MemberCertificateController::class, 'printShareCertificate'])->name('certificates.share-print');
 });

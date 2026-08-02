@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Member;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\Investment;
+use App\Models\SharePurchase;
 use App\Models\Transaction;
 use App\Services\AdminDashboardService;
 use App\Traits\FlashMessages;
@@ -87,6 +88,28 @@ class DashboardController extends Controller
         $savings = ['transactions' => [], 'balance' => 0, 'running_balance' => 0]; // Placeholder for savings
         $deposits = []; // Placeholder for deposits
         
+        // Get shares data from database
+        $dbShares = SharePurchase::with(['shareProduct', 'shareCertificates'])
+            ->where('user_id', $user->id)
+            ->orderBy('purchase_date', 'desc')
+            ->get();
+        
+        $shares = $dbShares->map(function ($share) {
+            return [
+                'share_number' => $share->id,
+                'product' => $share->shareProduct ? $share->shareProduct->name : 'Unknown Product',
+                'number_of_shares' => $share->number_of_shares,
+                'price_per_share' => $share->price_per_share,
+                'total_amount' => $share->total_amount,
+                'purchase_date' => $share->purchase_date ? $share->purchase_date->format('Y-m-d') : null,
+                'payment_status' => $share->payment_status,
+                'has_certificate' => $share->shareCertificates && $share->shareCertificates->count() > 0,
+                'certificate_id' => $share->shareCertificates && $share->shareCertificates->count() > 0 ? $share->shareCertificates->first()->id : null,
+            ];
+        })->toArray();
+        
+        $shareBalance = collect($shares)->sum('total_amount');
+        
         // Get SWF data from database
         $swfMember = $user->swfMember;
         if ($swfMember) {
@@ -165,7 +188,13 @@ class DashboardController extends Controller
             return in_array($status, ['active', 'approved', 'disbursed']);
         });
 
-        $recentTransactions = $this->consolidateRecentTransactions($loans, $savings, $deposits, $swf, $investments);
+        // Filter completed loans for certificate access
+        $completedLoans = array_filter($loans, function(array $loan): bool {
+            $status = strtolower($loan['status'] ?? '');
+            return $status === 'completed' || $status === 'paid';
+        });
+
+        $recentTransactions = $this->consolidateRecentTransactions($loans, $savings, $deposits, $swf, $investments, $shares);
 
         $savingsGrowth = $this->buildSavingsGrowthData($savings);
         $investmentDistribution = $this->buildInvestmentDistribution($dbInvestments);
@@ -186,14 +215,17 @@ class DashboardController extends Controller
             'member',
             'loans',
             'activeLoans',
+            'completedLoans',
             'savings',
             'deposits',
             'swf',
+            'shares',
             'investments',
             'loanBalance',
             'savingsBalance',
             'depositBalance',
             'swfBalance',
+            'shareBalance',
             'investmentBalance',
             'recentTransactions',
             'savingsGrowth',
@@ -202,7 +234,7 @@ class DashboardController extends Controller
         ));
     }
 
-    protected function consolidateRecentTransactions(array $loans, array $savings, array $deposits, array $swf, array $investments): array
+    protected function consolidateRecentTransactions(array $loans, array $savings, array $deposits, array $swf, array $investments, array $shares): array
     {
         $transactions = [];
 
@@ -289,6 +321,21 @@ class DashboardController extends Controller
                     'balance_after' => (float) ($swf['current_balance'] ?? 0),
                     'sort_date' => strtotime($c['date']),
                 ];
+            }
+        }
+
+        if (!empty($shares)) {
+            foreach ($shares as $share) {
+                if (!empty($share['purchase_date'])) {
+                    $transactions[] = [
+                        'date' => $share['purchase_date'],
+                        'type' => 'Share Purchase',
+                        'description' => "Purchased {$share['number_of_shares']} shares of {$share['product']}",
+                        'amount' => (float) $share['total_amount'],
+                        'balance_after' => (float) ($share['total_amount'] ?? 0),
+                        'sort_date' => strtotime($share['purchase_date']),
+                    ];
+                }
             }
         }
 
