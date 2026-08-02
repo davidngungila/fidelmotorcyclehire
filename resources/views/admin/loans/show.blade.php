@@ -58,28 +58,6 @@
         </div>
       </div>
 
-      <!-- Appreciation Certificate Preview Modal -->
-      <div id="appreciationCertificateModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-[9999]">
-        <div class="bg-white dark:bg-dark-card rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-auto">
-          <div class="p-6">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Appreciation Certificate Preview</h3>
-              <button onclick="closeAppreciationModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                <i class="fa-solid fa-times text-xl"></i>
-              </button>
-            </div>
-            <div id="appreciationCertificatePreview">
-              <!-- Certificate content will be loaded here -->
-            </div>
-            <div class="flex items-center gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-              <button type="button" onclick="printAppreciationCertificate()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-sm font-semibold transition-all">
-                <i class="fa-solid fa-print"></i> Print Certificate
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div class="w-full lg:ml-auto lg:w-auto lg:max-w-md">
         <div class="p-4 rounded-2xl bg-primary-50 dark:bg-primary-900/30 border border-primary-100 dark:border-primary-900/50">
           <div class="flex items-start gap-3">
@@ -695,6 +673,28 @@
               @endforelse
             </tbody>
           </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Appreciation Certificate Preview Modal -->
+  <div id="appreciationCertificateModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-[9999]">
+    <div class="bg-white dark:bg-dark-card rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-auto">
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Appreciation Certificate Preview</h3>
+          <button onclick="closeAppreciationModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+            <i class="fa-solid fa-times text-xl"></i>
+          </button>
+        </div>
+        <div id="appreciationCertificatePreview">
+          <!-- Certificate content will be loaded here -->
+        </div>
+        <div class="flex items-center gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <button type="button" onclick="printAppreciationCertificate()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-sm font-semibold transition-all">
+            <i class="fa-solid fa-print"></i> Print Certificate
+          </button>
         </div>
       </div>
     </div>
