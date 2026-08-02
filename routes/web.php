@@ -48,6 +48,7 @@ use App\Http\Controllers\Admin\RevenueController as AdminRevenueController;
 use App\Http\Controllers\Member\DashboardController as MemberDashboardController;
 use App\Http\Controllers\Member\ProfileController as MemberProfileController;
 use App\Http\Controllers\Member\LoanController as MemberLoanController;
+use App\Http\Controllers\Member\ShareController as MemberShareController;
 use App\Http\Controllers\Member\SavingController as MemberSavingController;
 use App\Http\Controllers\Member\ErrorController as MemberErrorController;
 use App\Http\Controllers\Member\DepositController as MemberDepositController;
@@ -481,6 +482,8 @@ Route::prefix('member')->middleware(['auth', 'role:member', 'member.isolation'])
     Route::get('/loans/{encryptedLoanNumber}', [MemberLoanController::class, 'show'])->name('loans.show');
 
     Route::get('/savings', [MemberSavingController::class, 'index'])->name('savings.index');
+
+    Route::get('/shares', [MemberShareController::class, 'index'])->name('shares.index');
 
     Route::get('/saving-plan', [MemberSavingPlanController::class, 'index'])->name('saving-plan.index');
 
