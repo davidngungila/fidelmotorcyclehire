@@ -254,152 +254,151 @@
         </div>
     </div>
 
-</div>
-
-<!-- Certificate Modal -->
-<div id="certificateModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-    <div class="bg-white dark:bg-dark-card rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div class="sticky top-0 bg-white dark:bg-dark-card border-b border-gray-200 dark:border-dark-border p-4 flex items-center justify-between">
-            <h3 class="text-lg font-bold text-gray-900 dark:text-white">Certificate Preview</h3>
-            <button onclick="closeCertificateModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                <i class="fa-solid fa-xmark text-xl"></i>
-            </button>
-        </div>
-        <div id="certificateContent" class="p-6">
-            <!-- Certificate content will be loaded here -->
-        </div>
-        <div class="sticky bottom-0 bg-white dark:bg-dark-card border-t border-gray-200 dark:border-dark-border p-4 flex justify-end gap-3">
-            <button onclick="closeCertificateModal()" class="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold transition-colors">
-                Close
-            </button>
-            <a id="printCertificateBtn" href="#" target="_blank" class="px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-500 text-white font-semibold transition-colors">
-                <i class="fa-solid fa-print mr-2"></i>Print
-            </a>
+    <!-- Certificate Modal -->
+    <div id="certificateModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-dark-card rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-white dark:bg-dark-card border-b border-gray-200 dark:border-dark-border p-4 flex items-center justify-between">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Certificate Preview</h3>
+                <button onclick="closeCertificateModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div id="certificateContent" class="p-6">
+                <!-- Certificate content will be loaded here -->
+            </div>
+            <div class="sticky bottom-0 bg-white dark:bg-dark-card border-t border-gray-200 dark:border-dark-border p-4 flex justify-end gap-3">
+                <button onclick="closeCertificateModal()" class="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold transition-colors">
+                    Close
+                </button>
+                <a id="printCertificateBtn" href="#" target="_blank" class="px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-500 text-white font-semibold transition-colors">
+                    <i class="fa-solid fa-print mr-2"></i>Print
+                </a>
+            </div>
         </div>
     </div>
+
+    <script>
+    function openCertificateModal() {
+        const modal = document.getElementById('certificateModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        loadMembershipCertificate();
+    }
+
+    function closeCertificateModal() {
+        const modal = document.getElementById('certificateModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    async function loadMembershipCertificate() {
+        const content = document.getElementById('certificateContent');
+        content.innerHTML = '<div class="text-center py-8"><i class="fa-solid fa-spinner fa-spin text-2xl text-primary-500"></i><p class="mt-2 text-gray-600 dark:text-gray-400">Loading certificate...</p></div>';
+
+        try {
+            const response = await fetch('{{ route('member.certificates.membership-preview') }}', {
+                headers: {
+                    'Accept': 'application/json',
+                }
+            });
+            const data = await response.json();
+            
+            const certificateHtml = `
+                <div class="text-center space-y-6">
+                    <div class="w-20 h-20 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center mx-auto shadow-lg">
+                        <i class="fa-solid fa-certificate text-3xl text-white"></i>
+                    </div>
+                    
+                    <div>
+                        <h2 class="text-2xl font-bold text-primary-900 dark:text-white mb-2">Certificate of Membership</h2>
+                        <p class="text-lg font-semibold text-primary-600 dark:text-primary-400">${data.organization}</p>
+                    </div>
+                    
+                    <div class="bg-primary-50 dark:bg-primary-900/20 rounded-xl p-6 space-y-4">
+                        <p class="text-gray-600 dark:text-gray-400 text-sm">This is to certify that</p>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">${data.name}</h3>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm">is a registered member of</p>
+                        <p class="text-lg font-semibold text-primary-700 dark:text-primary-300">${data.organization}</p>
+                    </div>
+                    
+                    <div class="flex flex-wrap justify-center gap-4 text-sm">
+                        <div class="bg-gray-50 dark:bg-gray-800 rounded-lg px-4 py-2">
+                            <span class="text-gray-500 dark:text-gray-400">Membership Number:</span>
+                            <span class="font-mono font-bold text-gray-900 dark:text-white ml-1">${data.member_number}</span>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-800 rounded-lg px-4 py-2">
+                            <span class="text-gray-500 dark:text-gray-400">Registration Date:</span>
+                            <span class="font-bold text-gray-900 dark:text-white ml-1">${data.registration_date}</span>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-800 rounded-lg px-4 py-2">
+                            <span class="text-gray-500 dark:text-gray-400">Branch:</span>
+                            <span class="font-bold text-gray-900 dark:text-white ml-1">${data.branch}</span>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-800 rounded-lg px-4 py-2">
+                            <span class="text-gray-500 dark:text-gray-400">Status:</span>
+                            <span class="font-bold ${data.status === 'Active' ? 'text-green-600' : 'text-gray-600'} ml-1">${data.status}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                        <p class="text-sm text-gray-600 dark:text-gray-400">This certificate confirms the membership status and entitles the holder to all rights and privileges of membership.</p>
+                    </div>
+                    
+                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                        <p>Issued by ${data.organization} • ${data.issue_date}</p>
+                    </div>
+                </div>
+            `;
+            
+            content.innerHTML = certificateHtml;
+            
+            // Update print button to print the modal content
+            document.getElementById('printCertificateBtn').onclick = function(e) {
+                e.preventDefault();
+                const printContent = content.innerHTML;
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Membership Certificate</title>
+                        <script src="https://cdn.tailwindcss.com"><\/script>
+                        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+                        <style>
+                            body { font-family: Georgia, serif; padding: 40px; }
+                            @media print { body { padding: 20px; } }
+                        </style>
+                    </head>
+                    <body class="bg-gray-50">
+                        <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-8">
+                            ${printContent}
+                        </div>
+                    </body>
+                    </html>
+                `);
+                printWindow.document.close();
+                setTimeout(() => printWindow.print(), 500);
+            };
+            
+        } catch (error) {
+            content.innerHTML = '<div class="text-center py-8 text-red-500"><i class="fa-solid fa-exclamation-circle text-2xl mb-2"></i><p>Failed to load certificate</p></div>';
+        }
+    }
+
+    // Close modal on escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeCertificateModal();
+        }
+    });
+
+    // Close modal on backdrop click
+    document.getElementById('certificateModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeCertificateModal();
+        }
+    });
+    </script>
 </div>
-
-<script>
-function openCertificateModal() {
-    const modal = document.getElementById('certificateModal');
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-    loadMembershipCertificate();
-}
-
-function closeCertificateModal() {
-    const modal = document.getElementById('certificateModal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-}
-
-async function loadMembershipCertificate() {
-    const content = document.getElementById('certificateContent');
-    content.innerHTML = '<div class="text-center py-8"><i class="fa-solid fa-spinner fa-spin text-2xl text-primary-500"></i><p class="mt-2 text-gray-600 dark:text-gray-400">Loading certificate...</p></div>';
-
-    try {
-        const response = await fetch('{{ route('member.certificates.membership-preview') }}', {
-            headers: {
-                'Accept': 'application/json',
-            }
-        });
-        const data = await response.json();
-        
-        const certificateHtml = `
-            <div class="text-center space-y-6">
-                <div class="w-20 h-20 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center mx-auto shadow-lg">
-                    <i class="fa-solid fa-certificate text-3xl text-white"></i>
-                </div>
-                
-                <div>
-                    <h2 class="text-2xl font-bold text-primary-900 dark:text-white mb-2">Certificate of Membership</h2>
-                    <p class="text-lg font-semibold text-primary-600 dark:text-primary-400">${data.organization}</p>
-                </div>
-                
-                <div class="bg-primary-50 dark:bg-primary-900/20 rounded-xl p-6 space-y-4">
-                    <p class="text-gray-600 dark:text-gray-400 text-sm">This is to certify that</p>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">${data.name}</h3>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm">is a registered member of</p>
-                    <p class="text-lg font-semibold text-primary-700 dark:text-primary-300">${data.organization}</p>
-                </div>
-                
-                <div class="flex flex-wrap justify-center gap-4 text-sm">
-                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg px-4 py-2">
-                        <span class="text-gray-500 dark:text-gray-400">Membership Number:</span>
-                        <span class="font-mono font-bold text-gray-900 dark:text-white ml-1">${data.member_number}</span>
-                    </div>
-                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg px-4 py-2">
-                        <span class="text-gray-500 dark:text-gray-400">Registration Date:</span>
-                        <span class="font-bold text-gray-900 dark:text-white ml-1">${data.registration_date}</span>
-                    </div>
-                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg px-4 py-2">
-                        <span class="text-gray-500 dark:text-gray-400">Branch:</span>
-                        <span class="font-bold text-gray-900 dark:text-white ml-1">${data.branch}</span>
-                    </div>
-                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg px-4 py-2">
-                        <span class="text-gray-500 dark:text-gray-400">Status:</span>
-                        <span class="font-bold ${data.status === 'Active' ? 'text-green-600' : 'text-gray-600'} ml-1">${data.status}</span>
-                    </div>
-                </div>
-                
-                <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
-                    <p class="text-sm text-gray-600 dark:text-gray-400">This certificate confirms the membership status and entitles the holder to all rights and privileges of membership.</p>
-                </div>
-                
-                <div class="text-xs text-gray-500 dark:text-gray-400">
-                    <p>Issued by ${data.organization} • ${data.issue_date}</p>
-                </div>
-            </div>
-        `;
-        
-        content.innerHTML = certificateHtml;
-        
-        // Update print button to print the modal content
-        document.getElementById('printCertificateBtn').onclick = function(e) {
-            e.preventDefault();
-            const printContent = content.innerHTML;
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Membership Certificate</title>
-                    <script src="https://cdn.tailwindcss.com"></script>
-                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-                    <style>
-                        body { font-family: Georgia, serif; padding: 40px; }
-                        @media print { body { padding: 20px; } }
-                    </style>
-                </head>
-                <body class="bg-gray-50">
-                    <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-8">
-                        ${printContent}
-                    </div>
-                </body>
-                </html>
-            `);
-            printWindow.document.close();
-            setTimeout(() => printWindow.print(), 500);
-        };
-        
-    } catch (error) {
-        content.innerHTML = '<div class="text-center py-8 text-red-500"><i class="fa-solid fa-exclamation-circle text-2xl mb-2"></i><p>Failed to load certificate</p></div>';
-    }
-}
-
-// Close modal on escape key
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        closeCertificateModal();
-    }
-});
-
-// Close modal on backdrop click
-document.getElementById('certificateModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeCertificateModal();
-    }
-});
-</script>
 
 @endsection
