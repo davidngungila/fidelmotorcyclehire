@@ -20,76 +20,55 @@
     </div>
   </div>
 
+  @php
+    $settings = \Illuminate\Support\Facades\Cache::get('share_settings', []);
+    $certificateBackgroundPath = $settings['certificate_background'] ?? '';
+    $certificateBackgroundUrl = $certificateBackgroundPath ? asset('storage/' . $certificateBackgroundPath) : '';
+    $memberName = $certificate->sharePurchase->member->name ?? 'N/A';
+    $shareProduct = $certificate->sharePurchase->shareProduct->name ?? 'N/A';
+    $totalValue = $certificate->number_of_shares * $certificate->share_value_per_share;
+  @endphp
+
   <div class="glass rounded-xl p-8 max-w-4xl mx-auto border-4 border-blue-200 dark:border-blue-800">
-    <div class="text-center mb-8">
-      <div class="w-20 h-20 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center mx-auto mb-4">
-        <i class="fa-solid fa-file-contract text-4xl text-blue-600 dark:text-blue-400"></i>
-      </div>
-      <h2 class="text-3xl font-bold text-blue-700 dark:text-blue-400 mb-2">Share Certificate</h2>
-      <p class="text-gray-600 dark:text-gray-400">This certifies ownership of shares in the organization</p>
-    </div>
-
-    <div class="space-y-6">
-      <div class="grid grid-cols-2 gap-6">
-        <div>
-          <label class="text-sm font-semibold text-gray-600 dark:text-gray-400">Certificate Number</label>
-          <div class="font-mono text-lg font-bold text-gray-900 dark:text-white">{{ $certificate->certificate_number }}</div>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+    <style>
+      .great-vibes-regular {
+        font-family: "Great Vibes", cursive;
+        font-weight: 400;
+        font-style: normal;
+      }
+    </style>
+    
+    <div style="background-image: url('{{ $certificateBackgroundUrl }}'); background-size: cover; background-position: center; background-repeat: no-repeat; min-height: 500px; padding: 40px; position: relative;">
+      <div style="padding: 40px; position: relative; z-index: 1;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <h1 style="font-size: 32px; font-weight: bold; color: #1e40af; margin-bottom: 5px; font-family: 'Times New Roman', serif; text-shadow: 2px 2px 4px rgba(255,255,255,0.8);">CERTIFICATE OF OWNERSHIP</h1>
         </div>
-        <div>
-          <label class="text-sm font-semibold text-gray-600 dark:text-gray-400">Issue Date</label>
-          <div class="text-lg font-semibold text-gray-900 dark:text-white">{{ $certificate->issue_date->format('F d, Y') }}</div>
+        
+        <div style="text-align: center; margin-bottom: 30px;">
+          <p style="color: #1f2937; font-size: 16px; margin-bottom: 10px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">THIS CERTIFICATE IS PROUDLY PRESENTED TO</p>
+          <h2 class="great-vibes-regular" style="font-size: 36px; color: #1e40af; margin: 10px 0; text-shadow: 2px 2px 4px rgba(255,255,255,0.8);">{{ $memberName }}</h2>
+          <div style="width: 350px; height: 2px; background: linear-gradient(to right, transparent, #1e40af, transparent); margin: 8px auto;"></div>
+          <p style="color: #1f2937; font-size: 16px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">This certifies that {{ $memberName }} is the registered owner of <strong>{{ $certificate->number_of_shares }} {{ $shareProduct }}</strong> in FEEDTAN COMMUNITY MICROFINANCE GROUP with a total value of <strong>TZS {{ number_format($totalValue, 2) }}</strong>. The shares are issued in accordance with the organization's Constitution, Share Policy, and applicable regulations, granting the shareholder all rights and responsibilities of ownership.</p>
         </div>
-      </div>
-
-      <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
-        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Share Details</h3>
-        <div class="grid grid-cols-2 gap-6">
-          <div>
-            <label class="text-sm font-semibold text-gray-600 dark:text-gray-400">Number of Shares</label>
-            <div class="text-lg font-semibold text-gray-900 dark:text-white">{{ $certificate->number_of_shares }}</div>
-          </div>
-          <div>
-            <label class="text-sm font-semibold text-gray-600 dark:text-gray-400">Share Product</label>
-            <div class="text-lg font-semibold text-gray-900 dark:text-white">{{ $certificate->sharePurchase->shareProduct->name ?? 'N/A' }}</div>
-          </div>
-          <div>
-            <label class="text-sm font-semibold text-gray-600 dark:text-gray-400">Share Value</label>
-            <div class="text-lg font-semibold text-gray-900 dark:text-white">TSh {{ number_format($certificate->share_value_per_share, 2) }} per share</div>
-          </div>
-          <div>
-            <label class="text-sm font-semibold text-gray-600 dark:text-gray-400">Total Value</label>
-            <div class="text-lg font-semibold text-gray-900 dark:text-white">TSh {{ number_format($certificate->number_of_shares * $certificate->share_value_per_share, 2) }}</div>
-          </div>
+        
+        <div style="text-align: center; margin-top: 30px; padding: 20px; background: rgba(255, 255, 255, 0.4); border-radius: 8px; backdrop-filter: blur(2px);">
+          <p style="color: #1f2937; font-size: 14px; line-height: 1.8; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">
+            Certificate No: <strong>{{ $certificate->certificate_number }}</strong> | 
+            Status: <strong>{{ $certificate->is_active ? 'Active' : 'Inactive' }}</strong> | 
+            Share Product: <strong>{{ $shareProduct }}</strong> | 
+            Issue Date: <strong>{{ $certificate->issue_date->format('d F Y') }}</strong> | 
+            Ownership Status: <strong>Fully Paid</strong> | 
+            Expiry: <strong>N/A (Permanent)</strong>
+          </p>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid rgba(255,255,255,0.5);">
+          <p style="color: #1f2937; font-size: 14px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">This certificate serves as official proof of share ownership and remains valid according to the organization's governing policies.</p>
         </div>
       </div>
-
-      <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
-        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Member Details</h3>
-        <div class="grid grid-cols-2 gap-6">
-          <div>
-            <label class="text-sm font-semibold text-gray-600 dark:text-gray-400">Member Name</label>
-            <div class="text-lg font-semibold text-gray-900 dark:text-white">{{ $certificate->sharePurchase->member->name ?? 'N/A' }}</div>
-          </div>
-          <div>
-            <label class="text-sm font-semibold text-gray-600 dark:text-gray-400">Member Number</label>
-            <div class="font-mono text-lg font-bold text-gray-900 dark:text-white">{{ $certificate->sharePurchase->member_number }}</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
-        <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6 text-center">
-          <p class="text-lg font-bold text-blue-700 dark:text-blue-400 mb-2">✓ Share Ownership Confirmed</p>
-          <p class="text-sm text-gray-600 dark:text-gray-400">This certificate serves as proof of share ownership in the organization.</p>
-        </div>
-      </div>
-
-      @if($certificate->notes)
-        <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
-          <label class="text-sm font-semibold text-gray-600 dark:text-gray-400">Additional Notes</label>
-          <div class="text-sm text-gray-900 dark:text-white mt-2">{{ $certificate->notes }}</div>
-        </div>
-      @endif
     </div>
   </div>
 </div>
