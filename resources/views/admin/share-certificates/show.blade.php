@@ -158,8 +158,8 @@ const certificateData = {
   user_name: '{{ $shareCertificate->user->name ?? 'N/A' }}',
   share_product: '{{ $shareCertificate->shareProduct->name ?? 'N/A' }}',
   number_of_shares: {{ $shareCertificate->number_of_shares }},
-  issue_date: '{{ $shareCertificate->issue_date ? $shareCertificate->issue_date->format('M d, Y') : 'N/A' }}',
-  expiry_date: '{{ $shareCertificate->expiry_date ? $shareCertificate->expiry_date->format('M d, Y') : 'N/A' }}',
+  total_value: {{ $shareCertificate->number_of_shares * ($shareCertificate->share_value_per_share ?? 10000) }},
+  issue_date: '{{ $shareCertificate->issue_date ? $shareCertificate->issue_date->format('d F Y') : 'N/A' }}',
   status: '{{ ucfirst($shareCertificate->status) }}'
 };
 
@@ -180,46 +180,35 @@ function previewCertificate() {
   }
   
   preview.innerHTML = `
-    <div style="${backgroundStyle} min-height: 400px; padding: 40px; position: relative;">
-      <div style="background: rgba(255, 255, 255, 0.95); padding: 30px; border-radius: 10px; position: relative; z-index: 1;">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+    <div style="${backgroundStyle} min-height: 500px; padding: 40px; position: relative;">
+      <div style="padding: 40px; position: relative; z-index: 1;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <h1 style="font-size: 32px; font-weight: bold; color: #1e40af; margin-bottom: 5px; font-family: 'Times New Roman', serif;">CERTIFICATE OF OWNERSHIP</h1>
+        </div>
+        
         <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="font-size: 24px; font-weight: bold; color: #1e40af; margin-bottom: 10px;">Share Certificate</h1>
-          <p style="color: #6b7280;">Certificate of Ownership</p>
+          <p style="color: #1f2937; font-size: 16px; margin-bottom: 10px;">THIS CERTIFICATE IS PROUDLY PRESENTED TO</p>
+          <h2 style="font-size: 36px; color: #1e40af; margin: 10px 0; font-family: 'Great Vibes', cursive;">${certificateData.user_name}</h2>
+          <div style="width: 350px; height: 2px; background: linear-gradient(to right, transparent, #1e40af, transparent); margin: 8px auto;"></div>
+          <p style="color: #1f2937; font-size: 16px;">This certifies that ${certificateData.user_name} is the registered owner of <strong>${certificateData.number_of_shares} ${certificateData.share_product}</strong> in FEEDTAN COMMUNITY MICROFINANCE GROUP with a total value of <strong>TZS ${certificateData.total_value.toLocaleString()}</strong>. The shares are issued in accordance with the organization's Constitution, Share Policy, and applicable regulations, granting the shareholder all rights and responsibilities of ownership.</p>
         </div>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-          <div>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Certificate Number:</p>
-            <p style="font-weight: 600; color: #1f2937;">${certificateData.certificate_number}</p>
-          </div>
-          <div>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Status:</p>
-            <p style="font-weight: 600; color: #1f2937;">${certificateData.status}</p>
-          </div>
-          <div>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Shareholder:</p>
-            <p style="font-weight: 600; color: #1f2937;">${certificateData.user_name}</p>
-          </div>
-          <div>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Share Product:</p>
-            <p style="font-weight: 600; color: #1f2937;">${certificateData.share_product}</p>
-          </div>
-          <div>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Number of Shares:</p>
-            <p style="font-weight: 600; color: #1f2937;">${certificateData.number_of_shares}</p>
-          </div>
-          <div>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Issue Date:</p>
-            <p style="font-weight: 600; color: #1f2937;">${certificateData.issue_date}</p>
-          </div>
-          <div>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Expiry Date:</p>
-            <p style="font-weight: 600; color: #1f2937;">${certificateData.expiry_date}</p>
-          </div>
+        <div style="text-align: center; margin-top: 30px; padding: 20px; background: rgba(255, 255, 255, 0.4); border-radius: 8px;">
+          <p style="color: #1f2937; font-size: 14px; line-height: 1.8;">
+            Certificate No: <strong>${certificateData.certificate_number}</strong> | 
+            Status: <strong>${certificateData.status}</strong> | 
+            Share Product: <strong>${certificateData.share_product}</strong> | 
+            Issue Date: <strong>${certificateData.issue_date}</strong> | 
+            Ownership Status: <strong>Fully Paid</strong> | 
+            Expiry: <strong>N/A (Permanent)</strong>
+          </p>
         </div>
         
-        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid #e5e7eb;">
-          <p style="color: #6b7280; font-size: 12px;">This certificate certifies that the above-named person is the registered owner of the stated number of shares.</p>
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid rgba(255,255,255,0.5);">
+          <p style="color: #1f2937; font-size: 14px;">This certificate serves as official proof of share ownership and remains valid according to the organization's governing policies.</p>
         </div>
       </div>
     </div>
@@ -245,46 +234,35 @@ function printCertificate() {
   }
   
   const printContent = `
-    <div style="${backgroundStyle} min-height: 400px; padding: 40px; position: relative;">
-      <div style="background: rgba(255, 255, 255, 0.95); padding: 30px; border-radius: 10px; position: relative; z-index: 1;">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+    <div style="${backgroundStyle} min-height: 500px; padding: 40px; position: relative;">
+      <div style="padding: 40px; position: relative; z-index: 1;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <h1 style="font-size: 32px; font-weight: bold; color: #1e40af; margin-bottom: 5px; font-family: 'Times New Roman', serif;">CERTIFICATE OF OWNERSHIP</h1>
+        </div>
+        
         <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="font-size: 24px; font-weight: bold; color: #1e40af; margin-bottom: 10px;">Share Certificate</h1>
-          <p style="color: #6b7280;">Certificate of Ownership</p>
+          <p style="color: #1f2937; font-size: 16px; margin-bottom: 10px;">THIS CERTIFICATE IS PROUDLY PRESENTED TO</p>
+          <h2 style="font-size: 36px; color: #1e40af; margin: 10px 0; font-family: 'Great Vibes', cursive;">${certificateData.user_name}</h2>
+          <div style="width: 350px; height: 2px; background: linear-gradient(to right, transparent, #1e40af, transparent); margin: 8px auto;"></div>
+          <p style="color: #1f2937; font-size: 16px;">This certifies that ${certificateData.user_name} is the registered owner of <strong>${certificateData.number_of_shares} ${certificateData.share_product}</strong> in FEEDTAN COMMUNITY MICROFINANCE GROUP with a total value of <strong>TZS ${certificateData.total_value.toLocaleString()}</strong>. The shares are issued in accordance with the organization's Constitution, Share Policy, and applicable regulations, granting the shareholder all rights and responsibilities of ownership.</p>
         </div>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-          <div>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Certificate Number:</p>
-            <p style="font-weight: 600; color: #1f2937;">${certificateData.certificate_number}</p>
-          </div>
-          <div>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Status:</p>
-            <p style="font-weight: 600; color: #1f2937;">${certificateData.status}</p>
-          </div>
-          <div>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Shareholder:</p>
-            <p style="font-weight: 600; color: #1f2937;">${certificateData.user_name}</p>
-          </div>
-          <div>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Share Product:</p>
-            <p style="font-weight: 600; color: #1f2937;">${certificateData.share_product}</p>
-          </div>
-          <div>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Number of Shares:</p>
-            <p style="font-weight: 600; color: #1f2937;">${certificateData.number_of_shares}</p>
-          </div>
-          <div>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Issue Date:</p>
-            <p style="font-weight: 600; color: #1f2937;">${certificateData.issue_date}</p>
-          </div>
-          <div>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 5px;">Expiry Date:</p>
-            <p style="font-weight: 600; color: #1f2937;">${certificateData.expiry_date}</p>
-          </div>
+        <div style="text-align: center; margin-top: 30px; padding: 20px; background: rgba(255, 255, 255, 0.4); border-radius: 8px;">
+          <p style="color: #1f2937; font-size: 14px; line-height: 1.8;">
+            Certificate No: <strong>${certificateData.certificate_number}</strong> | 
+            Status: <strong>${certificateData.status}</strong> | 
+            Share Product: <strong>${certificateData.share_product}</strong> | 
+            Issue Date: <strong>${certificateData.issue_date}</strong> | 
+            Ownership Status: <strong>Fully Paid</strong> | 
+            Expiry: <strong>N/A (Permanent)</strong>
+          </p>
         </div>
         
-        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid #e5e7eb;">
-          <p style="color: #6b7280; font-size: 12px;">This certificate certifies that the above-named person is the registered owner of the stated number of shares.</p>
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid rgba(255,255,255,0.5);">
+          <p style="color: #1f2937; font-size: 14px;">This certificate serves as official proof of share ownership and remains valid according to the organization's governing policies.</p>
         </div>
       </div>
     </div>
