@@ -268,6 +268,9 @@
                     <button onclick="printMembershipCertificate()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-sm font-semibold transition-all">
                         <i class="fa-solid fa-print"></i> Print
                     </button>
+                    <button onclick="exportMembershipCertificatePDF()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white text-sm font-semibold transition-all">
+                        <i class="fa-solid fa-file-pdf"></i> Export PDF
+                    </button>
                 </div>
                 <div id="certificateContent" class="border border-gray-200 dark:border-gray-700 rounded-lg p-8">
                     <!-- Certificate content will be loaded here -->
@@ -380,6 +383,38 @@
         `);
         printWindow.document.close();
         setTimeout(() => printWindow.print(), 500);
+    }
+
+    function exportMembershipCertificatePDF() {
+        const content = document.getElementById('certificateContent');
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>Membership Certificate</title>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
+                <style>
+                    body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+                </style>
+            </head>
+            <body>
+                <div id="certificate-content">${content.innerHTML}</div>
+                <script>
+                    const element = document.getElementById('certificate-content');
+                    const opt = {
+                        margin: 10,
+                        filename: 'membership-certificate.pdf',
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 2 },
+                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+                    };
+                    html2pdf().set(opt).from(element).save();
+                    setTimeout(() => window.close(), 2000);
+                <\/script>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
     }
 
     // Close modal on escape key
