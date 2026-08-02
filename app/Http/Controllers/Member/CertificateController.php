@@ -5,7 +5,13 @@ namespace App\Http\Controllers\Member;
 use App\Http\Controllers\Controller;
 use App\Models\LoanCompletionCertificate;
 use App\Models\ShareCertificate;
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Encoding\Encoding;
+use Endroid\QrCode\ErrorCorrectionLevel;
+use Endroid\QrCode\RoundBlockSizeMode;
+use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class CertificateController extends Controller
 {
@@ -29,6 +35,26 @@ class CertificateController extends Controller
     {
         $user = auth()->user();
         
+        // Generate unique verification code
+        $verificationCode = 'CERT-' . strtoupper($user->member_number) . '-' . Str::random(8);
+        
+        // Generate QR code with verification URL
+        $verificationUrl = url('/verify-certificate/' . $verificationCode);
+        $qrCode = Builder::create()
+            ->data($verificationUrl)
+            ->encoding(new Encoding('UTF-8'))
+            ->errorCorrectionLevel(ErrorCorrectionLevel::High)
+            ->size(150)
+            ->margin(10)
+            ->roundBlockSizeMode(RoundBlockSizeMode::Margin)
+            ->build();
+        
+        $writer = new PngWriter();
+        $result = $writer->write($qrCode);
+        
+        // Convert QR code to base64
+        $qrCodeBase64 = 'data:image/png;base64,' . base64_encode($result->getString());
+        
         return response()->json([
             'name' => $user->name,
             'member_number' => $user->member_number,
@@ -37,6 +63,9 @@ class CertificateController extends Controller
             'status' => $user->status ?? 'Active',
             'organization' => 'FEED TAN CMG SACCO',
             'issue_date' => now()->format('m/d/Y'),
+            'verification_code' => $verificationCode,
+            'qr_code' => $qrCodeBase64,
+            'verification_url' => $verificationUrl,
         ]);
     }
 

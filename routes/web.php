@@ -505,3 +505,8 @@ Route::prefix('member')->middleware(['auth', 'role:member', 'member.isolation'])
     Route::get('/certificates/share/{id}/print', [MemberCertificateController::class, 'printShareCertificate'])->name('certificates.share-print');
     Route::get('/certificates/membership/preview', [MemberCertificateController::class, 'getMembershipCertificate'])->name('certificates.membership-preview');
 });
+
+// Certificate verification route (public)
+Route::get('/verify-certificate/{code}', function($code) {
+    return view('certificates.verify', compact('code'));
+})->name('verify.certificate');
