@@ -789,8 +789,8 @@
         <button onclick="printMembershipCertificate()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-sm font-semibold transition-all">
           <i class="fa-solid fa-print"></i> Print
         </button>
-        <button onclick="exportMembershipCertificatePDF()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white text-sm font-semibold transition-all">
-          <i class="fa-solid fa-file-pdf"></i> Export PDF
+        <button onclick="downloadMembershipCertificatePDF()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white text-sm font-semibold transition-all">
+          <i class="fa-solid fa-file-pdf"></i> Download PDF
         </button>
       </div>
       <div id="membershipCertificatePreview" class="border border-gray-200 dark:border-gray-700 rounded-lg p-8">
@@ -916,85 +916,57 @@
       backgroundStyle = `background-image: url('${certificateBackgroundUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat;`;
     }
     
-    const printContent = `
-      <div style="${backgroundStyle} min-height: 500px; padding: 40px; position: relative;">
-        <div style="background: rgba(255, 255, 255, 0.3); padding: 40px; border-radius: 10px; position: relative; z-index: 1; backdrop-filter: blur(2px);">
-          <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="font-size: 28px; font-weight: bold; color: #1e40af; margin-bottom: 10px; font-family: 'Times New Roman', serif; text-shadow: 2px 2px 4px rgba(255,255,255,0.8);">Certificate of Membership</h1>
-            <p style="color: #1f2937; font-size: 14px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">FEED TAN CMG SACCO</p>
-          </div>
-          
-          <div style="text-align: center; margin-bottom: 0; padding: 20px; background: rgba(255, 255, 255, 0.4); border-radius: 8px; backdrop-filter: blur(2px);">
-            <p style="color: #1f2937; font-size: 14px; margin-bottom: 5px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">This is to certify that</p>
-            <h2 style="font-size: 28px; font-weight: bold; color: #1e40af; margin: 10px 0; font-family: 'Brush Script MT', 'Great Vibes', cursive; text-shadow: 2px 2px 4px rgba(255,255,255,0.8);">${memberData.member_name}</h2>
-            <p style="color: #1f2937; font-size: 14px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">is a registered member of</p>
-            <h3 style="font-size: 18px; font-weight: bold; color: #0369a1; margin-top: 10px; text-shadow: 2px 2px 4px rgba(255,255,255,0.8);">FEED TAN CMG SACCO</h3>
-          </div>
-          
-          <div style="text-align: center; margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.4); border-radius: 8px; backdrop-filter: blur(2px);">
-            <p style="color: #1f2937; font-size: 16px; line-height: 1.6; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">
-              Membership Number: <strong>${memberData.member_number}</strong> • 
-              Registration Date: <strong>${memberData.registration_date}</strong> • 
-              Branch: <strong>${memberData.branch}</strong> • 
-              Status: <strong>${memberData.status}</strong>
-            </p>
-          </div>
-          
-          <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid rgba(255,255,255,0.5);">
-            <p style="color: #1f2937; font-size: 12px; margin-bottom: 5px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">This certificate confirms the membership status and entitles the holder to all rights and privileges of membership.</p>
-            <p style="color: #1f2937; font-size: 10px; margin-top: 10px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">Issued by FEED TAN CMG SACCO • ${new Date().toLocaleDateString()}</p>
-          </div>
-        </div>
-      </div>
-    `;
-    
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Membership Certificate - ${memberData.member_number}</title>
-          <style>
-            body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
-            @media print { body { margin: 0; } }
-          </style>
-        </head>
-        <body>${printContent}</body>
-      </html>
-    `);
-    printWindow.document.close();
-    printWindow.print();
-  }
-
-  function exportMembershipCertificatePDF() {
     const content = document.getElementById('membershipCertificatePreview').innerHTML;
     const printWindow = window.open('', '_blank');
     printWindow.document.write(`
       <html>
       <head>
         <title>Membership Certificate - ${memberData.member_number}</title>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
         <style>
           body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+          @media print { body { margin: 0; } }
         </style>
       </head>
       <body>
-        <div id="certificate-content">${content}</div>
-        <script>
-          const element = document.getElementById('certificate-content');
-          const opt = {
-            margin: 10,
-            filename: 'membership-certificate-${memberData.member_number}.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-          };
-          html2pdf().set(opt).from(element).save();
-          setTimeout(() => window.close(), 2000);
-        <\/script>
+        <div style="${backgroundStyle} min-height: 500px; padding: 40px; position: relative;">
+          ${content}
+        </div>
       </body>
       </html>
     `);
     printWindow.document.close();
+    setTimeout(() => printWindow.print(), 500);
+  }
+
+  function downloadMembershipCertificatePDF() {
+    let backgroundStyle = '';
+    if (certificateBackgroundUrl) {
+      backgroundStyle = `background-image: url('${certificateBackgroundUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat;`;
+    }
+    
+    const content = document.getElementById('membershipCertificatePreview').innerHTML;
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <html>
+      <head>
+        <title>Membership Certificate - ${memberData.member_number}</title>
+        <style>
+          body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+          @media print { body { margin: 0; } }
+        </style>
+      </head>
+      <body>
+        <div style="${backgroundStyle} min-height: 500px; padding: 40px; position: relative;">
+          ${content}
+        </div>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+    setTimeout(() => {
+      printWindow.print();
+      // Note: The user will need to select 'Save as PDF' in the print dialog
+    }, 500);
   }
 </script>
 @endpush
