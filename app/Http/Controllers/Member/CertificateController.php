@@ -38,22 +38,8 @@ class CertificateController extends Controller
         // Generate unique verification code
         $verificationCode = 'CERT-' . strtoupper($user->member_number) . '-' . Str::random(8);
         
-        // Generate QR code with verification URL
+        // Generate verification URL
         $verificationUrl = url('/verify-certificate/' . $verificationCode);
-        $qrCode = Builder::create()
-            ->data($verificationUrl)
-            ->encoding(new Encoding('UTF-8'))
-            ->errorCorrectionLevel(ErrorCorrectionLevel::High)
-            ->size(150)
-            ->margin(10)
-            ->roundBlockSizeMode(RoundBlockSizeMode::Margin)
-            ->build();
-        
-        $writer = new PngWriter();
-        $result = $writer->write($qrCode);
-        
-        // Convert QR code to base64
-        $qrCodeBase64 = 'data:image/png;base64,' . base64_encode($result->getString());
         
         return response()->json([
             'name' => $user->name,
@@ -64,7 +50,6 @@ class CertificateController extends Controller
             'organization' => 'FEED TAN CMG SACCO',
             'issue_date' => now()->format('m/d/Y'),
             'verification_code' => $verificationCode,
-            'qr_code' => $qrCodeBase64,
             'verification_url' => $verificationUrl,
         ]);
     }
