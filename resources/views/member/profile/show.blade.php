@@ -284,7 +284,7 @@ function openCertificateModal() {
     const modal = document.getElementById('certificateModal');
     modal.classList.remove('hidden');
     modal.classList.add('flex');
-    loadCertificates();
+    loadMembershipCertificate();
 }
 
 function closeCertificateModal() {
@@ -293,74 +293,97 @@ function closeCertificateModal() {
     modal.classList.remove('flex');
 }
 
-async function loadCertificates() {
+async function loadMembershipCertificate() {
     const content = document.getElementById('certificateContent');
-    content.innerHTML = '<div class="text-center py-8"><i class="fa-solid fa-spinner fa-spin text-2xl text-primary-500"></i><p class="mt-2 text-gray-600 dark:text-gray-400">Loading certificates...</p></div>';
+    content.innerHTML = '<div class="text-center py-8"><i class="fa-solid fa-spinner fa-spin text-2xl text-primary-500"></i><p class="mt-2 text-gray-600 dark:text-gray-400">Loading certificate...</p></div>';
 
     try {
-        const response = await fetch('{{ route('member.certificates.index') }}', {
+        const response = await fetch('{{ route('member.certificates.membership-preview') }}', {
             headers: {
-                'Accept': 'text/html',
+                'Accept': 'application/json',
             }
         });
-        const html = await response.text();
+        const data = await response.json();
         
-        // Parse the HTML to extract certificate lists
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        
-        const loanCertificates = doc.querySelector('.loan-certificates');
-        const shareCertificates = doc.querySelector('.share-certificates');
-        
-        let certificatesHtml = '';
-        
-        if (loanCertificates || shareCertificates) {
-            certificatesHtml = '<div class="space-y-6">';
-            
-            if (loanCertificates) {
-                certificatesHtml += `
-                    <div>
-                        <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                            <i class="fa-solid fa-certificate text-green-600"></i>
-                            Loan Completion Certificates
-                        </h4>
-                        <div class="space-y-3">
-                            ${loanCertificates.innerHTML}
-                        </div>
-                    </div>
-                `;
-            }
-            
-            if (shareCertificates) {
-                certificatesHtml += `
-                    <div>
-                        <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                            <i class="fa-solid fa-file-contract text-blue-600"></i>
-                            Share Certificates
-                        </h4>
-                        <div class="space-y-3">
-                            ${shareCertificates.innerHTML}
-                        </div>
-                    </div>
-                `;
-            }
-            
-            certificatesHtml += '</div>';
-        } else {
-            certificatesHtml = `
-                <div class="text-center py-8">
-                    <div class="w-16 h-16 rounded-full bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center mx-auto mb-4">
-                        <i class="fa-solid fa-certificate text-2xl text-primary-500"></i>
-                    </div>
-                    <h4 class="font-bold text-gray-900 dark:text-white text-lg mb-2">No Certificates</h4>
-                    <p class="text-gray-600 dark:text-gray-400">You don't have any certificates yet. Certificates will appear here when you complete loans or purchase shares.</p>
+        const certificateHtml = `
+            <div class="text-center space-y-6">
+                <div class="w-20 h-20 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center mx-auto shadow-lg">
+                    <i class="fa-solid fa-certificate text-3xl text-white"></i>
                 </div>
-            `;
-        }
+                
+                <div>
+                    <h2 class="text-2xl font-bold text-primary-900 dark:text-white mb-2">Certificate of Membership</h2>
+                    <p class="text-lg font-semibold text-primary-600 dark:text-primary-400">${data.organization}</p>
+                </div>
+                
+                <div class="bg-primary-50 dark:bg-primary-900/20 rounded-xl p-6 space-y-4">
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">This is to certify that</p>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">${data.name}</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">is a registered member of</p>
+                    <p class="text-lg font-semibold text-primary-700 dark:text-primary-300">${data.organization}</p>
+                </div>
+                
+                <div class="flex flex-wrap justify-center gap-4 text-sm">
+                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg px-4 py-2">
+                        <span class="text-gray-500 dark:text-gray-400">Membership Number:</span>
+                        <span class="font-mono font-bold text-gray-900 dark:text-white ml-1">${data.member_number}</span>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg px-4 py-2">
+                        <span class="text-gray-500 dark:text-gray-400">Registration Date:</span>
+                        <span class="font-bold text-gray-900 dark:text-white ml-1">${data.registration_date}</span>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg px-4 py-2">
+                        <span class="text-gray-500 dark:text-gray-400">Branch:</span>
+                        <span class="font-bold text-gray-900 dark:text-white ml-1">${data.branch}</span>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg px-4 py-2">
+                        <span class="text-gray-500 dark:text-gray-400">Status:</span>
+                        <span class="font-bold ${data.status === 'Active' ? 'text-green-600' : 'text-gray-600'} ml-1">${data.status}</span>
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <p class="text-sm text-gray-600 dark:text-gray-400">This certificate confirms the membership status and entitles the holder to all rights and privileges of membership.</p>
+                </div>
+                
+                <div class="text-xs text-gray-500 dark:text-gray-400">
+                    <p>Issued by ${data.organization} • ${data.issue_date}</p>
+                </div>
+            </div>
+        `;
         
-        content.innerHTML = certificatesHtml;
+        content.innerHTML = certificateHtml;
+        
+        // Update print button to print the modal content
+        document.getElementById('printCertificateBtn').onclick = function(e) {
+            e.preventDefault();
+            const printContent = content.innerHTML;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Membership Certificate</title>
+                    <script src="https://cdn.tailwindcss.com"></script>
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+                    <style>
+                        body { font-family: Georgia, serif; padding: 40px; }
+                        @media print { body { padding: 20px; } }
+                    </style>
+                </head>
+                <body class="bg-gray-50">
+                    <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-8">
+                        ${printContent}
+                    </div>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            setTimeout(() => printWindow.print(), 500);
+        };
+        
     } catch (error) {
-        content.innerHTML = '<div class="text-center py-8 text-red-500"><i class="fa-solid fa-exclamation-circle text-2xl mb-2"></i><p>Failed to load certificates</p></div>';
+        content.innerHTML = '<div class="text-center py-8 text-red-500"><i class="fa-solid fa-exclamation-circle text-2xl mb-2"></i><p>Failed to load certificate</p></div>';
     }
 }
 

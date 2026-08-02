@@ -503,6 +503,5 @@ Route::prefix('member')->middleware(['auth', 'role:member', 'member.isolation'])
     Route::get('/certificates/loan/{id}/print', [MemberCertificateController::class, 'printLoanCertificate'])->name('certificates.loan-print');
     Route::get('/certificates/share/{id}', [MemberCertificateController::class, 'showShareCertificate'])->name('certificates.share-show');
     Route::get('/certificates/share/{id}/print', [MemberCertificateController::class, 'printShareCertificate'])->name('certificates.share-print');
-    Route::get('/certificates/loan/{id}/preview', [MemberCertificateController::class, 'getLoanCertificate'])->name('certificates.loan-preview');
-    Route::get('/certificates/share/{id}/preview', [MemberCertificateController::class, 'getShareCertificate'])->name('certificates.share-preview');
+    Route::get('/certificates/membership/preview', [MemberCertificateController::class, 'getMembershipCertificate'])->name('certificates.membership-preview');
 });

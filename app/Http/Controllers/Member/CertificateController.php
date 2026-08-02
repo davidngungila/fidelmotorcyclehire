@@ -25,45 +25,18 @@ class CertificateController extends Controller
         return view('member.certificates.index', compact('loanCertificates', 'shareCertificates'));
     }
 
-    public function getLoanCertificate($id)
+    public function getMembershipCertificate()
     {
-        $certificate = LoanCompletionCertificate::with(['loan', 'loan.member'])
-            ->whereHas('loan', function($query) {
-                $query->where('member_number', auth()->user()->member_number);
-            })
-            ->findOrFail($id);
-
+        $user = auth()->user();
+        
         return response()->json([
-            'certificate_number' => $certificate->certificate_number,
-            'completion_date' => $certificate->completion_date->format('F d, Y'),
-            'loan_number' => $certificate->loan->loan_number,
-            'loan_amount' => number_format($certificate->loan->principal_amount, 2),
-            'purpose' => ucfirst($certificate->loan->purpose),
-            'disbursement_date' => $certificate->loan->disbursement_date ? $certificate->loan->disbursement_date->format('F d, Y') : 'N/A',
-            'member_name' => $certificate->loan->member->name ?? 'N/A',
-            'member_number' => $certificate->loan->member_number,
-            'notes' => $certificate->notes,
-        ]);
-    }
-
-    public function getShareCertificate($id)
-    {
-        $certificate = ShareCertificate::with(['sharePurchase', 'sharePurchase.shareProduct', 'sharePurchase.member'])
-            ->whereHas('sharePurchase', function($query) {
-                $query->where('member_number', auth()->user()->member_number);
-            })
-            ->findOrFail($id);
-
-        return response()->json([
-            'certificate_number' => $certificate->certificate_number,
-            'issue_date' => $certificate->issue_date->format('F d, Y'),
-            'number_of_shares' => $certificate->number_of_shares,
-            'share_product' => $certificate->sharePurchase->shareProduct->name ?? 'N/A',
-            'share_value' => number_format($certificate->share_value_per_share, 2),
-            'total_value' => number_format($certificate->number_of_shares * $certificate->share_value_per_share, 2),
-            'member_name' => $certificate->sharePurchase->member->name ?? 'N/A',
-            'member_number' => $certificate->sharePurchase->member_number,
-            'notes' => $certificate->notes,
+            'name' => $user->name,
+            'member_number' => $user->member_number,
+            'registration_date' => $user->created_at ? $user->created_at->format('Y-m-d') : 'N/A',
+            'branch' => $user->branch ?? 'N/A',
+            'status' => $user->status ?? 'Active',
+            'organization' => 'FEED TAN CMG SACCO',
+            'issue_date' => now()->format('m/d/Y'),
         ]);
     }
 
