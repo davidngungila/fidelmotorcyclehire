@@ -45,7 +45,6 @@ use App\Http\Controllers\Admin\ReceiptController as AdminReceiptController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\ExpenseController as AdminExpenseController;
 use App\Http\Controllers\Admin\RevenueController as AdminRevenueController;
-use App\Http\Controllers\Admin\LoanCompletionCertificateController as AdminLoanCompletionCertificateController;
 use App\Http\Controllers\Member\DashboardController as MemberDashboardController;
 use App\Http\Controllers\Member\ProfileController as MemberProfileController;
 use App\Http\Controllers\Member\LoanController as MemberLoanController;
@@ -56,8 +55,8 @@ use App\Http\Controllers\Member\SwfController as MemberSwfController;
 use App\Http\Controllers\Member\InvestmentController as MemberInvestmentController;
 use App\Http\Controllers\Member\StatementController as MemberStatementController;
 use App\Http\Controllers\Member\NotificationController as MemberNotificationController;
-use App\Http\Controllers\Member\CertificateController as MemberCertificateController;
 use App\Http\Controllers\Member\SavingPlanController as MemberSavingPlanController;
+use App\Http\Controllers\Member\CertificateController as MemberCertificateController;
 
 Route::get('/', function () {
     if (auth()->check()) {
@@ -134,14 +133,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::post('/loans/{id}/disburse', [AdminLoanController::class, 'disburse'])->name('loans.disburse');
     Route::post('/loans/import-loan-payments', [AdminLoanController::class, 'importLoanPayments'])->name('loans.import-loan-payments');
     Route::post('/loans/import-loans-information', [AdminLoanController::class, 'importLoansInformation'])->name('loans.import-loans-information');
-
-    // Loan Completion Certificates routes
-    Route::get('/loan-completion-certificates', [AdminLoanCompletionCertificateController::class, 'index'])->name('loan-completion-certificates.index');
-    Route::get('/loan-completion-certificates/create/{loanId}', [AdminLoanCompletionCertificateController::class, 'create'])->name('loan-completion-certificates.create');
-    Route::post('/loan-completion-certificates/{loanId}', [AdminLoanCompletionCertificateController::class, 'store'])->name('loan-completion-certificates.store');
-    Route::get('/loan-completion-certificates/{id}', [AdminLoanCompletionCertificateController::class, 'show'])->name('loan-completion-certificates.show');
-    Route::get('/loan-completion-certificates/{id}/print', [AdminLoanCompletionCertificateController::class, 'print'])->name('loan-completion-certificates.print');
-    Route::delete('/loan-completion-certificates/{id}', [AdminLoanCompletionCertificateController::class, 'destroy'])->name('loan-completion-certificates.destroy');
 
     Route::get('/loan-products', [AdminLoanProductController::class, 'index'])->name('loan-products.index');
     Route::get('/loan-products/create', [AdminLoanProductController::class, 'create'])->name('loan-products.create');
@@ -404,6 +395,33 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::post('/revenues', [AdminRevenueController::class, 'store'])->name('revenues.store');
     Route::get('/revenues/{id}', [AdminRevenueController::class, 'show'])->name('revenues.show');
     Route::delete('/revenues/{id}', [AdminRevenueController::class, 'destroy'])->name('revenues.destroy');
+
+    // Accounting routes
+    Route::get('/accounting/dashboard', [AdminAccountingController::class, 'dashboard'])->name('accounting.dashboard');
+    Route::get('/accounting/chart-of-accounts', [AdminAccountingController::class, 'chartOfAccounts'])->name('accounting.chart-of-accounts');
+    Route::get('/accounting/journal-entries', [AdminAccountingController::class, 'journalEntries'])->name('accounting.journal-entries');
+    Route::get('/accounting/general-ledger', [AdminAccountingController::class, 'generalLedger'])->name('accounting.general-ledger');
+    Route::get('/accounting/trial-balance', [AdminAccountingController::class, 'trialBalance'])->name('accounting.trial-balance');
+    Route::get('/accounting/balance-sheet', [AdminAccountingController::class, 'balanceSheet'])->name('accounting.balance-sheet');
+    Route::get('/accounting/income-statement', [AdminAccountingController::class, 'incomeStatement'])->name('accounting.income-statement');
+    Route::get('/accounting/cash-flow', [AdminAccountingController::class, 'cashFlow'])->name('accounting.cash-flow');
+    Route::get('/accounting/fixed-assets', [AdminAccountingController::class, 'fixedAssets'])->name('accounting.fixed-assets');
+    Route::get('/accounting/depreciation', [AdminAccountingController::class, 'depreciation'])->name('accounting.depreciation');
+    Route::get('/accounting/bank-accounts', [AdminAccountingController::class, 'bankAccounts'])->name('accounting.bank-accounts');
+    Route::get('/accounting/bank-reconciliation', [AdminAccountingController::class, 'bankReconciliation'])->name('accounting.bank-reconciliation');
+    Route::get('/accounting/receipts', [AdminAccountingController::class, 'receipts'])->name('accounting.receipts');
+    Route::get('/accounting/payments', [AdminAccountingController::class, 'payments'])->name('accounting.payments');
+    Route::get('/accounting/expenses', [AdminAccountingController::class, 'expenses'])->name('accounting.expenses');
+    Route::get('/accounting/revenue', [AdminAccountingController::class, 'revenue'])->name('accounting.revenue');
+    Route::get('/accounting/accounts-receivable', [AdminAccountingController::class, 'accountsReceivable'])->name('accounting.accounts-receivable');
+    Route::get('/accounting/accounts-payable', [AdminAccountingController::class, 'accountsPayable'])->name('accounting.accounts-payable');
+    Route::get('/accounting/budgets', [AdminAccountingController::class, 'budgets'])->name('accounting.budgets');
+    Route::get('/accounting/financial-periods', [AdminAccountingController::class, 'financialPeriods'])->name('accounting.financial-periods');
+    Route::get('/accounting/closing-entries', [AdminAccountingController::class, 'closingEntries'])->name('accounting.closing-entries');
+    Route::get('/accounting/tax-management', [AdminAccountingController::class, 'taxManagement'])->name('accounting.tax-management');
+    Route::get('/accounting/audit-trail', [AdminAccountingController::class, 'auditTrail'])->name('accounting.audit-trail');
+    Route::get('/accounting/financial-reports', [AdminAccountingController::class, 'financialReports'])->name('accounting.financial-reports');
+    Route::get('/accounting/settings', [AdminAccountingController::class, 'settings'])->name('accounting.settings');
 
     Route::get('/roles', [AdminRoleController::class, 'index'])->name('roles.index');
     Route::get('/roles/create', [AdminRoleController::class, 'create'])->name('roles.create');

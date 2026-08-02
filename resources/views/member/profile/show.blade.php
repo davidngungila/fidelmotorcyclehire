@@ -226,15 +226,15 @@
             </div>
             <div>
                 <p class="text-sm font-bold text-primary-900 dark:text-white">Need help with your account?</p>
-                <p class="text-xs text-primary-600 dark:text-primary-400 mt-0.5">Download your statement or contact our support team for assistance.</p>
+                <p class="text-xs text-primary-600 dark:text-primary-400 mt-0.5">Download your statement, view certificates, or contact our support team for assistance.</p>
             </div>
         </div>
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
             <a href="{{ route('member.certificates.index') }}"
-               class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white shadow-lg shadow-primary-500/25 transition-all hover:shadow-primary-500/40 hover:-translate-y-0.5"
+               class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:shadow-blue-500/40 hover:-translate-y-0.5"
                style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
                 <i class="fa-solid fa-certificate"></i>
-                My Certificates
+                View Certificates
             </a>
             <a href="{{ route('member.statements.index') }}"
                class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white shadow-lg shadow-primary-500/25 transition-all hover:shadow-primary-500/40 hover:-translate-y-0.5"

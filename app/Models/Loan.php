@@ -48,14 +48,10 @@ class Loan extends Model
         'total_amount_due' => 'decimal:2',
         'amount_paid' => 'decimal:2',
         'balance' => 'decimal:2',
-        'collateral_value' => 'decimal:2',
-        'monthly_income' => 'decimal:2',
-        'other_income' => 'decimal:2',
         'application_date' => 'date',
         'approval_date' => 'date',
         'disbursement_date' => 'date',
         'maturity_date' => 'date',
-        'preferred_repayment_date' => 'integer',
     ];
 
     public function user()
@@ -81,11 +77,6 @@ class Loan extends Model
     public function loanProduct()
     {
         return $this->belongsTo(LoanProduct::class);
-    }
-
-    public function completionCertificate()
-    {
-        return $this->hasOne(LoanCompletionCertificate::class);
     }
 
     public function disbursement()

@@ -83,7 +83,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
         <div class="stat-card glass">
             <div class="bg-blob" style="background: #ef4444;"></div>
@@ -105,7 +105,7 @@
             </p>
         </div>
 
-        <div class="stat-card glass">
+        <div class="stat-card glass sm:col-span-2 lg:col-span-1">
             <div class="bg-blob" style="background: #10b981;"></div>
             <div class="flex items-start justify-between mb-3">
                 <div class="icon-wrap bg-green-50 dark:bg-green-900/30 text-green-500">
@@ -151,27 +151,7 @@
             </p>
         </div>
 
-        <div class="stat-card glass">
-            <div class="bg-blob" style="background: #3b82f6;"></div>
-            <div class="flex items-start justify-between mb-3">
-                <div class="icon-wrap bg-blue-50 dark:bg-blue-900/30 text-blue-500">
-                    <i class="fa-solid fa-certificate"></i>
-                </div>
-                <span class="inline-flex items-center gap-1 text-[11px] font-bold text-green-500 bg-green-50 dark:bg-green-900/30 px-2 py-0.5 rounded-full">
-                    <i class="fa-solid fa-arrow-up"></i>
-                    {{ number_format(5.2, 1) }}%
-                </span>
-            </div>
-            <p class="text-[11px] uppercase font-bold tracking-wider text-primary-500 dark:text-primary-400 mb-1">Share Holdings</p>
-            <p class="text-xl lg:text-2xl font-extrabold text-primary-900 dark:text-white leading-tight">
-                {{ fmtTsh($shareBalance ?? 0) }}
-            </p>
-            <p class="text-[11px] text-primary-500 dark:text-primary-400 mt-1">
-                {{ count($shares ?? []) }} share purchase{{ count($shares ?? []) !== 1 ? 's' : '' }}
-            </p>
-        </div>
-
-        <div class="stat-card glass">
+        <div class="stat-card glass sm:col-span-2 lg:col-span-1">
             <div class="bg-blob" style="background: #f59e0b;"></div>
             <div class="flex items-start justify-between mb-3">
                 <div class="icon-wrap bg-amber-50 dark:bg-amber-900/30 text-amber-500">
@@ -286,6 +266,114 @@
             <div class="p-4 flex-1 min-h-[280px]">
                 <canvas id="investmentPerformanceChart" x-init x-data x-ref="chart"></canvas>
             </div>
+        </div>
+    </div>
+
+    <div class="glass rounded-2xl overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-primary-100 dark:border-dark-border">
+            <div>
+                <h3 class="font-bold text-primary-900 dark:text-white text-sm">My Certificates</h3>
+                <p class="text-[11px] text-primary-500 dark:text-primary-400 mt-0.5">{{ count($loanCertificates) + count($shareCertificates) }} certificate{{ count($loanCertificates) + count($shareCertificates) !== 1 ? 's' : '' }}</p>
+            </div>
+            <a href="{{ route('member.certificates.index') }}" class="text-[11px] font-bold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 inline-flex items-center gap-1">
+                View All
+                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </a>
+        </div>
+        <div class="p-5">
+            @if(count($loanCertificates) > 0 || count($shareCertificates) > 0)
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    @forelse($loanCertificates->take(2) as $certificate)
+                        <div class="p-4 border border-green-200 dark:border-green-800/60 rounded-xl bg-green-50/50 dark:bg-green-900/20 hover:bg-green-50 dark:hover:bg-green-900/30 transition-colors">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/40 flex items-center justify-center">
+                                        <i class="fa-solid fa-certificate text-green-600 dark:text-green-400"></i>
+                                    </div>
+                                    <div>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-green-50 dark:bg-green-900/40 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800/60">
+                                            {{ $certificate->certificate_number }}
+                                        </span>
+                                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Loan Completion</p>
+                                    </div>
+                                </div>
+                                @if($certificate->is_active)
+                                    <span class="badge badge-green text-[10px]">Active</span>
+                                @else
+                                    <span class="badge badge-red text-[10px]">Inactive</span>
+                                @endif
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-xs text-gray-600 dark:text-gray-400">Loan #{{ $certificate->loan->loan_number }}</p>
+                                    <p class="text-[10px] text-gray-500 dark:text-gray-500 mt-1">Completed: {{ $certificate->completion_date->format('M d, Y') }}</p>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <a href="{{ route('member.certificates.loan-show', $certificate->id) }}" class="text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 transition-colors">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
+                                    <a href="{{ route('member.certificates.loan-print', $certificate->id) }}" target="_blank" class="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors">
+                                        <i class="fa-solid fa-print"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        @forelse($shareCertificates->take(2) as $certificate)
+                            <div class="p-4 border border-blue-200 dark:border-blue-800/60 rounded-xl bg-blue-50/50 dark:bg-blue-900/20 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+                                            <i class="fa-solid fa-file-contract text-blue-600 dark:text-blue-400"></i>
+                                        </div>
+                                        <div>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60">
+                                                {{ $certificate->certificate_number }}
+                                            </span>
+                                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Share Certificate</p>
+                                        </div>
+                                    </div>
+                                    @if($certificate->is_active)
+                                        <span class="badge badge-green text-[10px]">Active</span>
+                                    @else
+                                        <span class="badge badge-red text-[10px]">Inactive</span>
+                                    @endif
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-xs text-gray-600 dark:text-gray-400">{{ $certificate->number_of_shares }} shares</p>
+                                        <p class="text-[10px] text-gray-500 dark:text-gray-500 mt-1">Issued: {{ $certificate->issue_date->format('M d, Y') }}</p>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <a href="{{ route('member.certificates.share-show', $certificate->id) }}" class="text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 transition-colors">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </a>
+                                        <a href="{{ route('member.certificates.share-print', $certificate->id) }}" target="_blank" class="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors">
+                                            <i class="fa-solid fa-print"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="col-span-2 text-center py-8 text-gray-500 dark:text-gray-400">
+                                <div class="w-12 h-12 rounded-xl bg-primary-50 dark:bg-primary-900/20 text-primary-500 flex items-center justify-center mx-auto mb-3">
+                                    <i class="fa-solid fa-certificate text-xl"></i>
+                                </div>
+                                <h4 class="font-bold text-primary-900 dark:text-white text-sm mb-1">No Certificates Yet</h4>
+                                <p class="text-xs text-primary-600 dark:text-primary-400">Certificates will appear here when you complete loans or purchase shares.</p>
+                            </div>
+                        @endforelse
+                    @endforelse
+                </div>
+            @else
+                <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <div class="w-12 h-12 rounded-xl bg-primary-50 dark:bg-primary-900/20 text-primary-500 flex items-center justify-center mx-auto mb-3">
+                        <i class="fa-solid fa-certificate text-xl"></i>
+                    </div>
+                    <h4 class="font-bold text-primary-900 dark:text-white text-sm mb-1">No Certificates Yet</h4>
+                    <p class="text-xs text-primary-600 dark:text-primary-400">Certificates will appear here when you complete loans or purchase shares.</p>
+                </div>
+            @endif
         </div>
     </div>
 
