@@ -885,7 +885,8 @@
           
           <div style="text-align: center; margin-bottom: 30px;">
             <p style="color: #1f2937; font-size: 16px; margin-bottom: 10px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">This is to certify that</p>
-            <h2 class="great-vibes-regular" style="font-size: 36px; color: #1e40af; margin: 10px 0; text-shadow: 2px 2px 4px rgba(255,255,255,0.8); text-decoration: underline;">${memberData.member_name}</h2>
+            <h2 class="great-vibes-regular" style="font-size: 36px; color: #1e40af; margin: 10px 0; text-shadow: 2px 2px 4px rgba(255,255,255,0.8);">${memberData.member_name}</h2>
+            <div style="width: 200px; height: 2px; background: linear-gradient(to right, transparent, #1e40af, transparent); margin: 15px auto;"></div>
             <p style="color: #1f2937; font-size: 16px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">is a registered and active member of <strong>FEED TAN CMG SACCO</strong>, holding <strong>Membership Number ${memberData.member_number}</strong>, with a registration date of <strong>${memberData.registration_date}</strong>. This certificate serves as official proof of membership and entitles the holder to the rights, privileges, and responsibilities of membership in accordance with the Constitution, By-laws, and Policies of FEED TAN CMG SACCO.</p>
           </div>
           
