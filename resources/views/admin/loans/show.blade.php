@@ -68,7 +68,7 @@
                 <i class="fa-solid fa-times text-xl"></i>
               </button>
             </div>
-            <div id="appreciationCertificatePreview" class="border border-gray-200 dark:border-gray-700 rounded-lg p-8">
+            <div id="appreciationCertificatePreview">
               <!-- Certificate content will be loaded here -->
             </div>
             <div class="flex items-center gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
