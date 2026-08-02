@@ -344,7 +344,7 @@
                         </div>
                         
                         <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid rgba(255,255,255,0.5);">
-                            <img src="${qrCodeUrl}" alt="QR Code" style="width: 100px; height: 100px; border: 2px solid rgba(255,255,255,0.5); border-radius: 8px; margin: 0 auto 15px;">
+                            <img src="${qrCodeUrl}" alt="QR Code" style="width: 60px; height: 60px; border: 2px solid rgba(255,255,255,0.5); border-radius: 8px; margin: 0 auto 15px;">
                         </div>
                         
                         <div style="text-align: center; margin-top: 20px;">
