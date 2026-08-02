@@ -342,7 +342,7 @@
                         
                         <div style="text-align: center; margin-bottom: 30px;">
                             <p style="color: #1f2937; font-size: 16px; margin-bottom: 10px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">This is to certify that</p>
-                            <h2 class="great-vibes-regular" style="font-size: 36px; color: #1e40af; margin: 10px 0; text-shadow: 2px 2px 4px rgba(255,255,255,0.8);">${data.name}</h2>
+                            <h2 class="great-vibes-regular" style="font-size: 36px; color: #1e40af; margin: 10px 0; text-shadow: 2px 2px 4px rgba(255,255,255,0.8); text-decoration: underline;">${data.name}</h2>
                             <p style="color: #1f2937; font-size: 16px; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);">is a registered and active member of <strong>${data.organization}</strong>, holding <strong>Membership Number ${data.member_number}</strong>, with a registration date of <strong>${data.registration_date}</strong>. This certificate serves as official proof of membership and entitles the holder to the rights, privileges, and responsibilities of membership in accordance with the Constitution, By-laws, and Policies of ${data.organization}.</p>
                         </div>
                         
