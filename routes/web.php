@@ -405,33 +405,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/revenues/{id}', [AdminRevenueController::class, 'show'])->name('revenues.show');
     Route::delete('/revenues/{id}', [AdminRevenueController::class, 'destroy'])->name('revenues.destroy');
 
-    // Accounting routes
-    Route::get('/accounting/dashboard', [AdminAccountingController::class, 'dashboard'])->name('accounting.dashboard');
-    Route::get('/accounting/chart-of-accounts', [AdminAccountingController::class, 'chartOfAccounts'])->name('accounting.chart-of-accounts');
-    Route::get('/accounting/journal-entries', [AdminAccountingController::class, 'journalEntries'])->name('accounting.journal-entries');
-    Route::get('/accounting/general-ledger', [AdminAccountingController::class, 'generalLedger'])->name('accounting.general-ledger');
-    Route::get('/accounting/trial-balance', [AdminAccountingController::class, 'trialBalance'])->name('accounting.trial-balance');
-    Route::get('/accounting/balance-sheet', [AdminAccountingController::class, 'balanceSheet'])->name('accounting.balance-sheet');
-    Route::get('/accounting/income-statement', [AdminAccountingController::class, 'incomeStatement'])->name('accounting.income-statement');
-    Route::get('/accounting/cash-flow', [AdminAccountingController::class, 'cashFlow'])->name('accounting.cash-flow');
-    Route::get('/accounting/fixed-assets', [AdminAccountingController::class, 'fixedAssets'])->name('accounting.fixed-assets');
-    Route::get('/accounting/depreciation', [AdminAccountingController::class, 'depreciation'])->name('accounting.depreciation');
-    Route::get('/accounting/bank-accounts', [AdminAccountingController::class, 'bankAccounts'])->name('accounting.bank-accounts');
-    Route::get('/accounting/bank-reconciliation', [AdminAccountingController::class, 'bankReconciliation'])->name('accounting.bank-reconciliation');
-    Route::get('/accounting/receipts', [AdminAccountingController::class, 'receipts'])->name('accounting.receipts');
-    Route::get('/accounting/payments', [AdminAccountingController::class, 'payments'])->name('accounting.payments');
-    Route::get('/accounting/expenses', [AdminAccountingController::class, 'expenses'])->name('accounting.expenses');
-    Route::get('/accounting/revenue', [AdminAccountingController::class, 'revenue'])->name('accounting.revenue');
-    Route::get('/accounting/accounts-receivable', [AdminAccountingController::class, 'accountsReceivable'])->name('accounting.accounts-receivable');
-    Route::get('/accounting/accounts-payable', [AdminAccountingController::class, 'accountsPayable'])->name('accounting.accounts-payable');
-    Route::get('/accounting/budgets', [AdminAccountingController::class, 'budgets'])->name('accounting.budgets');
-    Route::get('/accounting/financial-periods', [AdminAccountingController::class, 'financialPeriods'])->name('accounting.financial-periods');
-    Route::get('/accounting/closing-entries', [AdminAccountingController::class, 'closingEntries'])->name('accounting.closing-entries');
-    Route::get('/accounting/tax-management', [AdminAccountingController::class, 'taxManagement'])->name('accounting.tax-management');
-    Route::get('/accounting/audit-trail', [AdminAccountingController::class, 'auditTrail'])->name('accounting.audit-trail');
-    Route::get('/accounting/financial-reports', [AdminAccountingController::class, 'financialReports'])->name('accounting.financial-reports');
-    Route::get('/accounting/settings', [AdminAccountingController::class, 'settings'])->name('accounting.settings');
-
     Route::get('/roles', [AdminRoleController::class, 'index'])->name('roles.index');
     Route::get('/roles/create', [AdminRoleController::class, 'create'])->name('roles.create');
     Route::post('/roles', [AdminRoleController::class, 'store'])->name('roles.store');
