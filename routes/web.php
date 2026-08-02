@@ -32,6 +32,8 @@ use App\Http\Controllers\Admin\ShareDividendController as AdminShareDividendCont
 use App\Http\Controllers\Admin\ShareTransactionController as AdminShareTransactionController;
 use App\Http\Controllers\Admin\ShareReportController as AdminShareReportController;
 use App\Http\Controllers\Admin\ShareSettingController as AdminShareSettingController;
+use App\Http\Controllers\Admin\AccountController as AdminAccountController;
+use App\Http\Controllers\Admin\JournalEntryController as AdminJournalEntryController;
 use App\Http\Controllers\Member\DashboardController as MemberDashboardController;
 use App\Http\Controllers\Member\ProfileController as MemberProfileController;
 use App\Http\Controllers\Member\LoanController as MemberLoanController;
@@ -297,6 +299,26 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
 
     Route::get('/share-settings', [AdminShareSettingController::class, 'index'])->name('share-settings.index');
     Route::put('/share-settings', [AdminShareSettingController::class, 'update'])->name('share-settings.update');
+
+    // Chart of Accounts routes
+    Route::get('/accounts', [AdminAccountController::class, 'index'])->name('accounts.index');
+    Route::get('/accounts/create', [AdminAccountController::class, 'create'])->name('accounts.create');
+    Route::post('/accounts', [AdminAccountController::class, 'store'])->name('accounts.store');
+    Route::get('/accounts/{id}', [AdminAccountController::class, 'show'])->name('accounts.show');
+    Route::get('/accounts/{id}/edit', [AdminAccountController::class, 'edit'])->name('accounts.edit');
+    Route::put('/accounts/{id}', [AdminAccountController::class, 'update'])->name('accounts.update');
+    Route::delete('/accounts/{id}', [AdminAccountController::class, 'destroy'])->name('accounts.destroy');
+
+    // Journal Entries routes
+    Route::get('/journal-entries', [AdminJournalEntryController::class, 'index'])->name('journal-entries.index');
+    Route::get('/journal-entries/create', [AdminJournalEntryController::class, 'create'])->name('journal-entries.create');
+    Route::post('/journal-entries', [AdminJournalEntryController::class, 'store'])->name('journal-entries.store');
+    Route::get('/journal-entries/{id}', [AdminJournalEntryController::class, 'show'])->name('journal-entries.show');
+    Route::get('/journal-entries/{id}/edit', [AdminJournalEntryController::class, 'edit'])->name('journal-entries.edit');
+    Route::put('/journal-entries/{id}', [AdminJournalEntryController::class, 'update'])->name('journal-entries.update');
+    Route::delete('/journal-entries/{id}', [AdminJournalEntryController::class, 'destroy'])->name('journal-entries.destroy');
+    Route::post('/journal-entries/{id}/post', [AdminJournalEntryController::class, 'post'])->name('journal-entries.post');
+    Route::post('/journal-entries/{id}/void', [AdminJournalEntryController::class, 'void'])->name('journal-entries.void');
 
     // Accounting routes
     Route::get('/accounting/dashboard', [AdminAccountingController::class, 'dashboard'])->name('accounting.dashboard');

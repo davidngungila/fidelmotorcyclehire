@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
-@section('breadcrumb', 'System › Share Products › Edit')
-@section('page_title', 'Edit Share Product')
+@section('breadcrumb', 'System › Share Products › ' . $shareProduct->name . ' › Edit')
+@section('page_title', 'Edit Share Product: ' . $shareProduct->name)
 
 @section('content')
 <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-primary-100 dark:border-primary-800 p-8">
