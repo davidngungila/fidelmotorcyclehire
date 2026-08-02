@@ -110,7 +110,7 @@ class AdminDashboardService
                 'class' => 'badge-green',
             ],
             'paid', 'settled', 'closed' => [
-                'label' => 'Settled',
+                'label' => 'Completed',
                 'class' => 'badge-blue',
             ],
             'defaulted', 'overdue' => [

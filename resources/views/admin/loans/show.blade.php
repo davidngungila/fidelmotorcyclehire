@@ -15,6 +15,10 @@
   $memberPhone = $member['phone'] ?? ($member['Phone'] ?? '-');
   $memberEmail = $member['email'] ?? ($member['Email'] ?? '-');
   $memberBranch = $member['branch'] ?? ($member['Branch'] ?? '-');
+
+  $settings = \Illuminate\Support\Facades\Cache::get('share_settings', []);
+  $certificateBackgroundPath = $settings['certificate_background'] ?? '';
+  $certificateBackgroundUrl = $certificateBackgroundPath ? asset('storage/' . $certificateBackgroundPath) : '';
 @endphp
 
 @section('content')
@@ -49,6 +53,28 @@
                 <i class="fa-solid fa-certificate text-[10px]"></i> Preview Certificate
               </button>
               @endif
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Appreciation Certificate Preview Modal -->
+      <div id="appreciationCertificateModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white dark:bg-dark-card rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-auto">
+          <div class="p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Appreciation Certificate Preview</h3>
+              <button onclick="closeAppreciationModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                <i class="fa-solid fa-times text-xl"></i>
+              </button>
+            </div>
+            <div id="appreciationCertificatePreview" class="border border-gray-200 dark:border-gray-700 rounded-lg p-8">
+              <!-- Certificate content will be loaded here -->
+            </div>
+            <div class="flex items-center gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+              <button type="button" onclick="printAppreciationCertificate()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-sm font-semibold transition-all">
+                <i class="fa-solid fa-print"></i> Print Certificate
+              </button>
             </div>
           </div>
         </div>
@@ -714,12 +740,82 @@
     });
   }
 
-  function generateAppreciationCertificate() {
-    const loanNumber = '{{ $loanNo }}';
-    window.open(`/admin/loans/${loanNumber}/appreciation-certificate`, '_blank');
+  function previewAppreciationCertificate() {
+    const modal = document.getElementById('appreciationCertificateModal');
+    const preview = document.getElementById('appreciationCertificatePreview');
+    
+    let backgroundStyle = '';
+    if ('{{ $certificateBackgroundUrl }}') {
+      backgroundStyle = `background-image: url('{{ $certificateBackgroundUrl }}'); background-size: cover; background-position: center; background-repeat: no-repeat;`;
+    }
+    
+    const totalAmount = {{ $loanAmount + ($totalInterest ?? 0) }};
+    
+    preview.innerHTML = `
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+      <div style="${backgroundStyle} min-height: 500px; padding: 40px; position: relative;">
+        <div style="padding: 40px; position: relative; z-index: 1;">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <h1 style="font-size: 32px; font-weight: bold; color: #1e40af; margin-bottom: 5px; font-family: 'Times New Roman', serif;">CERTIFICATE OF APPRECIATION</h1>
+          </div>
+          
+          <div style="text-align: center; margin-bottom: 30px;">
+            <p style="color: #1f2937; font-size: 16px; margin-bottom: 10px;">THIS CERTIFICATE IS PROUDLY PRESENTED TO</p>
+            <h2 style="font-size: 36px; color: #1e40af; margin: 10px 0; font-family: 'Great Vibes', cursive;">{{ $memberName }}</h2>
+            <div style="width: 350px; height: 2px; background: linear-gradient(to right, transparent, #1e40af, transparent); margin: 8px auto;"></div>
+            <p style="color: #1f2937; font-size: 16px;">In recognition of successfully completing loan repayment for <strong>Loan Number {{ $loanNo }}</strong> with a total amount of <strong>TZS ${totalAmount.toLocaleString()}</strong>. This achievement demonstrates financial responsibility and commitment to fulfilling obligations, serving as an example to other members of FEEDTAN COMMUNITY MICROFINANCE GROUP.</p>
+          </div>
+          
+          <div style="text-align: center; margin-top: 30px; padding: 20px; background: rgba(255, 255, 255, 0.4); border-radius: 8px;">
+            <p style="color: #1f2937; font-size: 14px; line-height: 1.8;">
+              Loan Number: <strong>{{ $loanNo }}</strong> | 
+              Loan Amount: <strong>{{ $fmt($loanAmount) }}</strong> | 
+              Completion Date: <strong>{{ now()->format('d F Y') }}</strong> | 
+              Status: <strong>Fully Paid</strong>
+            </p>
+          </div>
+          
+          <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid rgba(0,0,0,0.1);">
+            <p style="color: #1f2937; font-size: 14px;">This certificate serves as proof of successful loan completion and expresses our gratitude for your trust and partnership with FEEDTAN COMMUNITY MICROFINANCE GROUP.</p>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
   }
 
-  function previewAppreciationCertificate() {
+  function closeAppreciationModal() {
+    const modal = document.getElementById('appreciationCertificateModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
+  function printAppreciationCertificate() {
+    const preview = document.getElementById('appreciationCertificatePreview');
+    const printContent = preview.innerHTML;
+    
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Appreciation Certificate - {{ $loanNo }}</title>
+          <style>
+            body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+            @media print { body { margin: 0; } }
+          </style>
+        </head>
+        <body>${printContent}</body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+  }
+
+  function generateAppreciationCertificate() {
     const loanNumber = '{{ $loanNo }}';
     window.open(`/admin/loans/${loanNumber}/appreciation-certificate`, '_blank');
   }
