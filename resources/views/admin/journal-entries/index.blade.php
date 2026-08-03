@@ -83,7 +83,8 @@
                 </div>
               </td>
             </tr>
-          @empty
+          @endforeach
+          @if($journalEntries->isEmpty())
             <tr>
               <td colspan="8" class="text-center py-12 text-gray-500 dark:text-gray-400">
                 <i class="fa-solid fa-book-journal-whills text-3xl mb-3 block opacity-30"></i>
@@ -91,7 +92,7 @@
                 <p class="text-xs">Create your first journal entry to get started</p>
               </td>
             </tr>
-          @endforeach
+          @endif
         </tbody>
       </table>
     </div>

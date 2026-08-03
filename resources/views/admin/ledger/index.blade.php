@@ -48,7 +48,8 @@
                 </a>
               </td>
             </tr>
-          @empty
+          @endforeach
+          @if($accounts->isEmpty())
             <tr>
               <td colspan="5" class="text-center py-12 text-gray-500 dark:text-gray-400">
                 <i class="fa-solid fa-book text-3xl mb-3 block opacity-30"></i>
@@ -56,7 +57,7 @@
                 <p class="text-xs">Create accounts to view their ledger entries</p>
               </td>
             </tr>
-          @endforeach
+          @endif
         </tbody>
       </table>
     </div>
