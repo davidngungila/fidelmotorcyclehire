@@ -73,7 +73,7 @@ class AccountSeeder extends Seeder
             'account_code' => '1130',
             'account_name' => 'Loans Receivable',
             'account_type' => 'asset',
-            'account_subtype' => 'current_asset',
+            'account_subtype' => 'loan_receivable',
             'description' => 'Loans issued to members',
             'opening_balance' => 0,
             'current_balance' => 0,
@@ -117,6 +117,20 @@ class AccountSeeder extends Seeder
             'account_type' => 'asset',
             'account_subtype' => 'current_asset',
             'description' => 'Interest income not yet received',
+            'opening_balance' => 0,
+            'current_balance' => 0,
+            'is_active' => true,
+            'is_system_account' => false,
+            'parent_account_id' => $cash->id,
+            'level' => 3,
+        ]);
+
+        Account::create([
+            'account_code' => '1170',
+            'account_name' => 'Investments',
+            'account_type' => 'asset',
+            'account_subtype' => 'investment',
+            'description' => 'Member investments',
             'opening_balance' => 0,
             'current_balance' => 0,
             'is_active' => true,
@@ -227,7 +241,7 @@ class AccountSeeder extends Seeder
             'account_code' => '2110',
             'account_name' => 'Savings Deposits Payable',
             'account_type' => 'liability',
-            'account_subtype' => 'current_liability',
+            'account_subtype' => 'savings_deposit',
             'description' => 'Member savings deposits owed',
             'opening_balance' => 0,
             'current_balance' => 0,
@@ -308,6 +322,20 @@ class AccountSeeder extends Seeder
         ]);
 
         Account::create([
+            'account_code' => '2170',
+            'account_name' => 'SWF Fund',
+            'account_type' => 'liability',
+            'account_subtype' => 'swf_fund',
+            'description' => 'Social Welfare Fund contributions',
+            'opening_balance' => 0,
+            'current_balance' => 0,
+            'is_active' => true,
+            'is_system_account' => false,
+            'parent_account_id' => $liabilities->id,
+            'level' => 3,
+        ]);
+
+        Account::create([
             'account_code' => '2200',
             'account_name' => 'Long Term Liabilities',
             'account_type' => 'liability',
@@ -355,6 +383,20 @@ class AccountSeeder extends Seeder
             'account_type' => 'equity',
             'account_subtype' => 'owners_equity',
             'description' => 'Total member equity',
+            'opening_balance' => 0,
+            'current_balance' => 0,
+            'is_active' => true,
+            'is_system_account' => false,
+            'parent_account_id' => $equity->id,
+            'level' => 2,
+        ]);
+
+        Account::create([
+            'account_code' => '3110',
+            'account_name' => 'Share Capital',
+            'account_type' => 'equity',
+            'account_subtype' => 'share_capital',
+            'description' => 'Member share capital contributions',
             'opening_balance' => 0,
             'current_balance' => 0,
             'is_active' => true,
@@ -423,7 +465,7 @@ class AccountSeeder extends Seeder
             'account_code' => '4110',
             'account_name' => 'Interest Income from Loans',
             'account_type' => 'revenue',
-            'account_subtype' => 'operating_revenue',
+            'account_subtype' => 'interest_income',
             'description' => 'Interest earned from member loans',
             'opening_balance' => 0,
             'current_balance' => 0,
