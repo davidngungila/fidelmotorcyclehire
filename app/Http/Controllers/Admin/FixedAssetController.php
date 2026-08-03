@@ -27,7 +27,7 @@ class FixedAssetController extends Controller
             ->orderBy('account_code')
             ->get();
         
-        $responsiblePersons = User::where('is_active', true)->orderBy('name')->get();
+        $responsiblePersons = User::orderBy('name')->get();
         
         return view('admin.fixed-assets.create', compact('accounts', 'responsiblePersons'));
     }
@@ -77,7 +77,7 @@ class FixedAssetController extends Controller
             ->orderBy('account_code')
             ->get();
         
-        $responsiblePersons = User::where('is_active', true)->orderBy('name')->get();
+        $responsiblePersons = User::orderBy('name')->get();
         
         return view('admin.fixed-assets.edit', compact('fixedAsset', 'accounts', 'responsiblePersons'));
     }

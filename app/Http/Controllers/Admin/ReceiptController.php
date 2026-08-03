@@ -26,7 +26,7 @@ class ReceiptController extends Controller
             ->orderBy('account_code')
             ->get();
         
-        $members = Member::where('is_active', true)->orderBy('name')->get();
+        $members = Member::orderBy('name')->get();
         
         return view('admin.receipts.create', compact('accounts', 'members'));
     }
