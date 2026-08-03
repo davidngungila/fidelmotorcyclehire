@@ -63,7 +63,8 @@
                 </div>
               </td>
             </tr>
-          @empty
+          @endforeach
+          @if($revenues->isEmpty())
             <tr>
               <td colspan="7" class="text-center py-12 text-gray-500 dark:text-gray-400">
                 <i class="fa-solid fa-coins text-3xl mb-3 block opacity-30"></i>
@@ -71,7 +72,7 @@
                 <p class="text-xs">Create your first revenue to get started</p>
               </td>
             </tr>
-          @endforeach
+          @endif
         </tbody>
       </table>
     </div>
@@ -112,3 +113,5 @@ function deleteRevenue(id) {
   });
 }
 </script>
+
+@endsection
