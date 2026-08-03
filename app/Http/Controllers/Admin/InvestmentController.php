@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Account;
 use App\Models\ActivityLog;
 use App\Models\Investment;
 use App\Models\InvestmentProduct;
+use App\Models\JournalEntry;
 use App\Models\User;
 use App\Services\AdminDashboardService;
 use App\Services\EncryptedIdService;
@@ -213,6 +215,9 @@ class InvestmentController extends Controller
             'notes' => $validated['notes'] ?? null,
         ]);
 
+        // Create journal entry for investment (double-entry)
+        $this->createInvestmentJournalEntry($investment, $validated['amount'], $validated['investment_date']);
+
         ActivityLog::create([
             'user_id' => Auth::id(),
             'subject_type' => 'investment',
@@ -230,6 +235,60 @@ class InvestmentController extends Controller
 
         $this->success('Investment created successfully');
         return redirect()->route('admin.investments.index');
+    }
+
+    private function createInvestmentJournalEntry(Investment $investment, float $amount, string $investmentDate)
+    {
+        // Get investment account (asset) and cash/bank account
+        $investmentAccount = Account::where('account_type', 'asset')
+            ->where('account_subtype', 'investment')
+            ->where('is_active', true)
+            ->first();
+
+        $cashAccount = Account::where('account_type', 'asset')
+            ->where('account_subtype', 'current_asset')
+            ->where('is_active', true)
+            ->first();
+
+        if (!$investmentAccount || !$cashAccount) {
+            \Log::error('Required accounts not found for investment journal entry', [
+                'investment_number' => $investment->investment_number,
+            ]);
+            return;
+        }
+
+        // Create journal entry
+        $journalEntry = JournalEntry::create([
+            'entry_number' => 'INV-' . date('Ymd') . '-' . str_pad((string) ($investment->id), 4, '0', STR_PAD_LEFT),
+            'entry_date' => $investmentDate,
+            'entry_type' => 'investment',
+            'description' => "Investment by member {$investment->member_number} ({$investment->investment_number})",
+            'reference' => $investment->investment_number,
+            'total_debit' => $amount,
+            'total_credit' => $amount,
+            'status' => 'posted',
+            'created_by' => Auth::id(),
+        ]);
+
+        // Create journal entry lines (double-entry)
+        // Debit: Investment Account (Asset increases)
+        $journalEntry->lines()->create([
+            'account_id' => $investmentAccount->id,
+            'debit_amount' => $amount,
+            'credit_amount' => 0,
+            'description' => "Investment by member {$investment->member_number}",
+        ]);
+
+        // Credit: Cash/Bank (Asset decreases)
+        $journalEntry->lines()->create([
+            'account_id' => $cashAccount->id,
+            'debit_amount' => 0,
+            'credit_amount' => $amount,
+            'description' => "Cash payment for investment {$investment->investment_number}",
+        ]);
+
+        // Post the journal entry to update account balances
+        $journalEntry->post();
     }
 
     public function show(Request $request, string $encryptedMemberNumber)

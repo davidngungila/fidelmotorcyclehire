@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Account;
 use App\Models\ActivityLog;
+use App\Models\JournalEntry;
 use App\Models\SwfContribution;
 use App\Models\SwfMember;
 use App\Services\EncryptedIdService;
@@ -57,6 +59,9 @@ class SwfContributionController extends Controller
             $swfMember->total_contributions += $contribution->amount;
             $swfMember->save();
 
+            // Create journal entry for SWF contribution (double-entry)
+            $this->createSwfContributionJournalEntry($contribution, $swfMember);
+
             ActivityLog::create([
                 'user_id' => Auth::id(),
                 'subject_type' => 'swf_contribution',
@@ -77,5 +82,61 @@ class SwfContributionController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to record contribution: ' . $e->getMessage());
         }
+    }
+
+    private function createSwfContributionJournalEntry(SwfContribution $contribution, SwfMember $swfMember)
+    {
+        // Get SWF fund account (liability) and cash/bank account
+        $swfFundAccount = Account::where('account_type', 'liability')
+            ->where('account_subtype', 'swf_fund')
+            ->where('is_active', true)
+            ->first();
+
+        $cashAccount = Account::where('account_type', 'asset')
+            ->where('account_subtype', 'current_asset')
+            ->where('is_active', true)
+            ->first();
+
+        if (!$swfFundAccount || !$cashAccount) {
+            \Log::error('Required accounts not found for SWF contribution journal entry', [
+                'contribution_id' => $contribution->id,
+            ]);
+            return;
+        }
+
+        $userName = $swfMember->user ? $swfMember->user->name : 'Unknown';
+
+        // Create journal entry
+        $journalEntry = JournalEntry::create([
+            'entry_number' => 'SWF-' . date('Ymd') . '-' . str_pad((string) ($contribution->id), 4, '0', STR_PAD_LEFT),
+            'entry_date' => $contribution->contribution_date,
+            'entry_type' => 'swf_contribution',
+            'description' => "SWF contribution from {$userName} ({$swfMember->membership_number})",
+            'reference' => $contribution->reference_number ?? 'SWF-' . $contribution->id,
+            'total_debit' => $contribution->amount,
+            'total_credit' => $contribution->amount,
+            'status' => 'posted',
+            'created_by' => Auth::id(),
+        ]);
+
+        // Create journal entry lines (double-entry)
+        // Debit: Cash/Bank (Asset increases)
+        $journalEntry->lines()->create([
+            'account_id' => $cashAccount->id,
+            'debit_amount' => $contribution->amount,
+            'credit_amount' => 0,
+            'description' => "SWF contribution payment from {$userName}",
+        ]);
+
+        // Credit: SWF Fund (Liability increases)
+        $journalEntry->lines()->create([
+            'account_id' => $swfFundAccount->id,
+            'debit_amount' => 0,
+            'credit_amount' => $contribution->amount,
+            'description' => "SWF fund contribution from {$userName}",
+        ]);
+
+        // Post the journal entry to update account balances
+        $journalEntry->post();
     }
 }

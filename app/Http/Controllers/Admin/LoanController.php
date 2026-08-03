@@ -6,6 +6,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\Account;
+use App\Models\JournalEntry;
 use App\Models\Loan;
 use App\Models\SmsSettings;
 use App\Services\AdminDashboardService;
@@ -581,6 +583,9 @@ class LoanController extends Controller
             'balance' => $validated['total_amount_due'],
         ]);
 
+        // Create journal entry for loan disbursement (double-entry)
+        $this->createDisbursementJournalEntry($loan, $netAmountPaid, $validated['disbursement_date']);
+
         // Send SMS notification if enabled
         $this->sendDisbursementSms($loan, $validated);
 
@@ -668,6 +673,139 @@ class LoanController extends Controller
         return "Dear {$memberName}, Your loan {$loanNumber} of TSh {$amount} has been successfully disbursed on {$disbursementDate}. Monthly payment: TSh {$monthlyPayment}. Maturity date: {$maturityDate}. Start making repayments from next month. Thank you, FEEDTAN DIGITAL.";
     }
 
+    private function createDisbursementJournalEntry(Loan $loan, float $amount, string $disbursementDate)
+    {
+        // Get loan receivable account (asset) and cash/bank account
+        $loanReceivableAccount = Account::where('account_type', 'asset')
+            ->where('account_subtype', 'loan_receivable')
+            ->where('is_active', true)
+            ->first();
+
+        $cashAccount = Account::where('account_type', 'asset')
+            ->where('account_subtype', 'current_asset')
+            ->where('is_active', true)
+            ->first();
+
+        if (!$loanReceivableAccount || !$cashAccount) {
+            \Log::error('Required accounts not found for loan disbursement journal entry', [
+                'loan_number' => $loan->loan_number,
+            ]);
+            return;
+        }
+
+        // Create journal entry
+        $journalEntry = JournalEntry::create([
+            'entry_number' => 'LOAN-DIS-' . date('Ymd') . '-' . str_pad((string) ($loan->id), 4, '0', STR_PAD_LEFT),
+            'entry_date' => $disbursementDate,
+            'entry_type' => 'loan_disbursement',
+            'description' => "Loan disbursement to {$loan->user->name} ({$loan->loan_number})",
+            'reference' => $loan->loan_number,
+            'total_debit' => $amount,
+            'total_credit' => $amount,
+            'status' => 'posted',
+            'created_by' => Auth::id(),
+        ]);
+
+        // Create journal entry lines (double-entry)
+        // Debit: Loan Receivable (Asset increases)
+        $journalEntry->lines()->create([
+            'account_id' => $loanReceivableAccount->id,
+            'debit_amount' => $amount,
+            'credit_amount' => 0,
+            'description' => "Loan disbursement to {$loan->user->name}",
+            'member_id' => $loan->user->id,
+        ]);
+
+        // Credit: Cash/Bank (Asset decreases)
+        $journalEntry->lines()->create([
+            'account_id' => $cashAccount->id,
+            'debit_amount' => 0,
+            'credit_amount' => $amount,
+            'description' => "Cash disbursement for loan {$loan->loan_number}",
+            'member_id' => $loan->user->id,
+        ]);
+
+        // Post the journal entry to update account balances
+        $journalEntry->post();
+    }
+
+    private function createRepaymentJournalEntry(Loan $loan, float $amount, string $paymentDate)
+    {
+        // Get loan receivable account (asset) and cash/bank account
+        $loanReceivableAccount = Account::where('account_type', 'asset')
+            ->where('account_subtype', 'loan_receivable')
+            ->where('is_active', true)
+            ->first();
+
+        $cashAccount = Account::where('account_type', 'asset')
+            ->where('account_subtype', 'current_asset')
+            ->where('is_active', true)
+            ->first();
+
+        $interestIncomeAccount = Account::where('account_type', 'revenue')
+            ->where('account_subtype', 'interest_income')
+            ->where('is_active', true)
+            ->first();
+
+        if (!$loanReceivableAccount || !$cashAccount) {
+            \Log::error('Required accounts not found for loan repayment journal entry', [
+                'loan_number' => $loan->loan_number,
+            ]);
+            return;
+        }
+
+        // Calculate interest portion (simplified - could be calculated from schedule)
+        $interestRate = (float) $loan->interest_rate;
+        $monthlyInterest = $amount * ($interestRate / 100 / 12);
+        $principalPortion = $amount - $monthlyInterest;
+
+        // Create journal entry
+        $journalEntry = JournalEntry::create([
+            'entry_number' => 'LOAN-PAY-' . date('Ymd') . '-' . str_pad((string) ($loan->id), 4, '0', STR_PAD_LEFT),
+            'entry_date' => $paymentDate,
+            'entry_type' => 'loan_repayment',
+            'description' => "Loan repayment from {$loan->user->name} ({$loan->loan_number})",
+            'reference' => $loan->loan_number,
+            'total_debit' => $amount,
+            'total_credit' => $amount,
+            'status' => 'posted',
+            'created_by' => Auth::id(),
+        ]);
+
+        // Create journal entry lines (double-entry)
+        // Debit: Cash/Bank (Asset increases)
+        $journalEntry->lines()->create([
+            'account_id' => $cashAccount->id,
+            'debit_amount' => $amount,
+            'credit_amount' => 0,
+            'description' => "Loan repayment from {$loan->user->name}",
+            'member_id' => $loan->user->id,
+        ]);
+
+        // Credit: Loan Receivable (Asset decreases - principal portion)
+        $journalEntry->lines()->create([
+            'account_id' => $loanReceivableAccount->id,
+            'debit_amount' => 0,
+            'credit_amount' => $principalPortion,
+            'description' => "Principal repayment for loan {$loan->loan_number}",
+            'member_id' => $loan->user->id,
+        ]);
+
+        // Credit: Interest Income (Revenue increases - interest portion)
+        if ($interestIncomeAccount && $monthlyInterest > 0) {
+            $journalEntry->lines()->create([
+                'account_id' => $interestIncomeAccount->id,
+                'debit_amount' => 0,
+                'credit_amount' => $monthlyInterest,
+                'description' => "Interest income from loan {$loan->loan_number}",
+                'member_id' => $loan->user->id,
+            ]);
+        }
+
+        // Post the journal entry to update account balances
+        $journalEntry->post();
+    }
+
     public function recordPayment(Request $request, string $encryptedLoanNumber)
     {
         try {
@@ -711,6 +849,9 @@ class LoanController extends Controller
 
         // Update repayment schedule status
         $this->updateRepaymentScheduleStatus($loan, $loanPaymentAmount, $validated['payment_date']);
+
+        // Create journal entry for loan repayment (double-entry)
+        $this->createRepaymentJournalEntry($loan, $loanPaymentAmount, $validated['payment_date']);
 
         // Create loan payment record with sequential reference number
         $today = date('Ymd');
