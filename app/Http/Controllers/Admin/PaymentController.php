@@ -26,7 +26,7 @@ class PaymentController extends Controller
             ->orderBy('account_code')
             ->get();
         
-        $members = Member::orderBy('name')->get();
+        $members = Member::orderBy('full_name')->get();
         
         return view('admin.payments.create', compact('accounts', 'members'));
     }
