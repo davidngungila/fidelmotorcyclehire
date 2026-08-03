@@ -63,11 +63,17 @@
             <option value="">Select Subtype</option>
             <option value="current_asset">Current Asset</option>
             <option value="fixed_asset">Fixed Asset</option>
+            <option value="loan_receivable">Loan Receivable</option>
+            <option value="investment">Investment</option>
             <option value="current_liability">Current Liability</option>
             <option value="long_term_liability">Long Term Liability</option>
+            <option value="savings_deposit">Savings Deposit</option>
+            <option value="swf_fund">SWF Fund</option>
             <option value="owners_equity">Owner's Equity</option>
+            <option value="share_capital">Share Capital</option>
             <option value="operating_revenue">Operating Revenue</option>
             <option value="non_operating_revenue">Non-Operating Revenue</option>
+            <option value="interest_income">Interest Income</option>
             <option value="operating_expense">Operating Expense</option>
             <option value="non_operating_expense">Non-Operating Expense</option>
           </select>

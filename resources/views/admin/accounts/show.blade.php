@@ -138,7 +138,7 @@
           <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Child Accounts</h3>
           <div class="space-y-3">
             @foreach($account->childAccounts as $child)
-              <a href="{{ route('admin.accounts.show', $child->id) }}" class="block p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+              <a href="{{ route('admin.accounts.show', app('App\Services\EncryptedIdService')->encrypt($child->id)) }}" class="block p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                 <div class="flex items-center justify-between">
                   <div>
                     <span class="font-mono text-sm text-primary-700 dark:text-primary-300">{{ $child->account_code }}</span>

@@ -69,14 +69,14 @@
               </td>
               <td class="text-right">
                 <div class="flex items-center justify-end gap-2">
-                  <a href="{{ route('admin.accounts.show', $account->id) }}" class="text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 transition-colors">
+                  <a href="{{ route('admin.accounts.show', app('App\Services\EncryptedIdService')->encrypt($account->id)) }}" class="text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 transition-colors">
                     <i class="fa-solid fa-eye"></i>
                   </a>
                   @if(!$account->is_system_account)
-                    <a href="{{ route('admin.accounts.edit', $account->id) }}" class="text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 transition-colors">
+                    <a href="{{ route('admin.accounts.edit', app('App\Services\EncryptedIdService')->encrypt($account->id)) }}" class="text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 transition-colors">
                       <i class="fa-solid fa-edit"></i>
                     </a>
-                    <button onclick="deleteAccount({{ $account->id }})" class="text-gray-600 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors">
+                    <button onclick="deleteAccount('{{ app('App\Services\EncryptedIdService')->encrypt($account->id) }}')" class="text-gray-600 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors">
                       <i class="fa-solid fa-trash"></i>
                     </button>
                   @endif

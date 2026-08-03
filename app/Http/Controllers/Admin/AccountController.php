@@ -4,10 +4,16 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Account;
+use App\Services\EncryptedIdService;
 use Illuminate\Http\Request;
 
 class AccountController extends Controller
 {
+    public function __construct(
+        protected EncryptedIdService $encryptedIdService,
+    ) {
+    }
+
     public function index()
     {
         $accounts = Account::with('parentAccount')
@@ -32,7 +38,7 @@ class AccountController extends Controller
             'account_code' => 'required|string|max:20|unique:accounts',
             'account_name' => 'required|string|max:255',
             'account_type' => 'required|in:asset,liability,equity,revenue,expense',
-            'account_subtype' => 'nullable|in:current_asset,fixed_asset,current_liability,long_term_liability,owners_equity,operating_revenue,non_operating_revenue,operating_expense,non_operating_expense',
+            'account_subtype' => 'nullable|in:current_asset,fixed_asset,loan_receivable,investment,current_liability,long_term_liability,savings_deposit,swf_fund,owners_equity,share_capital,operating_revenue,non_operating_revenue,interest_income,operating_expense,non_operating_expense',
             'description' => 'nullable|string',
             'opening_balance' => 'required|numeric|min:0',
             'is_active' => 'boolean',
@@ -51,16 +57,30 @@ class AccountController extends Controller
             ->with('success', 'Account created successfully.');
     }
 
-    public function show($id)
+    public function show($encryptedId)
     {
+        try {
+            $id = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            return redirect()->route('admin.accounts.index')
+                ->with('error', 'Invalid account ID.');
+        }
+
         $account = Account::with(['parentAccount', 'childAccounts', 'journalEntryLines'])
             ->findOrFail($id);
         
         return view('admin.accounts.show', compact('account'));
     }
 
-    public function edit($id)
+    public function edit($encryptedId)
     {
+        try {
+            $id = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            return redirect()->route('admin.accounts.index')
+                ->with('error', 'Invalid account ID.');
+        }
+
         $account = Account::findOrFail($id);
         $parentAccounts = Account::where('is_active', true)
             ->where('id', '!=', $id)
@@ -70,15 +90,22 @@ class AccountController extends Controller
         return view('admin.accounts.edit', compact('account', 'parentAccounts'));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $encryptedId)
     {
+        try {
+            $id = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            return redirect()->route('admin.accounts.index')
+                ->with('error', 'Invalid account ID.');
+        }
+
         $account = Account::findOrFail($id);
 
         $validated = $request->validate([
             'account_code' => 'required|string|max:20|unique:accounts,account_code,' . $id,
             'account_name' => 'required|string|max:255',
             'account_type' => 'required|in:asset,liability,equity,revenue,expense',
-            'account_subtype' => 'nullable|in:current_asset,fixed_asset,current_liability,long_term_liability,owners_equity,operating_revenue,non_operating_revenue,operating_expense,non_operating_expense',
+            'account_subtype' => 'nullable|in:current_asset,fixed_asset,loan_receivable,investment,current_liability,long_term_liability,savings_deposit,swf_fund,owners_equity,share_capital,operating_revenue,non_operating_revenue,interest_income,operating_expense,non_operating_expense',
             'description' => 'nullable|string',
             'is_active' => 'boolean',
             'parent_account_id' => 'nullable|exists:accounts,id',
@@ -90,8 +117,15 @@ class AccountController extends Controller
             ->with('success', 'Account updated successfully.');
     }
 
-    public function destroy($id)
+    public function destroy($encryptedId)
     {
+        try {
+            $id = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            return redirect()->route('admin.accounts.index')
+                ->with('error', 'Invalid account ID.');
+        }
+
         $account = Account::findOrFail($id);
         
         if ($account->is_system_account) {

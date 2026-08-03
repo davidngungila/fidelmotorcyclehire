@@ -16,7 +16,7 @@
   </div>
 
   <div class="glass rounded-xl p-8">
-    <form action="{{ route('admin.accounts.update', $account->id) }}" method="POST" class="space-y-6">
+    <form action="{{ route('admin.accounts.update', app('App\Services\EncryptedIdService')->encrypt($account->id)) }}" method="POST" class="space-y-6">
       @csrf
       @method('PUT')
       
@@ -64,11 +64,17 @@
             <option value="">Select Subtype</option>
             <option value="current_asset" {{ $account->account_subtype === 'current_asset' ? 'selected' : '' }}>Current Asset</option>
             <option value="fixed_asset" {{ $account->account_subtype === 'fixed_asset' ? 'selected' : '' }}>Fixed Asset</option>
+            <option value="loan_receivable" {{ $account->account_subtype === 'loan_receivable' ? 'selected' : '' }}>Loan Receivable</option>
+            <option value="investment" {{ $account->account_subtype === 'investment' ? 'selected' : '' }}>Investment</option>
             <option value="current_liability" {{ $account->account_subtype === 'current_liability' ? 'selected' : '' }}>Current Liability</option>
             <option value="long_term_liability" {{ $account->account_subtype === 'long_term_liability' ? 'selected' : '' }}>Long Term Liability</option>
+            <option value="savings_deposit" {{ $account->account_subtype === 'savings_deposit' ? 'selected' : '' }}>Savings Deposit</option>
+            <option value="swf_fund" {{ $account->account_subtype === 'swf_fund' ? 'selected' : '' }}>SWF Fund</option>
             <option value="owners_equity" {{ $account->account_subtype === 'owners_equity' ? 'selected' : '' }}>Owner's Equity</option>
+            <option value="share_capital" {{ $account->account_subtype === 'share_capital' ? 'selected' : '' }}>Share Capital</option>
             <option value="operating_revenue" {{ $account->account_subtype === 'operating_revenue' ? 'selected' : '' }}>Operating Revenue</option>
             <option value="non_operating_revenue" {{ $account->account_subtype === 'non_operating_revenue' ? 'selected' : '' }}>Non-Operating Revenue</option>
+            <option value="interest_income" {{ $account->account_subtype === 'interest_income' ? 'selected' : '' }}>Interest Income</option>
             <option value="operating_expense" {{ $account->account_subtype === 'operating_expense' ? 'selected' : '' }}>Operating Expense</option>
             <option value="non_operating_expense" {{ $account->account_subtype === 'non_operating_expense' ? 'selected' : '' }}>Non-Operating Expense</option>
           </select>
