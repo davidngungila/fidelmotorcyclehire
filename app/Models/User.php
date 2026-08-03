@@ -85,6 +85,16 @@ class User extends Authenticatable
         return $this->hasOne(SwfMember::class);
     }
 
+    public function sharePurchases()
+    {
+        return $this->hasMany(SharePurchase::class);
+    }
+
+    public function shareCertificates()
+    {
+        return $this->hasMany(ShareCertificate::class);
+    }
+
     public function hasRole($role): bool
     {
         if (is_string($role)) {
