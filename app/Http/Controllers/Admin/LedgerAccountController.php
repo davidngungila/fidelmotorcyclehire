@@ -5,10 +5,16 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Account;
 use App\Models\LedgerAccount;
+use App\Services\EncryptedIdService;
 use Illuminate\Http\Request;
 
 class LedgerAccountController extends Controller
 {
+    public function __construct(
+        protected EncryptedIdService $encryptedIdService,
+    ) {
+    }
+
     public function index()
     {
         $accounts = Account::where('is_active', true)
@@ -18,8 +24,15 @@ class LedgerAccountController extends Controller
         return view('admin.ledger.index', compact('accounts'));
     }
 
-    public function show($accountId)
+    public function show($encryptedId)
     {
+        try {
+            $accountId = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            return redirect()->route('admin.ledger.index')
+                ->with('error', 'Invalid account ID.');
+        }
+
         $account = Account::findOrFail($accountId);
         
         $ledgerEntries = LedgerAccount::where('account_id', $accountId)

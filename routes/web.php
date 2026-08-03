@@ -336,7 +336,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
 
     // General Ledger routes
     Route::get('/ledger', [AdminLedgerAccountController::class, 'index'])->name('ledger.index');
-    Route::get('/ledger/{accountId}', [AdminLedgerAccountController::class, 'show'])->name('ledger.show');
+    Route::get('/ledger/{encryptedId}', [AdminLedgerAccountController::class, 'show'])->name('ledger.show');
     Route::post('/ledger/filter', [AdminLedgerAccountController::class, 'accountLedger'])->name('ledger.filter');
 
     // Trial Balance routes

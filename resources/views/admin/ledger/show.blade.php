@@ -63,7 +63,7 @@
               Filter
             </button>
             @if(request('start_date') || request('end_date'))
-              <a href="{{ route('admin.ledger.show', $account->id) }}" class="text-sm text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400">
+              <a href="{{ route('admin.ledger.show', app('App\Services\EncryptedIdService')->encrypt($account->id)) }}" class="text-sm text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400">
                 Clear
               </a>
             @endif
@@ -83,7 +83,16 @@
               </tr>
             </thead>
             <tbody>
-              @foreach($ledgerEntries as $entry)
+              @if($ledgerEntries->isEmpty())
+                <tr>
+                  <td colspan="6" class="text-center py-12 text-gray-500 dark:text-gray-400">
+                    <i class="fa-solid fa-receipt text-3xl mb-3 block opacity-30"></i>
+                    <p class="text-sm font-semibold mb-1">No ledger entries found</p>
+                    <p class="text-xs">Post journal entries to see ledger activity</p>
+                  </td>
+                </tr>
+              @else
+                @foreach($ledgerEntries as $entry)
                 <tr>
                   <td>{{ $entry->transaction_date->format('M d, Y') }}</td>
                   <td>
@@ -100,15 +109,8 @@
                     {{ number_format($entry->balance, 2) }}
                   </td>
                 </tr>
-              @empty
-                <tr>
-                  <td colspan="6" class="text-center py-12 text-gray-500 dark:text-gray-400">
-                    <i class="fa-solid fa-receipt text-3xl mb-3 block opacity-30"></i>
-                    <p class="text-sm font-semibold mb-1">No ledger entries found</p>
-                    <p class="text-xs">Post journal entries to see ledger activity</p>
-                  </td>
-                </tr>
-              @endforeach
+                @endforeach
+              @endif
             </tbody>
           </table>
         </div>

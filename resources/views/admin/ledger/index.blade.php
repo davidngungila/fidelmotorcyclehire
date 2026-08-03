@@ -43,7 +43,7 @@
                 {{ number_format($account->current_balance, 2) }}
               </td>
               <td class="text-right">
-                <a href="{{ route('admin.ledger.show', $account->id) }}" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-sm font-semibold transition-all">
+                <a href="{{ route('admin.ledger.show', app('App\Services\EncryptedIdService')->encrypt($account->id)) }}" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-sm font-semibold transition-all">
                   <i class="fa-solid fa-eye"></i> View Ledger
                 </a>
               </td>
