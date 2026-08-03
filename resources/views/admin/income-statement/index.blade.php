@@ -138,8 +138,12 @@
           </div>
           <div>
             <span class="text-sm text-gray-600 dark:text-gray-400">Profit Margin</span>
-            <div class="font-mono font-bold text-xl {{ $totalRevenue > 0 ? (($netIncome / $totalRevenue) * 100) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
-              {{ $totalRevenue > 0 ? number_format(($netIncome / $totalRevenue) * 100, 2) : '0.00' }}%
+            @php
+              $profitMargin = $totalRevenue > 0 ? ($netIncome / $totalRevenue) * 100 : 0;
+              $marginColorClass = $profitMargin >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+            @endphp
+            <div class="font-mono font-bold text-xl {{ $marginColorClass }}">
+              {{ number_format($profitMargin, 2) }}%
             </div>
           </div>
         </div>

@@ -52,7 +52,8 @@
                 {{ $account->isCreditAccount() ? number_format($account->current_balance, 2) : '-' }}
               </td>
             </tr>
-          @empty
+          @endforeach
+          @if($accounts->isEmpty())
             <tr>
               <td colspan="5" class="text-center py-12 text-gray-500 dark:text-gray-400">
                 <i class="fa-solid fa-scale-balanced text-3xl mb-3 block opacity-30"></i>
@@ -60,7 +61,7 @@
                 <p class="text-xs">Post journal entries to generate trial balance</p>
               </td>
             </tr>
-          @endforeach
+          @endif
         </tbody>
         <tfoot>
           <tr class="bg-gray-50 dark:bg-gray-800 font-bold">
