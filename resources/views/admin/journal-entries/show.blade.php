@@ -12,13 +12,13 @@
     </div>
     <div class="flex items-center gap-2">
       @if($journalEntry->status === 'draft')
-        <a href="{{ route('admin.journal-entries.edit', $journalEntry->id) }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-sm font-semibold transition-all">
+        <a href="{{ route('admin.journal-entries.edit', app('App\Services\EncryptedIdService')->encrypt($journalEntry->id)) }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-sm font-semibold transition-all">
           <i class="fa-solid fa-edit"></i> Edit
         </a>
-        <button onclick="postJournalEntry({{ $journalEntry->id }})" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-green-100 hover:bg-green-200 dark:bg-green-900/40 dark:hover:bg-green-900/60 text-green-700 dark:text-green-300 text-sm font-semibold transition-all">
+        <button onclick="postJournalEntry('{{ app('App\Services\EncryptedIdService')->encrypt($journalEntry->id) }}')" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-green-100 hover:bg-green-200 dark:bg-green-900/40 dark:hover:bg-green-900/60 text-green-700 dark:text-green-300 text-sm font-semibold transition-all">
           <i class="fa-solid fa-check"></i> Post
         </button>
-        <button onclick="voidJournalEntry({{ $journalEntry->id }})" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-100 hover:bg-red-200 dark:bg-red-900/40 dark:hover:bg-red-900/60 text-red-700 dark:text-red-300 text-sm font-semibold transition-all">
+        <button onclick="voidJournalEntry('{{ app('App\Services\EncryptedIdService')->encrypt($journalEntry->id) }}')" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-100 hover:bg-red-200 dark:bg-red-900/40 dark:hover:bg-red-900/60 text-red-700 dark:text-red-300 text-sm font-semibold transition-all">
           <i class="fa-solid fa-ban"></i> Void
         </button>
       @endif

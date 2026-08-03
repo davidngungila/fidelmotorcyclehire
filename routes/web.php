@@ -327,12 +327,12 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/journal-entries', [AdminJournalEntryController::class, 'index'])->name('journal-entries.index');
     Route::get('/journal-entries/create', [AdminJournalEntryController::class, 'create'])->name('journal-entries.create');
     Route::post('/journal-entries', [AdminJournalEntryController::class, 'store'])->name('journal-entries.store');
-    Route::get('/journal-entries/{id}', [AdminJournalEntryController::class, 'show'])->name('journal-entries.show');
-    Route::get('/journal-entries/{id}/edit', [AdminJournalEntryController::class, 'edit'])->name('journal-entries.edit');
-    Route::put('/journal-entries/{id}', [AdminJournalEntryController::class, 'update'])->name('journal-entries.update');
-    Route::delete('/journal-entries/{id}', [AdminJournalEntryController::class, 'destroy'])->name('journal-entries.destroy');
-    Route::post('/journal-entries/{id}/post', [AdminJournalEntryController::class, 'post'])->name('journal-entries.post');
-    Route::post('/journal-entries/{id}/void', [AdminJournalEntryController::class, 'void'])->name('journal-entries.void');
+    Route::get('/journal-entries/{encryptedId}', [AdminJournalEntryController::class, 'show'])->name('journal-entries.show');
+    Route::get('/journal-entries/{encryptedId}/edit', [AdminJournalEntryController::class, 'edit'])->name('journal-entries.edit');
+    Route::put('/journal-entries/{encryptedId}', [AdminJournalEntryController::class, 'update'])->name('journal-entries.update');
+    Route::delete('/journal-entries/{encryptedId}', [AdminJournalEntryController::class, 'destroy'])->name('journal-entries.destroy');
+    Route::post('/journal-entries/{encryptedId}/post', [AdminJournalEntryController::class, 'post'])->name('journal-entries.post');
+    Route::post('/journal-entries/{encryptedId}/void', [AdminJournalEntryController::class, 'void'])->name('journal-entries.void');
 
     // General Ledger routes
     Route::get('/ledger', [AdminLedgerAccountController::class, 'index'])->name('ledger.index');

@@ -6,10 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Models\Account;
 use App\Models\JournalEntry;
 use App\Models\JournalEntryLine;
+use App\Services\EncryptedIdService;
 use Illuminate\Http\Request;
 
 class JournalEntryController extends Controller
 {
+    public function __construct(
+        protected EncryptedIdService $encryptedIdService,
+    ) {
+    }
+
     public function index()
     {
         $journalEntries = JournalEntry::with(['createdBy', 'financialPeriod'])
@@ -37,7 +43,7 @@ class JournalEntryController extends Controller
             'entry_date' => 'required|date',
             'description' => 'required|string',
             'reference' => 'nullable|string',
-            'entry_type' => 'required|in:manual,automatic,adjusting,closing',
+            'entry_type' => 'required|in:manual,automatic,adjusting,closing,loan_disbursement,loan_repayment,investment,share_purchase,swf_contribution,deposit',
             'financial_period_id' => 'nullable|exists:financial_periods,id',
             'lines' => 'required|array|min:2',
             'lines.*.account_id' => 'required|exists:accounts,id',
@@ -84,16 +90,30 @@ class JournalEntryController extends Controller
             ->with('success', 'Journal entry created successfully.');
     }
 
-    public function show($id)
+    public function show($encryptedId)
     {
+        try {
+            $id = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            return redirect()->route('admin.journal-entries.index')
+                ->with('error', 'Invalid journal entry ID.');
+        }
+
         $journalEntry = JournalEntry::with(['lines.account', 'createdBy', 'approvedBy', 'financialPeriod'])
             ->findOrFail($id);
         
         return view('admin.journal-entries.show', compact('journalEntry'));
     }
 
-    public function edit($id)
+    public function edit($encryptedId)
     {
+        try {
+            $id = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            return redirect()->route('admin.journal-entries.index')
+                ->with('error', 'Invalid journal entry ID.');
+        }
+
         $journalEntry = JournalEntry::with('lines')->findOrFail($id);
         
         if ($journalEntry->status === 'posted') {
@@ -109,8 +129,15 @@ class JournalEntryController extends Controller
         return view('admin.journal-entries.edit', compact('journalEntry', 'accounts', 'financialPeriods'));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $encryptedId)
     {
+        try {
+            $id = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            return redirect()->route('admin.journal-entries.index')
+                ->with('error', 'Invalid journal entry ID.');
+        }
+
         $journalEntry = JournalEntry::findOrFail($id);
         
         if ($journalEntry->status === 'posted') {
@@ -125,7 +152,7 @@ class JournalEntryController extends Controller
             'entry_date' => 'required|date',
             'description' => 'required|string',
             'reference' => 'nullable|string',
-            'entry_type' => 'required|in:manual,automatic,adjusting,closing',
+            'entry_type' => 'required|in:manual,automatic,adjusting,closing,loan_disbursement,loan_repayment,investment,share_purchase,swf_contribution,deposit',
             'financial_period_id' => 'nullable|exists:financial_periods,id',
             'lines' => 'required|array|min:2',
             'lines.*.account_id' => 'required|exists:accounts,id',
@@ -172,8 +199,15 @@ class JournalEntryController extends Controller
             ->with('success', 'Journal entry updated successfully.');
     }
 
-    public function destroy($id)
+    public function destroy($encryptedId)
     {
+        try {
+            $id = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            return redirect()->route('admin.journal-entries.index')
+                ->with('error', 'Invalid journal entry ID.');
+        }
+
         $journalEntry = JournalEntry::findOrFail($id);
         
         if ($journalEntry->status === 'posted') {
@@ -186,8 +220,15 @@ class JournalEntryController extends Controller
             ->with('success', 'Journal entry deleted successfully.');
     }
 
-    public function post($id)
+    public function post($encryptedId)
     {
+        try {
+            $id = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            return redirect()->route('admin.journal-entries.index')
+                ->with('error', 'Invalid journal entry ID.');
+        }
+
         $journalEntry = JournalEntry::findOrFail($id);
         
         if ($journalEntry->status === 'posted') {
@@ -206,8 +247,15 @@ class JournalEntryController extends Controller
         }
     }
 
-    public function void($id)
+    public function void($encryptedId)
     {
+        try {
+            $id = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            return redirect()->route('admin.journal-entries.index')
+                ->with('error', 'Invalid journal entry ID.');
+        }
+
         $journalEntry = JournalEntry::findOrFail($id);
         
         if ($journalEntry->status === 'voided') {

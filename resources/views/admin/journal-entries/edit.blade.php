@@ -16,7 +16,7 @@
   </div>
 
   <div class="glass rounded-xl p-8">
-    <form action="{{ route('admin.journal-entries.update', $journalEntry->id) }}" method="POST" id="journalEntryForm" class="space-y-6">
+    <form action="{{ route('admin.journal-entries.update', app('App\Services\EncryptedIdService')->encrypt($journalEntry->id)) }}" method="POST" id="journalEntryForm" class="space-y-6">
       @csrf
       @method('PUT')
       
@@ -39,6 +39,12 @@
             <option value="automatic" {{ $journalEntry->entry_type === 'automatic' ? 'selected' : '' }}>Automatic</option>
             <option value="adjusting" {{ $journalEntry->entry_type === 'adjusting' ? 'selected' : '' }}>Adjusting</option>
             <option value="closing" {{ $journalEntry->entry_type === 'closing' ? 'selected' : '' }}>Closing</option>
+            <option value="loan_disbursement" {{ $journalEntry->entry_type === 'loan_disbursement' ? 'selected' : '' }}>Loan Disbursement</option>
+            <option value="loan_repayment" {{ $journalEntry->entry_type === 'loan_repayment' ? 'selected' : '' }}>Loan Repayment</option>
+            <option value="investment" {{ $journalEntry->entry_type === 'investment' ? 'selected' : '' }}>Investment</option>
+            <option value="share_purchase" {{ $journalEntry->entry_type === 'share_purchase' ? 'selected' : '' }}>Share Purchase</option>
+            <option value="swf_contribution" {{ $journalEntry->entry_type === 'swf_contribution' ? 'selected' : '' }}>SWF Contribution</option>
+            <option value="deposit" {{ $journalEntry->entry_type === 'deposit' ? 'selected' : '' }}>Deposit</option>
           </select>
           @error('entry_type')
             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>

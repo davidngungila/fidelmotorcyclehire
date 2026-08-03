@@ -63,20 +63,20 @@
               </td>
               <td class="text-right">
                 <div class="flex items-center justify-end gap-2">
-                  <a href="{{ route('admin.journal-entries.show', $entry->id) }}" class="text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 transition-colors">
+                  <a href="{{ route('admin.journal-entries.show', app('App\Services\EncryptedIdService')->encrypt($entry->id)) }}" class="text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 transition-colors">
                     <i class="fa-solid fa-eye"></i>
                   </a>
                   @if($entry->status === 'draft')
-                    <a href="{{ route('admin.journal-entries.edit', $entry->id) }}" class="text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 transition-colors">
+                    <a href="{{ route('admin.journal-entries.edit', app('App\Services\EncryptedIdService')->encrypt($entry->id)) }}" class="text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 transition-colors">
                       <i class="fa-solid fa-edit"></i>
                     </a>
-                    <button onclick="postJournalEntry({{ $entry->id }})" class="text-gray-600 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400 transition-colors" title="Post Entry">
+                    <button onclick="postJournalEntry('{{ app('App\Services\EncryptedIdService')->encrypt($entry->id) }}')" class="text-gray-600 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400 transition-colors" title="Post Entry">
                       <i class="fa-solid fa-check"></i>
                     </button>
-                    <button onclick="voidJournalEntry({{ $entry->id }})" class="text-gray-600 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors" title="Void Entry">
+                    <button onclick="voidJournalEntry('{{ app('App\Services\EncryptedIdService')->encrypt($entry->id) }}')" class="text-gray-600 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors" title="Void Entry">
                       <i class="fa-solid fa-ban"></i>
                     </button>
-                    <button onclick="deleteJournalEntry({{ $entry->id }})" class="text-gray-600 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors">
+                    <button onclick="deleteJournalEntry('{{ app('App\Services\EncryptedIdService')->encrypt($entry->id) }}')" class="text-gray-600 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors">
                       <i class="fa-solid fa-trash"></i>
                     </button>
                   @endif
