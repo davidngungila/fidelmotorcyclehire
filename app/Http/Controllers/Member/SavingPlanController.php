@@ -34,11 +34,18 @@ class SavingPlanController extends Controller
             ->where('transaction_type', 'deposit')
             ->sum('amount');
 
+        // Calculate current month's savings for monthly progress
+        $currentMonthStart = now()->startOfMonth();
+        $currentMonthSavings = Transaction::byMemberCode($memberNumber)
+            ->where('transaction_type', 'deposit')
+            ->where('date', '>=', $currentMonthStart)
+            ->sum('amount');
+
         // Calculate progress percentage
         $goalAmount = (float) $savingPlan->goal;
         $monthlyGoal = (float) $savingPlan->monthly_goal;
         $progress = $goalAmount > 0 ? ($currentSavings / $goalAmount) * 100 : 0;
-        $monthlyProgress = $monthlyGoal > 0 ? ($currentSavings / $monthlyGoal) * 100 : 0;
+        $monthlyProgress = $monthlyGoal > 0 ? ($currentMonthSavings / $monthlyGoal) * 100 : 0;
 
         // Calculate remaining amount
         $remaining = max(0, $goalAmount - $currentSavings);

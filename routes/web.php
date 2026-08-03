@@ -501,13 +501,6 @@ Route::prefix('member')->middleware(['auth', 'role:member', 'member.isolation'])
     Route::get('/notifications', [MemberNotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/mark-all-read', [MemberNotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
     Route::post('/notifications/{id}/read', [MemberNotificationController::class, 'markRead'])->name('notifications.read');
-
-    Route::get('/certificates', [MemberCertificateController::class, 'index'])->name('certificates.index');
-    Route::get('/certificates/loan/{id}', [MemberCertificateController::class, 'showLoanCertificate'])->name('certificates.loan-show');
-    Route::get('/certificates/loan/{id}/print', [MemberCertificateController::class, 'printLoanCertificate'])->name('certificates.loan-print');
-    Route::get('/certificates/share/{id}', [MemberCertificateController::class, 'showShareCertificate'])->name('certificates.share-show');
-    Route::get('/certificates/share/{id}/print', [MemberCertificateController::class, 'printShareCertificate'])->name('certificates.share-print');
-    Route::get('/certificates/membership/preview', [MemberCertificateController::class, 'getMembershipCertificate'])->name('certificates.membership-preview');
 });
 
 // Certificate verification route (public)
