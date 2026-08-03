@@ -76,7 +76,8 @@
                 </div>
               </td>
             </tr>
-          @empty
+          @endforeach
+          @if($fixedAssets->isEmpty())
             <tr>
               <td colspan="8" class="text-center py-12 text-gray-500 dark:text-gray-400">
                 <i class="fa-solid fa-building text-3xl mb-3 block opacity-30"></i>
@@ -84,7 +85,7 @@
                 <p class="text-xs">Create your first fixed asset to get started</p>
               </td>
             </tr>
-          @endforeach
+          @endif
         </tbody>
       </table>
     </div>
