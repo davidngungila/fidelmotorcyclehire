@@ -26,28 +26,30 @@ return Application::configure(basePath: dirname(__DIR__))
             fn (Request $request) => $request->is('api/*'),
         );
 
-        // Handle database connection errors
-        $exceptions->render(function (QueryException $e, Request $request) {
-            if ($request->is('member/*') || $request->is('api/*')) {
-                $errorCode = $e->getCode();
-                $errorMessage = $e->getMessage();
-                
-                // Determine error type based on error code
-                if (str_contains($errorMessage, 'Access denied') || str_contains($errorMessage, '1698')) {
+        // Handle database connection errors only when APP_DEBUG is false
+        if (!config('app.debug')) {
+            $exceptions->render(function (QueryException $e, Request $request) {
+                if ($request->is('member/*') || $request->is('api/*')) {
+                    $errorCode = $e->getCode();
+                    $errorMessage = $e->getMessage();
+                    
+                    // Determine error type based on error code
+                    if (str_contains($errorMessage, 'Access denied') || str_contains($errorMessage, '1698')) {
+                        return redirect()->route('member.error.database', 'database_connection_failed')
+                            ->with('error_details', $errorMessage);
+                    } elseif (str_contains($errorMessage, 'Connection refused') || str_contains($errorMessage, '2002')) {
+                        return redirect()->route('member.error.network', 'connection_lost')
+                            ->with('error_details', $errorMessage);
+                    } elseif (str_contains($errorMessage, 'timeout') || str_contains($errorMessage, '2006')) {
+                        return redirect()->route('member.error.database', 'query_timeout')
+                            ->with('error_details', $errorMessage);
+                    }
+                    
                     return redirect()->route('member.error.database', 'database_connection_failed')
-                        ->with('error_details', $errorMessage);
-                } elseif (str_contains($errorMessage, 'Connection refused') || str_contains($errorMessage, '2002')) {
-                    return redirect()->route('member.error.network', 'connection_lost')
-                        ->with('error_details', $errorMessage);
-                } elseif (str_contains($errorMessage, 'timeout') || str_contains($errorMessage, '2006')) {
-                    return redirect()->route('member.error.database', 'query_timeout')
                         ->with('error_details', $errorMessage);
                 }
                 
-                return redirect()->route('member.error.database', 'database_connection_failed')
-                    ->with('error_details', $errorMessage);
-            }
-            
-            return null; // Let Laravel handle it for admin routes
-        });
+                return null; // Let Laravel handle it for admin routes
+            });
+        }
     })->create();
