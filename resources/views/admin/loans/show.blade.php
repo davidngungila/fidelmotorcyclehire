@@ -259,7 +259,7 @@
         </div>
       </div>
 
-      <form method="POST" action="{{ route('admin.loans.approve', $loan['id']) }}" id="approveForm" class="hidden">
+      <form method="POST" action="{{ route('admin.loans.approve', app('App\Services\EncryptedIdService')->encrypt($loan['id'])) }}" id="approveForm" class="hidden">
         @csrf
       </form>
       <button type="button" onclick="confirmApprove()" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-bold transition-colors">
@@ -278,7 +278,7 @@
         </div>
       </div>
 
-      <form method="POST" action="{{ route('admin.loans.disburse', $loan['id']) }}" id="disburseForm">
+      <form method="POST" action="{{ route('admin.loans.disburse', app('App\Services\EncryptedIdService')->encrypt($loan['id'])) }}" id="disburseForm">
         @csrf
         <div class="space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

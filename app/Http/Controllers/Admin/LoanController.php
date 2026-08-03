@@ -503,9 +503,16 @@ class LoanController extends Controller
         return redirect()->route('admin.loans.index');
     }
 
-    public function approve(Request $request, $id)
+    public function approve(Request $request, $encryptedId)
     {
         Gate::authorize('admin-only');
+
+        try {
+            $id = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            $this->error('Invalid loan ID.');
+            return redirect()->route('admin.loans.index');
+        }
 
         $loan = Loan::findOrFail($id);
         $loan->update([
@@ -518,9 +525,16 @@ class LoanController extends Controller
         return redirect()->back();
     }
 
-    public function disburse(Request $request, $id)
+    public function disburse(Request $request, $encryptedId)
     {
         Gate::authorize('admin-only');
+
+        try {
+            $id = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            $this->error('Invalid loan ID.');
+            return redirect()->route('admin.loans.index');
+        }
 
         $loan = Loan::findOrFail($id);
         

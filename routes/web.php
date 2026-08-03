@@ -130,8 +130,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/loans/{id}/edit', [AdminLoanController::class, 'edit'])->name('loans.edit');
     Route::put('/loans/{id}', [AdminLoanController::class, 'update'])->name('loans.update');
     Route::delete('/loans/{id}', [AdminLoanController::class, 'destroy'])->name('loans.destroy');
-    Route::post('/loans/{id}/approve', [AdminLoanController::class, 'approve'])->name('loans.approve');
-    Route::post('/loans/{id}/disburse', [AdminLoanController::class, 'disburse'])->name('loans.disburse');
+    Route::post('/loans/{encryptedId}/approve', [AdminLoanController::class, 'approve'])->name('loans.approve');
+    Route::post('/loans/{encryptedId}/disburse', [AdminLoanController::class, 'disburse'])->name('loans.disburse');
     Route::get('/loans/{encryptedLoanNumber}/appreciation-certificate', [AdminLoanController::class, 'appreciationCertificate'])->name('loans.appreciation-certificate');
     Route::post('/loans/import-loan-payments', [AdminLoanController::class, 'importLoanPayments'])->name('loans.import-loan-payments');
     Route::post('/loans/import-loans-information', [AdminLoanController::class, 'importLoansInformation'])->name('loans.import-loans-information');
