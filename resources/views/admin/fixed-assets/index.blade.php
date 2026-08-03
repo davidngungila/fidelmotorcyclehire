@@ -159,3 +159,5 @@ function deleteFixedAsset(id) {
   });
 }
 </script>
+
+@endsection

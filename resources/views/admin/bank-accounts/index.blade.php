@@ -119,3 +119,5 @@ function deleteBankAccount(id) {
   });
 }
 </script>
+
+@endsection
