@@ -94,7 +94,7 @@
       </div>
 
       <!-- Journal Entry Lines Section -->
-      <div>
+      <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Journal Entry Lines</h3>
           <button type="button" onclick="addLine()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-500 text-white text-sm font-semibold transition-all">
@@ -102,30 +102,31 @@
           </button>
         </div>
 
-        <div class="bg-white dark:bg-dark-card rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <div class="bg-gray-50 dark:bg-gray-800 px-6 py-3 border-b border-gray-200 dark:border-gray-700">
-            <div class="grid grid-cols-12 gap-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
-              <div class="col-span-5">Account</div>
-              <div class="col-span-3 text-right">Debit</div>
-              <div class="col-span-3 text-right">Credit</div>
-              <div class="col-span-1"></div>
-            </div>
-          </div>
-          
-          <div id="linesContainer" class="divide-y divide-gray-200 dark:divide-gray-700">
-            <!-- Lines will be added dynamically -->
-          </div>
+        <div class="bg-white dark:bg-dark-card rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <table class="w-full">
+            <thead>
+              <tr class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide w-1/2">Account</th>
+                <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide w-1/6">Debit</th>
+                <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide w-1/6">Credit</th>
+                <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide w-1/12">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="linesContainer">
+              <!-- Lines will be added dynamically -->
+            </tbody>
+          </table>
         </div>
 
-        <div class="mt-4 p-6 bg-primary-50 dark:bg-primary-900/20 rounded-xl border border-primary-200 dark:border-primary-800">
+        <div class="mt-4 p-4 bg-primary-50 dark:bg-primary-900/20 rounded-lg border border-primary-200 dark:border-primary-800">
           <div class="grid grid-cols-3 gap-6">
             <div>
               <span class="text-sm text-gray-600 dark:text-gray-400">Total Debit:</span>
-              <div id="totalDebit" class="text-2xl font-bold text-gray-900 dark:text-white">0.00</div>
+              <div id="totalDebit" class="text-xl font-bold text-gray-900 dark:text-white">0.00</div>
             </div>
             <div>
               <span class="text-sm text-gray-600 dark:text-gray-400">Total Credit:</span>
-              <div id="totalCredit" class="text-2xl font-bold text-gray-900 dark:text-white">0.00</div>
+              <div id="totalCredit" class="text-xl font-bold text-gray-900 dark:text-white">0.00</div>
             </div>
             <div>
               <span class="text-sm text-gray-600 dark:text-gray-400">Balance Status:</span>
@@ -158,45 +159,41 @@ function addLine() {
   lineCount++;
   const container = document.getElementById('linesContainer');
   const lineHtml = `
-    <div class="line-item px-6 py-4" data-line="${lineCount}">
-      <div class="grid grid-cols-12 gap-4 items-center">
-        <div class="col-span-5">
-          <select name="lines[${lineCount}][account_id]" required onchange="updateTotals()"
-            class="form-select py-2 px-3 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-card text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-            <option value="">Select Account</option>
-            ${accounts.map(acc => `
-              <option value="${acc.id}" data-type="${acc.account_type}">
-                ${acc.account_code} - ${acc.account_name}
-              </option>
-            `).join('')}
-          </select>
-        </div>
-        <div class="col-span-3">
-          <input type="number" name="lines[${lineCount}][debit_amount]" step="0.01" min="0" value="0" onchange="updateTotals()" placeholder="0.00"
-            class="form-input py-2 px-3 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-card text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent text-right">
-        </div>
-        <div class="col-span-3">
-          <input type="number" name="lines[${lineCount}][credit_amount]" step="0.01" min="0" value="0" onchange="updateTotals()" placeholder="0.00"
-            class="form-input py-2 px-3 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-card text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent text-right">
-        </div>
-        <div class="col-span-1 text-right">
-          <button type="button" onclick="removeLine(${lineCount})" class="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors">
-            <i class="fa-solid fa-trash"></i>
-          </button>
-        </div>
-      </div>
-      <div class="mt-3">
+    <tr class="line-item border-b border-gray-200 dark:border-gray-700" data-line="${lineCount}">
+      <td class="px-4 py-3">
+        <select name="lines[${lineCount}][account_id]" required onchange="updateTotals()"
+          class="form-select py-2 px-3 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-card text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+          <option value="">Select Account</option>
+          ${accounts.map(acc => `
+            <option value="${acc.id}" data-type="${acc.account_type}">
+              ${acc.account_code} - ${acc.account_name}
+            </option>
+          `).join('')}
+        </select>
         <input type="text" name="lines[${lineCount}][description]" placeholder="Line description (optional)"
-          class="form-input py-2 px-3 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-card text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-      </div>
-    </div>
+          class="form-input py-2 px-3 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-card text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent mt-2">
+      </td>
+      <td class="px-4 py-3">
+        <input type="number" name="lines[${lineCount}][debit_amount]" step="0.01" min="0" value="0" onchange="updateTotals()" placeholder="0.00"
+          class="form-input py-2 px-3 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-card text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent text-right">
+      </td>
+      <td class="px-4 py-3">
+        <input type="number" name="lines[${lineCount}][credit_amount]" step="0.01" min="0" value="0" onchange="updateTotals()" placeholder="0.00"
+          class="form-input py-2 px-3 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-card text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent text-right">
+      </td>
+      <td class="px-4 py-3 text-right">
+        <button type="button" onclick="removeLine(${lineCount})" class="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </td>
+    </tr>
   `;
   container.insertAdjacentHTML('beforeend', lineHtml);
   updateTotals();
 }
 
 function removeLine(lineId) {
-  const line = document.querySelector(`[data-line="${lineId}"]`);
+  const line = document.querySelector(`tr[data-line="${lineId}"]`);
   if (line) {
     line.remove();
     updateTotals();
