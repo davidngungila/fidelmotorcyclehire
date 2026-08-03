@@ -119,8 +119,8 @@ class DashboardController extends Controller
             $query->where('member_number', $memberNumber);
         })->with('loan')->orderBy('completion_date', 'desc')->get();
 
-        $shareCertificates = ShareCertificate::whereHas('sharePurchase', function($query) use ($memberNumber) {
-            $query->where('member_number', $memberNumber);
+        $shareCertificates = ShareCertificate::whereHas('sharePurchase', function($query) use ($user) {
+            $query->where('user_id', $user->id);
         })->with(['sharePurchase.shareProduct'])->orderBy('issue_date', 'desc')->get();
 
         // Get database transactions
