@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
-@section('breadcrumb', 'Members \u203A List')
-@section('page_title', 'Members Directory')
+@section('breadcrumb', 'Customers \u203A List')
+@section('page_title', 'Customers Directory')
 
 @php
   $fmt = fn($n) => number_format((float)$n, 2) . ' TSh';
@@ -16,7 +16,7 @@
       <div class="relative flex-1">
         <i class="fa-solid fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-primary-400"></i>
         <input type="text" 
-               placeholder="Search by member number, name, phone, email..."
+               placeholder="Search by customer number, name, phone, email..."
                class="form-input pl-9 py-2.5 text-sm"
                x-model="searchQuery"/>
         <button x-show="searchQuery" @click="clearSearch()" class="absolute right-3 top-1/2 -translate-y-1/2 text-primary-400 hover:text-primary-600">
@@ -28,11 +28,11 @@
     <div class="flex items-center gap-3">
       <button type="button" @click="$dispatch('open-import-modal')"
              class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95 whitespace-nowrap">
-        <i class="fa-solid fa-file-import text-[13px]"></i> Import Members
+        <i class="fa-solid fa-file-import text-[13px]"></i> Import Customers
       </button>
       <a href="{{ route('admin.users.create') }}"
          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95 whitespace-nowrap">
-        <i class="fa-solid fa-user-plus text-[13px]"></i> New Member
+        <i class="fa-solid fa-user-plus text-[13px]"></i> New Customer
       </a>
     </div>
   </div>
@@ -41,7 +41,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
       <div class="flex items-center gap-3">
         <span class="text-xs font-semibold text-primary-600 dark:text-primary-400">
-          <i class="fa-solid fa-list-check mr-1.5"></i> <span x-text="filteredMembers.length"></span> Members Found
+          <i class="fa-solid fa-list-check mr-1.5"></i> <span x-text="filteredMembers.length"></span> Customers Found
         </span>
         <span x-show="searchQuery" class="badge badge-blue text-[10px]">Search: <span x-text="searchQuery"></span></span>
       </div>
@@ -64,7 +64,7 @@
           <tr>
             <th class="w-12">#</th>
             <th class="cursor-pointer select-none" @click="sortBy('member_number')">
-              Member Number
+              Customer Number
               <i class="fa-solid ml-1.5 text-[10px] {{ $memberService->getSortDirectionIcon($sortColumn, 'member_number', $sortDirection) }}"></i>
             </th>
             <th class="cursor-pointer select-none" @click="sortBy('name')">
@@ -112,27 +112,27 @@
                      title="View Profile">
                     <i class="fa-solid fa-eye text-xs"></i>
                   </a>
-                  <a :href="'/admin/members/' + member.encrypted_id + '#tab-loans'"
+                  <a :href="'/admin/members/' + member.encrypted_id + '#tab-loans'
                      class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-orange-50 hover:bg-orange-100 dark:bg-orange-900/30 dark:hover:bg-orange-900/50 text-orange-700 dark:text-orange-300 text-sm transition-colors border border-orange-200 dark:border-orange-800/40"
                      title="Loans">
                     <i class="fa-solid fa-hand-holding-dollar text-xs"></i>
                   </a>
-                  <a :href="'/admin/members/' + member.encrypted_id + '#tab-savings'"
+                  <a :href="'/admin/members/' + member.encrypted_id + '#tab-savings'
                      class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-green-50 hover:bg-green-100 dark:bg-green-900/30 dark:hover:bg-green-900/50 text-green-700 dark:text-green-300 text-sm transition-colors border border-green-200 dark:border-green-800/40"
                      title="Savings">
                     <i class="fa-solid fa-piggy-bank text-xs"></i>
                   </a>
-                  <a :href="'/admin/members/' + member.encrypted_id + '#tab-investments'"
+                  <a :href="'/admin/members/' + member.encrypted_id + '#tab-investments'
                      class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/30 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 text-sm transition-colors border border-purple-200 dark:border-purple-800/40"
                      title="Investments">
                     <i class="fa-solid fa-chart-line text-xs"></i>
                   </a>
-                  <a :href="'/admin/members/' + member.encrypted_id + '#tab-shares'"
+                  <a :href="'/admin/members/' + member.encrypted_id + '#tab-shares'
                      class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-sm transition-colors border border-blue-200 dark:border-blue-800/40"
                      title="Shares">
                     <i class="fa-solid fa-certificate text-xs"></i>
                   </a>
-                  <a :href="'/admin/members/' + member.encrypted_id + '#tab-swf'"
+                  <a :href="'/admin/members/' + member.encrypted_id + '#tab-swf'
                      class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-pink-50 hover:bg-pink-100 dark:bg-pink-900/30 dark:hover:bg-pink-900/50 text-pink-700 dark:text-pink-300 text-sm transition-colors border border-pink-200 dark:border-pink-800/40"
                      title="SWF">
                     <i class="fa-solid fa-hand-holding-heart text-xs"></i>
@@ -144,7 +144,7 @@
           <tr x-show="filteredMembers.length === 0">
             <td colspan="6" class="text-center py-16 text-primary-500 dark:text-primary-400">
               <i class="fa-solid fa-user-slash text-4xl mb-4 block opacity-30"></i>
-              <p class="text-sm font-semibold mb-1">No members found</p>
+              <p class="text-sm font-semibold mb-1">No customers found</p>
               <p class="text-xs">Try adjusting your search terms</p>
             </td>
           </tr>
@@ -157,7 +157,7 @@
         <p class="text-xs text-primary-600 dark:text-primary-400">
           Showing <span class="font-bold text-primary-900 dark:text-white">{{ $members->firstItem() ?? 0 }}</span> to
           <span class="font-bold text-primary-900 dark:text-white">{{ $members->lastItem() ?? 0 }}</span> of
-          <span class="font-bold text-primary-900 dark:text-white">{{ $members->total() }}</span> members
+          <span class="font-bold text-primary-900 dark:text-white">{{ $members->total() }}</span> customers
         </p>
 
         <nav class="flex items-center justify-center gap-1" role="navigation" aria-label="Pagination Navigation">
@@ -220,7 +220,7 @@
   <div class="bg-white dark:bg-dark-bg rounded-2xl shadow-2xl w-full max-w-lg">
     <div class="p-6 border-b border-gray-200 dark:border-dark-border">
       <div class="flex items-center justify-between">
-        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Import Members from Excel</h3>
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Import Customers from Excel</h3>
         <button type="button" @click="showModal = false"
                 class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
           <i class="fa-solid fa-xmark text-xl"></i>
@@ -263,7 +263,7 @@
         </button>
         <button type="submit"
                 class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium transition-colors flex items-center gap-2">
-          <i class="fa-solid fa-file-import"></i> Import Members
+          <i class="fa-solid fa-file-import"></i> Import Customers
         </button>
       </div>
     </form>
@@ -401,7 +401,7 @@
           if (data.success) {
             this.jobId = data.job_id;
             this.status = 'Processing...';
-            this.message = 'Importing members from Excel file...';
+            this.message = 'Importing customers from Excel file...';
             this.progress = 20;
             this.pollProgress();
           } else {

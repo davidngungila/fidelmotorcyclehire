@@ -45,6 +45,7 @@ use App\Http\Controllers\Admin\ReceiptController as AdminReceiptController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\ExpenseController as AdminExpenseController;
 use App\Http\Controllers\Admin\RevenueController as AdminRevenueController;
+use App\Http\Controllers\Admin\MotorcycleController as AdminMotorcycleController;
 use App\Http\Controllers\Member\DashboardController as MemberDashboardController;
 use App\Http\Controllers\Member\ProfileController as MemberProfileController;
 use App\Http\Controllers\Member\LoanController as MemberLoanController;
@@ -114,6 +115,15 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/member-types/{encryptedId}/edit', [AdminMemberTypeController::class, 'edit'])->name('member-types.edit');
     Route::put('/member-types/{encryptedId}', [AdminMemberTypeController::class, 'update'])->name('member-types.update');
     Route::delete('/member-types/{encryptedId}', [AdminMemberTypeController::class, 'destroy'])->name('member-types.destroy');
+
+    // Motorcycle Inventory routes
+    Route::get('/motorcycles', [AdminMotorcycleController::class, 'index'])->name('motorcycles.index');
+    Route::get('/motorcycles/create', [AdminMotorcycleController::class, 'create'])->name('motorcycles.create');
+    Route::post('/motorcycles', [AdminMotorcycleController::class, 'store'])->name('motorcycles.store');
+    Route::get('/motorcycles/{motorcycle}', [AdminMotorcycleController::class, 'show'])->name('motorcycles.show');
+    Route::get('/motorcycles/{motorcycle}/edit', [AdminMotorcycleController::class, 'edit'])->name('motorcycles.edit');
+    Route::put('/motorcycles/{motorcycle}', [AdminMotorcycleController::class, 'update'])->name('motorcycles.update');
+    Route::delete('/motorcycles/{motorcycle}', [AdminMotorcycleController::class, 'destroy'])->name('motorcycles.destroy');
 
     Route::get('/loans/applications', [AdminLoanController::class, 'applications'])->name('loans.applications');
     Route::get('/loans', [AdminLoanController::class, 'index'])->name('loans.index');

@@ -31,15 +31,15 @@
     <div class="flex items-center justify-between p-4 border-b border-primary-800/50 flex-shrink-0">
       <div class="flex items-center gap-3" x-show="!sidebarCollapsed || window.innerWidth < 1024">
         <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center flex-shrink-0 shadow-lg">
-          <i class="fa-solid fa-leaf text-primary-900 text-sm"></i>
+          <i class="fa-solid fa-motorcycle text-primary-900 text-sm"></i>
         </div>
         <div x-show="!sidebarCollapsed">
-          <p class="text-white font-bold text-sm leading-tight">FEEDTAN</p>
-          <p class="text-primary-300 text-[10px] font-semibold tracking-wide">DIGITAL</p>
+          <p class="text-white font-bold text-sm leading-tight">MOTORCYCLE</p>
+          <p class="text-primary-300 text-[10px] font-semibold tracking-wide">HIRE PURCHASE</p>
         </div>
       </div>
       <div x-show="sidebarCollapsed && window.innerWidth >= 1024" class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center mx-auto">
-        <i class="fa-solid fa-leaf text-primary-900 text-sm"></i>
+        <i class="fa-solid fa-motorcycle text-primary-900 text-sm"></i>
       </div>
       <button @click="toggleSidebar()" class="text-primary-300 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-primary-800/40 hidden lg:block">
         <i :class="sidebarCollapsed ? 'fa-solid fa-chevron-right' : 'fa-solid fa-chevron-left'" class="text-xs"></i>

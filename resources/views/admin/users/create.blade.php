@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
-@section('breadcrumb', 'Members \u203A Create Member')
-@section('page_title', 'Create New Member')
+@section('breadcrumb', 'Customers \u203A Create Customer')
+@section('page_title', 'Create New Customer')
 
 @section('content')
 <div x-data="memberCreateForm()" class="space-y-6">
@@ -12,7 +12,7 @@
     </a>
     <div>
       <p class="text-sm text-primary-600 dark:text-primary-400">
-        Create a new member with comprehensive information
+        Create a new customer with comprehensive information
       </p>
     </div>
   </div>
@@ -30,7 +30,7 @@
             <i class="fa-solid fa-address-book text-[10px]"></i> Contact
           </button>
           <button @click="currentTab = 3" :class="currentTab === 3 ? 'bg-primary-600 text-white' : 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300'" class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors">
-            <i class="fa-solid fa-id-card text-[10px]"></i> Membership
+            <i class="fa-solid fa-id-card text-[10px]"></i> Customer Info
           </button>
           <button @click="currentTab = 4" :class="currentTab === 4 ? 'bg-primary-600 text-white' : 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300'" class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors">
             <i class="fa-solid fa-lock text-[10px]"></i> Account
@@ -57,15 +57,6 @@
           <form id="basicInfoForm" @submit.prevent="saveBasicInfo" class="space-y-5">
             @csrf
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-              <div class="md:col-span-3">
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Member Type *</label>
-                <select name="member_type_id" required class="form-input">
-                  <option value="">Select member type...</option>
-                  @foreach($memberTypes as $type)
-                    <option value="{{ $type->id }}">{{ $type->name }} - {{ $type->code }}</option>
-                  @endforeach
-                </select>
-              </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">First Name *</label>
                 <input type="text" name="first_name" required class="form-input">
@@ -172,7 +163,7 @@
         <!-- Tab 3: Membership Details -->
         <div x-show="currentTab === 3" x-transition class="space-y-5">
           <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
-            <i class="fa-solid fa-id-card text-primary-500 text-xs"></i> Membership Details
+            <i class="fa-solid fa-id-card text-primary-500 text-xs"></i> Customer Information
           </h3>
           <form id="membershipDetailsForm" @submit.prevent="saveMembershipDetails" class="space-y-5">
             @csrf
@@ -404,7 +395,7 @@
         </h3>
         <div class="space-y-4">
           <div>
-            <p class="text-xs text-primary-600 dark:text-primary-400">Member Number</p>
+            <p class="text-xs text-primary-600 dark:text-primary-400">Customer Number</p>
             <p x-text="summary.member_number || 'Auto-generated'" class="text-sm font-mono font-semibold text-primary-900 dark:text-white">Auto-generated</p>
           </div>
           <div>
@@ -412,7 +403,7 @@
             <p x-text="summary.registration_date || '—'" class="text-sm font-semibold text-primary-900 dark:text-white">—</p>
           </div>
           <div>
-            <p class="text-xs text-primary-600 dark:text-primary-400">Member Type</p>
+            <p class="text-xs text-primary-600 dark:text-primary-400">Customer Type</p>
             <p x-text="summary.member_type || '—'" class="text-sm font-semibold text-primary-900 dark:text-white">—</p>
           </div>
           <div>
@@ -495,10 +486,9 @@ function memberCreateForm() {
           this.userId = data.user_id;
           this.summary.member_number = 'MB' + new Date().toISOString().slice(2,10).replace(/-/g,'') + Math.floor(Math.random() * 10000).toString().padStart(4, '0');
           this.summary.registration_date = formData.get('registration_date');
-          const memberTypeSelect = form.querySelector('[name="member_type_id"]');
-          this.summary.member_type = memberTypeSelect.options[memberTypeSelect.selectedIndex].text;
+          this.summary.member_type = 'Standard';
           this.summary.status = formData.get('status');
-          this.progress = 12.5;
+          this.progress = 14.28;
           
           Swal.fire({
             icon: 'success',
