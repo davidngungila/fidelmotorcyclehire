@@ -5,28 +5,28 @@
 
 @section('content')
 <div class="space-y-6">
-  <div class="flex items-center justify-between">
+  <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
     <div>
       <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $account->account_name }}</h1>
       <p class="text-gray-600 dark:text-gray-400 mt-1">{{ $account->account_code }} - {{ ucfirst($account->account_type) }}</p>
     </div>
-    <div class="flex items-center gap-2">
-      <form action="{{ route('admin.ledger.filter') }}" method="GET" class="flex items-center gap-2">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full md:w-auto">
+      <form action="{{ route('admin.ledger.filter') }}" method="GET" class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
         <input type="hidden" name="account_id" value="{{ $account->id }}">
         <input type="date" name="start_date" value="{{ request('start_date') }}"
-          class="form-input py-2 px-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-card text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+          class="form-input py-2 px-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-card text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent flex-1 sm:flex-none">
         <input type="date" name="end_date" value="{{ request('end_date') }}"
-          class="form-input py-2 px-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-card text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-        <button type="submit" class="px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-500 text-white text-sm font-semibold transition-all">
+          class="form-input py-2 px-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-card text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent flex-1 sm:flex-none">
+        <button type="submit" class="px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-500 text-white text-sm font-semibold transition-all whitespace-nowrap">
           Filter
         </button>
         @if(request('start_date') || request('end_date'))
-          <a href="{{ route('admin.ledger.show', app('App\Services\EncryptedIdService')->encrypt($account->id)) }}" class="text-sm text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400">
+          <a href="{{ route('admin.ledger.show', app('App\Services\EncryptedIdService')->encrypt($account->id)) }}" class="text-sm text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 whitespace-nowrap">
             Clear
           </a>
         @endif
       </form>
-      <a href="{{ route('admin.ledger.index') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-semibold transition-all">
+      <a href="{{ route('admin.ledger.index') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-semibold transition-all whitespace-nowrap">
         <i class="fa-solid fa-arrow-left"></i> Back
       </a>
     </div>
