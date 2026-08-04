@@ -46,7 +46,6 @@
           </div>
           <form action="{{ route('admin.communication.whatsapp.personal-token') }}" method="POST">
             @csrf
-            @method('PUT')
             <button type="submit" class="text-xs text-primary-600 dark:text-primary-400 hover:underline">Update Token</button>
           </form>
         </div>
@@ -55,9 +54,6 @@
 
     <form action="{{ route('admin.communication.whatsapp.personal-token') }}" method="POST">
       @csrf
-      @if($settings && $settings->personal_access_token)
-        @method('PUT')
-      @endif
       <div class="space-y-4">
         <div>
           <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Personal Access Token</label>
@@ -225,9 +221,6 @@
 
     <form action="{{ route('admin.communication.whatsapp.session-api-key') }}" method="POST">
       @csrf
-      @if($settings && $settings->session_api_key)
-        @method('PUT')
-      @endif
       <div class="space-y-4">
         <div>
           <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Session API Key</label>
@@ -240,6 +233,7 @@
           <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition-all">
             {{ $settings && $settings->session_api_key ? 'Update API Key' : 'Save API Key' }}
           </button>
+    </form>
           @if($settings && $settings->session_api_key)
             <form action="{{ route('admin.communication.whatsapp.toggle-status') }}" method="POST">
               @csrf
@@ -250,7 +244,6 @@
           @endif
         </div>
       </div>
-    </form>
   </div>
 
   <!-- Send Message Section -->

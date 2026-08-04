@@ -450,9 +450,9 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
         Route::get('/sms', [\App\Http\Controllers\Admin\CommunicationController::class, 'sms'])->name('sms');
         Route::get('/email', [\App\Http\Controllers\Admin\CommunicationController::class, 'email'])->name('email');
         Route::get('/whatsapp', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'index'])->name('whatsapp');
-        Route::post('/whatsapp/personal-token', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'storePersonalAccessToken'])->name('whatsapp.personal-token');
+        Route::match(['post', 'put'], '/whatsapp/personal-token', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'storePersonalAccessToken'])->name('whatsapp.personal-token');
         Route::post('/whatsapp/session', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'createSession'])->name('whatsapp.session');
-        Route::post('/whatsapp/session-api-key', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'storeSessionApiKey'])->name('whatsapp.session-api-key');
+        Route::match(['post', 'put'], '/whatsapp/session-api-key', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'storeSessionApiKey'])->name('whatsapp.session-api-key');
         Route::post('/whatsapp/send-single', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'sendSingleMessage'])->name('whatsapp.send-single');
         Route::post('/whatsapp/send-bulk', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'sendBulkMessage'])->name('whatsapp.send-bulk');
 
