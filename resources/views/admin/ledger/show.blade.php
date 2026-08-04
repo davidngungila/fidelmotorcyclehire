@@ -4,14 +4,14 @@
 @section('page_title', 'Ledger: ' . $account->account_name)
 
 @section('content')
-<div class="max-w-7xl mx-auto space-y-6">
-  <div class="flex flex-col gap-4">
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
     <div>
       <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $account->account_name }}</h1>
       <p class="text-gray-600 dark:text-gray-400 mt-1">{{ $account->account_code }} - {{ ucfirst($account->account_type) }}</p>
     </div>
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <form action="{{ route('admin.ledger.filter') }}" method="GET" class="flex flex-wrap items-center gap-2">
+    <div class="flex items-center gap-2">
+      <form action="{{ route('admin.ledger.filter') }}" method="GET" class="flex items-center gap-2">
         <input type="hidden" name="account_id" value="{{ $account->id }}">
         <input type="date" name="start_date" value="{{ request('start_date') }}"
           class="form-input py-2 px-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-card text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent">
@@ -32,7 +32,7 @@
     </div>
   </div>
 
-  <div class="glass rounded-xl p-6 overflow-hidden">
+  <div class="glass rounded-xl p-6">
     <div class="space-y-6">
       
       <!-- Account Details Section -->
@@ -68,7 +68,7 @@
       <div>
         <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">Ledger Entries</h3>
         <div class="overflow-x-auto">
-          <table class="data-table w-full">
+          <table class="data-table">
             <thead>
               <tr>
                 <th>Date</th>
