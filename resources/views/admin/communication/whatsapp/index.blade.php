@@ -149,12 +149,69 @@
       </div>
     </div>
 
-    @if($settings && $settings->session_api_key)
-      <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3 mb-4">
+    @if($sessionDetails)
+      <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-5 mb-4">
+        <div class="flex items-start gap-4">
+          <div class="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
+            <i class="fa-brands fa-whatsapp text-2xl text-green-600 dark:text-green-400"></i>
+          </div>
+          <div class="flex-1">
+            <h4 class="text-lg font-bold text-green-800 dark:text-green-200 mb-3">Session Information</h4>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p class="text-xs text-green-600 dark:text-green-400 uppercase tracking-wider mb-1">Session Name</p>
+                <p class="text-sm font-semibold text-green-900 dark:text-green-100">{{ $sessionDetails['name'] ?? $settings->session_name ?? 'N/A' }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-green-600 dark:text-green-400 uppercase tracking-wider mb-1">Phone Number</p>
+                <p class="text-sm font-semibold text-green-900 dark:text-green-100">{{ $sessionDetails['phone_number'] ?? $settings->phone_number ?? 'N/A' }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-green-600 dark:text-green-400 uppercase tracking-wider mb-1">Status</p>
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {{ ($sessionDetails['status'] ?? $settings->session_status) === 'connected' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' }}">
+                  <i class="fa-solid fa-circle text-[8px] mr-1.5 {{ ($sessionDetails['status'] ?? $settings->session_status) === 'connected' ? 'animate-pulse' : '' }}"></i>
+                  {{ ucfirst($sessionDetails['status'] ?? $settings->session_status ?? 'Unknown') }}
+                </span>
+              </div>
+              <div>
+                <p class="text-xs text-green-600 dark:text-green-400 uppercase tracking-wider mb-1">Last Active</p>
+                <p class="text-sm font-semibold text-green-900 dark:text-green-100">{{ $sessionDetails['last_active'] ?? 'N/A' }}</p>
+              </div>
+              <div class="md:col-span-2">
+                <p class="text-xs text-green-600 dark:text-green-400 uppercase tracking-wider mb-1">WhatsApp Account</p>
+                <p class="text-sm font-semibold text-green-900 dark:text-green-100">{{ $sessionDetails['account_name'] ?? 'N/A' }}</p>
+              </div>
+            </div>
+
+            @if(($sessionDetails['status'] ?? $settings->session_status) === 'connected')
+            <div class="mt-4 pt-4 border-t border-green-200 dark:border-green-800">
+              <p class="text-xs text-green-700 dark:text-green-300 mb-2">The WhatsApp session is connected and ready to use.</p>
+              <div class="flex gap-2">
+                <form action="{{ route('admin.communication.whatsapp.disconnect-session') }}" method="POST" class="inline">
+                  @csrf
+                  <button type="submit" class="px-3 py-1.5 rounded-lg bg-red-100 hover:bg-red-200 text-red-700 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-400 text-xs font-semibold transition-all">
+                    <i class="fa-solid fa-power-off mr-1"></i>Disconnect
+                  </button>
+                </form>
+                <form action="{{ route('admin.communication.whatsapp.restart-session') }}" method="POST" class="inline">
+                  @csrf
+                  <button type="submit" class="px-3 py-1.5 rounded-lg bg-yellow-100 hover:bg-yellow-200 text-yellow-700 dark:bg-yellow-900/30 dark:hover:bg-yellow-900/50 dark:text-yellow-400 text-xs font-semibold transition-all">
+                    <i class="fa-solid fa-rotate mr-1"></i>Restart
+                  </button>
+                </form>
+              </div>
+            </div>
+            @endif
+          </div>
+        </div>
+      </div>
+    @elseif($settings && $settings->session_api_key)
+      <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <i class="fa-solid fa-check-circle text-green-600 dark:text-green-400"></i>
-            <span class="text-sm font-medium text-green-800 dark:text-green-200">Session API Key configured</span>
+            <i class="fa-solid fa-check-circle text-blue-600 dark:text-blue-400"></i>
+            <span class="text-sm font-medium text-blue-800 dark:text-blue-200">Session API Key configured</span>
           </div>
           <div class="flex items-center gap-3">
             <span class="text-xs text-gray-500 dark:text-gray-400">{{ $settings->session_name ?? 'N/A' }}</span>

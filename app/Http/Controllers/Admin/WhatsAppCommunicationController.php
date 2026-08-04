@@ -22,13 +22,18 @@ class WhatsAppCommunicationController extends Controller
     {
         $settings = WhatsAppSettings::first();
         $sessions = [];
+        $sessionDetails = null;
         $messageHistory = WhatsAppMessageHistory::latest()->paginate(50);
         
         if ($settings && $settings->personal_access_token) {
             $sessions = $this->getSessions($settings->personal_access_token);
         }
 
-        return view('admin.communication.whatsapp.index', compact('settings', 'sessions', 'messageHistory'));
+        if ($settings && $settings->session_api_key) {
+            $sessionDetails = $this->getSessionDetails($settings->session_api_key);
+        }
+
+        return view('admin.communication.whatsapp.index', compact('settings', 'sessions', 'sessionDetails', 'messageHistory'));
     }
 
     public function storePersonalAccessToken(Request $request)
@@ -59,6 +64,23 @@ class WhatsAppCommunicationController extends Controller
             return [];
         } catch (\Exception $e) {
             return [];
+        }
+    }
+
+    public function getSessionDetails($sessionApiKey)
+    {
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $sessionApiKey,
+            ])->get('https://www.wasenderapi.com/api/session-info');
+
+            if ($response->successful()) {
+                return $response->json('data', null);
+            }
+
+            return null;
+        } catch (\Exception $e) {
+            return null;
         }
     }
 
@@ -284,5 +306,53 @@ class WhatsAppCommunicationController extends Controller
         }
 
         return back()->with('error', 'Failed to send bulk SMS: ' . $result['message']);
+    }
+
+    public function disconnectSession(Request $request)
+    {
+        $settings = WhatsAppSettings::first();
+        if (!$settings || !$settings->personal_access_token) {
+            return back()->with('error', 'Personal Access Token is required.');
+        }
+
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $settings->personal_access_token,
+            ])->post('https://www.wasenderapi.com/api/whatsapp-sessions/disconnect');
+
+            if ($response->successful()) {
+                $settings->session_status = 'disconnected';
+                $settings->save();
+                return back()->with('success', 'WhatsApp session disconnected successfully.');
+            }
+
+            return back()->with('error', 'Failed to disconnect session: ' . ($response->json('message', 'Unknown error')));
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to disconnect session: ' . $e->getMessage());
+        }
+    }
+
+    public function restartSession(Request $request)
+    {
+        $settings = WhatsAppSettings::first();
+        if (!$settings || !$settings->personal_access_token) {
+            return back()->with('error', 'Personal Access Token is required.');
+        }
+
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $settings->personal_access_token,
+            ])->post('https://www.wasenderapi.com/api/whatsapp-sessions/restart');
+
+            if ($response->successful()) {
+                $settings->session_status = 'connected';
+                $settings->save();
+                return back()->with('success', 'WhatsApp session restarted successfully.');
+            }
+
+            return back()->with('error', 'Failed to restart session: ' . ($response->json('message', 'Unknown error')));
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to restart session: ' . $e->getMessage());
+        }
     }
 }
