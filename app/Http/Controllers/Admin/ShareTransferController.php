@@ -6,10 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Models\ShareTransfer;
 use App\Models\ShareCertificate;
 use App\Models\User;
+use App\Services\EncryptedIdService;
 use Illuminate\Http\Request;
 
 class ShareTransferController extends Controller
 {
+    protected $encryptedIdService;
+
+    public function __construct(EncryptedIdService $encryptedIdService)
+    {
+        $this->encryptedIdService = $encryptedIdService;
+    }
+
     public function index()
     {
         $shareTransfers = ShareTransfer::with(['fromUser', 'toUser', 'shareCertificate'])->latest()->paginate(10);
@@ -42,21 +50,42 @@ class ShareTransferController extends Controller
             ->with('success', 'Share transfer created successfully.');
     }
 
-    public function show(ShareTransfer $shareTransfer)
+    public function show($encryptedId)
     {
-        $shareTransfer->load(['fromUser', 'toUser', 'shareCertificate']);
+        try {
+            $shareTransferId = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            abort(404, 'Invalid share transfer ID.');
+        }
+
+        $shareTransfer = ShareTransfer::with(['fromUser', 'toUser', 'shareCertificate'])->findOrFail($shareTransferId);
         return view('admin.share-transfers.show', compact('shareTransfer'));
     }
 
-    public function edit(ShareTransfer $shareTransfer)
+    public function edit($encryptedId)
     {
+        try {
+            $shareTransferId = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            abort(404, 'Invalid share transfer ID.');
+        }
+
+        $shareTransfer = ShareTransfer::findOrFail($shareTransferId);
         $users = User::where('role', 'member')->get();
         $shareCertificates = ShareCertificate::where('status', 'active')->get();
         return view('admin.share-transfers.edit', compact('shareTransfer', 'users', 'shareCertificates'));
     }
 
-    public function update(Request $request, ShareTransfer $shareTransfer)
+    public function update(Request $request, $encryptedId)
     {
+        try {
+            $shareTransferId = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            abort(404, 'Invalid share transfer ID.');
+        }
+
+        $shareTransfer = ShareTransfer::findOrFail($shareTransferId);
+
         $validated = $request->validate([
             'from_user_id' => 'required|exists:users,id',
             'to_user_id' => 'required|exists:users,id|different:from_user_id',
@@ -74,8 +103,15 @@ class ShareTransferController extends Controller
             ->with('success', 'Share transfer updated successfully.');
     }
 
-    public function destroy(ShareTransfer $shareTransfer)
+    public function destroy($encryptedId)
     {
+        try {
+            $shareTransferId = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            abort(404, 'Invalid share transfer ID.');
+        }
+
+        $shareTransfer = ShareTransfer::findOrFail($shareTransferId);
         $shareTransfer->delete();
 
         return redirect()->route('admin.share-transfers.index')

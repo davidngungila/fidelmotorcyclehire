@@ -55,13 +55,13 @@
             </td>
             <td class="py-3 px-4 text-center">
               <div class="flex items-center justify-center gap-2">
-                <a href="{{ route('admin.share-purchases.show', $purchase) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-100 hover:bg-teal-200 dark:bg-teal-900/40 dark:hover:bg-teal-900/60 text-teal-700 dark:text-teal-300 text-xs font-medium transition-colors">
+                <a href="{{ route('admin.share-purchases.show', app('App\Services\EncryptedIdService')->encrypt($purchase->id)) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-100 hover:bg-teal-200 dark:bg-teal-900/40 dark:hover:bg-teal-900/60 text-teal-700 dark:text-teal-300 text-xs font-medium transition-colors">
                   <i class="fa-solid fa-eye text-[10px]"></i> View
                 </a>
-                <a href="{{ route('admin.share-purchases.edit', $purchase) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-xs font-medium transition-colors">
+                <a href="{{ route('admin.share-purchases.edit', app('App\Services\EncryptedIdService')->encrypt($purchase->id)) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-xs font-medium transition-colors">
                   <i class="fa-solid fa-edit text-[10px]"></i> Edit
                 </a>
-                <form action="{{ route('admin.share-purchases.destroy', $purchase) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this share purchase?');">
+                <form action="{{ route('admin.share-purchases.destroy', app('App\Services\EncryptedIdService')->encrypt($purchase->id)) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this share purchase?');">
                   @csrf
                   @method('DELETE')
                   <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-100 hover:bg-red-200 dark:bg-red-900/40 dark:hover:bg-red-900/60 text-red-700 dark:text-red-300 text-xs font-medium transition-colors">

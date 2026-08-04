@@ -5,7 +5,7 @@
 
 @section('content')
 <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-primary-100 dark:border-primary-800 p-8">
-  <form method="POST" action="{{ route('admin.share-dividends.update', $shareDividend) }}" class="space-y-6">
+  <form method="POST" action="{{ route('admin.share-dividends.update', app('App\Services\EncryptedIdService')->encrypt($shareDividend->id)) }}" class="space-y-6">
     @csrf
     @method('PUT')
 

@@ -88,12 +88,12 @@
     @endif
 
     <div class="flex items-center gap-3 mt-6 pt-6 border-t border-primary-100 dark:border-primary-800">
-      <a href="{{ route('admin.share-transactions.edit', $shareTransaction) }}"
+      <a href="{{ route('admin.share-transactions.edit', app('App\Services\EncryptedIdService')->encrypt($shareTransaction->id)) }}"
          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-sm font-semibold transition-all shadow-sm hover:shadow-md">
         <i class="fa-solid fa-edit"></i> Edit
       </a>
       <button type="button"
-              onclick="deleteShareTransaction('{{ route('admin.share-transactions.destroy', $shareTransaction) }}')"
+              onclick="deleteShareTransaction('{{ route('admin.share-transactions.destroy', app('App\Services\EncryptedIdService')->encrypt($shareTransaction->id)) }}')"
               class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white text-sm font-semibold transition-all shadow-sm hover:shadow-md">
         <i class="fa-solid fa-trash"></i> Delete
       </button>

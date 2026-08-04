@@ -85,12 +85,12 @@
     @endif
 
     <div class="flex items-center gap-3 mt-6 pt-6 border-t border-primary-100 dark:border-primary-800">
-      <a href="{{ route('admin.share-dividends.edit', $shareDividend) }}"
+      <a href="{{ route('admin.share-dividends.edit', app('App\Services\EncryptedIdService')->encrypt($shareDividend->id)) }}"
          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-sm font-semibold transition-all shadow-sm hover:shadow-md">
         <i class="fa-solid fa-edit"></i> Edit
       </a>
       <button type="button"
-              onclick="deleteShareDividend('{{ route('admin.share-dividends.destroy', $shareDividend) }}')"
+              onclick="deleteShareDividend('{{ route('admin.share-dividends.destroy', app('App\Services\EncryptedIdService')->encrypt($shareDividend->id)) }}')"
               class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white text-sm font-semibold transition-all shadow-sm hover:shadow-md">
         <i class="fa-solid fa-trash"></i> Delete
       </button>

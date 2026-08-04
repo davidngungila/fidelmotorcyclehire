@@ -8,11 +8,19 @@ use App\Models\JournalEntry;
 use App\Models\SharePurchase;
 use App\Models\ShareProduct;
 use App\Models\User;
+use App\Services\EncryptedIdService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class SharePurchaseController extends Controller
 {
+    protected $encryptedIdService;
+
+    public function __construct(EncryptedIdService $encryptedIdService)
+    {
+        $this->encryptedIdService = $encryptedIdService;
+    }
+
     public function index()
     {
         $sharePurchases = SharePurchase::with(['user', 'shareProduct'])->latest()->paginate(10);
@@ -50,21 +58,42 @@ class SharePurchaseController extends Controller
             ->with('success', 'Share purchase created successfully.');
     }
 
-    public function show(SharePurchase $sharePurchase)
+    public function show($encryptedId)
     {
-        $sharePurchase->load(['user', 'shareProduct', 'shareCertificates']);
+        try {
+            $sharePurchaseId = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            abort(404, 'Invalid share purchase ID.');
+        }
+
+        $sharePurchase = SharePurchase::with(['user', 'shareProduct', 'shareCertificates'])->findOrFail($sharePurchaseId);
         return view('admin.share-purchases.show', compact('sharePurchase'));
     }
 
-    public function edit(SharePurchase $sharePurchase)
+    public function edit($encryptedId)
     {
+        try {
+            $sharePurchaseId = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            abort(404, 'Invalid share purchase ID.');
+        }
+
+        $sharePurchase = SharePurchase::findOrFail($sharePurchaseId);
         $users = User::where('role', 'member')->get();
         $shareProducts = ShareProduct::where('status', 'active')->get();
         return view('admin.share-purchases.edit', compact('sharePurchase', 'users', 'shareProducts'));
     }
 
-    public function update(Request $request, SharePurchase $sharePurchase)
+    public function update(Request $request, $encryptedId)
     {
+        try {
+            $sharePurchaseId = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            abort(404, 'Invalid share purchase ID.');
+        }
+
+        $sharePurchase = SharePurchase::findOrFail($sharePurchaseId);
+
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
             'share_product_id' => 'required|exists:share_products,id',
@@ -82,8 +111,15 @@ class SharePurchaseController extends Controller
             ->with('success', 'Share purchase updated successfully.');
     }
 
-    public function destroy(SharePurchase $sharePurchase)
+    public function destroy($encryptedId)
     {
+        try {
+            $sharePurchaseId = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            abort(404, 'Invalid share purchase ID.');
+        }
+
+        $sharePurchase = SharePurchase::findOrFail($sharePurchaseId);
         $sharePurchase->delete();
 
         return redirect()->route('admin.share-purchases.index')

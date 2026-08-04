@@ -82,12 +82,12 @@
     @endif
 
     <div class="flex items-center gap-3 mt-6 pt-6 border-t border-primary-100 dark:border-primary-800">
-      <a href="{{ route('admin.share-transfers.edit', $shareTransfer) }}"
+      <a href="{{ route('admin.share-transfers.edit', app('App\Services\EncryptedIdService')->encrypt($shareTransfer->id)) }}"
          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-sm font-semibold transition-all shadow-sm hover:shadow-md">
         <i class="fa-solid fa-edit"></i> Edit
       </a>
       <button type="button"
-              onclick="deleteShareTransfer('{{ route('admin.share-transfers.destroy', $shareTransfer) }}')"
+              onclick="deleteShareTransfer('{{ route('admin.share-transfers.destroy', app('App\Services\EncryptedIdService')->encrypt($shareTransfer->id)) }}')"
               class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white text-sm font-semibold transition-all shadow-sm hover:shadow-md">
         <i class="fa-solid fa-trash"></i> Delete
       </button>

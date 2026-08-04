@@ -5,7 +5,7 @@
 
 @section('content')
 <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-primary-100 dark:border-primary-800 p-8">
-  <form method="POST" action="{{ route('admin.share-purchases.update', $sharePurchase) }}" class="space-y-6">
+  <form method="POST" action="{{ route('admin.share-purchases.update', app('App\Services\EncryptedIdService')->encrypt($sharePurchase->id)) }}" class="space-y-6">
     @csrf
     @method('PUT')
 

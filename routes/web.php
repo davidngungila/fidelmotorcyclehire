@@ -272,10 +272,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/share-purchases', [AdminSharePurchaseController::class, 'index'])->name('share-purchases.index');
     Route::get('/share-purchases/create', [AdminSharePurchaseController::class, 'create'])->name('share-purchases.create');
     Route::post('/share-purchases', [AdminSharePurchaseController::class, 'store'])->name('share-purchases.store');
-    Route::get('/share-purchases/{sharePurchase}', [AdminSharePurchaseController::class, 'show'])->name('share-purchases.show');
-    Route::get('/share-purchases/{sharePurchase}/edit', [AdminSharePurchaseController::class, 'edit'])->name('share-purchases.edit');
-    Route::put('/share-purchases/{sharePurchase}', [AdminSharePurchaseController::class, 'update'])->name('share-purchases.update');
-    Route::delete('/share-purchases/{sharePurchase}', [AdminSharePurchaseController::class, 'destroy'])->name('share-purchases.destroy');
+    Route::get('/share-purchases/{encryptedId}', [AdminSharePurchaseController::class, 'show'])->name('share-purchases.show');
+    Route::get('/share-purchases/{encryptedId}/edit', [AdminSharePurchaseController::class, 'edit'])->name('share-purchases.edit');
+    Route::put('/share-purchases/{encryptedId}', [AdminSharePurchaseController::class, 'update'])->name('share-purchases.update');
+    Route::delete('/share-purchases/{encryptedId}', [AdminSharePurchaseController::class, 'destroy'])->name('share-purchases.destroy');
 
     Route::get('/share-certificates', [AdminShareCertificateController::class, 'index'])->name('share-certificates.index');
     Route::get('/share-certificates/create', [AdminShareCertificateController::class, 'create'])->name('share-certificates.create');
@@ -288,26 +288,26 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/share-transfers', [AdminShareTransferController::class, 'index'])->name('share-transfers.index');
     Route::get('/share-transfers/create', [AdminShareTransferController::class, 'create'])->name('share-transfers.create');
     Route::post('/share-transfers', [AdminShareTransferController::class, 'store'])->name('share-transfers.store');
-    Route::get('/share-transfers/{shareTransfer}', [AdminShareTransferController::class, 'show'])->name('share-transfers.show');
-    Route::get('/share-transfers/{shareTransfer}/edit', [AdminShareTransferController::class, 'edit'])->name('share-transfers.edit');
-    Route::put('/share-transfers/{shareTransfer}', [AdminShareTransferController::class, 'update'])->name('share-transfers.update');
-    Route::delete('/share-transfers/{shareTransfer}', [AdminShareTransferController::class, 'destroy'])->name('share-transfers.destroy');
+    Route::get('/share-transfers/{encryptedId}', [AdminShareTransferController::class, 'show'])->name('share-transfers.show');
+    Route::get('/share-transfers/{encryptedId}/edit', [AdminShareTransferController::class, 'edit'])->name('share-transfers.edit');
+    Route::put('/share-transfers/{encryptedId}', [AdminShareTransferController::class, 'update'])->name('share-transfers.update');
+    Route::delete('/share-transfers/{encryptedId}', [AdminShareTransferController::class, 'destroy'])->name('share-transfers.destroy');
 
     Route::get('/share-dividends', [AdminShareDividendController::class, 'index'])->name('share-dividends.index');
     Route::get('/share-dividends/create', [AdminShareDividendController::class, 'create'])->name('share-dividends.create');
     Route::post('/share-dividends', [AdminShareDividendController::class, 'store'])->name('share-dividends.store');
-    Route::get('/share-dividends/{shareDividend}', [AdminShareDividendController::class, 'show'])->name('share-dividends.show');
-    Route::get('/share-dividends/{shareDividend}/edit', [AdminShareDividendController::class, 'edit'])->name('share-dividends.edit');
-    Route::put('/share-dividends/{shareDividend}', [AdminShareDividendController::class, 'update'])->name('share-dividends.update');
-    Route::delete('/share-dividends/{shareDividend}', [AdminShareDividendController::class, 'destroy'])->name('share-dividends.destroy');
+    Route::get('/share-dividends/{encryptedId}', [AdminShareDividendController::class, 'show'])->name('share-dividends.show');
+    Route::get('/share-dividends/{encryptedId}/edit', [AdminShareDividendController::class, 'edit'])->name('share-dividends.edit');
+    Route::put('/share-dividends/{encryptedId}', [AdminShareDividendController::class, 'update'])->name('share-dividends.update');
+    Route::delete('/share-dividends/{encryptedId}', [AdminShareDividendController::class, 'destroy'])->name('share-dividends.destroy');
 
     Route::get('/share-transactions', [AdminShareTransactionController::class, 'index'])->name('share-transactions.index');
     Route::get('/share-transactions/create', [AdminShareTransactionController::class, 'create'])->name('share-transactions.create');
     Route::post('/share-transactions', [AdminShareTransactionController::class, 'store'])->name('share-transactions.store');
-    Route::get('/share-transactions/{shareTransaction}', [AdminShareTransactionController::class, 'show'])->name('share-transactions.show');
-    Route::get('/share-transactions/{shareTransaction}/edit', [AdminShareTransactionController::class, 'edit'])->name('share-transactions.edit');
-    Route::put('/share-transactions/{shareTransaction}', [AdminShareTransactionController::class, 'update'])->name('share-transactions.update');
-    Route::delete('/share-transactions/{shareTransaction}', [AdminShareTransactionController::class, 'destroy'])->name('share-transactions.destroy');
+    Route::get('/share-transactions/{encryptedId}', [AdminShareTransactionController::class, 'show'])->name('share-transactions.show');
+    Route::get('/share-transactions/{encryptedId}/edit', [AdminShareTransactionController::class, 'edit'])->name('share-transactions.edit');
+    Route::put('/share-transactions/{encryptedId}', [AdminShareTransactionController::class, 'update'])->name('share-transactions.update');
+    Route::delete('/share-transactions/{encryptedId}', [AdminShareTransactionController::class, 'destroy'])->name('share-transactions.destroy');
 
     Route::get('/share-reports', [AdminShareReportController::class, 'index'])->name('share-reports.index');
 
