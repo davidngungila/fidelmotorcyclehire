@@ -67,16 +67,16 @@
       <!-- Ledger Entries Section -->
       <div>
         <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">Ledger Entries</h3>
-        <div class="overflow-x-auto">
-          <table class="data-table">
+        <div class="overflow-x-auto min-w-0">
+          <table class="data-table min-w-full">
             <thead>
               <tr>
-                <th>Date</th>
-                <th>Description</th>
-                <th>Reference</th>
-                <th class="text-right">Debit</th>
-                <th class="text-right">Credit</th>
-                <th class="text-right">Balance</th>
+                <th class="whitespace-nowrap">Date</th>
+                <th class="min-w-[200px]">Description</th>
+                <th class="whitespace-nowrap">Reference</th>
+                <th class="text-right whitespace-nowrap">Debit</th>
+                <th class="text-right whitespace-nowrap">Credit</th>
+                <th class="text-right whitespace-nowrap">Balance</th>
               </tr>
             </thead>
             <tbody>
@@ -91,18 +91,18 @@
               @else
                 @foreach($ledgerEntries as $entry)
                 <tr>
-                  <td>{{ $entry->transaction_date->format('M d, Y') }}</td>
-                  <td>
-                    <div class="font-semibold text-gray-900 dark:text-white">{{ $entry->description }}</div>
+                  <td class="whitespace-nowrap">{{ $entry->transaction_date->format('M d, Y') }}</td>
+                  <td class="min-w-[200px] max-w-md">
+                    <div class="font-semibold text-gray-900 dark:text-white truncate" title="{{ $entry->description }}">{{ $entry->description }}</div>
                   </td>
-                  <td class="font-mono text-sm text-primary-700 dark:text-primary-300">{{ $entry->reference }}</td>
-                  <td class="text-right font-mono font-bold text-gray-900 dark:text-white">
+                  <td class="font-mono text-sm text-primary-700 dark:text-primary-300 whitespace-nowrap">{{ $entry->reference }}</td>
+                  <td class="text-right font-mono font-bold text-gray-900 dark:text-white whitespace-nowrap">
                     {{ $entry->debit_amount > 0 ? number_format($entry->debit_amount, 2) : '-' }}
                   </td>
-                  <td class="text-right font-mono font-bold text-gray-900 dark:text-white">
+                  <td class="text-right font-mono font-bold text-gray-900 dark:text-white whitespace-nowrap">
                     {{ $entry->credit_amount > 0 ? number_format($entry->credit_amount, 2) : '-' }}
                   </td>
-                  <td class="text-right font-mono font-bold text-primary-700 dark:text-primary-300">
+                  <td class="text-right font-mono font-bold text-primary-700 dark:text-primary-300 whitespace-nowrap">
                     {{ number_format($entry->balance, 2) }}
                   </td>
                 </tr>
