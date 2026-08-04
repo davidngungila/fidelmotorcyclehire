@@ -205,69 +205,149 @@
       </div>
       <div>
         <h3 class="text-lg font-semibold text-primary-900 dark:text-white">Send Messages</h3>
-        <p class="text-xs text-primary-500 dark:text-primary-400">Send single or bulk WhatsApp messages</p>
+        <p class="text-xs text-primary-500 dark:text-primary-400">Send single or bulk messages via WhatsApp or SMS</p>
       </div>
     </div>
 
-    <!-- Message Type Tabs -->
-    <div x-data="{ messageType: 'single' }" class="space-y-6">
+    <!-- Channel Type Tabs -->
+    <div x-data="{ channelType: 'whatsapp', messageType: 'single' }" class="space-y-6">
       <div class="flex gap-2 border-b border-primary-200 dark:border-primary-800">
-        <button @click="messageType = 'single'" 
-                :class="messageType === 'single' ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400'"
+        <button @click="channelType = 'whatsapp'" 
+                :class="channelType === 'whatsapp' ? 'border-b-2 border-green-500 text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'"
                 class="px-4 py-2 text-sm font-medium transition-colors">
-          Single Message
+          <i class="fa-brands fa-whatsapp mr-2"></i>WhatsApp
         </button>
-        <button @click="messageType = 'bulk'" 
-                :class="messageType === 'bulk' ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400'"
+        <button @click="channelType = 'sms'" 
+                :class="channelType === 'sms' ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'"
                 class="px-4 py-2 text-sm font-medium transition-colors">
-          Bulk Message
+          <i class="fa-solid fa-comment-sms mr-2"></i>SMS
         </button>
       </div>
 
-      <!-- Single Message Form -->
-      <div x-show="messageType === 'single'" x-transition>
-        <form action="{{ route('admin.communication.whatsapp.send-single') }}" method="POST">
-          @csrf
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Phone Number</label>
-              <input type="text" name="phone_number" required placeholder="+255123456789"
-                     class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Include country code (e.g., +255 for Tanzania)</p>
+      <!-- WhatsApp Messages -->
+      <div x-show="channelType === 'whatsapp'" x-transition>
+        <!-- Message Type Tabs -->
+        <div class="flex gap-2 border-b border-primary-200 dark:border-primary-800 mb-4">
+          <button @click="messageType = 'single'" 
+                  :class="messageType === 'single' ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400'"
+                  class="px-4 py-2 text-sm font-medium transition-colors">
+            Single Message
+          </button>
+          <button @click="messageType = 'bulk'" 
+                  :class="messageType === 'bulk' ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400'"
+                  class="px-4 py-2 text-sm font-medium transition-colors">
+            Bulk Message
+          </button>
+        </div>
+
+        <!-- Single WhatsApp Message Form -->
+        <div x-show="messageType === 'single'" x-transition>
+          <form action="{{ route('admin.communication.whatsapp.send-single') }}" method="POST">
+            @csrf
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Phone Number</label>
+                <input type="text" name="phone_number" required placeholder="+255123456789"
+                       class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Include country code (e.g., +255 for Tanzania)</p>
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Message</label>
+                <textarea name="message" rows="4" required placeholder="Enter your message here"
+                          class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"></textarea>
+              </div>
+              <button type="submit" class="px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-green-600 text-white text-sm font-semibold transition-all shadow-lg shadow-green-500/20">
+                <i class="fa-brands fa-whatsapp mr-2"></i>Send WhatsApp Message
+              </button>
             </div>
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Message</label>
-              <textarea name="message" rows="4" required placeholder="Enter your message here"
-                        class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"></textarea>
+          </form>
+        </div>
+
+        <!-- Bulk WhatsApp Message Form -->
+        <div x-show="messageType === 'bulk'" x-transition>
+          <form action="{{ route('admin.communication.whatsapp.send-bulk') }}" method="POST">
+            @csrf
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Phone Numbers</label>
+                <textarea name="phone_numbers" rows="6" required placeholder="+2551234567890&#10;+2551234567891&#10;+2551234567892"
+                          class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none font-mono text-sm"></textarea>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Enter one phone number per line (include country code)</p>
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Message</label>
+                <textarea name="message" rows="4" required placeholder="Enter your message here"
+                          class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"></textarea>
+              </div>
+              <button type="submit" class="px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-green-600 text-white text-sm font-semibold transition-all shadow-lg shadow-green-500/20">
+                <i class="fa-brands fa-whatsapp mr-2"></i>Send Bulk WhatsApp
+              </button>
             </div>
-            <button type="submit" class="px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-green-600 text-white text-sm font-semibold transition-all shadow-lg shadow-green-500/20">
-              <i class="fa-brands fa-whatsapp mr-2"></i>Send Message
-            </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
 
-      <!-- Bulk Message Form -->
-      <div x-show="messageType === 'bulk'" x-transition>
-        <form action="{{ route('admin.communication.whatsapp.send-bulk') }}" method="POST">
-          @csrf
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Phone Numbers</label>
-              <textarea name="phone_numbers" rows="6" required placeholder="+2551234567890&#10;+2551234567891&#10;+2551234567892"
-                        class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none font-mono text-sm"></textarea>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Enter one phone number per line (include country code)</p>
+      <!-- SMS Messages -->
+      <div x-show="channelType === 'sms'" x-transition>
+        <!-- Message Type Tabs -->
+        <div class="flex gap-2 border-b border-primary-200 dark:border-primary-800 mb-4">
+          <button @click="messageType = 'single'" 
+                  :class="messageType === 'single' ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400'"
+                  class="px-4 py-2 text-sm font-medium transition-colors">
+            Single SMS
+          </button>
+          <button @click="messageType = 'bulk'" 
+                  :class="messageType === 'bulk' ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400'"
+                  class="px-4 py-2 text-sm font-medium transition-colors">
+            Bulk SMS
+          </button>
+        </div>
+
+        <!-- Single SMS Form -->
+        <div x-show="messageType === 'single'" x-transition>
+          <form action="{{ route('admin.communication.whatsapp.send-single-sms') }}" method="POST">
+            @csrf
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Phone Number</label>
+                <input type="text" name="phone_number" required placeholder="255123456789"
+                       class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Include country code (e.g., 255 for Tanzania, without +)</p>
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Message</label>
+                <textarea name="message" rows="4" required placeholder="Enter your SMS message here"
+                          class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"></textarea>
+              </div>
+              <button type="submit" class="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm font-semibold transition-all shadow-lg shadow-blue-500/20">
+                <i class="fa-solid fa-comment-sms mr-2"></i>Send SMS
+              </button>
             </div>
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Message</label>
-              <textarea name="message" rows="4" required placeholder="Enter your message here"
-                        class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"></textarea>
+          </form>
+        </div>
+
+        <!-- Bulk SMS Form -->
+        <div x-show="messageType === 'bulk'" x-transition>
+          <form action="{{ route('admin.communication.whatsapp.send-bulk-sms') }}" method="POST">
+            @csrf
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Phone Numbers</label>
+                <textarea name="phone_numbers" rows="6" required placeholder="2551234567890&#10;2551234567891&#10;2551234567892"
+                          class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none font-mono text-sm"></textarea>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Enter one phone number per line (include country code, without +)</p>
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Message</label>
+                <textarea name="message" rows="4" required placeholder="Enter your SMS message here"
+                          class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"></textarea>
+              </div>
+              <button type="submit" class="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm font-semibold transition-all shadow-lg shadow-blue-500/20">
+                <i class="fa-solid fa-comment-sms mr-2"></i>Send Bulk SMS
+              </button>
             </div>
-            <button type="submit" class="px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-green-600 text-white text-sm font-semibold transition-all shadow-lg shadow-green-500/20">
-              <i class="fa-brands fa-whatsapp mr-2"></i>Send Bulk Message
-            </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   </div>

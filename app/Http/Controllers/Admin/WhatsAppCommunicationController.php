@@ -5,12 +5,19 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\WhatsAppSettings;
 use App\Models\WhatsAppMessageHistory;
+use App\Services\SmsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 
 class WhatsAppCommunicationController extends Controller
 {
+    protected SmsService $smsService;
+
+    public function __construct(SmsService $smsService)
+    {
+        $this->smsService = $smsService;
+    }
     public function index()
     {
         $settings = WhatsAppSettings::first();
@@ -244,5 +251,38 @@ class WhatsAppCommunicationController extends Controller
         $settings->save();
 
         return back()->with('success', 'WhatsApp status updated successfully.');
+    }
+
+    public function sendSingleSms(Request $request)
+    {
+        $request->validate([
+            'phone_number' => 'required|string',
+            'message' => 'required|string',
+        ]);
+
+        $result = $this->smsService->sendSingle($request->phone_number, $request->message);
+
+        if ($result['success']) {
+            return back()->with('success', 'SMS sent successfully.');
+        }
+
+        return back()->with('error', 'Failed to send SMS: ' . $result['message']);
+    }
+
+    public function sendBulkSms(Request $request)
+    {
+        $request->validate([
+            'phone_numbers' => 'required|string',
+            'message' => 'required|string',
+        ]);
+
+        $phoneNumbers = array_filter(array_map('trim', explode("\n", $request->phone_numbers)));
+        $result = $this->smsService->sendMultiple($phoneNumbers, $request->message);
+
+        if ($result['success']) {
+            return back()->with('success', 'Bulk SMS sent successfully.');
+        }
+
+        return back()->with('error', 'Failed to send bulk SMS: ' . $result['message']);
     }
 }
