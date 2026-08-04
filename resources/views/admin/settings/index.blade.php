@@ -603,10 +603,44 @@
                     class="px-6 py-2.5 rounded-xl bg-green-600 hover:bg-green-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95">
               <i class="fa-brands fa-whatsapp mr-1.5 text-[13px]"></i> Save WhatsApp Settings
             </button>
-            <a href="{{ route('admin.settings.test-whatsapp-page') }}"
-                    class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95 inline-flex items-center">
-              <i class="fa-solid fa-paper-plane mr-1.5 text-[13px]"></i> Test WhatsApp
-            </a>
+            <div class="flex gap-3">
+              <button type="button" x-data="{ loading: false, status: null }" @click="loading = true; fetch('{{ route('admin.settings.check-whatsapp-connection') }}', { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=\"csrf-token\"]').content } }).then(r => r.json()).then(data => { status = data; loading = false; }).catch(() => { loading = false; })" :disabled="loading"
+                      class="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fa-solid fa-plug mr-1.5 text-[13px]"></i>
+                <span x-show="!loading">Check Connection</span>
+                <span x-show="loading">Checking...</span>
+              </button>
+              <a href="{{ route('admin.settings.test-whatsapp-page') }}"
+                      class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95 inline-flex items-center">
+                <i class="fa-solid fa-paper-plane mr-1.5 text-[13px]"></i> Test WhatsApp
+              </a>
+            </div>
+          </div>
+
+          <!-- Connection Status -->
+          <div x-data="{ loading: false, status: null }" class="mt-4">
+            <button type="button" @click="loading = true; fetch('{{ route('admin.settings.check-whatsapp-connection') }}', { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=\"csrf-token\"]').content } }).then(r => r.json()).then(data => { status = data; loading = false; }).catch(() => { loading = false; })" :disabled="loading"
+                    class="w-full px-4 py-3 rounded-xl border-2 border-dashed border-primary-200 dark:border-primary-800 bg-primary-50/50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 text-sm font-medium hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+              <i class="fa-solid fa-wifi mr-2"></i>
+              <span x-show="!loading">Check WhatsApp Connection Status</span>
+              <span x-show="loading">Checking connection...</span>
+            </button>
+
+            <div x-show="status" x-transition class="mt-3 p-4 rounded-xl border" 
+                 :class="status.success ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'">
+              <div class="flex items-start gap-3">
+                <i :class="status.success ? 'fa-solid fa-circle-check text-green-600 dark:text-green-400' : 'fa-solid fa-circle-xmark text-red-600 dark:text-red-400'" class="mt-0.5"></i>
+                <div class="flex-1">
+                  <p class="text-sm font-semibold" :class="status.success ? 'text-green-800 dark:text-green-200' : 'text-red-800 dark:text-red-200'" x-text="status.message"></p>
+                  <template x-if="status.active_session">
+                    <div class="mt-2 text-xs text-green-700 dark:text-green-300">
+                      <p><strong>Active Session:</strong> <span x-text="status.active_session.name"></span></p>
+                      <p><strong>Phone:</strong> <span x-text="status.active_session.phone_number"></span></p>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
           </div>
         </form>
       </div>

@@ -372,4 +372,76 @@ class SettingController extends Controller
             'whatsappSettings' => $whatsappSettings,
         ]);
     }
+
+    public function checkWhatsAppConnection(Request $request): JsonResponse
+    {
+        $whatsappSettings = WhatsAppSettings::first();
+        
+        if (!$whatsappSettings || !$whatsappSettings->session_api_key) {
+            return response()->json([
+                'success' => false,
+                'message' => 'WhatsApp API key not configured.',
+                'status' => 'not_configured'
+            ], 400);
+        }
+
+        if (!$whatsappSettings->is_active) {
+            return response()->json([
+                'success' => false,
+                'message' => 'WhatsApp service is inactive.',
+                'status' => 'inactive'
+            ], 400);
+        }
+
+        try {
+            // Test connection by checking sessions
+            if ($whatsappSettings->personal_access_token) {
+                $response = \Illuminate\Support\Facades\Http::withHeaders([
+                    'Authorization' => 'Bearer ' . $whatsappSettings->personal_access_token,
+                ])->get('https://www.wasenderapi.com/api/whatsapp-sessions');
+
+                if ($response->successful()) {
+                    $sessions = $response->json('data', []);
+                    $connectedSession = collect($sessions)->firstWhere('status', 'connected');
+                    
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'WhatsApp connection is working.',
+                        'status' => 'connected',
+                        'sessions' => $sessions,
+                        'active_session' => $connectedSession
+                    ]);
+                }
+            }
+
+            // If no personal token, try to send a test message
+            $testResponse = \Illuminate\Support\Facades\Http::withHeaders([
+                'Authorization' => 'Bearer ' . $whatsappSettings->session_api_key,
+            ])->post('https://www.wasenderapi.com/api/send-message', [
+                'phone_number' => '0000000000', // Invalid number to test API connectivity
+                'message' => 'Connection test',
+            ]);
+
+            if ($testResponse->successful() || $testResponse->status() === 400) {
+                // 400 might mean API is working but phone number is invalid
+                return response()->json([
+                    'success' => true,
+                    'message' => 'WhatsApp API is accessible.',
+                    'status' => 'api_accessible'
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'WhatsApp API connection failed.',
+                'status' => 'connection_failed'
+            ], 500);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Connection error: ' . $e->getMessage(),
+                'status' => 'error'
+            ], 500);
+        }
+    }
 }

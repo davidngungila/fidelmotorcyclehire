@@ -250,6 +250,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/settings/test-sms-page', [AdminSettingController::class, 'testSmsPage'])->name('settings.test-sms-page');
     Route::post('/settings/test-whatsapp', [AdminSettingController::class, 'testWhatsApp'])->name('settings.test-whatsapp');
     Route::get('/settings/test-whatsapp-page', [AdminSettingController::class, 'testWhatsAppPage'])->name('settings.test-whatsapp-page');
+    Route::post('/settings/check-whatsapp-connection', [AdminSettingController::class, 'checkWhatsAppConnection'])->name('settings.check-whatsapp-connection');
 
     Route::get('/google-sheets', [AdminGoogleSheetsController::class, 'index'])->name('google-sheets.index');
     Route::post('/google-sheets/sync', [AdminGoogleSheetsController::class, 'sync'])->name('google-sheets.sync');
