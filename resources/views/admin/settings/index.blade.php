@@ -528,96 +528,101 @@
       </div>
 
       <div x-show="activeTab === 'whatsapp'" x-transition:enter="transition ease-out duration-200"
-           x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0">
-        <form method="POST" action="{{ route('admin.settings.update') }}" class="space-y-6">
-          @csrf
-          @method('PUT')
-          <input type="hidden" name="tab" value="whatsapp">
+           x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
+           class="space-y-6">
 
-          <div class="flex items-center gap-4 mb-6">
-            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-400 to-green-600 text-white flex items-center justify-center text-xl shadow-md">
-              <i class="fa-brands fa-whatsapp"></i>
-            </div>
-            <div>
-              <h3 class="font-bold text-lg" :class="darkMode ? 'text-white' : 'text-primary-900'">WhatsApp Configuration</h3>
-              <p class="text-xs mt-0.5" :class="darkMode ? 'text-primary-400' : 'text-primary-600'">Configure WhatsApp Business API for messaging</p>
-            </div>
-          </div>
+        <!-- ===== CONFIGURATION CARD ===== -->
+        <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-primary-100 dark:border-primary-800 p-6">
+          <form method="POST" action="{{ route('admin.settings.update') }}" class="space-y-6">
+            @csrf
+            @method('PUT')
+            <input type="hidden" name="tab" value="whatsapp">
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div class="md:col-span-2">
-              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Personal Access Token</label>
-              <input type="password" name="personal_access_token" value="{{ $whatsappSettings->personal_access_token ?? '' }}"
-                     class="form-input" placeholder="Enter your Personal Access Token from Wasender dashboard">
-              <p class="text-xs mt-1" :class="darkMode ? 'text-primary-400' : 'text-primary-600'>Get your token from Settings > Personal Access Token in Wasender dashboard</p>
+            <div class="flex items-center gap-4 mb-6">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-400 to-green-600 text-white flex items-center justify-center text-xl shadow-md">
+                <i class="fa-brands fa-whatsapp"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-lg" :class="darkMode ? 'text-white' : 'text-primary-900'">WhatsApp Configuration</h3>
+                <p class="text-xs mt-0.5" :class="darkMode ? 'text-primary-400' : 'text-primary-600'">Configure WhatsApp Business API for messaging</p>
+              </div>
             </div>
 
-            <div class="md:col-span-2">
-              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Session API Key</label>
-              <input type="password" name="session_api_key" value="{{ $whatsappSettings->session_api_key ?? '' }}"
-                     class="form-input" placeholder="Enter your Session API Key from Wasender session screen">
-              <p class="text-xs mt-1" :class="darkMode ? 'text-primary-400' : 'text-primary-600'>Get your API key after connecting your WhatsApp session from Session Management screen</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div class="md:col-span-2">
+                <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Personal Access Token</label>
+                <input type="password" name="personal_access_token" value="{{ $whatsappSettings->personal_access_token ?? '' }}"
+                       class="form-input" placeholder="Enter your Personal Access Token from Wasender dashboard">
+                <p class="text-xs mt-1" :class="darkMode ? 'text-primary-400' : 'text-primary-600'">Get your token from Settings > Personal Access Token in Wasender dashboard</p>
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Session API Key</label>
+                <input type="password" name="session_api_key" value="{{ $whatsappSettings->session_api_key ?? '' }}"
+                       class="form-input" placeholder="Enter your Session API Key from Wasender session screen">
+                <p class="text-xs mt-1" :class="darkMode ? 'text-primary-400' : 'text-primary-600'">Get your API key after connecting your WhatsApp session from Session Management screen</p>
+              </div>
+
+              <div>
+                <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Session Name</label>
+                <input type="text" name="session_name" value="{{ $whatsappSettings->session_name ?? '' }}"
+                       class="form-input" placeholder="e.g. Business WhatsApp">
+              </div>
+
+              <div>
+                <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Phone Number</label>
+                <input type="text" name="phone_number" value="{{ $whatsappSettings->phone_number ?? '' }}"
+                       class="form-input" placeholder="+1234567890">
+              </div>
+
+              <div>
+                <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Session Status</label>
+                <select name="session_status" class="form-input">
+                  <option value="disconnected" {{ $whatsappSettings->session_status === 'disconnected' ? 'selected' : '' }}>Disconnected</option>
+                  <option value="connected" {{ $whatsappSettings->session_status === 'connected' ? 'selected' : '' }}>Connected</option>
+                  <option value="pending" {{ $whatsappSettings->session_status === 'pending' ? 'selected' : '' }}>Pending</option>
+                </select>
+              </div>
             </div>
 
-            <div>
-              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Session Name</label>
-              <input type="text" name="session_name" value="{{ $whatsappSettings->session_name ?? '' }}"
-                     class="form-input" placeholder="e.g. Business WhatsApp">
+            <div class="flex items-center justify-between p-4 rounded-xl bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-900/50">
+              <div>
+                <p class="font-bold text-sm" :class="darkMode ? 'text-white' : 'text-primary-900'">Enable WhatsApp Messaging</p>
+                <p class="text-xs mt-0.5" :class="darkMode ? 'text-primary-400' : 'text-primary-600'">Allow sending WhatsApp messages to members</p>
+              </div>
+              <div class="relative">
+                <input type="hidden" name="whatsapp_is_active" :value="whatsappActive ? 1 : 0">
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" class="sr-only peer" :checked="whatsappActive" @change="whatsappActive = !whatsappActive; $el.previousElementSibling.value = whatsappActive ? 1 : 0">
+                  <div class="w-12 h-7 rounded-full transition-colors bg-gray-200 dark:bg-gray-700 peer-checked:bg-green-600"></div>
+                  <div class="absolute left-0.5 top-0.5 w-6 h-6 bg-white rounded-full shadow-md transition-transform peer-checked:translate-x-5 flex items-center justify-center">
+                    <i :class="whatsappActive ? 'fa-solid fa-check text-green-600' : 'fa-solid fa-xmark text-gray-400'" class="text-[10px]"></i>
+                  </div>
+                </label>
+              </div>
             </div>
 
-            <div>
-              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Phone Number</label>
-              <input type="text" name="phone_number" value="{{ $whatsappSettings->phone_number ?? '' }}"
-                     class="form-input" placeholder="+1234567890">
+            <div class="pt-4 flex flex-wrap justify-between items-center gap-3">
+              <button type="submit"
+                      class="px-6 py-2.5 rounded-xl bg-green-600 hover:bg-green-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95">
+                <i class="fa-brands fa-whatsapp mr-1.5 text-[13px]"></i> Save WhatsApp Settings
+              </button>
+              <div class="flex gap-3">
+                <a href="{{ route('admin.settings.test-whatsapp-page') }}"
+                        class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95 inline-flex items-center">
+                  <i class="fa-solid fa-paper-plane mr-1.5 text-[13px]"></i> Test WhatsApp
+                </a>
+              </div>
             </div>
+          </form>
 
-            <div>
-              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Session Status</label>
-              <select name="session_status" class="form-input">
-                <option value="disconnected" {{ $whatsappSettings->session_status === 'disconnected' ? 'selected' : '' }}>Disconnected</option>
-                <option value="connected" {{ $whatsappSettings->session_status === 'connected' ? 'selected' : '' }}>Connected</option>
-                <option value="pending" {{ $whatsappSettings->session_status === 'pending' ? 'selected' : '' }}>Pending</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="flex items-center justify-between p-4 rounded-xl bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-900/50">
-            <div>
-              <p class="font-bold text-sm" :class="darkMode ? 'text-white' : 'text-primary-900'">Enable WhatsApp Messaging</p>
-              <p class="text-xs mt-0.5" :class="darkMode ? 'text-primary-400' : 'text-primary-600'">Allow sending WhatsApp messages to members</p>
-            </div>
-            <div class="relative">
-              <input type="hidden" name="whatsapp_is_active" :value="whatsappActive ? 1 : 0">
-              <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" class="sr-only peer" :checked="whatsappActive" @change="whatsappActive = !whatsappActive; $el.previousElementSibling.value = whatsappActive ? 1 : 0">
-                <div class="w-12 h-7 rounded-full transition-colors bg-gray-200 dark:bg-gray-700 peer-checked:bg-green-600"></div>
-                <div class="absolute left-0.5 top-0.5 w-6 h-6 bg-white rounded-full shadow-md transition-transform peer-checked:translate-x-5 flex items-center justify-center">
-                  <i :class="whatsappActive ? 'fa-solid fa-check text-green-600' : 'fa-solid fa-xmark text-gray-400'" class="text-[10px]"></i>
-                </div>
-              </label>
-            </div>
-          </div>
-
-          <div class="pt-6 mt-6 border-t border-primary-100 dark:border-primary-900/50 flex justify-between items-center">
-            <button type="submit"
-                    class="px-6 py-2.5 rounded-xl bg-green-600 hover:bg-green-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95">
-              <i class="fa-brands fa-whatsapp mr-1.5 text-[13px]"></i> Save WhatsApp Settings
-            </button>
-            <div class="flex gap-3">
-              <a href="{{ route('admin.settings.test-whatsapp-page') }}"
-                      class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95 inline-flex items-center">
-                <i class="fa-solid fa-paper-plane mr-1.5 text-[13px]"></i> Test WhatsApp
-              </a>
-            </div>
-          </div>
-
-          <!-- Connection Status -->
+          <!-- Connection Status (outside config form, uses own Alpine scope) -->
           <div x-data="{ 
             loading: false, 
             status: null,
             checkConnection() {
               this.loading = true;
-              const token = document.querySelector('meta[name="csrf-token"]').content;
+              const token = document.querySelector('meta[name=\"csrf-token\"]').content;
               fetch('{{ route('admin.settings.check-whatsapp-connection') }}', {
                 method: 'POST',
                 headers: {
@@ -658,7 +663,494 @@
               </div>
             </div>
           </div>
-        </form>
+        </div>
+
+        <!-- ===== SESSION INFORMATION CARD ===== -->
+        @if($whatsappSessionDetails)
+          <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-primary-100 dark:border-primary-800 p-6">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                <i class="fa-solid fa-link"></i>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold" :class="darkMode ? 'text-white' : 'text-primary-900'">Session Information</h3>
+                <p class="text-xs" :class="darkMode ? 'text-primary-400' : 'text-primary-500'">Current connected session details</p>
+              </div>
+            </div>
+
+            <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-5">
+              <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
+                  <i class="fa-brands fa-whatsapp text-2xl text-green-600 dark:text-green-400"></i>
+                </div>
+                <div class="flex-1">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p class="text-xs text-green-600 dark:text-green-400 uppercase tracking-wider mb-1">Session Name</p>
+                      <p class="text-sm font-semibold text-green-900 dark:text-green-100">{{ $whatsappSessionDetails['name'] ?? $whatsappSettings->session_name ?? 'N/A' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-xs text-green-600 dark:text-green-400 uppercase tracking-wider mb-1">Phone Number</p>
+                      <p class="text-sm font-semibold text-green-900 dark:text-green-100">{{ $whatsappSessionDetails['phone_number'] ?? $whatsappSettings->phone_number ?? 'N/A' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-xs text-green-600 dark:text-green-400 uppercase tracking-wider mb-1">Status</p>
+                      <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {{ ($whatsappSessionDetails['status'] ?? $whatsappSettings->session_status) === 'connected' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' }}">
+                        <i class="fa-solid fa-circle text-[8px] mr-1.5 {{ ($whatsappSessionDetails['status'] ?? $whatsappSettings->session_status) === 'connected' ? 'animate-pulse' : '' }}"></i>
+                        {{ ucfirst($whatsappSessionDetails['status'] ?? $whatsappSettings->session_status ?? 'Unknown') }}
+                      </span>
+                    </div>
+                    <div>
+                      <p class="text-xs text-green-600 dark:text-green-400 uppercase tracking-wider mb-1">Last Active</p>
+                      <p class="text-sm font-semibold text-green-900 dark:text-green-100">{{ $whatsappSessionDetails['last_active'] ?? 'N/A' }}</p>
+                    </div>
+                    <div class="md:col-span-2">
+                      <p class="text-xs text-green-600 dark:text-green-400 uppercase tracking-wider mb-1">WhatsApp Account</p>
+                      <p class="text-sm font-semibold text-green-900 dark:text-green-100">{{ $whatsappSessionDetails['account_name'] ?? 'N/A' }}</p>
+                    </div>
+                  </div>
+
+                  @if(($whatsappSessionDetails['status'] ?? $whatsappSettings->session_status) === 'connected')
+                  <div class="mt-4 pt-4 border-t border-green-200 dark:border-green-800 flex gap-2 flex-wrap">
+                    <form action="{{ route('admin.communication.whatsapp.disconnect-session') }}" method="POST" class="inline">
+                      @csrf
+                      <button type="submit" class="px-3 py-1.5 rounded-lg bg-red-100 hover:bg-red-200 text-red-700 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-400 text-xs font-semibold transition-all">
+                        <i class="fa-solid fa-power-off mr-1"></i>Disconnect
+                      </button>
+                    </form>
+                    <form action="{{ route('admin.communication.whatsapp.restart-session') }}" method="POST" class="inline">
+                      @csrf
+                      <button type="submit" class="px-3 py-1.5 rounded-lg bg-yellow-100 hover:bg-yellow-200 text-yellow-700 dark:bg-yellow-900/30 dark:hover:bg-yellow-900/50 dark:text-yellow-400 text-xs font-semibold transition-all">
+                        <i class="fa-solid fa-rotate mr-1"></i>Restart
+                      </button>
+                    </form>
+                  </div>
+                  @endif
+                </div>
+              </div>
+            </div>
+          </div>
+        @endif
+
+        <!-- ===== SESSIONS LIST CARD ===== -->
+        @if($whatsappSettings && $whatsappSettings->personal_access_token)
+        <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-primary-100 dark:border-primary-800 p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 flex items-center justify-center">
+              <i class="fa-brands fa-whatsapp"></i>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-lg font-semibold" :class="darkMode ? 'text-white' : 'text-primary-900'">Available Sessions</h3>
+              <p class="text-xs" :class="darkMode ? 'text-primary-400' : 'text-primary-500'">Create and manage your WhatsApp sessions</p>
+            </div>
+            <form action="{{ route('admin.communication.whatsapp.refresh-sessions') }}" method="POST" class="inline">
+              @csrf
+              <button type="submit" class="px-3 py-1.5 rounded-lg bg-primary-100 hover:bg-primary-200 text-primary-700 dark:bg-primary-900/30 dark:hover:bg-primary-900/50 dark:text-primary-400 text-xs font-semibold transition-all">
+                <i class="fa-solid fa-rotate mr-1"></i>Refresh
+              </button>
+            </form>
+          </div>
+
+          <!-- Create Session Form -->
+          <div class="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg p-4 mb-4">
+            <h4 class="text-sm font-semibold mb-3" :class="darkMode ? 'text-white' : 'text-primary-900'">Create New Session</h4>
+            <form action="{{ route('admin.communication.whatsapp.session') }}" method="POST">
+              @csrf
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium mb-1" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">Session Name</label>
+                  <input type="text" name="name" required placeholder="e.g., Business WhatsApp"
+                         class="w-full px-3 py-2 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-1" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">Phone Number</label>
+                  <input type="text" name="phone_number" required placeholder="+1234567890"
+                         class="w-full px-3 py-2 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                </div>
+              </div>
+              <button type="submit" class="mt-3 px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white text-sm font-semibold transition-all">
+                <i class="fa-solid fa-plus mr-2"></i>Create Session
+              </button>
+            </form>
+          </div>
+
+          <!-- Sessions List -->
+          @if($whatsappSessions && count($whatsappSessions) > 0)
+            <div class="space-y-3">
+              @foreach($whatsappSessions as $session)
+                <div class="border border-primary-200 dark:border-primary-800 rounded-lg p-4">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <div class="w-8 h-8 rounded-full {{ ($session['status'] ?? '') === 'connected' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-100 dark:bg-gray-700' }} flex items-center justify-center">
+                        <i class="fa-brands fa-whatsapp {{ ($session['status'] ?? '') === 'connected' ? 'text-green-600 dark:text-green-400' : 'text-gray-500' }}"></i>
+                      </div>
+                      <div>
+                        <p class="text-sm font-semibold" :class="darkMode ? 'text-white' : 'text-primary-900'">{{ $session['name'] ?? 'Unnamed' }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ $session['phone_number'] ?? 'No phone' }}</p>
+                      </div>
+                    </div>
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {{ ($session['status'] ?? '') === 'connected' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300' }}">
+                      {{ ucfirst($session['status'] ?? 'Unknown') }}
+                    </span>
+                  </div>
+                </div>
+              @endforeach
+            </div>
+          @else
+            <p class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">No sessions found. Create a new session to get started.</p>
+          @endif
+        </div>
+        @endif
+
+        <!-- ===== SEND MESSAGES CARD ===== -->
+        @if($whatsappSettings && $whatsappSettings->session_api_key && $whatsappSettings->is_active)
+        <div x-data="{
+                messageScope: 'single',
+                msgType: 'text',
+                uploadedUrl: '{{ session('uploaded_url', '') }}'
+             }"
+             class="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-primary-100 dark:border-primary-800 p-6 space-y-6">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 flex items-center justify-center">
+              <i class="fa-solid fa-paper-plane"></i>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold" :class="darkMode ? 'text-white' : 'text-primary-900'">Send Messages</h3>
+              <p class="text-xs" :class="darkMode ? 'text-primary-400' : 'text-primary-500'">Send single or bulk messages via WhatsApp</p>
+            </div>
+          </div>
+
+          <!-- Single / Bulk Scope Tabs -->
+          <div class="flex gap-2 border-b border-primary-200 dark:border-primary-800 mb-4">
+            <button @click="messageScope = 'single'"
+                    :class="messageScope === 'single' ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400'"
+                    class="px-4 py-2 text-sm font-medium transition-colors">
+              <i class="fa-solid fa-user mr-1"></i>Single Message
+            </button>
+            <button @click="messageScope = 'bulk'"
+                    :class="messageScope === 'bulk' ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400'"
+                    class="px-4 py-2 text-sm font-medium transition-colors">
+              <i class="fa-solid fa-users mr-1"></i>Bulk Message
+            </button>
+          </div>
+
+          <!-- ========================================================== -->
+          <!-- SINGLE SCOPE -->
+          <!-- ========================================================== -->
+          <div x-show="messageScope === 'single'" x-transition>
+
+            <!-- Message Type Selector (8 types) -->
+            <div class="mb-5">
+              <label class="block text-sm font-semibold mb-2" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">
+                <i class="fa-solid fa-layer-group mr-1 text-primary-500"></i>Message Type
+              </label>
+              <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
+                @php
+                  $msgTypes = [
+                      'text'     => ['icon' => 'fa-message',       'label' => 'Text',     'color' => 'emerald'],
+                      'image'    => ['icon' => 'fa-image',         'label' => 'Image',    'color' => 'indigo'],
+                      'video'    => ['icon' => 'fa-video',         'label' => 'Video',    'color' => 'rose'],
+                      'document' => ['icon' => 'fa-file-pdf',      'label' => 'Document', 'color' => 'amber'],
+                      'audio'    => ['icon' => 'fa-music',         'label' => 'Audio',    'color' => 'violet'],
+                      'sticker'  => ['icon' => 'fa-face-smile',    'label' => 'Sticker',  'color' => 'pink'],
+                      'contact'  => ['icon' => 'fa-address-book',  'label' => 'Contact',  'color' => 'cyan'],
+                      'location' => ['icon' => 'fa-location-dot',  'label' => 'Location', 'color' => 'orange'],
+                  ];
+                @endphp
+                @foreach($msgTypes as $key => $mt)
+                  <button type="button" @click="msgType = '{{ $key }}'"
+                          :class="msgType === '{{ $key }}'
+                                   ? 'bg-{{ $mt['color'] }}-50 border-{{ $mt['color'] }}-400 text-{{ $mt['color'] }}-700 dark:bg-{{ $mt['color'] }}-900/30 dark:border-{{ $mt['color'] }}-600 dark:text-{{ $mt['color'] }}-300 shadow-sm'
+                                   : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100 dark:bg-gray-800/50 dark:border-gray-700 dark:text-gray-300'"
+                          class="group border rounded-xl p-3 text-center transition-all">
+                    <i class="fa-solid {{ $mt['icon'] }} text-lg mb-1"></i>
+                    <p class="text-xs font-semibold">{{ $mt['label'] }}</p>
+                  </button>
+                @endforeach
+              </div>
+            </div>
+
+            <!-- Single - Text Form -->
+            <form x-show="msgType === 'text'" x-transition action="{{ route('admin.communication.whatsapp.send-single') }}" method="POST">
+              @csrf
+              @include('admin.communication.whatsapp.partials._single_phone_field')
+              <div class="mb-4">
+                <label class="block text-sm font-semibold mb-2" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">Message</label>
+                <textarea name="message" rows="5" required placeholder="Enter message text..."
+                          class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"></textarea>
+              </div>
+              <button type="submit" class="px-5 py-2 rounded-lg bg-gradient-to-r from-green-500 to-green-600 text-white text-sm font-semibold transition-all shadow-lg shadow-green-500/20">
+                <i class="fa-solid fa-message mr-2"></i>Send Text
+              </button>
+            </form>
+
+            <!-- Single - Image Form -->
+            <form x-show="msgType === 'image'" x-transition action="{{ route('admin.communication.whatsapp.send-image') }}" method="POST">
+              @csrf
+              @include('admin.communication.whatsapp.partials._single_phone_field')
+              @include('admin.communication.whatsapp.partials._url_field', ['name'=>'image_url', 'label'=>'Image URL', 'placeholder'=>'https://.../photo.jpg', 'required'=>true, 'help'=>'Public image URL (JPG/PNG/WebP)'])
+              <div class="mb-4">
+                <label class="block text-sm font-semibold mb-2" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">Caption <span class="text-gray-400 font-normal">(optional)</span></label>
+                <textarea name="caption" rows="3" placeholder="Add a caption to the image..."
+                          class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"></textarea>
+              </div>
+              <button type="submit" class="px-5 py-2 rounded-lg bg-gradient-to-r from-indigo-500 to-indigo-600 text-white text-sm font-semibold transition-all shadow-lg shadow-indigo-500/20">
+                <i class="fa-solid fa-image mr-2"></i>Send Image
+              </button>
+            </form>
+
+            <!-- Single - Video Form -->
+            <form x-show="msgType === 'video'" x-transition action="{{ route('admin.communication.whatsapp.send-video') }}" method="POST">
+              @csrf
+              @include('admin.communication.whatsapp.partials._single_phone_field')
+              @include('admin.communication.whatsapp.partials._url_field', ['name'=>'video_url', 'label'=>'Video URL', 'placeholder'=>'https://.../clip.mp4', 'required'=>true, 'help'=>'Public video URL (MP4 recommended)'])
+              <div class="mb-4">
+                <label class="block text-sm font-semibold mb-2" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">Caption <span class="text-gray-400 font-normal">(optional)</span></label>
+                <textarea name="caption" rows="3" placeholder="Add a caption..."
+                          class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"></textarea>
+              </div>
+              <button type="submit" class="px-5 py-2 rounded-lg bg-gradient-to-r from-rose-500 to-rose-600 text-white text-sm font-semibold transition-all shadow-lg shadow-rose-500/20">
+                <i class="fa-solid fa-video mr-2"></i>Send Video
+              </button>
+            </form>
+
+            <!-- Single - Document Form -->
+            <form x-show="msgType === 'document'" x-transition action="{{ route('admin.communication.whatsapp.send-document') }}" method="POST">
+              @csrf
+              @include('admin.communication.whatsapp.partials._single_phone_field')
+              @include('admin.communication.whatsapp.partials._url_field', ['name'=>'document_url', 'label'=>'Document URL', 'placeholder'=>'https://.../report.pdf', 'required'=>true, 'help'=>'Public URL (PDF, DOCX, XLS, etc.)'])
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label class="block text-sm font-semibold mb-2" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">File Name</label>
+                  <input type="text" name="file_name" required placeholder="report.pdf"
+                         class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold mb-2" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">Caption <span class="text-gray-400 font-normal">(optional)</span></label>
+                  <input type="text" name="caption" placeholder="Document description..."
+                         class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                </div>
+              </div>
+              <button type="submit" class="px-5 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 text-white text-sm font-semibold transition-all shadow-lg shadow-amber-500/20">
+                <i class="fa-solid fa-file-pdf mr-2"></i>Send Document
+              </button>
+            </form>
+
+            <!-- Single - Audio Form -->
+            <form x-show="msgType === 'audio'" x-transition action="{{ route('admin.communication.whatsapp.send-audio') }}" method="POST">
+              @csrf
+              @include('admin.communication.whatsapp.partials._single_phone_field')
+              @include('admin.communication.whatsapp.partials._url_field', ['name'=>'audio_url', 'label'=>'Audio URL', 'placeholder'=>'https://.../voice.mp3', 'required'=>true, 'help'=>'Public audio URL (MP3, AAC, OGG, AMR)'])
+              <button type="submit" class="px-5 py-2 rounded-lg bg-gradient-to-r from-violet-500 to-violet-600 text-white text-sm font-semibold transition-all shadow-lg shadow-violet-500/20">
+                <i class="fa-solid fa-music mr-2"></i>Send Audio
+              </button>
+            </form>
+
+            <!-- Single - Sticker Form -->
+            <form x-show="msgType === 'sticker'" x-transition action="{{ route('admin.communication.whatsapp.send-sticker') }}" method="POST">
+              @csrf
+              @include('admin.communication.whatsapp.partials._single_phone_field')
+              @include('admin.communication.whatsapp.partials._url_field', ['name'=>'sticker_url', 'label'=>'Sticker URL (.webp)', 'placeholder'=>'https://.../sticker.webp', 'required'=>true, 'help'=>'Must be .webp, max 100KB, 512×512px'])
+              <button type="submit" class="px-5 py-2 rounded-lg bg-gradient-to-r from-pink-500 to-pink-600 text-white text-sm font-semibold transition-all shadow-lg shadow-pink-500/20">
+                <i class="fa-solid fa-face-smile mr-2"></i>Send Sticker
+              </button>
+            </form>
+
+            <!-- Single - Contact Form -->
+            <form x-show="msgType === 'contact'" x-transition action="{{ route('admin.communication.whatsapp.send-contact') }}" method="POST">
+              @csrf
+              @include('admin.communication.whatsapp.partials._single_phone_field')
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label class="block text-sm font-semibold mb-2" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">Contact Full Name</label>
+                  <input type="text" name="contact_name" required placeholder="John Doe"
+                         class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold mb-2" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">Contact Phone Number</label>
+                  <input type="text" name="contact_phone" required placeholder="+255711000000"
+                         class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                </div>
+              </div>
+              <button type="submit" class="px-5 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-cyan-600 text-white text-sm font-semibold transition-all shadow-lg shadow-cyan-500/20">
+                <i class="fa-solid fa-address-book mr-2"></i>Send Contact Card
+              </button>
+            </form>
+
+            <!-- Single - Location Form -->
+            <form x-show="msgType === 'location'" x-transition action="{{ route('admin.communication.whatsapp.send-location') }}" method="POST">
+              @csrf
+              @include('admin.communication.whatsapp.partials._single_phone_field')
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label class="block text-sm font-semibold mb-2" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">Latitude</label>
+                  <input type="number" step="any" name="latitude" required placeholder="-6.7924"
+                         class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold mb-2" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">Longitude</label>
+                  <input type="number" step="any" name="longitude" required placeholder="39.2083"
+                         class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label class="block text-sm font-semibold mb-2" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">Location Name <span class="text-gray-400 font-normal">(optional)</span></label>
+                  <input type="text" name="name" placeholder="Head Office"
+                         class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold mb-2" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">Address <span class="text-gray-400 font-normal">(optional)</span></label>
+                  <input type="text" name="address" placeholder="Samora Avenue, Dar es Salaam"
+                         class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                </div>
+              </div>
+              <button type="submit" class="px-5 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 text-white text-sm font-semibold transition-all shadow-lg shadow-orange-500/20">
+                <i class="fa-solid fa-location-dot mr-2"></i>Send Location Pin
+              </button>
+            </form>
+
+            <!-- Upload helper -->
+            <div class="mt-6 p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl">
+              <div class="flex items-start gap-3">
+                <div class="w-9 h-9 rounded-lg bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400 flex items-center justify-center flex-shrink-0">
+                  <i class="fa-solid fa-cloud-arrow-up"></i>
+                </div>
+                <div class="flex-1">
+                  <h5 class="text-sm font-semibold mb-1" :class="darkMode ? 'text-gray-200' : 'text-gray-800'">No public URL? Upload a file first</h5>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Upload a file below to get a public URL to paste into any of the URL fields above.</p>
+                  <form action="{{ route('admin.communication.whatsapp.upload-media') }}" method="POST" enctype="multipart/form-data" class="space-y-3">
+                    @csrf
+                    <div class="flex items-center gap-3">
+                      <input type="file" name="file" required class="block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-sky-100 file:text-sky-700 dark:file:bg-sky-900/40 dark:file:text-sky-300 hover:file:bg-sky-200 dark:hover:file:bg-sky-900/60 transition" :class="darkMode ? 'text-gray-300' : 'text-gray-700'" />
+                      <button type="submit" class="flex-shrink-0 px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold transition-all">
+                        <i class="fa-solid fa-upload mr-1"></i>Upload
+                      </button>
+                    </div>
+                    @if(session('uploaded_url'))
+                      <div class="rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 p-3">
+                        <p class="text-xs font-semibold text-green-800 dark:text-green-300 mb-1"><i class="fa-solid fa-check mr-1"></i>Upload successful – copy URL below:</p>
+                        <div class="flex items-center gap-2">
+                          <input x-model="uploadedUrl" type="text" readonly value="{{ session('uploaded_url') }}"
+                                 class="flex-1 px-3 py-1.5 text-xs font-mono rounded-lg border border-green-200 dark:border-green-800 bg-white dark:bg-green-900/30 text-green-900 dark:text-green-100">
+                          <button type="button"
+                                  @click="navigator.clipboard.writeText(uploadedUrl).then(() => alert('Copied!'))"
+                                  class="px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white text-xs font-semibold">
+                            <i class="fa-solid fa-copy mr-1"></i>Copy
+                          </button>
+                        </div>
+                      </div>
+                    @endif
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ========================================================== -->
+          <!-- BULK SCOPE -->
+          <!-- ========================================================== -->
+          <div x-show="messageScope === 'bulk'" x-transition>
+
+            <!-- Bulk Message Type Selector (3 types) -->
+            <div class="mb-5">
+              <label class="block text-sm font-semibold mb-2" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">
+                <i class="fa-solid fa-layer-group mr-1 text-primary-500"></i>Bulk Message Type
+              </label>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <button type="button" @click="msgType = 'text'"
+                        :class="msgType === 'text'
+                                 ? 'bg-emerald-50 border-emerald-400 text-emerald-700 dark:bg-emerald-900/30 dark:border-emerald-600 dark:text-emerald-300 shadow-sm'
+                                 : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100 dark:bg-gray-800/50 dark:border-gray-700 dark:text-gray-300'"
+                        class="border rounded-xl p-4 text-left transition-all">
+                  <i class="fa-solid fa-message text-xl mb-1 block"></i>
+                  <p class="text-sm font-bold">Bulk Text</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">Same text to many numbers</p>
+                </button>
+                <button type="button" @click="msgType = 'image'"
+                        :class="msgType === 'image'
+                                 ? 'bg-indigo-50 border-indigo-400 text-indigo-700 dark:bg-indigo-900/30 dark:border-indigo-600 dark:text-indigo-300 shadow-sm'
+                                 : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100 dark:bg-gray-800/50 dark:border-gray-700 dark:text-gray-300'"
+                        class="border rounded-xl p-4 text-left transition-all">
+                  <i class="fa-solid fa-image text-xl mb-1 block"></i>
+                  <p class="text-sm font-bold">Bulk Image</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">Same image + caption to many</p>
+                </button>
+                <button type="button" @click="msgType = 'document'"
+                        :class="msgType === 'document'
+                                 ? 'bg-amber-50 border-amber-400 text-amber-700 dark:bg-amber-900/30 dark:border-amber-600 dark:text-amber-300 shadow-sm'
+                                 : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100 dark:bg-gray-800/50 dark:border-gray-700 dark:text-gray-300'"
+                        class="border rounded-xl p-4 text-left transition-all">
+                  <i class="fa-solid fa-file-pdf text-xl mb-1 block"></i>
+                  <p class="text-sm font-bold">Bulk Document</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">Same PDF/doc to many numbers</p>
+                </button>
+              </div>
+            </div>
+
+            <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 mb-4">
+              <p class="text-xs text-amber-800 dark:text-amber-300"><i class="fa-solid fa-circle-info mr-1"></i> <b>Rate limit notice:</b> WasenderAPI enforces ~1 message per 5 seconds. Bulk sends respect this sequentially; large lists will take time.</p>
+            </div>
+
+            <!-- Bulk - Text Form -->
+            <form x-show="msgType === 'text'" x-transition action="{{ route('admin.communication.whatsapp.send-bulk') }}" method="POST">
+              @csrf
+              @include('admin.communication.whatsapp.partials._bulk_phones_field')
+              <div class="mb-4">
+                <label class="block text-sm font-semibold mb-2" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">Message</label>
+                <textarea name="message" rows="5" required placeholder="Enter message text to send to all recipients..."
+                          class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"></textarea>
+              </div>
+              <button type="submit" class="px-5 py-2 rounded-lg bg-gradient-to-r from-green-500 to-green-600 text-white text-sm font-semibold transition-all shadow-lg shadow-green-500/20">
+                <i class="fa-solid fa-paper-plane mr-2"></i>Send Bulk Text
+              </button>
+            </form>
+
+            <!-- Bulk - Image Form -->
+            <form x-show="msgType === 'image'" x-transition action="{{ route('admin.communication.whatsapp.send-bulk-image') }}" method="POST">
+              @csrf
+              @include('admin.communication.whatsapp.partials._bulk_phones_field')
+              @include('admin.communication.whatsapp.partials._url_field', ['name'=>'image_url', 'label'=>'Image URL', 'placeholder'=>'https://.../photo.jpg', 'required'=>true, 'help'=>'Public image URL'])
+              <div class="mb-4">
+                <label class="block text-sm font-semibold mb-2" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">Caption <span class="text-gray-400 font-normal">(optional)</span></label>
+                <textarea name="caption" rows="3" placeholder="Shared caption for all recipients..."
+                          class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"></textarea>
+              </div>
+              <button type="submit" class="px-5 py-2 rounded-lg bg-gradient-to-r from-indigo-500 to-indigo-600 text-white text-sm font-semibold transition-all shadow-lg shadow-indigo-500/20">
+                <i class="fa-solid fa-image mr-2"></i>Send Bulk Image
+              </button>
+            </form>
+
+            <!-- Bulk - Document Form -->
+            <form x-show="msgType === 'document'" x-transition action="{{ route('admin.communication.whatsapp.send-bulk-document') }}" method="POST">
+              @csrf
+              @include('admin.communication.whatsapp.partials._bulk_phones_field')
+              @include('admin.communication.whatsapp.partials._url_field', ['name'=>'document_url', 'label'=>'Document URL', 'placeholder'=>'https://.../report.pdf', 'required'=>true, 'help'=>'Public document URL'])
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label class="block text-sm font-semibold mb-2" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">File Name</label>
+                  <input type="text" name="file_name" required placeholder="report.pdf"
+                         class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold mb-2" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">Caption <span class="text-gray-400 font-normal">(optional)</span></label>
+                  <input type="text" name="caption" placeholder="Description for this document..."
+                         class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                </div>
+              </div>
+              <button type="submit" class="px-5 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 text-white text-sm font-semibold transition-all shadow-lg shadow-amber-500/20">
+                <i class="fa-solid fa-file-pdf mr-2"></i>Send Bulk Document
+              </button>
+            </form>
+          </div>
+        </div>
+        @elseif($whatsappSettings)
+          <div class="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-6 text-center">
+            <i class="fa-brands fa-whatsapp text-4xl text-gray-400 dark:text-gray-500 mb-3"></i>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Configure your Session API Key and activate it to send messages</p>
+          </div>
+        @endif
+
       </div>
 
     </div>

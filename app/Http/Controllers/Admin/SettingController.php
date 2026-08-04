@@ -11,6 +11,7 @@ use App\Models\GoogleSheetsConfig;
 use App\Models\SmsSettings;
 use App\Models\WhatsAppSettings;
 use App\Services\SmsService;
+use App\Services\WhatsAppService;
 use App\Traits\FlashMessages;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,6 +21,13 @@ use Illuminate\Support\Facades\Cache;
 class SettingController extends Controller
 {
     use FlashMessages;
+
+    protected WhatsAppService $whatsAppService;
+
+    public function __construct(WhatsAppService $whatsAppService)
+    {
+        $this->whatsAppService = $whatsAppService;
+    }
 
     public function index(Request $request)
     {
@@ -64,6 +72,25 @@ class SettingController extends Controller
         $smsSettings = SmsSettings::first() ?? new SmsSettings();
         $whatsappSettings = WhatsAppSettings::first() ?? new WhatsAppSettings();
 
+        $whatsappSessions = [];
+        $whatsappSessionDetails = null;
+
+        if ($whatsappSettings && $whatsappSettings->personal_access_token) {
+            try {
+                $whatsappSessions = $this->whatsAppService->getSessions();
+            } catch (\Throwable $e) {
+                $whatsappSessions = [];
+            }
+        }
+
+        if ($whatsappSettings && $whatsappSettings->session_api_key) {
+            try {
+                $whatsappSessionDetails = $this->whatsAppService->getSessionInfo();
+            } catch (\Throwable $e) {
+                $whatsappSessionDetails = null;
+            }
+        }
+
         ActivityLog::create([
             'user_id' => Auth::id(),
             'description' => 'Admin viewed settings page',
@@ -79,6 +106,8 @@ class SettingController extends Controller
             'emailSettings' => $emailSettings,
             'smsSettings' => $smsSettings,
             'whatsappSettings' => $whatsappSettings,
+            'whatsappSessions' => $whatsappSessions,
+            'whatsappSessionDetails' => $whatsappSessionDetails,
         ]);
     }
 
