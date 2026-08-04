@@ -13,8 +13,11 @@ return new class extends Migration
     {
         Schema::create('whatsapp_settings', function (Blueprint $table) {
             $table->id();
-            $table->string('api_key')->nullable();
-            $table->string('account')->nullable();
+            $table->string('personal_access_token')->nullable()->comment('Bearer token for account-level operations');
+            $table->string('session_api_key')->nullable()->comment('API key for specific WhatsApp session');
+            $table->string('session_name')->nullable();
+            $table->string('phone_number')->nullable();
+            $table->string('session_status')->nullable()->default('disconnected');
             $table->boolean('is_active')->default(false);
             $table->timestamps();
         });

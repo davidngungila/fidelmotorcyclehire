@@ -446,7 +446,12 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::prefix('communication')->name('communication.')->group(function () {
         Route::get('/sms', [\App\Http\Controllers\Admin\CommunicationController::class, 'sms'])->name('sms');
         Route::get('/email', [\App\Http\Controllers\Admin\CommunicationController::class, 'email'])->name('email');
-        Route::get('/whatsapp', [\App\Http\Controllers\Admin\CommunicationController::class, 'whatsapp'])->name('whatsapp');
+        Route::get('/whatsapp', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'index'])->name('whatsapp');
+        Route::post('/whatsapp/personal-token', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'storePersonalAccessToken'])->name('whatsapp.personal-token');
+        Route::post('/whatsapp/session', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'createSession'])->name('whatsapp.session');
+        Route::post('/whatsapp/session-api-key', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'storeSessionApiKey'])->name('whatsapp.session-api-key');
+        Route::post('/whatsapp/send-message', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'sendMessage'])->name('whatsapp.send-message');
+        Route::post('/whatsapp/toggle-status', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'toggleStatus'])->name('whatsapp.toggle-status');
         Route::post('/whatsapp/send', [\App\Http\Controllers\Admin\CommunicationController::class, 'sendWhatsApp'])->name('whatsapp.send');
         Route::get('/whatsapp/test', [\App\Http\Controllers\Admin\CommunicationController::class, 'testWhatsAppPage'])->name('whatsapp.test');
         Route::post('/whatsapp/test', [\App\Http\Controllers\Admin\CommunicationController::class, 'testWhatsApp'])->name('whatsapp.test.send');
