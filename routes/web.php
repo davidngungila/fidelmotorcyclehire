@@ -264,10 +264,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/share-products', [AdminShareProductController::class, 'index'])->name('share-products.index');
     Route::get('/share-products/create', [AdminShareProductController::class, 'create'])->name('share-products.create');
     Route::post('/share-products', [AdminShareProductController::class, 'store'])->name('share-products.store');
-    Route::get('/share-products/{shareProduct}', [AdminShareProductController::class, 'show'])->name('share-products.show');
-    Route::get('/share-products/{shareProduct}/edit', [AdminShareProductController::class, 'edit'])->name('share-products.edit');
-    Route::put('/share-products/{shareProduct}', [AdminShareProductController::class, 'update'])->name('share-products.update');
-    Route::delete('/share-products/{shareProduct}', [AdminShareProductController::class, 'destroy'])->name('share-products.destroy');
+    Route::get('/share-products/{encryptedId}', [AdminShareProductController::class, 'show'])->name('share-products.show');
+    Route::get('/share-products/{encryptedId}/edit', [AdminShareProductController::class, 'edit'])->name('share-products.edit');
+    Route::put('/share-products/{encryptedId}', [AdminShareProductController::class, 'update'])->name('share-products.update');
+    Route::delete('/share-products/{encryptedId}', [AdminShareProductController::class, 'destroy'])->name('share-products.destroy');
 
     Route::get('/share-purchases', [AdminSharePurchaseController::class, 'index'])->name('share-purchases.index');
     Route::get('/share-purchases/create', [AdminSharePurchaseController::class, 'create'])->name('share-purchases.create');

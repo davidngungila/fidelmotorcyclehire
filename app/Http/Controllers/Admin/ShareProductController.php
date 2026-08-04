@@ -4,11 +4,19 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ShareProduct;
+use App\Services\EncryptedIdService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ShareProductController extends Controller
 {
+    protected $encryptedIdService;
+
+    public function __construct(EncryptedIdService $encryptedIdService)
+    {
+        $this->encryptedIdService = $encryptedIdService;
+    }
+
     public function index()
     {
         $shareProducts = ShareProduct::latest()->paginate(10);
@@ -41,18 +49,40 @@ class ShareProductController extends Controller
             ->with('success', 'Share product created successfully.');
     }
 
-    public function show(ShareProduct $shareProduct)
+    public function show($encryptedId)
     {
+        try {
+            $shareProductId = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            abort(404, 'Invalid share product ID.');
+        }
+
+        $shareProduct = ShareProduct::findOrFail($shareProductId);
         return view('admin.share-products.show', compact('shareProduct'));
     }
 
-    public function edit(ShareProduct $shareProduct)
+    public function edit($encryptedId)
     {
+        try {
+            $shareProductId = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            abort(404, 'Invalid share product ID.');
+        }
+
+        $shareProduct = ShareProduct::findOrFail($shareProductId);
         return view('admin.share-products.edit', compact('shareProduct'));
     }
 
-    public function update(Request $request, ShareProduct $shareProduct)
+    public function update(Request $request, $encryptedId)
     {
+        try {
+            $shareProductId = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            abort(404, 'Invalid share product ID.');
+        }
+
+        $shareProduct = ShareProduct::findOrFail($shareProductId);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|unique:share_products,code,' . $shareProduct->id . '|max:50',
@@ -72,8 +102,15 @@ class ShareProductController extends Controller
             ->with('success', 'Share product updated successfully.');
     }
 
-    public function destroy(ShareProduct $shareProduct)
+    public function destroy($encryptedId)
     {
+        try {
+            $shareProductId = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            abort(404, 'Invalid share product ID.');
+        }
+
+        $shareProduct = ShareProduct::findOrFail($shareProductId);
         $shareProduct->delete();
 
         return redirect()->route('admin.share-products.index')
