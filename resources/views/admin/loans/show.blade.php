@@ -604,7 +604,7 @@
         <div class="p-5 bg-gradient-to-r from-primary-50 to-white dark:from-primary-900/40 dark:to-primary-900/20 border-b border-primary-200 dark:border-primary-900/60">
           <div class="flex items-center justify-between flex-wrap gap-4">
             <div>
-              <p class="font-black text-lg text-primary-900 dark:text-white">FEEDTAN DIGITAL</p>
+              <p class="font-black text-lg text-primary-900 dark:text-white">Motorcycle Hire Purchase</p>
               <p class="text-[10px] text-primary-500 dark:text-primary-400 font-semibold tracking-wide">LOAN ACCOUNT STATEMENT</p>
             </div>
             <div class="text-right">

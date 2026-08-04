@@ -52,7 +52,7 @@
             <div class="md:col-span-2">
               <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Application Name</label>
               <input type="text" name="app_name" value="{{ $generalSettings['app_name'] }}"
-                     class="form-input" placeholder="e.g. FEEDTAN DIGITAL">
+                     class="form-input" placeholder="e.g. Motorcycle Hire Purchase Management System">
             </div>
 
             <div>

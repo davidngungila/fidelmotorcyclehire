@@ -27,7 +27,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>FEEDTAN DIGITAL</h1>
+        <h1>Motorcycle Hire Purchase</h1>
         <p>LOAN ACCOUNT STATEMENT</p>
         <p>Statement Date: {{ date('Y-m-d') }}</p>
     </div>

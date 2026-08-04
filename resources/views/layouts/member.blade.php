@@ -167,7 +167,7 @@
         </button>
         <div class="hidden sm:flex items-center gap-2 text-xs">
           <a href="{{ route('member.dashboard') }}" class="font-medium transition-colors"
-             :class="darkMode ? 'text-primary-400 hover:text-primary-300' : 'text-primary-500 hover:text-primary-600'">FEEDTAN DIGITAL</a>
+             :class="darkMode ? 'text-primary-400 hover:text-primary-300' : 'text-primary-500 hover:text-primary-600'">Motorcycle Hire Purchase</a>
           <i class="fa-solid fa-chevron-right text-[10px]" :class="darkMode ? 'text-primary-700' : 'text-primary-300'"></i>
           <span class="font-semibold" :class="darkMode ? 'text-primary-200' : 'text-primary-800'">@yield('breadcrumb', 'Member Dashboard')</span>
         </div>
