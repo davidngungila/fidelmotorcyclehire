@@ -4,8 +4,8 @@
 @section('page_title', 'Ledger: ' . $account->account_name)
 
 @section('content')
-<div class="space-y-6">
-  <div class="flex items-center justify-between">
+<div class="max-w-7xl mx-auto space-y-6">
+  <div class="flex flex-col gap-4">
     <div>
       <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $account->account_name }}</h1>
       <p class="text-gray-600 dark:text-gray-400 mt-1">{{ $account->account_code }} - {{ ucfirst($account->account_type) }}</p>
@@ -32,8 +32,9 @@
     </div>
   </div>
 
-  <div class="glass rounded-xl p-6">
+  <div class="glass rounded-xl p-6 overflow-hidden">
     <div class="space-y-6">
+      
       <!-- Account Details Section -->
       <div>
         <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">Account Details</h3>
@@ -67,7 +68,7 @@
       <div>
         <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">Ledger Entries</h3>
         <div class="overflow-x-auto">
-          <table class="data-table">
+          <table class="data-table w-full">
             <thead>
               <tr>
                 <th>Date</th>
