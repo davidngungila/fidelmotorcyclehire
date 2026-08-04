@@ -5,25 +5,38 @@
 
 @section('content')
 <div class="space-y-6">
-  <div class="flex items-center justify-between">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
     <div>
       <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $account->account_name }}</h1>
       <p class="text-gray-600 dark:text-gray-400 mt-1">{{ $account->account_code }} - {{ ucfirst($account->account_type) }}</p>
     </div>
-    <a href="{{ route('admin.ledger.index') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-semibold transition-all">
-      <i class="fa-solid fa-arrow-left"></i> Back to Ledger
-    </a>
+    <div class="flex items-center gap-2">
+      <form action="{{ route('admin.ledger.filter') }}" method="GET" class="flex items-center gap-2">
+        <input type="hidden" name="account_id" value="{{ $account->id }}">
+        <input type="date" name="start_date" value="{{ request('start_date') }}"
+          class="form-input py-2 px-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-card text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+        <input type="date" name="end_date" value="{{ request('end_date') }}"
+          class="form-input py-2 px-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-card text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+        <button type="submit" class="px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-500 text-white text-sm font-semibold transition-all">
+          Filter
+        </button>
+        @if(request('start_date') || request('end_date'))
+          <a href="{{ route('admin.ledger.show', app('App\Services\EncryptedIdService')->encrypt($account->id)) }}" class="text-sm text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400">
+            Clear
+          </a>
+        @endif
+      </form>
+      <a href="{{ route('admin.ledger.index') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-semibold transition-all">
+        <i class="fa-solid fa-arrow-left"></i> Back
+      </a>
+    </div>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <div class="lg:col-span-2 space-y-6">
-      <div class="glass rounded-xl p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Account Details</h3>
-          <span class="badge badge-{{ $account->account_type === 'asset' || $account->account_type === 'expense' ? 'blue' : 'green' }}">
-            {{ ucfirst($account->account_type) }}
-          </span>
-        </div>
+  <div class="glass rounded-xl p-6">
+    <div class="space-y-6">
+      <!-- Account Details Section -->
+      <div>
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">Account Details</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <span class="text-sm text-gray-600 dark:text-gray-400">Account Code:</span>
@@ -50,26 +63,9 @@
         </div>
       </div>
 
-      <div class="glass rounded-xl p-6">
-        <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-4">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Ledger Entries</h3>
-          <form action="{{ route('admin.ledger.filter') }}" method="GET" class="flex flex-wrap items-center gap-2">
-            <input type="hidden" name="account_id" value="{{ $account->id }}">
-            <input type="date" name="start_date" value="{{ request('start_date') }}"
-              class="form-input py-1.5 px-3 rounded-lg border	border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-card text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-            <input type="date" name="end_date" value="{{ request('end_date') }}"
-              class="form-input py-1.5 px-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-card text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-            <button type="submit" class="px-3 py-1.5 rounded-lg bg-primary-600 hover:bg-primary-500 text-white text-sm font-semibold transition-all">
-              Filter
-            </button>
-            @if(request('start_date') || request('end_date'))
-              <a href="{{ route('admin.ledger.show', app('App\Services\EncryptedIdService')->encrypt($account->id)) }}" class="text-sm text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400">
-                Clear
-              </a>
-            @endif
-          </form>
-        </div>
-
+      <!-- Ledger Entries Section -->
+      <div>
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">Ledger Entries</h3>
         <div class="overflow-x-auto">
           <table class="data-table">
             <thead>
@@ -115,47 +111,39 @@
           </table>
         </div>
       </div>
-    </div>
 
-    <div class="space-y-6">
-      <div class="glass rounded-xl p-6">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Summary</h3>
-        <div class="space-y-3">
-          <div class="flex justify-between items-center">
-            <span class="text-sm text-gray-600 dark:text-gray-400">Total Debits:</span>
-            <span class="font-mono font-bold text-gray-900 dark:text-white">{{ number_format($ledgerEntries->sum('debit_amount'), 2) }}</span>
+      <!-- Summary Section -->
+      <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <span class="text-sm text-gray-600 dark:text-gray-400">Total Debits</span>
+            <div class="font-mono font-bold text-xl text-gray-900 dark:text-white">{{ number_format($ledgerEntries->sum('debit_amount'), 2) }}</div>
           </div>
-          <div class="flex justify-between items-center">
-            <span class="text-sm text-gray-600 dark:text-gray-400">Total Credits:</span>
-            <span class="font-mono font-bold text-gray-900 dark:text-white">{{ number_format($ledgerEntries->sum('credit_amount'), 2) }}</span>
+          <div>
+            <span class="text-sm text-gray-600 dark:text-gray-400">Total Credits</span>
+            <div class="font-mono font-bold text-xl text-gray-900 dark:text-white">{{ number_format($ledgerEntries->sum('credit_amount'), 2) }}</div>
           </div>
-          <div class="border-t border-gray-200 dark:border-gray-700 pt-3">
-            <div class="flex justify-between items-center">
-              <span class="text-sm text-gray-600 dark:text-gray-400">Net Change:</span>
-              <span class="font-mono font-bold {{ $ledgerEntries->sum('debit_amount') > $ledgerEntries->sum('credit_amount') ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
-                {{ number_format($ledgerEntries->sum('debit_amount') - $ledgerEntries->sum('credit_amount'), 2) }}
-              </span>
+          <div>
+            <span class="text-sm text-gray-600 dark:text-gray-400">Net Change</span>
+            <div class="font-mono font-bold text-xl {{ $ledgerEntries->sum('debit_amount') > $ledgerEntries->sum('credit_amount') ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
+              {{ number_format($ledgerEntries->sum('debit_amount') - $ledgerEntries->sum('credit_amount'), 2) }}
             </div>
           </div>
-          <div class="border-t border-gray-200 dark:border-gray-700 pt-3">
-            <div class="flex justify-between items-center">
-              <span class="text-sm text-gray-600 dark:text-gray-400">Current Balance:</span>
-              <span class="font-mono font-bold text-primary-700 dark:text-primary-300">{{ number_format($account->current_balance, 2) }}</span>
-            </div>
+          <div>
+            <span class="text-sm text-gray-600 dark:text-gray-400">Current Balance</span>
+            <div class="font-mono font-bold text-xl text-primary-700 dark:text-primary-300">{{ number_format($account->current_balance, 2) }}</div>
           </div>
         </div>
       </div>
 
-      <div class="glass rounded-xl p-6">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h3>
-        <div class="space-y-2">
-          <a href="{{ route('admin.journal-entries.create') }}" class="block w-full text-center px-4 py-2.5 rounded-lg bg-primary-600 hover:bg-primary-500 text-white text-sm font-semibold transition-all">
-            <i class="fa-solid fa-plus mr-2"></i> New Journal Entry
-          </a>
-          <a href="{{ route('admin.accounts.show', app('App\Services\EncryptedIdService')->encrypt($account->id)) }}" class="block w-full text-center px-4 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-semibold transition-all">
-            <i class="fa-solid fa-eye mr-2"></i> View Account Details
-          </a>
-        </div>
+      <!-- Quick Actions Section -->
+      <div class="flex flex-wrap items-center gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <a href="{{ route('admin.journal-entries.create') }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary-600 hover:bg-primary-500 text-white text-sm font-semibold transition-all">
+          <i class="fa-solid fa-plus"></i> New Journal Entry
+        </a>
+        <a href="{{ route('admin.accounts.show', app('App\Services\EncryptedIdService')->encrypt($account->id)) }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-semibold transition-all">
+          <i class="fa-solid fa-eye"></i> View Account Details
+        </a>
       </div>
     </div>
   </div>
