@@ -546,17 +546,38 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div class="md:col-span-2">
-              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">API Key</label>
-              <input type="text" name="whatsapp_api_key" value="{{ $whatsappSettings->api_key ?? '' }}"
-                     class="form-input" placeholder="Enter your WhatsApp API key">
-              <p class="text-xs mt-1" :class="darkMode ? 'text-primary-400' : 'text-primary-600'>Get your API key from Messaging Service dashboard</p>
+              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Personal Access Token</label>
+              <input type="password" name="personal_access_token" value="{{ $whatsappSettings->personal_access_token ?? '' }}"
+                     class="form-input" placeholder="Enter your Personal Access Token from Wasender dashboard">
+              <p class="text-xs mt-1" :class="darkMode ? 'text-primary-400' : 'text-primary-600'>Get your token from Settings > Personal Access Token in Wasender dashboard</p>
             </div>
 
             <div class="md:col-span-2">
-              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Account Name</label>
-              <input type="text" name="whatsapp_account" value="{{ $whatsappSettings->account ?? '' }}"
-                     class="form-input" placeholder="e.g. NEXTBYTE">
-              <p class="text-xs mt-1" :class="darkMode ? 'text-primary-400' : 'text-primary-600'">Your WhatsApp Business account name</p>
+              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Session API Key</label>
+              <input type="password" name="session_api_key" value="{{ $whatsappSettings->session_api_key ?? '' }}"
+                     class="form-input" placeholder="Enter your Session API Key from Wasender session screen">
+              <p class="text-xs mt-1" :class="darkMode ? 'text-primary-400' : 'text-primary-600'>Get your API key after connecting your WhatsApp session from Session Management screen</p>
+            </div>
+
+            <div>
+              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Session Name</label>
+              <input type="text" name="session_name" value="{{ $whatsappSettings->session_name ?? '' }}"
+                     class="form-input" placeholder="e.g. Business WhatsApp">
+            </div>
+
+            <div>
+              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Phone Number</label>
+              <input type="text" name="phone_number" value="{{ $whatsappSettings->phone_number ?? '' }}"
+                     class="form-input" placeholder="+1234567890">
+            </div>
+
+            <div>
+              <label class="form-label uppercase tracking-wider" :class="darkMode ? 'text-primary-300' : 'text-primary-700'">Session Status</label>
+              <select name="session_status" class="form-input">
+                <option value="disconnected" {{ $whatsappSettings->session_status === 'disconnected' ? 'selected' : '' }}>Disconnected</option>
+                <option value="connected" {{ $whatsappSettings->session_status === 'connected' ? 'selected' : '' }}>Connected</option>
+                <option value="pending" {{ $whatsappSettings->session_status === 'pending' ? 'selected' : '' }}>Pending</option>
+              </select>
             </div>
           </div>
 
@@ -582,7 +603,7 @@
                     class="px-6 py-2.5 rounded-xl bg-green-600 hover:bg-green-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95">
               <i class="fa-brands fa-whatsapp mr-1.5 text-[13px]"></i> Save WhatsApp Settings
             </button>
-            <a href="{{ route('admin.communication.whatsapp.test') }}"
+            <a href="{{ route('admin.settings.test-whatsapp-page') }}"
                     class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md active:scale-95 inline-flex items-center">
               <i class="fa-solid fa-paper-plane mr-1.5 text-[13px]"></i> Test WhatsApp
             </a>

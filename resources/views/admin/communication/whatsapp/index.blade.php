@@ -204,30 +204,72 @@
         <i class="fa-solid fa-paper-plane"></i>
       </div>
       <div>
-        <h3 class="text-lg font-semibold text-primary-900 dark:text-white">Send Message</h3>
-        <p class="text-xs text-primary-500 dark:text-primary-400">Send WhatsApp messages to members</p>
+        <h3 class="text-lg font-semibold text-primary-900 dark:text-white">Send Messages</h3>
+        <p class="text-xs text-primary-500 dark:text-primary-400">Send single or bulk WhatsApp messages</p>
       </div>
     </div>
 
-    <form action="{{ route('admin.communication.whatsapp.send-message') }}" method="POST">
-      @csrf
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Phone Number</label>
-          <input type="text" name="phone_number" required placeholder="+255123456789"
-                 class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Include country code (e.g., +255 for Tanzania)</p>
-        </div>
-        <div>
-          <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Message</label>
-          <textarea name="message" rows="4" required placeholder="Enter your message here"
-                    class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"></textarea>
-        </div>
-        <button type="submit" class="px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-green-600 text-white text-sm font-semibold transition-all shadow-lg shadow-green-500/20">
-          <i class="fa-brands fa-whatsapp mr-2"></i>Send Message
+    <!-- Message Type Tabs -->
+    <div x-data="{ messageType: 'single' }" class="space-y-6">
+      <div class="flex gap-2 border-b border-primary-200 dark:border-primary-800">
+        <button @click="messageType = 'single'" 
+                :class="messageType === 'single' ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400'"
+                class="px-4 py-2 text-sm font-medium transition-colors">
+          Single Message
+        </button>
+        <button @click="messageType = 'bulk'" 
+                :class="messageType === 'bulk' ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400'"
+                class="px-4 py-2 text-sm font-medium transition-colors">
+          Bulk Message
         </button>
       </div>
-    </form>
+
+      <!-- Single Message Form -->
+      <div x-show="messageType === 'single'" x-transition>
+        <form action="{{ route('admin.communication.whatsapp.send-single') }}" method="POST">
+          @csrf
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Phone Number</label>
+              <input type="text" name="phone_number" required placeholder="+255123456789"
+                     class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Include country code (e.g., +255 for Tanzania)</p>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Message</label>
+              <textarea name="message" rows="4" required placeholder="Enter your message here"
+                        class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"></textarea>
+            </div>
+            <button type="submit" class="px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-green-600 text-white text-sm font-semibold transition-all shadow-lg shadow-green-500/20">
+              <i class="fa-brands fa-whatsapp mr-2"></i>Send Message
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Bulk Message Form -->
+      <div x-show="messageType === 'bulk'" x-transition>
+        <form action="{{ route('admin.communication.whatsapp.send-bulk') }}" method="POST">
+          @csrf
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Phone Numbers</label>
+              <textarea name="phone_numbers" rows="6" required placeholder="+2551234567890&#10;+2551234567891&#10;+2551234567892"
+                        class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none font-mono text-sm"></textarea>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Enter one phone number per line (include country code)</p>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Message</label>
+              <textarea name="message" rows="4" required placeholder="Enter your message here"
+                        class="w-full px-4 py-2.5 rounded-lg border border-primary-200 dark:border-dark-border bg-white dark:bg-dark-card text-primary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"></textarea>
+            </div>
+            <button type="submit" class="px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-green-600 text-white text-sm font-semibold transition-all shadow-lg shadow-green-500/20">
+              <i class="fa-brands fa-whatsapp mr-2"></i>Send Bulk Message
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
   @else
   <div class="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-6 text-center">
@@ -235,6 +277,67 @@
     <p class="text-sm text-gray-600 dark:text-gray-400">Configure your Session API Key and activate it to send messages</p>
   </div>
   @endif
+
+  <!-- Message History Section -->
+  <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-primary-100 dark:border-primary-800 p-6">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+        <i class="fa-solid fa-history"></i>
+      </div>
+      <div>
+        <h3 class="text-lg font-semibold text-primary-900 dark:text-white">Message History</h3>
+        <p class="text-xs text-primary-500 dark:text-primary-400">View sent and failed messages</p>
+      </div>
+    </div>
+
+    @if($messageHistory->count() > 0)
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="bg-primary-50 dark:bg-primary-900/20">
+              <th class="text-left py-3 px-4 text-xs font-semibold text-primary-600 dark:text-primary-400">Phone Number</th>
+              <th class="text-left py-3 px-4 text-xs font-semibold text-primary-600 dark:text-primary-400">Message</th>
+              <th class="text-left py-3 px-4 text-xs font-semibold text-primary-600 dark:text-primary-400">Type</th>
+              <th class="text-left py-3 px-4 text-xs font-semibold text-primary-600 dark:text-primary-400">Status</th>
+              <th class="text-left py-3 px-4 text-xs font-semibold text-primary-600 dark:text-primary-400">Sent At</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach($messageHistory as $history)
+              <tr class="border-b border-primary-100 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/10 transition-colors">
+                <td class="py-3 px-4 text-sm text-primary-700 dark:text-primary-300">{{ $history->phone_number }}</td>
+                <td class="py-3 px-4 text-sm text-primary-700 dark:text-primary-300 max-w-xs truncate">{{ Str::limit($history->message, 50) }}</td>
+                <td class="py-3 px-4">
+                  <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                    {{ ucfirst($history->message_type) }}
+                  </span>
+                </td>
+                <td class="py-3 px-4">
+                  @if($history->status === 'sent')
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Sent</span>
+                  @elseif($history->status === 'failed')
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">Failed</span>
+                  @else
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">Pending</span>
+                  @endif
+                </td>
+                <td class="py-3 px-4 text-sm text-primary-700 dark:text-primary-300">{{ $history->sent_at ? $history->sent_at->format('M d, Y H:i') : 'N/A' }}</td>
+              </tr>
+            @endforeach
+          </tbody>
+        </table>
+      </div>
+
+      @if($messageHistory->hasPages())
+        <div class="flex items-center justify-between mt-5 pt-5 border-t border-primary-100 dark:border-primary-800">
+          <span class="text-xs text-primary-600 dark:text-primary-400">Showing {{ $messageHistory->firstItem() }} to {{ $messageHistory->lastItem() }} of {{ $messageHistory->total() }} results</span>
+          {{ $messageHistory->links() }}
+        </div>
+      @endif
+    @else
+      <p class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">No message history found.</p>
+    @endif
+  </div>
 
 </div>
 @endsection

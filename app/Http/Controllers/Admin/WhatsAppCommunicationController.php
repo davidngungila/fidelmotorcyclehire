@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\WhatsAppSettings;
+use App\Models\WhatsAppMessageHistory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 
 class WhatsAppCommunicationController extends Controller
@@ -13,12 +15,13 @@ class WhatsAppCommunicationController extends Controller
     {
         $settings = WhatsAppSettings::first();
         $sessions = [];
+        $messageHistory = WhatsAppMessageHistory::latest()->paginate(50);
         
         if ($settings && $settings->personal_access_token) {
             $sessions = $this->getSessions($settings->personal_access_token);
         }
 
-        return view('admin.communication.whatsapp.index', compact('settings', 'sessions'));
+        return view('admin.communication.whatsapp.index', compact('settings', 'sessions', 'messageHistory'));
     }
 
     public function storePersonalAccessToken(Request $request)
@@ -109,7 +112,7 @@ class WhatsAppCommunicationController extends Controller
             ->with('success', 'Session API Key saved successfully.');
     }
 
-    public function sendMessage(Request $request)
+    public function sendSingleMessage(Request $request)
     {
         $request->validate([
             'phone_number' => 'required|string',
@@ -121,6 +124,15 @@ class WhatsAppCommunicationController extends Controller
             return back()->with('error', 'Active WhatsApp session not configured.');
         }
 
+        // Create message history record
+        $messageHistory = WhatsAppMessageHistory::create([
+            'user_id' => Auth::id(),
+            'phone_number' => $request->phone_number,
+            'message' => $request->message,
+            'message_type' => 'single',
+            'status' => 'pending',
+        ]);
+
         try {
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $settings->session_api_key,
@@ -129,14 +141,96 @@ class WhatsAppCommunicationController extends Controller
                 'message' => $request->message,
             ]);
 
+            $responseData = $response->json();
+
             if ($response->successful()) {
+                $messageHistory->update([
+                    'status' => 'sent',
+                    'response' => $responseData,
+                    'sent_at' => now(),
+                ]);
+
                 return back()->with('success', 'Message sent successfully.');
             }
 
-            return back()->with('error', 'Failed to send message: ' . ($response->json('message', 'Unknown error')));
+            $messageHistory->update([
+                'status' => 'failed',
+                'response' => $responseData,
+                'error_message' => $responseData['message'] ?? 'Unknown error',
+            ]);
+
+            return back()->with('error', 'Failed to send message: ' . ($responseData['message'] ?? 'Unknown error'));
         } catch (\Exception $e) {
+            $messageHistory->update([
+                'status' => 'failed',
+                'error_message' => $e->getMessage(),
+            ]);
+
             return back()->with('error', 'Failed to send message: ' . $e->getMessage());
         }
+    }
+
+    public function sendBulkMessage(Request $request)
+    {
+        $request->validate([
+            'phone_numbers' => 'required|string',
+            'message' => 'required|string',
+        ]);
+
+        $settings = WhatsAppSettings::getActiveSettings();
+        if (!$settings || !$settings->session_api_key) {
+            return back()->with('error', 'Active WhatsApp session not configured.');
+        }
+
+        $phoneNumbers = array_filter(array_map('trim', explode("\n", $request->phone_numbers)));
+        $message = $request->message;
+        $successCount = 0;
+        $failCount = 0;
+
+        foreach ($phoneNumbers as $phoneNumber) {
+            $messageHistory = WhatsAppMessageHistory::create([
+                'user_id' => Auth::id(),
+                'phone_number' => $phoneNumber,
+                'message' => $message,
+                'message_type' => 'bulk',
+                'status' => 'pending',
+            ]);
+
+            try {
+                $response = Http::withHeaders([
+                    'Authorization' => 'Bearer ' . $settings->session_api_key,
+                ])->post('https://www.wasenderapi.com/api/send-message', [
+                    'phone_number' => $phoneNumber,
+                    'message' => $message,
+                ]);
+
+                $responseData = $response->json();
+
+                if ($response->successful()) {
+                    $messageHistory->update([
+                        'status' => 'sent',
+                        'response' => $responseData,
+                        'sent_at' => now(),
+                    ]);
+                    $successCount++;
+                } else {
+                    $messageHistory->update([
+                        'status' => 'failed',
+                        'response' => $responseData,
+                        'error_message' => $responseData['message'] ?? 'Unknown error',
+                    ]);
+                    $failCount++;
+                }
+            } catch (\Exception $e) {
+                $messageHistory->update([
+                    'status' => 'failed',
+                    'error_message' => $e->getMessage(),
+                ]);
+                $failCount++;
+            }
+        }
+
+        return back()->with('success', "Bulk message sent: {$successCount} successful, {$failCount} failed.");
     }
 
     public function toggleStatus(Request $request)

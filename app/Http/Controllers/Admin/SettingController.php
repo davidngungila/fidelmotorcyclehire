@@ -124,8 +124,11 @@ class SettingController extends Controller
             'sms_sender_id' => ['nullable', 'string'],
             'sms_is_active' => ['nullable', 'boolean'],
             // WhatsApp settings
-            'whatsapp_api_key' => ['nullable', 'string'],
-            'whatsapp_account' => ['nullable', 'string'],
+            'personal_access_token' => ['nullable', 'string'],
+            'session_api_key' => ['nullable', 'string'],
+            'session_name' => ['nullable', 'string'],
+            'phone_number' => ['nullable', 'string'],
+            'session_status' => ['nullable', 'string'],
             'whatsapp_is_active' => ['nullable', 'boolean'],
         ]);
 
@@ -200,8 +203,11 @@ class SettingController extends Controller
             }
             
             $whatsappSettings->fill([
-                'api_key' => $validated['whatsapp_api_key'] ?? null,
-                'account' => $validated['whatsapp_account'] ?? null,
+                'personal_access_token' => $validated['personal_access_token'] ?? null,
+                'session_api_key' => $validated['session_api_key'] ?? null,
+                'session_name' => $validated['session_name'] ?? null,
+                'phone_number' => $validated['phone_number'] ?? null,
+                'session_status' => $validated['session_status'] ?? 'disconnected',
                 'is_active' => $validated['whatsapp_is_active'] ?? false,
             ]);
             $whatsappSettings->save();
@@ -306,6 +312,64 @@ class SettingController extends Controller
 
         return view('admin.settings.test-sms', [
             'smsSettings' => $smsSettings,
+        ]);
+    }
+
+    public function testWhatsApp(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'phone' => ['required', 'string'],
+            'message' => ['required', 'string'],
+        ]);
+
+        $whatsappSettings = WhatsAppSettings::getActiveSettings();
+        
+        if (! $whatsappSettings || ! $whatsappSettings->session_api_key) {
+            return response()->json([
+                'success' => false,
+                'message' => 'WhatsApp service is not configured or inactive. Please configure WhatsApp settings first.',
+            ], 400);
+        }
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::withHeaders([
+                'Authorization' => 'Bearer ' . $whatsappSettings->session_api_key,
+            ])->post('https://www.wasenderapi.com/api/send-message', [
+                'phone_number' => $validated['phone'],
+                'message' => $validated['message'],
+            ]);
+
+            $result = $response->json();
+
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'description' => 'Admin sent test WhatsApp message',
+                'subject_type' => 'whatsapp_test',
+                'subject_id' => null,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'properties' => [
+                    'phone' => $validated['phone'],
+                    'message' => $validated['message'],
+                    'result' => $result,
+                ],
+            ]);
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send test message: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function testWhatsAppPage(Request $request)
+    {
+        $whatsappSettings = WhatsAppSettings::first() ?? new WhatsAppSettings();
+
+        return view('admin.settings.test-whatsapp', [
+            'whatsappSettings' => $whatsappSettings,
         ]);
     }
 }

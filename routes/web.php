@@ -247,7 +247,9 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/settings', [AdminSettingController::class, 'index'])->name('settings.index');
     Route::put('/settings', [AdminSettingController::class, 'update'])->name('settings.update');
     Route::post('/settings/test-sms', [AdminSettingController::class, 'testSms'])->name('settings.test-sms');
-    Route::get('/settings/test-sms', [AdminSettingController::class, 'testSmsPage'])->name('settings.test-sms-page');
+    Route::get('/settings/test-sms-page', [AdminSettingController::class, 'testSmsPage'])->name('settings.test-sms-page');
+    Route::post('/settings/test-whatsapp', [AdminSettingController::class, 'testWhatsApp'])->name('settings.test-whatsapp');
+    Route::get('/settings/test-whatsapp-page', [AdminSettingController::class, 'testWhatsAppPage'])->name('settings.test-whatsapp-page');
 
     Route::get('/google-sheets', [AdminGoogleSheetsController::class, 'index'])->name('google-sheets.index');
     Route::post('/google-sheets/sync', [AdminGoogleSheetsController::class, 'sync'])->name('google-sheets.sync');
@@ -450,7 +452,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
         Route::post('/whatsapp/personal-token', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'storePersonalAccessToken'])->name('whatsapp.personal-token');
         Route::post('/whatsapp/session', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'createSession'])->name('whatsapp.session');
         Route::post('/whatsapp/session-api-key', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'storeSessionApiKey'])->name('whatsapp.session-api-key');
-        Route::post('/whatsapp/send-message', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'sendMessage'])->name('whatsapp.send-message');
+        Route::post('/whatsapp/send-single', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'sendSingleMessage'])->name('whatsapp.send-single');
+        Route::post('/whatsapp/send-bulk', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'sendBulkMessage'])->name('whatsapp.send-bulk');
         Route::post('/whatsapp/toggle-status', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'toggleStatus'])->name('whatsapp.toggle-status');
         Route::post('/whatsapp/send', [\App\Http\Controllers\Admin\CommunicationController::class, 'sendWhatsApp'])->name('whatsapp.send');
         Route::get('/whatsapp/test', [\App\Http\Controllers\Admin\CommunicationController::class, 'testWhatsAppPage'])->name('whatsapp.test');
