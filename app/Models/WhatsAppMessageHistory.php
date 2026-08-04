@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class WhatsAppMessageHistory extends Model
 {
+    protected $table = 'whatsapp_message_history';
+
     protected $fillable = [
         'user_id',
         'phone_number',

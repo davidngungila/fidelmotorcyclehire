@@ -34,7 +34,7 @@ class WhatsAppCommunicationController extends Controller
         $settings->personal_access_token = $request->personal_access_token;
         $settings->save();
 
-        return redirect()->route('admin.communication.whatsapp.index')
+        return redirect()->route('admin.communication.whatsapp')
             ->with('success', 'Personal Access Token saved successfully.');
     }
 
@@ -83,7 +83,7 @@ class WhatsAppCommunicationController extends Controller
                 $settings->session_status = $sessionData['status'] ?? 'pending';
                 $settings->save();
 
-                return redirect()->route('admin.communication.whatsapp.index')
+                return redirect()->route('admin.communication.whatsapp')
                     ->with('success', 'WhatsApp session created successfully.');
             }
 
@@ -108,7 +108,7 @@ class WhatsAppCommunicationController extends Controller
         $settings->is_active = true;
         $settings->save();
 
-        return redirect()->route('admin.communication.whatsapp.index')
+        return redirect()->route('admin.communication.whatsapp')
             ->with('success', 'Session API Key saved successfully.');
     }
 
