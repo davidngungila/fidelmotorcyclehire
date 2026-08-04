@@ -5,13 +5,13 @@
 
 @section('content')
 <div class="space-y-6">
-  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+  <div class="flex flex-col gap-4">
     <div>
       <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $account->account_name }}</h1>
       <p class="text-gray-600 dark:text-gray-400 mt-1">{{ $account->account_code }} - {{ ucfirst($account->account_type) }}</p>
     </div>
-    <div class="flex items-center gap-2">
-      <form action="{{ route('admin.ledger.filter') }}" method="GET" class="flex items-center gap-2">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <form action="{{ route('admin.ledger.filter') }}" method="GET" class="flex flex-wrap items-center gap-2">
         <input type="hidden" name="account_id" value="{{ $account->id }}">
         <input type="date" name="start_date" value="{{ request('start_date') }}"
           class="form-input py-2 px-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-card text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent">
