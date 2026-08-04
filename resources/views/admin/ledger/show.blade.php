@@ -24,7 +24,7 @@
             {{ ucfirst($account->account_type) }}
           </span>
         </div>
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <span class="text-sm text-gray-600 dark:text-gray-400">Account Code:</span>
             <div class="font-mono font-bold text-gray-900 dark:text-white">{{ $account->account_code }}</div>
@@ -34,7 +34,7 @@
             <div class="font-semibold text-gray-900 dark:text-white">{{ $account->account_name }}</div>
           </div>
           @if($account->description)
-            <div class="col-span-2">
+            <div class="col-span-1 md:col-span-2">
               <span class="text-sm text-gray-600 dark:text-gray-400">Description:</span>
               <div class="text-sm text-gray-900 dark:text-white">{{ $account->description }}</div>
             </div>
@@ -51,9 +51,9 @@
       </div>
 
       <div class="glass rounded-xl p-6">
-        <div class="flex items-center justify-between mb-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-4">
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Ledger Entries</h3>
-          <form action="{{ route('admin.ledger.filter') }}" method="GET" class="flex items-center gap-2">
+          <form action="{{ route('admin.ledger.filter') }}" method="GET" class="flex flex-wrap items-center gap-2">
             <input type="hidden" name="account_id" value="{{ $account->id }}">
             <input type="date" name="start_date" value="{{ request('start_date') }}"
               class="form-input py-1.5 px-3 rounded-lg border	border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-card text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent">
@@ -152,7 +152,7 @@
           <a href="{{ route('admin.journal-entries.create') }}" class="block w-full text-center px-4 py-2.5 rounded-lg bg-primary-600 hover:bg-primary-500 text-white text-sm font-semibold transition-all">
             <i class="fa-solid fa-plus mr-2"></i> New Journal Entry
           </a>
-          <a href="{{ route('admin.accounts.show', $account->id) }}" class="block w-full text-center px-4 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-semibold transition-all">
+          <a href="{{ route('admin.accounts.show', app('App\Services\EncryptedIdService')->encrypt($account->id)) }}" class="block w-full text-center px-4 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-semibold transition-all">
             <i class="fa-solid fa-eye mr-2"></i> View Account Details
           </a>
         </div>
