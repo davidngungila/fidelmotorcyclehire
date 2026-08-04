@@ -12,12 +12,12 @@
                 <p class="text-gray-600 dark:text-gray-400 mt-1">{{ $account->account_code }} - {{ ucfirst($account->account_type) }}</p>
             </div>
             <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full md:w-auto">
-                <form action="{{ route('admin.ledger.filter') }}" method="GET" class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                <form action="{{ route('admin.ledger.filter') }}" method="GET" class="flex items-center gap-2 w-full sm:w-auto">
                     <input type="hidden" name="account_id" value="{{ $account->id }}">
                     <input type="date" name="start_date" value="{{ request('start_date') }}"
-                        class="form-input py-2 px-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-card text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent flex-1 sm:flex-none">
+                        class="form-input py-2 px-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-card text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                     <input type="date" name="end_date" value="{{ request('end_date') }}"
-                        class="form-input py-2 px-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-card text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent flex-1 sm:flex-none">
+                        class="form-input py-2 px-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-card text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                     <button type="submit" class="px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-500 text-white text-sm font-semibold transition-all whitespace-nowrap">
                         Filter
                     </button>
