@@ -4,7 +4,7 @@
 @section('page_title', 'Ledger: ' . $account->account_name)
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6 overflow-x-hidden">
   <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
     <div>
       <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $account->account_name }}</h1>
@@ -32,7 +32,7 @@
     </div>
   </div>
 
-  <div class="glass rounded-xl p-6">
+  <div class="glass rounded-xl p-6 overflow-hidden">
     <div class="space-y-6">
       
       <!-- Account Details Section -->
