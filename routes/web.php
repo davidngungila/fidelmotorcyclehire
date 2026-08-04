@@ -455,6 +455,27 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
         Route::post('/whatsapp/session-api-key', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'storeSessionApiKey'])->name('whatsapp.session-api-key');
         Route::post('/whatsapp/send-single', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'sendSingleMessage'])->name('whatsapp.send-single');
         Route::post('/whatsapp/send-bulk', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'sendBulkMessage'])->name('whatsapp.send-bulk');
+
+        // WasenderAPI single media message endpoints
+        Route::post('/whatsapp/send-image', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'sendImageMessage'])->name('whatsapp.send-image');
+        Route::post('/whatsapp/send-video', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'sendVideoMessage'])->name('whatsapp.send-video');
+        Route::post('/whatsapp/send-document', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'sendDocumentMessage'])->name('whatsapp.send-document');
+        Route::post('/whatsapp/send-audio', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'sendAudioMessage'])->name('whatsapp.send-audio');
+        Route::post('/whatsapp/send-sticker', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'sendStickerMessage'])->name('whatsapp.send-sticker');
+        Route::post('/whatsapp/send-contact', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'sendContactMessage'])->name('whatsapp.send-contact');
+        Route::post('/whatsapp/send-location', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'sendLocationMessage'])->name('whatsapp.send-location');
+
+        // WasenderAPI bulk media message endpoints
+        Route::post('/whatsapp/send-bulk-image', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'sendBulkImage'])->name('whatsapp.send-bulk-image');
+        Route::post('/whatsapp/send-bulk-document', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'sendBulkDocument'])->name('whatsapp.send-bulk-document');
+
+        // WasenderAPI media utility endpoints
+        Route::post('/whatsapp/refresh-sessions', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'refreshSessions'])->name('whatsapp.refresh-sessions');
+        Route::post('/whatsapp/upload-media', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'uploadMedia'])->name('whatsapp.upload-media');
+        Route::post('/whatsapp/decrypt-media', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'decryptMedia'])->name('whatsapp.decrypt-media');
+        Route::post('/whatsapp/decrypt-media-raw', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'decryptMediaRaw'])->name('whatsapp.decrypt-media-raw');
+
+        // SMS endpoints
         Route::post('/whatsapp/send-single-sms', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'sendSingleSms'])->name('whatsapp.send-single-sms');
         Route::post('/whatsapp/send-bulk-sms', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'sendBulkSms'])->name('whatsapp.send-bulk-sms');
         Route::post('/whatsapp/toggle-status', [\App\Http\Controllers\Admin\WhatsAppCommunicationController::class, 'toggleStatus'])->name('whatsapp.toggle-status');

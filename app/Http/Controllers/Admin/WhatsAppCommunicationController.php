@@ -6,31 +6,34 @@ use App\Http\Controllers\Controller;
 use App\Models\WhatsAppSettings;
 use App\Models\WhatsAppMessageHistory;
 use App\Services\SmsService;
+use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
 
 class WhatsAppCommunicationController extends Controller
 {
     protected SmsService $smsService;
+    protected WhatsAppService $whatsAppService;
 
-    public function __construct(SmsService $smsService)
+    public function __construct(SmsService $smsService, WhatsAppService $whatsAppService)
     {
         $this->smsService = $smsService;
+        $this->whatsAppService = $whatsAppService;
     }
+
     public function index()
     {
         $settings = WhatsAppSettings::first();
         $sessions = [];
         $sessionDetails = null;
         $messageHistory = WhatsAppMessageHistory::latest()->paginate(50);
-        
+
         if ($settings && $settings->personal_access_token) {
-            $sessions = $this->getSessions($settings->personal_access_token);
+            $sessions = $this->whatsAppService->getSessions();
         }
 
         if ($settings && $settings->session_api_key) {
-            $sessionDetails = $this->getSessionDetails($settings->session_api_key);
+            $sessionDetails = $this->whatsAppService->getSessionInfo();
         }
 
         return view('admin.communication.whatsapp.index', compact('settings', 'sessions', 'sessionDetails', 'messageHistory'));
@@ -50,76 +53,31 @@ class WhatsAppCommunicationController extends Controller
             ->with('success', 'Personal Access Token saved successfully.');
     }
 
-    public function getSessions($token)
-    {
-        try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $token,
-            ])->get('https://www.wasenderapi.com/api/whatsapp-sessions');
-
-            if ($response->successful()) {
-                return $response->json('data', []);
-            }
-
-            return [];
-        } catch (\Exception $e) {
-            return [];
-        }
-    }
-
-    public function getSessionDetails($sessionApiKey)
-    {
-        try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $sessionApiKey,
-            ])->get('https://www.wasenderapi.com/api/session-info');
-
-            if ($response->successful()) {
-                return $response->json('data', null);
-            }
-
-            return null;
-        } catch (\Exception $e) {
-            return null;
-        }
-    }
-
     public function createSession(Request $request)
     {
         $request->validate([
-            'name' => 'required|string',
+            'name'         => 'required|string',
             'phone_number' => 'required|string',
         ]);
 
-        $settings = WhatsAppSettings::first();
-        if (!$settings || !$settings->personal_access_token) {
-            return back()->with('error', 'Personal Access Token is required.');
-        }
+        $result = $this->whatsAppService->createSession($request->name, $request->phone_number);
 
-        try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $settings->personal_access_token,
-            ])->post('https://www.wasenderapi.com/api/whatsapp-sessions', [
-                'name' => $request->name,
-                'phone_number' => $request->phone_number,
-            ]);
-
-            if ($response->successful()) {
-                $sessionData = $response->json('data');
-                
-                $settings->session_name = $sessionData['name'] ?? $request->name;
-                $settings->phone_number = $sessionData['phone_number'] ?? $request->phone_number;
-                $settings->session_status = $sessionData['status'] ?? 'pending';
-                $settings->save();
-
-                return redirect()->route('admin.communication.whatsapp')
-                    ->with('success', 'WhatsApp session created successfully.');
+        if ($result['success']) {
+            $sessionData = $result['data'] ?? [];
+            $settings = WhatsAppSettings::first();
+            if (!$settings) {
+                $settings = new WhatsAppSettings();
             }
+            $settings->session_name   = $sessionData['name'] ?? $request->name;
+            $settings->phone_number   = $sessionData['phone_number'] ?? $request->phone_number;
+            $settings->session_status = $sessionData['status'] ?? 'pending';
+            $settings->save();
 
-            return back()->with('error', 'Failed to create session: ' . ($response->json('message', 'Unknown error')));
-        } catch (\Exception $e) {
-            return back()->with('error', 'Failed to create session: ' . $e->getMessage());
+            return redirect()->route('admin.communication.whatsapp')
+                ->with('success', 'WhatsApp session created successfully.');
         }
+
+        return back()->with('error', 'Failed to create session: ' . ($result['message'] ?? 'Unknown error'));
     }
 
     public function storeSessionApiKey(Request $request)
@@ -141,11 +99,45 @@ class WhatsAppCommunicationController extends Controller
             ->with('success', 'Session API Key saved successfully.');
     }
 
+    // =========================================================================
+    // SINGLE MESSAGE SENDERS
+    // =========================================================================
+
+    protected function createHistoryRecord(string $phone, string $message, string $type, string $messageType = 'text', ?array $media = null): WhatsAppMessageHistory
+    {
+        return WhatsAppMessageHistory::create([
+            'user_id'      => Auth::id(),
+            'phone_number' => $phone,
+            'message'      => $message,
+            'message_type' => $type,
+            'media_type'   => $messageType,
+            'media_data'   => $media,
+            'status'       => 'pending',
+        ]);
+    }
+
+    protected function updateHistoryResult(WhatsAppMessageHistory $history, array $result): void
+    {
+        if ($result['success']) {
+            $history->update([
+                'status'   => 'sent',
+                'response' => $result,
+                'sent_at'  => now(),
+            ]);
+        } else {
+            $history->update([
+                'status'       => 'failed',
+                'response'     => $result,
+                'error_message' => $result['message'] ?? 'Unknown error',
+            ]);
+        }
+    }
+
     public function sendSingleMessage(Request $request)
     {
         $request->validate([
             'phone_number' => 'required|string',
-            'message' => 'required|string',
+            'message'      => 'required|string',
         ]);
 
         $settings = WhatsAppSettings::getActiveSettings();
@@ -153,57 +145,221 @@ class WhatsAppCommunicationController extends Controller
             return back()->with('error', 'Active WhatsApp session not configured.');
         }
 
-        // Create message history record
-        $messageHistory = WhatsAppMessageHistory::create([
-            'user_id' => Auth::id(),
-            'phone_number' => $request->phone_number,
-            'message' => $request->message,
-            'message_type' => 'single',
-            'status' => 'pending',
+        $history = $this->createHistoryRecord($request->phone_number, $request->message, 'single', 'text');
+
+        $result = $this->whatsAppService->sendText($request->phone_number, $request->message);
+        $this->updateHistoryResult($history, $result);
+
+        if ($result['success']) {
+            return back()->with('success', 'Message sent successfully.');
+        }
+
+        return back()->with('error', 'Failed to send message: ' . ($result['message'] ?? 'Unknown error'));
+    }
+
+    public function sendImageMessage(Request $request)
+    {
+        $request->validate([
+            'phone_number' => 'required|string',
+            'image_url'    => 'required|url',
+            'caption'      => 'nullable|string',
         ]);
 
-        try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $settings->session_api_key,
-            ])->post('https://www.wasenderapi.com/api/send-message', [
-                'phone_number' => $request->phone_number,
-                'message' => $request->message,
-            ]);
-
-            $responseData = $response->json();
-
-            if ($response->successful()) {
-                $messageHistory->update([
-                    'status' => 'sent',
-                    'response' => $responseData,
-                    'sent_at' => now(),
-                ]);
-
-                return back()->with('success', 'Message sent successfully.');
-            }
-
-            $messageHistory->update([
-                'status' => 'failed',
-                'response' => $responseData,
-                'error_message' => $responseData['message'] ?? 'Unknown error',
-            ]);
-
-            return back()->with('error', 'Failed to send message: ' . ($responseData['message'] ?? 'Unknown error'));
-        } catch (\Exception $e) {
-            $messageHistory->update([
-                'status' => 'failed',
-                'error_message' => $e->getMessage(),
-            ]);
-
-            return back()->with('error', 'Failed to send message: ' . $e->getMessage());
+        $settings = WhatsAppSettings::getActiveSettings();
+        if (!$settings || !$settings->session_api_key) {
+            return back()->with('error', 'Active WhatsApp session not configured.');
         }
+
+        $media = ['imageUrl' => $request->image_url, 'caption' => $request->caption];
+        $history = $this->createHistoryRecord($request->phone_number, $request->caption ?? '[Image]', 'single', 'image', $media);
+
+        $result = $this->whatsAppService->sendImage($request->phone_number, $request->image_url, $request->caption);
+        $this->updateHistoryResult($history, $result);
+
+        if ($result['success']) {
+            return back()->with('success', 'Image sent successfully.');
+        }
+
+        return back()->with('error', 'Failed to send image: ' . ($result['message'] ?? 'Unknown error'));
     }
+
+    public function sendVideoMessage(Request $request)
+    {
+        $request->validate([
+            'phone_number' => 'required|string',
+            'video_url'    => 'required|url',
+            'caption'      => 'nullable|string',
+        ]);
+
+        $settings = WhatsAppSettings::getActiveSettings();
+        if (!$settings || !$settings->session_api_key) {
+            return back()->with('error', 'Active WhatsApp session not configured.');
+        }
+
+        $media = ['videoUrl' => $request->video_url, 'caption' => $request->caption];
+        $history = $this->createHistoryRecord($request->phone_number, $request->caption ?? '[Video]', 'single', 'video', $media);
+
+        $result = $this->whatsAppService->sendVideo($request->phone_number, $request->video_url, $request->caption);
+        $this->updateHistoryResult($history, $result);
+
+        if ($result['success']) {
+            return back()->with('success', 'Video sent successfully.');
+        }
+
+        return back()->with('error', 'Failed to send video: ' . ($result['message'] ?? 'Unknown error'));
+    }
+
+    public function sendDocumentMessage(Request $request)
+    {
+        $request->validate([
+            'phone_number'  => 'required|string',
+            'document_url'  => 'required|url',
+            'file_name'     => 'required|string',
+            'caption'       => 'nullable|string',
+        ]);
+
+        $settings = WhatsAppSettings::getActiveSettings();
+        if (!$settings || !$settings->session_api_key) {
+            return back()->with('error', 'Active WhatsApp session not configured.');
+        }
+
+        $media = ['documentUrl' => $request->document_url, 'fileName' => $request->file_name, 'caption' => $request->caption];
+        $history = $this->createHistoryRecord($request->phone_number, $request->caption ?? '[Document: ' . $request->file_name . ']', 'single', 'document', $media);
+
+        $result = $this->whatsAppService->sendDocument($request->phone_number, $request->document_url, $request->file_name, $request->caption);
+        $this->updateHistoryResult($history, $result);
+
+        if ($result['success']) {
+            return back()->with('success', 'Document sent successfully.');
+        }
+
+        return back()->with('error', 'Failed to send document: ' . ($result['message'] ?? 'Unknown error'));
+    }
+
+    public function sendAudioMessage(Request $request)
+    {
+        $request->validate([
+            'phone_number' => 'required|string',
+            'audio_url'    => 'required|url',
+        ]);
+
+        $settings = WhatsAppSettings::getActiveSettings();
+        if (!$settings || !$settings->session_api_key) {
+            return back()->with('error', 'Active WhatsApp session not configured.');
+        }
+
+        $media = ['audioUrl' => $request->audio_url];
+        $history = $this->createHistoryRecord($request->phone_number, '[Audio]', 'single', 'audio', $media);
+
+        $result = $this->whatsAppService->sendAudio($request->phone_number, $request->audio_url);
+        $this->updateHistoryResult($history, $result);
+
+        if ($result['success']) {
+            return back()->with('success', 'Audio sent successfully.');
+        }
+
+        return back()->with('error', 'Failed to send audio: ' . ($result['message'] ?? 'Unknown error'));
+    }
+
+    public function sendStickerMessage(Request $request)
+    {
+        $request->validate([
+            'phone_number'  => 'required|string',
+            'sticker_url'   => 'required|url',
+        ]);
+
+        $settings = WhatsAppSettings::getActiveSettings();
+        if (!$settings || !$settings->session_api_key) {
+            return back()->with('error', 'Active WhatsApp session not configured.');
+        }
+
+        $media = ['stickerUrl' => $request->sticker_url];
+        $history = $this->createHistoryRecord($request->phone_number, '[Sticker]', 'single', 'sticker', $media);
+
+        $result = $this->whatsAppService->sendSticker($request->phone_number, $request->sticker_url);
+        $this->updateHistoryResult($history, $result);
+
+        if ($result['success']) {
+            return back()->with('success', 'Sticker sent successfully.');
+        }
+
+        return back()->with('error', 'Failed to send sticker: ' . ($result['message'] ?? 'Unknown error'));
+    }
+
+    public function sendContactMessage(Request $request)
+    {
+        $request->validate([
+            'phone_number'   => 'required|string',
+            'contact_name'   => 'required|string',
+            'contact_phone'  => 'required|string',
+        ]);
+
+        $settings = WhatsAppSettings::getActiveSettings();
+        if (!$settings || !$settings->session_api_key) {
+            return back()->with('error', 'Active WhatsApp session not configured.');
+        }
+
+        $media = ['name' => $request->contact_name, 'phone' => $request->contact_phone];
+        $history = $this->createHistoryRecord($request->phone_number, '[Contact: ' . $request->contact_name . ']', 'single', 'contact', $media);
+
+        $result = $this->whatsAppService->sendContact($request->phone_number, $request->contact_name, $request->contact_phone);
+        $this->updateHistoryResult($history, $result);
+
+        if ($result['success']) {
+            return back()->with('success', 'Contact card sent successfully.');
+        }
+
+        return back()->with('error', 'Failed to send contact: ' . ($result['message'] ?? 'Unknown error'));
+    }
+
+    public function sendLocationMessage(Request $request)
+    {
+        $request->validate([
+            'phone_number' => 'required|string',
+            'latitude'     => 'required|numeric',
+            'longitude'    => 'required|numeric',
+            'name'         => 'nullable|string',
+            'address'      => 'nullable|string',
+        ]);
+
+        $settings = WhatsAppSettings::getActiveSettings();
+        if (!$settings || !$settings->session_api_key) {
+            return back()->with('error', 'Active WhatsApp session not configured.');
+        }
+
+        $media = [
+            'latitude'  => (float) $request->latitude,
+            'longitude' => (float) $request->longitude,
+            'name'      => $request->name,
+            'address'   => $request->address,
+        ];
+        $history = $this->createHistoryRecord($request->phone_number, '[Location: ' . ($request->name ?? $request->latitude . ', ' . $request->longitude) . ']', 'single', 'location', $media);
+
+        $result = $this->whatsAppService->sendLocation(
+            $request->phone_number,
+            (float) $request->latitude,
+            (float) $request->longitude,
+            $request->name,
+            $request->address
+        );
+        $this->updateHistoryResult($history, $result);
+
+        if ($result['success']) {
+            return back()->with('success', 'Location sent successfully.');
+        }
+
+        return back()->with('error', 'Failed to send location: ' . ($result['message'] ?? 'Unknown error'));
+    }
+
+    // =========================================================================
+    // BULK MESSAGE SENDERS
+    // =========================================================================
 
     public function sendBulkMessage(Request $request)
     {
         $request->validate([
             'phone_numbers' => 'required|string',
-            'message' => 'required|string',
+            'message'       => 'required|string',
         ]);
 
         $settings = WhatsAppSettings::getActiveSettings();
@@ -217,50 +373,90 @@ class WhatsAppCommunicationController extends Controller
         $failCount = 0;
 
         foreach ($phoneNumbers as $phoneNumber) {
-            $messageHistory = WhatsAppMessageHistory::create([
-                'user_id' => Auth::id(),
-                'phone_number' => $phoneNumber,
-                'message' => $message,
-                'message_type' => 'bulk',
-                'status' => 'pending',
-            ]);
+            $history = $this->createHistoryRecord($phoneNumber, $message, 'bulk', 'text');
+            $result = $this->whatsAppService->sendText($phoneNumber, $message);
+            $this->updateHistoryResult($history, $result);
 
-            try {
-                $response = Http::withHeaders([
-                    'Authorization' => 'Bearer ' . $settings->session_api_key,
-                ])->post('https://www.wasenderapi.com/api/send-message', [
-                    'phone_number' => $phoneNumber,
-                    'message' => $message,
-                ]);
-
-                $responseData = $response->json();
-
-                if ($response->successful()) {
-                    $messageHistory->update([
-                        'status' => 'sent',
-                        'response' => $responseData,
-                        'sent_at' => now(),
-                    ]);
-                    $successCount++;
-                } else {
-                    $messageHistory->update([
-                        'status' => 'failed',
-                        'response' => $responseData,
-                        'error_message' => $responseData['message'] ?? 'Unknown error',
-                    ]);
-                    $failCount++;
-                }
-            } catch (\Exception $e) {
-                $messageHistory->update([
-                    'status' => 'failed',
-                    'error_message' => $e->getMessage(),
-                ]);
+            if ($result['success']) {
+                $successCount++;
+            } else {
                 $failCount++;
             }
         }
 
         return back()->with('success', "Bulk message sent: {$successCount} successful, {$failCount} failed.");
     }
+
+    public function sendBulkImage(Request $request)
+    {
+        $request->validate([
+            'phone_numbers' => 'required|string',
+            'image_url'     => 'required|url',
+            'caption'       => 'nullable|string',
+        ]);
+
+        $settings = WhatsAppSettings::getActiveSettings();
+        if (!$settings || !$settings->session_api_key) {
+            return back()->with('error', 'Active WhatsApp session not configured.');
+        }
+
+        $phoneNumbers = array_filter(array_map('trim', explode("\n", $request->phone_numbers)));
+        $successCount = 0;
+        $failCount = 0;
+        $media = ['imageUrl' => $request->image_url, 'caption' => $request->caption];
+
+        foreach ($phoneNumbers as $phoneNumber) {
+            $history = $this->createHistoryRecord($phoneNumber, $request->caption ?? '[Image]', 'bulk', 'image', $media);
+            $result = $this->whatsAppService->sendImage($phoneNumber, $request->image_url, $request->caption);
+            $this->updateHistoryResult($history, $result);
+
+            if ($result['success']) {
+                $successCount++;
+            } else {
+                $failCount++;
+            }
+        }
+
+        return back()->with('success', "Bulk image sent: {$successCount} successful, {$failCount} failed.");
+    }
+
+    public function sendBulkDocument(Request $request)
+    {
+        $request->validate([
+            'phone_numbers' => 'required|string',
+            'document_url'  => 'required|url',
+            'file_name'     => 'required|string',
+            'caption'       => 'nullable|string',
+        ]);
+
+        $settings = WhatsAppSettings::getActiveSettings();
+        if (!$settings || !$settings->session_api_key) {
+            return back()->with('error', 'Active WhatsApp session not configured.');
+        }
+
+        $phoneNumbers = array_filter(array_map('trim', explode("\n", $request->phone_numbers)));
+        $successCount = 0;
+        $failCount = 0;
+        $media = ['documentUrl' => $request->document_url, 'fileName' => $request->file_name, 'caption' => $request->caption];
+
+        foreach ($phoneNumbers as $phoneNumber) {
+            $history = $this->createHistoryRecord($phoneNumber, $request->caption ?? '[Document: ' . $request->file_name . ']', 'bulk', 'document', $media);
+            $result = $this->whatsAppService->sendDocument($phoneNumber, $request->document_url, $request->file_name, $request->caption);
+            $this->updateHistoryResult($history, $result);
+
+            if ($result['success']) {
+                $successCount++;
+            } else {
+                $failCount++;
+            }
+        }
+
+        return back()->with('success', "Bulk document sent: {$successCount} successful, {$failCount} failed.");
+    }
+
+    // =========================================================================
+    // SESSION & SMS ACTIONS
+    // =========================================================================
 
     public function toggleStatus(Request $request)
     {
@@ -279,7 +475,7 @@ class WhatsAppCommunicationController extends Controller
     {
         $request->validate([
             'phone_number' => 'required|string',
-            'message' => 'required|string',
+            'message'      => 'required|string',
         ]);
 
         $result = $this->smsService->sendSingle($request->phone_number, $request->message);
@@ -295,7 +491,7 @@ class WhatsAppCommunicationController extends Controller
     {
         $request->validate([
             'phone_numbers' => 'required|string',
-            'message' => 'required|string',
+            'message'       => 'required|string',
         ]);
 
         $phoneNumbers = array_filter(array_map('trim', explode("\n", $request->phone_numbers)));
@@ -310,49 +506,122 @@ class WhatsAppCommunicationController extends Controller
 
     public function disconnectSession(Request $request)
     {
-        $settings = WhatsAppSettings::first();
-        if (!$settings || !$settings->personal_access_token) {
-            return back()->with('error', 'Personal Access Token is required.');
-        }
+        $result = $this->whatsAppService->disconnectSession();
 
-        try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $settings->personal_access_token,
-            ])->post('https://www.wasenderapi.com/api/whatsapp-sessions/disconnect');
-
-            if ($response->successful()) {
+        if ($result['success']) {
+            $settings = WhatsAppSettings::first();
+            if ($settings) {
                 $settings->session_status = 'disconnected';
                 $settings->save();
-                return back()->with('success', 'WhatsApp session disconnected successfully.');
             }
-
-            return back()->with('error', 'Failed to disconnect session: ' . ($response->json('message', 'Unknown error')));
-        } catch (\Exception $e) {
-            return back()->with('error', 'Failed to disconnect session: ' . $e->getMessage());
+            return back()->with('success', $result['message'] ?? 'WhatsApp session disconnected successfully.');
         }
+
+        return back()->with('error', 'Failed to disconnect session: ' . ($result['message'] ?? 'Unknown error'));
     }
 
     public function restartSession(Request $request)
     {
-        $settings = WhatsAppSettings::first();
-        if (!$settings || !$settings->personal_access_token) {
-            return back()->with('error', 'Personal Access Token is required.');
-        }
+        $result = $this->whatsAppService->restartSession();
 
-        try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $settings->personal_access_token,
-            ])->post('https://www.wasenderapi.com/api/whatsapp-sessions/restart');
-
-            if ($response->successful()) {
+        if ($result['success']) {
+            $settings = WhatsAppSettings::first();
+            if ($settings) {
                 $settings->session_status = 'connected';
                 $settings->save();
-                return back()->with('success', 'WhatsApp session restarted successfully.');
             }
-
-            return back()->with('error', 'Failed to restart session: ' . ($response->json('message', 'Unknown error')));
-        } catch (\Exception $e) {
-            return back()->with('error', 'Failed to restart session: ' . $e->getMessage());
+            return back()->with('success', $result['message'] ?? 'WhatsApp session restarted successfully.');
         }
+
+        return back()->with('error', 'Failed to restart session: ' . ($result['message'] ?? 'Unknown error'));
+    }
+
+    // =========================================================================
+    // WASENDER MEDIA UTILITY ENDPOINTS
+    // =========================================================================
+
+    public function refreshSessions(Request $request)
+    {
+        $result = $this->whatsAppService->listSessions();
+
+        if ($request->expectsJson()) {
+            return response()->json($result);
+        }
+
+        if ($result['success']) {
+            return back()->with('success', 'Sessions refreshed: ' . count($result['data'] ?? []) . ' found.');
+        }
+
+        return back()->with('error', 'Failed to refresh sessions: ' . ($result['message'] ?? 'Unknown error'));
+    }
+
+    public function uploadMedia(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|max:51200',
+        ]);
+
+        $file = $request->file('file');
+        $result = $this->whatsAppService->uploadFile($file);
+
+        if ($request->expectsJson()) {
+            return response()->json($result);
+        }
+
+        if ($result['success']) {
+            $url = $result['data']['url'] ?? $result['data']['file_url'] ?? '';
+            return back()->with('success', 'File uploaded successfully.' . ($url ? " URL: {$url}" : ''))
+                ->with('uploaded_url', $url);
+        }
+
+        return back()->with('error', 'Failed to upload file: ' . ($result['message'] ?? 'Unknown error'));
+    }
+
+    public function decryptMedia(Request $request)
+    {
+        $request->validate([
+            'message_id'   => 'required|string',
+            'media_type'   => 'required|string|in:image,video,audio,document',
+            'encrypted_url'=> 'required|url',
+            'media_key'    => 'required|string',
+            'mime_type'    => 'nullable|string',
+        ]);
+
+        $method = 'decrypt' . ucfirst($request->media_type) . 'Message';
+        $mime = $request->mime_type ?? match ($request->media_type) {
+            'image'    => 'image/jpeg',
+            'video'    => 'video/mp4',
+            'audio'    => 'audio/ogg; codecs=opus',
+            'document' => 'application/pdf',
+            default    => 'application/octet-stream',
+        };
+
+        $result = $this->whatsAppService->{$method}(
+            $request->message_id,
+            $request->encrypted_url,
+            $request->media_key,
+            $mime
+        );
+
+        if ($request->expectsJson()) {
+            return response()->json($result);
+        }
+
+        if ($result['success']) {
+            return back()->with('success', 'Media decrypted successfully.');
+        }
+
+        return back()->with('error', 'Failed to decrypt media: ' . ($result['message'] ?? 'Unknown error'));
+    }
+
+    public function decryptMediaRaw(Request $request)
+    {
+        $validated = $request->validate([
+            'payload' => 'required|array',
+        ]);
+
+        $result = $this->whatsAppService->decryptMedia($validated['payload']);
+
+        return response()->json($result);
     }
 }

@@ -14,6 +14,8 @@ class WhatsAppMessageHistory extends Model
         'phone_number',
         'message',
         'message_type',
+        'media_type',
+        'media_data',
         'status',
         'response',
         'error_message',
@@ -21,8 +23,9 @@ class WhatsAppMessageHistory extends Model
     ];
 
     protected $casts = [
-        'response' => 'array',
-        'sent_at' => 'datetime',
+        'response'   => 'array',
+        'media_data' => 'array',
+        'sent_at'    => 'datetime',
     ];
 
     public function user(): BelongsTo
@@ -53,5 +56,105 @@ class WhatsAppMessageHistory extends Model
     public function scopeBulk($query)
     {
         return $query->where('message_type', 'bulk');
+    }
+
+    public function scopeByMediaType($query, string $type)
+    {
+        return $query->where('media_type', $type);
+    }
+
+    public function scopeText($query)
+    {
+        return $query->where('media_type', 'text');
+    }
+
+    public function scopeImage($query)
+    {
+        return $query->where('media_type', 'image');
+    }
+
+    public function scopeVideo($query)
+    {
+        return $query->where('media_type', 'video');
+    }
+
+    public function scopeDocument($query)
+    {
+        return $query->where('media_type', 'document');
+    }
+
+    public function scopeAudio($query)
+    {
+        return $query->where('media_type', 'audio');
+    }
+
+    public function scopeSticker($query)
+    {
+        return $query->where('media_type', 'sticker');
+    }
+
+    public function scopeContact($query)
+    {
+        return $query->where('media_type', 'contact');
+    }
+
+    public function scopeLocation($query)
+    {
+        return $query->where('media_type', 'location');
+    }
+
+    public function isText(): bool
+    {
+        return $this->media_type === 'text';
+    }
+
+    public function isImage(): bool
+    {
+        return $this->media_type === 'image';
+    }
+
+    public function isVideo(): bool
+    {
+        return $this->media_type === 'video';
+    }
+
+    public function isDocument(): bool
+    {
+        return $this->media_type === 'document';
+    }
+
+    public function isAudio(): bool
+    {
+        return $this->media_type === 'audio';
+    }
+
+    public function isSticker(): bool
+    {
+        return $this->media_type === 'sticker';
+    }
+
+    public function isContact(): bool
+    {
+        return $this->media_type === 'contact';
+    }
+
+    public function isLocation(): bool
+    {
+        return $this->media_type === 'location';
+    }
+
+    public function getMediaTypeLabelAttribute(): string
+    {
+        return match ($this->media_type) {
+            'text'     => 'Text',
+            'image'    => 'Image',
+            'video'    => 'Video',
+            'document' => 'Document',
+            'audio'    => 'Audio',
+            'sticker'  => 'Sticker',
+            'contact'  => 'Contact',
+            'location' => 'Location',
+            default    => ucfirst($this->media_type ?? 'unknown'),
+        };
     }
 }

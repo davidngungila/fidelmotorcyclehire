@@ -47,6 +47,9 @@ return [
         'test_url' => env('WHATSAPP_TEST_URL', 'https://messaging-service.co.tz/api/whatsapp/v2/test/text/single'),
         'api_key' => env('WHATSAPP_API_KEY'),
         'account' => env('WHATSAPP_ACCOUNT'),
+        'wasender_base_url' => env('WASENDER_BASE_URL', 'https://www.wasenderapi.com/api'),
+        'wasender_api_key' => env('WASENDER_API_KEY'),
+        'wasender_personal_token' => env('WASENDER_PERSONAL_TOKEN'),
     ],
 
 ];
