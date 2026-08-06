@@ -289,7 +289,7 @@ class LoanController extends Controller
                 'total_amount_due' => $validated['total_repayment'],
                 'balance' => $validated['principal_amount'],
                 'status' => 'active',
-                'purpose' => 'motorcycle_purchase',
+                'purpose' => 'motorcycle',
                 'collateral' => $validated['collateral'] ?? null,
                 'guarantor' => $validated['guarantor'] ?? null,
                 'notes' => $validated['notes'] ?? null,
