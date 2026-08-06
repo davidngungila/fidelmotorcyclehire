@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Sign In - Feedtan Digital</title>
+    <title>Sign In - Motorcycle Hire Purchase</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -85,15 +85,15 @@
          x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
          class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
-            <div class="w-20 h-20 border-4 border-green-200 border-t-green-600 rounded-full animate-spin mx-auto mb-6"></div>
+            <div class="w-20 h-20 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-6"></div>
             <h3 class="text-xl font-bold text-gray-900 mb-2">Signing In...</h3>
             <div class="min-h-[40px] flex items-center justify-center">
-                <p class="text-lg font-medium text-green-600" x-text="loadingSteps[currentStep]"></p>
+                <p class="text-lg font-medium text-blue-600" x-text="loadingSteps[currentStep]"></p>
             </div>
             <div class="flex justify-center gap-2 mt-6">
                 <template x-for="(step, index) in loadingSteps" :key="index">
                     <div class="w-2 h-2 rounded-full transition-all duration-300"
-                         :class="index < currentStep ? 'bg-green-600' : (index === currentStep ? 'bg-green-400 w-3' : 'bg-gray-300')"></div>
+                         :class="index < currentStep ? 'bg-blue-600' : (index === currentStep ? 'bg-blue-400 w-3' : 'bg-gray-300')"></div>
                 </template>
             </div>
         </div>
@@ -102,11 +102,11 @@
     <div class="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8" x-show="!loading">
         <div class="w-full max-w-md">
             <div class="text-center mb-8">
-                <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-600 rounded-2xl shadow-lg mb-4">
-                    <i class="fa-solid fa-leaf text-white text-2xl"></i>
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg mb-4">
+                    <i class="fa-solid fa-motorcycle text-white text-2xl"></i>
                 </div>
-                <h1 class="text-2xl font-bold text-gray-900 mb-1">Feedtan Digital</h1>
-                <p class="text-gray-500 text-sm">Membership Portal</p>
+                <h1 class="text-2xl font-bold text-gray-900 mb-1">Motorcycle Hire Purchase</h1>
+                <p class="text-gray-500 text-sm">Management System</p>
             </div>
 
             <div class="bg-white border border-gray-200 rounded-2xl shadow-lg p-6 sm:p-8">
@@ -132,7 +132,7 @@
                                 required
                                 autofocus
                                 autocomplete="email"
-                                class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 @error('email') border-red-300 focus:ring-red-500 @enderror"
+                                class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 @error('email') border-red-300 focus:ring-red-500 @enderror"
                                 placeholder="you@example.com"
                             >
                         </div>
@@ -156,7 +156,7 @@
                                 name="password"
                                 required
                                 autocomplete="current-password"
-                                class="w-full pl-10 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 @error('password') border-red-300 focus:ring-red-500 @enderror"
+                                class="w-full pl-10 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 @error('password') border-red-300 focus:ring-red-500 @enderror"
                                 placeholder="Enter your password"
                             >
                             <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors">
@@ -178,12 +178,12 @@
                                 id="remember"
                                 name="remember"
                                 {{ old('remember') ? 'checked' : '' }}
-                                class="w-4 h-4 rounded border-gray-300 text-green-600 focus:ring-green-500 cursor-pointer"
+                                class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                             >
                             <span class="text-sm text-gray-600 group-hover:text-gray-800 transition-colors">Remember me</span>
                         </label>
 
-                        <a href="{{ route('password.request') }}" class="text-sm font-medium text-green-600 hover:text-green-700 transition-colors">
+                        <a href="{{ route('password.request') }}" class="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors">
                             Forgot password?
                         </a>
                     </div>
@@ -191,7 +191,7 @@
                     <button
                         type="submit"
                         @click="loading = true; currentStep = 0; const interval = setInterval(() => { if (currentStep < loadingSteps.length - 1) { currentStep++; } else { clearInterval(interval); } }, 200);"
-                        class="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+                        class="w-full py-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
                     >
                         <span>Sign In</span>
                         <i class="fa-solid fa-arrow-right text-sm"></i>
@@ -200,7 +200,7 @@
             </div>
 
             <p class="text-center text-gray-400 text-xs mt-6">
-                &copy; {{ date('Y') }} Feedtan Digital. All rights reserved.
+                &copy; {{ date('Y') }} Motorcycle Hire Purchase. All rights reserved.
             </p>
         </div>
     </div>
