@@ -23,10 +23,10 @@ class DatabaseSeeder extends Seeder
 
         // Create default admin user
         $admin = User::firstOrCreate(
-            ['email' => 'admin@membersportal.co.tz'],
+            ['email' => 'admin@motorcyclehire.co.tz'],
             [
                 'name' => 'System Administrator',
-                'password' => Hash::make('admin123'),
+                'password' => Hash::make('Motorcycle@2024'),
                 'role' => 'admin',
                 'status' => 'active',
             ]
@@ -43,12 +43,12 @@ class DatabaseSeeder extends Seeder
 
         // Create default member user
         $member = User::firstOrCreate(
-            ['email' => 'member@membersportal.co.tz'],
+            ['email' => 'customer@motorcyclehire.co.tz'],
             [
-                'name' => 'John Member',
-                'password' => Hash::make('member123'),
+                'name' => 'John Customer',
+                'password' => Hash::make('Customer@2024'),
                 'role' => 'member',
-                'member_number' => 'MEM001',
+                'member_number' => 'CUST001',
                 'status' => 'active',
             ]
         );
@@ -70,8 +70,8 @@ class DatabaseSeeder extends Seeder
             InvestmentProductSeeder::class,
         ]);
 
-        $this->command->info('✓ Default admin user created: admin@membersportal.co.tz / admin123');
-        $this->command->info('✓ Default member user created: member@membersportal.co.tz / member123');
+        $this->command->info('✓ Default admin user created: admin@motorcyclehire.co.tz / Motorcycle@2024');
+        $this->command->info('✓ Default customer user created: customer@motorcyclehire.co.tz / Customer@2024');
         $this->command->info('✓ Member types seeded successfully');
         $this->command->info('✓ Loan products seeded successfully');
         $this->command->info('✓ Savings products seeded successfully');
