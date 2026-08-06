@@ -515,6 +515,12 @@ function loanCreateForm() {
       formData.append('end_date', this.endDate);
       formData.append('payment_schedule', JSON.stringify(this.paymentSchedule));
       
+      // Log form data for debugging
+      console.log('Form data:');
+      for (let [key, value] of formData.entries()) {
+        console.log(key, value);
+      }
+      
       try {
         const response = await fetch('{{ route('admin.loans.store') }}', {
           method: 'POST',
@@ -525,7 +531,9 @@ function loanCreateForm() {
           body: formData
         });
         
+        console.log('Response status:', response.status);
         const contentType = response.headers.get('content-type');
+        console.log('Content type:', contentType);
         
         if (!response.ok) {
           if (contentType && contentType.includes('application/json')) {
@@ -556,6 +564,7 @@ function loanCreateForm() {
         }
         
         const data = await response.json();
+        console.log('Response data:', data);
         
         if (data.success) {
           Swal.fire({

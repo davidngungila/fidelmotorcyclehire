@@ -248,15 +248,27 @@ class LoanController extends Controller
                 'down_payment' => 'required|numeric|min:0',
                 'payment_frequency' => 'required|in:daily,weekly,biweekly,monthly',
                 'number_of_payments' => 'required|integer|min:1',
+                'payment_amount' => 'required|numeric|min:0',
                 'start_date' => 'required|date',
                 'principal_amount' => 'required|numeric|min:0',
                 'total_interest' => 'required|numeric|min:0',
                 'total_repayment' => 'required|numeric|min:0',
-                'payment_amount' => 'required|numeric|min:0',
                 'end_date' => 'required|date',
                 'collateral' => 'nullable|string',
                 'guarantor' => 'nullable|string',
                 'notes' => 'nullable|string',
+            ], [], [
+                'user_id.required' => 'Please select a customer',
+                'member_number.required' => 'Member number is required',
+                'motorcycle_id.required' => 'Please select a motorcycle',
+                'purchase_price.required' => 'Purchase price is required',
+                'profit_margin.required' => 'Profit margin is required',
+                'selling_price.required' => 'Selling price is required',
+                'down_payment.required' => 'Down payment is required',
+                'payment_frequency.required' => 'Payment frequency is required',
+                'number_of_payments.required' => 'Number of payments is required',
+                'payment_amount.required' => 'Payment amount is required',
+                'start_date.required' => 'Start date is required',
             ]);
 
             // Generate sequential loan number
