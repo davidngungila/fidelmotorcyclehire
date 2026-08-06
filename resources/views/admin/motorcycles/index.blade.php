@@ -5,7 +5,7 @@
 
 @section('content')
 
-<div class="space-y-6">
+<div x-data="motorcycleList()" class="space-y-6">
 
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div class="flex flex-col sm:flex-row sm:items-center gap-3 flex-1 max-w-2xl">
