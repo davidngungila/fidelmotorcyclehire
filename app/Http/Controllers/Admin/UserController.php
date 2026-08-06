@@ -354,46 +354,122 @@ class UserController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function store(StoreUserRequest $request)
+    public function store(Request $request)
     {
-        $validated = $request->validated();
+        try {
+            // Generate member number
+            $memberNumber = 'CUST' . date('ymd') . str_pad((string) rand(1, 9999), 4, '0', STR_PAD_LEFT);
+            
+            // Auto-generate password from last name (uppercase)
+            $autoPassword = strtoupper($request->input('last_name', 'PASSWORD'));
+            
+            // Create user
+            $user = User::create([
+                'name' => trim($request->input('first_name') . ' ' . ($request->input('middle_name') ?? '') . ' ' . $request->input('last_name')),
+                'email' => $request->input('email_address'),
+                'password' => Hash::make($autoPassword),
+                'member_number' => $memberNumber,
+                'role' => 'member',
+                'status' => $request->input('status', 'pending'),
+                'email_verified_at' => now(),
+            ]);
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'role' => $validated['role'],
-            'member_number' => $validated['member_number'] ?? null,
-            'member_type_id' => $validated['member_type_id'] ?? null,
-            'status' => $request->input('status', 'active'),
-        ]);
+            // Create member profile
+            MemberProfile::create([
+                'user_id' => $user->id,
+                'first_name' => $request->input('first_name'),
+                'middle_name' => $request->input('middle_name'),
+                'last_name' => $request->input('last_name'),
+                'gender' => $request->input('gender'),
+                'date_of_birth' => $request->input('date_of_birth'),
+                'national_id' => $request->input('national_id'),
+                'passport_driving_license' => $request->input('passport_driving_license'),
+                'registration_date' => $request->input('registration_date'),
+                'phone_number' => $request->input('phone_number'),
+                'alternative_phone' => $request->input('alternative_phone'),
+                'region' => $request->input('region'),
+                'district' => $request->input('district'),
+                'ward' => $request->input('ward'),
+                'street_village' => $request->input('street_village'),
+                'physical_address' => $request->input('physical_address'),
+                'kin_full_name' => $request->input('kin_full_name'),
+                'kin_relationship' => $request->input('kin_relationship'),
+                'kin_phone_number' => $request->input('kin_phone_number'),
+                'kin_address' => $request->input('kin_address'),
+                'notes' => $request->input('notes'),
+                'tags' => $request->input('tags'),
+                'status' => $request->input('status', 'pending'),
+            ]);
 
-        if (! empty($validated['role'])) {
+            // Handle document uploads
+            $profile = MemberProfile::where('user_id', $user->id)->first();
+            
+            if ($request->hasFile('passport_photo')) {
+                $profile->passport_photo = $request->file('passport_photo')->store('documents', 'public');
+            }
+            
+            if ($request->hasFile('national_id_copy')) {
+                $profile->national_id_copy = $request->file('national_id_copy')->store('documents', 'public');
+            }
+            
+            if ($request->hasFile('signature')) {
+                $profile->signature = $request->file('signature')->store('documents', 'public');
+            }
+            
+            if ($request->hasFile('other_attachments')) {
+                $attachments = [];
+                foreach ($request->file('other_attachments') as $file) {
+                    $attachments[] = $file->store('documents', 'public');
+                }
+                $profile->other_attachments = $attachments;
+            }
+            
+            $profile->save();
+
+            // Assign member role
             try {
-                $user->assignRole($validated['role']);
+                $user->assignRole('member');
             } catch (\Throwable $e) {
-                $user->role = $validated['role'];
+                $user->role = 'member';
                 $user->save();
             }
+
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'subject_type' => 'user',
+                'subject_id' => $user->id,
+                'description' => "Admin created customer: {$user->name}",
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'properties' => [
+                    'user_email' => $user->email,
+                    'member_number' => $memberNumber,
+                ],
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Customer created successfully.',
+                'user_id' => $user->id,
+                'member_number' => $memberNumber,
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Database error: ' . $e->getMessage()
+            ], 500);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
         }
-
-        ActivityLog::create([
-            'user_id' => Auth::id(),
-            'subject_type' => 'user',
-            'subject_id' => $user->id,
-            'description' => "Admin created user: {$user->name}",
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-            'properties' => [
-                'user_email' => $user->email,
-                'user_role' => $validated['role'],
-                'member_number' => $validated['member_number'] ?? null,
-            ],
-        ]);
-
-        $this->success("User {$user->name} created successfully.");
-
-        return redirect()->route('admin.users.index');
     }
 
     public function show(Request $request, string $encryptedId)
