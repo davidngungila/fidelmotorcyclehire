@@ -69,7 +69,7 @@
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Motorcycle *</label>
                 <select name="motorcycle_id" id="motorcycle_id" required class="form-input" @change="updateMotorcycleInfo()">
                   <option value="">Select a motorcycle</option>
-                  @foreach(\App\Models\Motorcycle::where('status', 'available')->get() as $motorcycle)
+                  @foreach(\App\Models\Motorcycle::where('status', 'Available')->get() as $motorcycle)
                     <option value="{{ $motorcycle->id }}" 
                             data-brand="{{ $motorcycle->brand }}"
                             data-model="{{ $motorcycle->model }}"
