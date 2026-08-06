@@ -154,7 +154,7 @@
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Payment Amount (TSh) *</label>
-                <input type="number" name="manual_payment_amount" id="manual_payment_amount" value="{{ old('manual_payment_amount') }}" min="0" step="0.01" placeholder="Auto-calculated or enter manually" class="form-input" @input="updateManualPayment()">
+                <input type="number" name="payment_amount" id="payment_amount" value="{{ old('payment_amount') }}" min="0" step="0.01" placeholder="Auto-calculated or enter manually" class="form-input" @input="updateManualPayment()">
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Start Date *</label>
@@ -441,7 +441,7 @@ function loanCreateForm() {
       // Calculate payment amount (unless manual override is set)
       if (!this.useManualPayment) {
         this.paymentAmount = this.totalRepayment / numberOfPayments;
-        document.getElementById('manual_payment_amount').value = this.paymentAmount.toFixed(2);
+        document.getElementById('payment_amount').value = this.paymentAmount.toFixed(2);
       }
       
       // Set payment frequency label
@@ -483,7 +483,7 @@ function loanCreateForm() {
     },
     
     updateManualPayment() {
-      const manualAmount = parseFloat(document.getElementById('manual_payment_amount').value) || 0;
+      const manualAmount = parseFloat(document.getElementById('payment_amount').value) || 0;
       if (manualAmount > 0) {
         this.useManualPayment = true;
         this.paymentAmount = manualAmount;
