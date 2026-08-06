@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
-@section('breadcrumb', 'Loans \u203A Create Loan Application')
-@section('page_title', 'Create Loan Application')
+@section('breadcrumb', 'Loans \u203A Create Loan Contract')
+@section('page_title', 'Create Loan Contract')
 
 @section('content')
 <div x-data="loanCreateForm()" class="space-y-6">
@@ -12,7 +12,7 @@
     </a>
     <div>
       <p class="text-sm text-primary-600 dark:text-primary-400">
-        Create a new loan application with comprehensive information
+        Create a new motorcycle hire purchase contract
       </p>
     </div>
   </div>
@@ -21,224 +21,249 @@
     <!-- Main Form Area -->
     <div class="lg:col-span-3">
       <div class="glass p-6 rounded-2xl">
-        <!-- Tabs Navigation -->
-        <div class="flex flex-wrap gap-2 mb-6 border-b border-primary-100 dark:border-primary-900/50 pb-4">
-          <button @click="currentTab = 1" :class="currentTab === 1 ? 'bg-primary-600 text-white' : 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300'" class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors">
-            <i class="fa-solid fa-user text-[10px]"></i> Basic Info
-          </button>
-          <button @click="currentTab = 2" :class="currentTab === 2 ? 'bg-primary-600 text-white' : 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300'" class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors">
-            <i class="fa-solid fa-calculator text-[10px]"></i> Loan Details
-          </button>
-          <button @click="currentTab = 3" :class="currentTab === 3 ? 'bg-primary-600 text-white' : 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300'" class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors">
-            <i class="fa-solid fa-shield-halved text-[10px]"></i> Collateral
-          </button>
-          <button @click="currentTab = 4" :class="currentTab === 4 ? 'bg-primary-600 text-white' : 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300'" class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors">
-            <i class="fa-solid fa-note-sticky text-[10px]"></i> Additional
-          </button>
-        </div>
-
-        <!-- Tab 1: Basic Information -->
-        <div x-show="currentTab === 1" x-transition class="space-y-5">
-          <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
-            <i class="fa-solid fa-user text-primary-500 text-xs"></i> Basic Information
-          </h3>
-          <form id="basicInfoForm" @submit.prevent="saveBasicInfo" class="space-y-5">
-            @csrf
+        <form id="loanForm" @submit.prevent="submitLoan" class="space-y-8">
+          @csrf
+          
+          <!-- Customer Selection -->
+          <div>
+            <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2 mb-4">
+              <i class="fa-solid fa-user text-primary-500 text-xs"></i> Customer Information
+            </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div class="md:col-span-2">
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Loan Product *</label>
-                <select name="loan_product_id" id="loan_product_id" required class="form-input" onchange="updateLoanDetails()">
-                  <option value="">Select a loan product</option>
-                  @foreach(\App\Models\LoanProduct::active()->get() as $product)
-                    <option value="{{ $product->id }}" 
-                            data-min-amount="{{ $product->min_amount }}"
-                            data-max-amount="{{ $product->max_amount }}"
-                            data-interest-rate="{{ $product->interest_rate }}"
-                            data-min-term="{{ $product->min_term_months }}"
-                            data-max-term="{{ $product->max_term_months }}"
-                            data-processing-fee="{{ $product->processing_fee }}"
-                            data-late-fee="{{ $product->late_fee }}"
-                            data-interest-type="{{ $product->interest_type }}"
-                            data-repayment-frequency="{{ $product->repayment_frequency }}"
-                            {{ old('loan_product_id') == $product->id ? 'selected' : '' }}>
-                      {{ $product->name }} ({{ $product->code }})
-                    </option>
-                  @endforeach
-                </select>
-              </div>
-              <div class="md:col-span-2">
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Member *</label>
-                <select name="user_id" id="user_id" required class="form-input" onchange="updateMemberNumber()">
-                  <option value="">Select a member</option>
-                  @foreach(\App\Models\User::where('role', 'member')->get() as $member)
-                    <option value="{{ $member->id }}" data-member-number="{{ $member->member_number }}" {{ old('user_id') == $member->id ? 'selected' : '' }}>
-                      {{ $member->name }} ({{ $member->member_number }})
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Customer *</label>
+                <select name="user_id" id="user_id" required class="form-input" @change="updateCustomerInfo()">
+                  <option value="">Select a customer</option>
+                  @foreach(\App\Models\User::where('role', 'member')->get() as $customer)
+                    <option value="{{ $customer->id }}" 
+                            data-member-number="{{ $customer->member_number }}"
+                            data-phone="{{ $customer->phone }}"
+                            {{ old('user_id') == $customer->id ? 'selected' : '' }}>
+                      {{ $customer->name }} ({{ $customer->member_number }})
                     </option>
                   @endforeach
                 </select>
               </div>
               <div>
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Member Number</label>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Customer Number</label>
                 <input type="text" name="member_number" id="member_number" value="{{ old('member_number') }}"
-                       placeholder="Auto-filled from member selection"
+                       placeholder="Auto-filled from customer selection"
                        class="form-input" readonly>
               </div>
               <div>
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Application Date *</label>
-                <input type="date" name="application_date" value="{{ old('application_date', date('Y-m-d')) }}" required class="form-input">
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Phone</label>
+                <input type="text" name="customer_phone" id="customer_phone" value="{{ old('customer_phone') }}"
+                       placeholder="Auto-filled from customer selection"
+                       class="form-input" readonly>
               </div>
-              <div>
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Purpose *</label>
-                <select name="purpose" required class="form-input">
-                  <option value="">Select purpose</option>
-                  <option value="business" {{ old('purpose') === 'business' ? 'selected' : '' }}>Business</option>
-                  <option value="education" {{ old('purpose') === 'education' ? 'selected' : '' }}>Education</option>
-                  <option value="agriculture" {{ old('purpose') === 'agriculture' ? 'selected' : '' }}>Agriculture</option>
-                  <option value="personal" {{ old('purpose') === 'personal' ? 'selected' : '' }}>Personal</option>
-                  <option value="emergency" {{ old('purpose') === 'emergency' ? 'selected' : '' }}>Emergency</option>
-                  <option value="other" {{ old('purpose') === 'other' ? 'selected' : '' }}>Other</option>
+            </div>
+          </div>
+
+          <!-- Motorcycle Selection -->
+          <div class="border-t border-primary-100 dark:border-primary-900/50 pt-8">
+            <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2 mb-4">
+              <i class="fa-solid fa-motorcycle text-primary-500 text-xs"></i> Motorcycle Selection
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div class="md:col-span-2">
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Motorcycle *</label>
+                <select name="motorcycle_id" id="motorcycle_id" required class="form-input" @change="updateMotorcycleInfo()">
+                  <option value="">Select a motorcycle</option>
+                  @foreach(\App\Models\Motorcycle::where('status', 'available')->get() as $motorcycle)
+                    <option value="{{ $motorcycle->id }}" 
+                            data-brand="{{ $motorcycle->brand }}"
+                            data-model="{{ $motorcycle->model }}"
+                            data-selling-price="{{ $motorcycle->selling_price }}"
+                            data-engine-number="{{ $motorcycle->engine_number }}"
+                            data-chassis-number="{{ $motorcycle->chassis_number }}"
+                            data-registration-number="{{ $motorcycle->registration_number }}"
+                            {{ old('motorcycle_id') == $motorcycle->id ? 'selected' : '' }}>
+                      {{ $motorcycle->brand }} {{ $motorcycle->model }} ({{ $motorcycle->registration_number }}) - TSh {{ number_format($motorcycle->selling_price, 2) }}
+                    </option>
+                  @endforeach
                 </select>
               </div>
-              <div class="md:col-span-2">
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Purpose Description</label>
-                <textarea name="purpose_description" rows="3" placeholder="Describe the purpose of the loan (optional)" class="form-input">{{ old('purpose_description') }}</textarea>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Brand</label>
+                <input type="text" name="motorcycle_brand" id="motorcycle_brand" value="{{ old('motorcycle_brand') }}"
+                       placeholder="Auto-filled from motorcycle selection"
+                       class="form-input" readonly>
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Model</label>
+                <input type="text" name="motorcycle_model" id="motorcycle_model" value="{{ old('motorcycle_model') }}"
+                       placeholder="Auto-filled from motorcycle selection"
+                       class="form-input" readonly>
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Registration Number</label>
+                <input type="text" name="registration_number" id="registration_number" value="{{ old('registration_number') }}"
+                       placeholder="Auto-filled from motorcycle selection"
+                       class="form-input" readonly>
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Engine Number</label>
+                <input type="text" name="engine_number" id="engine_number" value="{{ old('engine_number') }}"
+                       placeholder="Auto-filled from motorcycle selection"
+                       class="form-input" readonly>
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Chassis Number</label>
+                <input type="text" name="chassis_number" id="chassis_number" value="{{ old('chassis_number') }}"
+                       placeholder="Auto-filled from motorcycle selection"
+                       class="form-input" readonly>
               </div>
             </div>
-            <div class="flex items-center justify-end gap-3 pt-4">
-              <button type="submit" :disabled="isSaving" class="px-6 py-2.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                <span x-show="!isSaving">Save & Continue</span>
-                <span x-show="isSaving"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Saving...</span>
-              </button>
-            </div>
-          </form>
-        </div>
+          </div>
 
-        <!-- Tab 2: Loan Details -->
-        <div x-show="currentTab === 2" x-transition class="space-y-5">
-          <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
-            <i class="fa-solid fa-calculator text-primary-500 text-xs"></i> Loan Details
-          </h3>
-          <form id="loanDetailsForm" @submit.prevent="saveLoanDetails" class="space-y-5">
-            @csrf
+          <!-- Loan Details -->
+          <div class="border-t border-primary-100 dark:border-primary-900/50 pt-8">
+            <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2 mb-4">
+              <i class="fa-solid fa-calculator text-primary-500 text-xs"></i> Loan Details
+            </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Principal Amount (TSh) *</label>
-                <input type="number" name="principal_amount" id="principal_amount" value="{{ old('principal_amount') }}" required min="0" step="0.01" placeholder="Enter loan amount" class="form-input">
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Selling Price (TSh) *</label>
+                <input type="number" name="selling_price" id="selling_price" value="{{ old('selling_price') }}" required min="0" step="0.01" placeholder="Auto-filled from motorcycle" class="form-input" @input="calculateRepayment()">
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Down Payment (TSh) *</label>
+                <input type="number" name="down_payment" id="down_payment" value="{{ old('down_payment', 0) }}" required min="0" step="0.01" placeholder="Enter down payment amount" class="form-input" @input="calculateRepayment()">
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Interest Rate (%) *</label>
-                <input type="number" name="interest_rate" id="interest_rate" value="{{ old('interest_rate') }}" required min="0" max="100" step="0.01" placeholder="Auto-filled from product" class="form-input">
+                <input type="number" name="interest_rate" id="interest_rate" value="{{ old('interest_rate', 15) }}" required min="0" max="100" step="0.01" placeholder="Enter interest rate" class="form-input" @input="calculateRepayment()">
               </div>
               <div>
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Term (Months) *</label>
-                <input type="number" name="term_months" id="term_months" value="{{ old('term_months') }}" required min="1" placeholder="Auto-filled from product" class="form-input">
-              </div>
-              <div>
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Repayment Frequency</label>
-                <select name="repayment_frequency" class="form-input">
-                  <option value="monthly">Monthly</option>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Payment Frequency *</label>
+                <select name="payment_frequency" id="payment_frequency" required class="form-input" @change="calculateRepayment()">
+                  <option value="daily">Daily</option>
+                  <option value="weekly" selected>Weekly</option>
                   <option value="biweekly">Bi-weekly</option>
-                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
                 </select>
               </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Number of Payments *</label>
+                <input type="number" name="number_of_payments" id="number_of_payments" value="{{ old('number_of_payments', 52) }}" required min="1" placeholder="Enter number of payments" class="form-input" @input="calculateRepayment()">
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Start Date *</label>
+                <input type="date" name="start_date" id="start_date" value="{{ old('start_date', date('Y-m-d')) }}" required class="form-input" @input="calculateRepayment()">
+              </div>
             </div>
-            <div class="flex items-center justify-end gap-3 pt-4">
-              <button type="button" @click="currentTab = 1" class="px-6 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-bold transition-colors">
-                Back
-              </button>
-              <button type="submit" :disabled="isSaving" class="px-6 py-2.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                <span x-show="!isSaving">Save & Continue</span>
-                <span x-show="isSaving"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Saving...</span>
-              </button>
-            </div>
-          </form>
-        </div>
+          </div>
 
-        <!-- Tab 3: Collateral -->
-        <div x-show="currentTab === 3" x-transition class="space-y-5">
-          <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
-            <i class="fa-solid fa-shield-halved text-primary-500 text-xs"></i> Collateral & Guarantor
-          </h3>
-          <form id="collateralForm" @submit.prevent="saveCollateral" class="space-y-5">
-            @csrf
+          <!-- Repayment Summary -->
+          <div class="border-t border-primary-100 dark:border-primary-900/50 pt-8">
+            <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2 mb-4">
+              <i class="fa-solid fa-chart-line text-primary-500 text-xs"></i> Repayment Summary
+            </h3>
+            <div class="bg-primary-50 dark:bg-primary-900/30 rounded-xl p-5">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <p class="text-xs text-primary-600 dark:text-primary-400 mb-1">Principal Amount</p>
+                  <p class="text-lg font-bold text-primary-900 dark:text-white" x-text="formatCurrency(principalAmount)">TSh 0.00</p>
+                </div>
+                <div>
+                  <p class="text-xs text-primary-600 dark:text-primary-400 mb-1">Total Interest</p>
+                  <p class="text-lg font-bold text-orange-600 dark:text-orange-400" x-text="formatCurrency(totalInterest)">TSh 0.00</p>
+                </div>
+                <div>
+                  <p class="text-xs text-primary-600 dark:text-primary-400 mb-1">Total Repayment</p>
+                  <p class="text-lg font-bold text-primary-600 dark:text-primary-300" x-text="formatCurrency(totalRepayment)">TSh 0.00</p>
+                </div>
+                <div>
+                  <p class="text-xs text-primary-600 dark:text-primary-400 mb-1">Payment Amount</p>
+                  <p class="text-lg font-bold text-emerald-600 dark:text-emerald-400" x-text="formatCurrency(paymentAmount)">TSh 0.00</p>
+                </div>
+                <div>
+                  <p class="text-xs text-primary-600 dark:text-primary-400 mb-1">Payment Frequency</p>
+                  <p class="text-lg font-bold text-primary-900 dark:text-white" x-text="paymentFrequencyLabel">Weekly</p>
+                </div>
+                <div>
+                  <p class="text-xs text-primary-600 dark:text-primary-400 mb-1">End Date</p>
+                  <p class="text-lg font-bold text-primary-900 dark:text-white" x-text="endDate">—</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Collateral & Guarantor -->
+          <div class="border-t border-primary-100 dark:border-primary-900/50 pt-8">
+            <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2 mb-4">
+              <i class="fa-solid fa-shield-halved text-primary-500 text-xs"></i> Collateral & Guarantor
+            </h3>
             <div class="space-y-5">
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Collateral Description</label>
-                <textarea name="collateral" rows="4" placeholder="Describe collateral (optional)" class="form-input">{{ old('collateral') }}</textarea>
+                <textarea name="collateral" rows="3" placeholder="Describe additional collateral (optional)" class="form-input">{{ old('collateral') }}</textarea>
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Guarantor Information</label>
-                <textarea name="guarantor" rows="4" placeholder="Describe guarantor information (optional)" class="form-input">{{ old('guarantor') }}</textarea>
+                <textarea name="guarantor" rows="3" placeholder="Describe guarantor information (optional)" class="form-input">{{ old('guarantor') }}</textarea>
               </div>
             </div>
-            <div class="flex items-center justify-end gap-3 pt-4">
-              <button type="button" @click="currentTab = 2" class="px-6 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-bold transition-colors">
-                Back
-              </button>
-              <button type="submit" :disabled="isSaving" class="px-6 py-2.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                <span x-show="!isSaving">Save & Continue</span>
-                <span x-show="isSaving"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Saving...</span>
-              </button>
-            </div>
-          </form>
-        </div>
+          </div>
 
-        <!-- Tab 4: Additional -->
-        <div x-show="currentTab === 4" x-transition class="space-y-5">
-          <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
-            <i class="fa-solid fa-note-sticky text-primary-500 text-xs"></i> Additional Information
-          </h3>
-          <form id="additionalForm" @submit.prevent="submitLoan" class="space-y-5">
-            @csrf
-            <div class="space-y-5">
-              <div>
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Notes</label>
-                <textarea name="notes" rows="4" placeholder="Additional notes (optional)" class="form-input">{{ old('notes') }}</textarea>
-              </div>
+          <!-- Additional Information -->
+          <div class="border-t border-primary-100 dark:border-primary-900/50 pt-8">
+            <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2 mb-4">
+              <i class="fa-solid fa-note-sticky text-primary-500 text-xs"></i> Additional Information
+            </h3>
+            <div>
+              <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Notes</label>
+              <textarea name="notes" rows="3" placeholder="Additional notes (optional)" class="form-input">{{ old('notes') }}</textarea>
             </div>
-            <div class="flex items-center justify-end gap-3 pt-4">
-              <button type="button" @click="currentTab = 3" class="px-6 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-bold transition-colors">
-                Back
-              </button>
-              <button type="submit" :disabled="isSubmitting" class="px-6 py-2.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                <span x-show="!isSubmitting"><i class="fa-solid fa-check mr-2"></i> Submit Loan Application</span>
-                <span x-show="isSubmitting"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Submitting...</span>
-              </button>
-            </div>
-          </form>
-        </div>
+          </div>
+
+          <div class="flex justify-end gap-3 pt-4">
+            <a href="{{ route('admin.loans.index') }}" class="px-6 py-2.5 rounded-xl bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-bold transition-all">
+              Cancel
+            </a>
+            <button type="submit" :disabled="loading" class="px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+              <i :class="loading ? 'fa-solid fa-spinner fa-spin' : 'fa-solid fa-check'" class="mr-1.5"></i>
+              <span x-text="loading ? 'Creating Contract...' : 'Create Contract'">Create Contract</span>
+            </button>
+          </div>
+        </form>
       </div>
     </div>
 
-    <!-- Progress Sidebar -->
+    <!-- Right Sidebar Summary -->
     <div class="lg:col-span-1">
-      <div class="glass p-5 rounded-2xl sticky top-6">
-        <h3 class="font-bold text-primary-900 dark:text-white text-sm mb-4">Application Progress</h3>
-        <div class="space-y-3">
-          <div class="flex items-center gap-3">
-            <div :class="currentTab >= 1 ? 'bg-primary-600' : 'bg-primary-200 dark:bg-primary-800'" class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold transition-colors">1</div>
-            <span :class="currentTab >= 1 ? 'text-primary-900 dark:text-white font-semibold' : 'text-primary-500'" class="text-sm transition-colors">Basic Info</span>
+      <div class="glass p-6 rounded-2xl sticky top-6">
+        <h3 class="font-bold text-primary-900 dark:text-white text-sm mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-clipboard-list text-primary-500 text-xs"></i> Contract Summary
+        </h3>
+        <div class="space-y-4">
+          <div>
+            <p class="text-xs text-primary-600 dark:text-primary-400">Customer</p>
+            <p class="text-sm font-semibold text-primary-900 dark:text-white" x-text="customerName || '—'">—</p>
           </div>
-          <div class="flex items-center gap-3">
-            <div :class="currentTab >= 2 ? 'bg-primary-600' : 'bg-primary-200 dark:bg-primary-800'" class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold transition-colors">2</div>
-            <span :class="currentTab >= 2 ? 'text-primary-900 dark:text-white font-semibold' : 'text-primary-500'" class="text-sm transition-colors">Loan Details</span>
+          <div>
+            <p class="text-xs text-primary-600 dark:text-primary-400">Motorcycle</p>
+            <p class="text-sm font-semibold text-primary-900 dark:text-white" x-text="motorcycleName || '—'">—</p>
           </div>
-          <div class="flex items-center gap-3">
-            <div :class="currentTab >= 3 ? 'bg-primary-600' : 'bg-primary-200 dark:bg-primary-800'" class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold transition-colors">3</div>
-            <span :class="currentTab >= 3 ? 'text-primary-900 dark:text-white font-semibold' : 'text-primary-500'" class="text-sm transition-colors">Collateral</span>
+          <div>
+            <p class="text-xs text-primary-600 dark:text-primary-400">Selling Price</p>
+            <p class="text-sm font-semibold text-primary-900 dark:text-white" x-text="formatCurrency(sellingPrice)">TSh 0.00</p>
           </div>
-          <div class="flex items-center gap-3">
-            <div :class="currentTab >= 4 ? 'bg-primary-600' : 'bg-primary-200 dark:bg-primary-800'" class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold transition-colors">4</div>
-            <span :class="currentTab >= 4 ? 'text-primary-900 dark:text-white font-semibold' : 'text-primary-500'" class="text-sm transition-colors">Additional</span>
+          <div>
+            <p class="text-xs text-primary-600 dark:text-primary-400">Down Payment</p>
+            <p class="text-sm font-semibold text-primary-900 dark:text-white" x-text="formatCurrency(downPayment)">TSh 0.00</p>
           </div>
-        </div>
-        <div class="mt-6 pt-4 border-t border-primary-100 dark:border-primary-900/50">
-          <div class="flex items-center justify-between text-xs text-primary-600 dark:text-primary-400 mb-2">
-            <span>Completion</span>
-            <span x-text="progress + '%'"></span>
-          </div>
-          <div class="w-full bg-primary-100 dark:bg-primary-900/40 rounded-full h-2">
-            <div :style="'width: ' + progress + '%'" class="bg-primary-600 h-2 rounded-full transition-all duration-300"></div>
+          <div class="pt-4 border-t border-primary-100 dark:border-primary-900/50">
+            <p class="text-xs text-primary-600 dark:text-primary-400 mb-2">Payment Schedule</p>
+            <div class="space-y-2 max-h-64 overflow-y-auto">
+              <template x-for="(payment, index) in paymentSchedule" :key="index">
+                <div class="flex justify-between items-center text-xs bg-primary-50 dark:bg-primary-900/30 p-2 rounded">
+                  <span x-text="'Payment ' + (index + 1)"></span>
+                  <span x-text="formatCurrency(payment.amount)" class="font-semibold"></span>
+                  <span x-text="payment.date" class="text-primary-600 dark:text-primary-400"></span>
+                </div>
+              </template>
+            </div>
           </div>
         </div>
       </div>
@@ -251,200 +276,145 @@
 <script>
 function loanCreateForm() {
   return {
-    currentTab: 1,
-    progress: 25,
-    isSaving: false,
-    isSubmitting: false,
-    loanData: {},
+    loading: false,
+    customerName: '',
+    motorcycleName: '',
+    sellingPrice: 0,
+    downPayment: 0,
+    principalAmount: 0,
+    totalInterest: 0,
+    totalRepayment: 0,
+    paymentAmount: 0,
+    paymentFrequencyLabel: 'Weekly',
+    endDate: '—',
+    paymentSchedule: [],
     
-    updateMemberNumber() {
+    updateCustomerInfo() {
       const select = document.getElementById('user_id');
-      const memberNumberInput = document.getElementById('member_number');
       const selectedOption = select.options[select.selectedIndex];
       
       if (selectedOption && selectedOption.value) {
-        memberNumberInput.value = selectedOption.getAttribute('data-member-number') || '';
+        document.getElementById('member_number').value = selectedOption.getAttribute('data-member-number') || '';
+        document.getElementById('customer_phone').value = selectedOption.getAttribute('data-phone') || '';
+        this.customerName = selectedOption.text.split('(')[0].trim();
       } else {
-        memberNumberInput.value = '';
+        document.getElementById('member_number').value = '';
+        document.getElementById('customer_phone').value = '';
+        this.customerName = '';
       }
     },
     
-    updateLoanDetails() {
-      const select = document.getElementById('loan_product_id');
+    updateMotorcycleInfo() {
+      const select = document.getElementById('motorcycle_id');
       const selectedOption = select.options[select.selectedIndex];
       
       if (selectedOption && selectedOption.value) {
-        document.getElementById('interest_rate').value = selectedOption.getAttribute('data-interest-rate') || '';
-        document.getElementById('term_months').value = selectedOption.getAttribute('data-min-term') || '';
+        document.getElementById('motorcycle_brand').value = selectedOption.getAttribute('data-brand') || '';
+        document.getElementById('motorcycle_model').value = selectedOption.getAttribute('data-model') || '';
+        document.getElementById('registration_number').value = selectedOption.getAttribute('data-registration-number') || '';
+        document.getElementById('engine_number').value = selectedOption.getAttribute('data-engine-number') || '';
+        document.getElementById('chassis_number').value = selectedOption.getAttribute('data-chassis-number') || '';
         
-        const minAmount = selectedOption.getAttribute('data-min-amount');
-        const maxAmount = selectedOption.getAttribute('data-max-amount');
-        const principalAmountInput = document.getElementById('principal_amount');
+        const sellingPrice = parseFloat(selectedOption.getAttribute('data-selling-price')) || 0;
+        document.getElementById('selling_price').value = sellingPrice;
+        this.sellingPrice = sellingPrice;
+        this.motorcycleName = selectedOption.text.split('-')[0].trim();
         
-        if (principalAmountInput.value === '' || parseFloat(principalAmountInput.value) < parseFloat(minAmount)) {
-          principalAmountInput.value = minAmount;
-        }
-        principalAmountInput.min = minAmount;
-        principalAmountInput.max = maxAmount;
+        this.calculateRepayment();
       } else {
-        document.getElementById('interest_rate').value = '';
-        document.getElementById('term_months').value = '';
-        document.getElementById('principal_amount').value = '';
-        document.getElementById('principal_amount').min = 0;
-        document.getElementById('principal_amount').max = '';
+        document.getElementById('motorcycle_brand').value = '';
+        document.getElementById('motorcycle_model').value = '';
+        document.getElementById('registration_number').value = '';
+        document.getElementById('engine_number').value = '';
+        document.getElementById('chassis_number').value = '';
+        document.getElementById('selling_price').value = '';
+        this.sellingPrice = 0;
+        this.motorcycleName = '';
+        
+        this.calculateRepayment();
       }
     },
     
-    async saveBasicInfo() {
-      this.isSaving = true;
-      const form = document.getElementById('basicInfoForm');
-      const formData = new FormData(form);
+    calculateRepayment() {
+      const sellingPrice = parseFloat(document.getElementById('selling_price').value) || 0;
+      const downPayment = parseFloat(document.getElementById('down_payment').value) || 0;
+      const interestRate = parseFloat(document.getElementById('interest_rate').value) || 0;
+      const paymentFrequency = document.getElementById('payment_frequency').value;
+      const numberOfPayments = parseInt(document.getElementById('number_of_payments').value) || 1;
+      const startDate = document.getElementById('start_date').value;
       
-      try {
-        const response = await fetch('/admin/loans/store-basic-info', {
-          method: 'POST',
-          headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Accept': 'application/json'
-          },
-          body: formData
-        });
+      this.sellingPrice = sellingPrice;
+      this.downPayment = downPayment;
+      
+      // Calculate principal amount
+      this.principalAmount = Math.max(0, sellingPrice - downPayment);
+      
+      // Calculate total interest (simple interest)
+      this.totalInterest = this.principalAmount * (interestRate / 100);
+      
+      // Calculate total repayment
+      this.totalRepayment = this.principalAmount + this.totalInterest;
+      
+      // Calculate payment amount
+      this.paymentAmount = this.totalRepayment / numberOfPayments;
+      
+      // Set payment frequency label
+      const frequencyLabels = {
+        'daily': 'Daily',
+        'weekly': 'Weekly',
+        'biweekly': 'Bi-weekly',
+        'monthly': 'Monthly'
+      };
+      this.paymentFrequencyLabel = frequencyLabels[paymentFrequency] || 'Weekly';
+      
+      // Calculate end date and payment schedule
+      if (startDate && numberOfPayments > 0) {
+        const startDateObj = new Date(startDate);
+        const paymentIntervals = {
+          'daily': 1,
+          'weekly': 7,
+          'biweekly': 14,
+          'monthly': 30
+        };
+        const intervalDays = paymentIntervals[paymentFrequency] || 7;
         
-        const data = await response.json();
+        this.paymentSchedule = [];
+        let currentDate = new Date(startDateObj);
         
-        if (data.success) {
-          this.loanData = { ...this.loanData, ...data.loan_data };
-          this.progress = 50;
-          Swal.fire({
-            icon: 'success',
-            title: 'Saved!',
-            text: 'Basic information saved successfully.',
-            timer: 1500,
-            showConfirmButton: false
-          });
-          this.currentTab = 2;
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: data.message || 'Failed to save basic information.'
+        for (let i = 0; i < numberOfPayments; i++) {
+          currentDate.setDate(currentDate.getDate() + intervalDays);
+          this.paymentSchedule.push({
+            amount: this.paymentAmount,
+            date: currentDate.toISOString().split('T')[0]
           });
         }
-      } catch (error) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Failed to save basic information.'
-        });
+        
+        this.endDate = currentDate.toISOString().split('T')[0];
+      } else {
+        this.paymentSchedule = [];
+        this.endDate = '—';
       }
-      
-      this.isSaving = false;
     },
     
-    async saveLoanDetails() {
-      this.isSaving = true;
-      const form = document.getElementById('loanDetailsForm');
-      const formData = new FormData(form);
-      
-      try {
-        const response = await fetch('/admin/loans/store-loan-details', {
-          method: 'POST',
-          headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Accept': 'application/json'
-          },
-          body: formData
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          this.loanData = { ...this.loanData, ...data.loan_data };
-          this.progress = 75;
-          Swal.fire({
-            icon: 'success',
-            title: 'Saved!',
-            text: 'Loan details saved successfully.',
-            timer: 1500,
-            showConfirmButton: false
-          });
-          this.currentTab = 3;
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: data.message || 'Failed to save loan details.'
-          });
-        }
-      } catch (error) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Failed to save loan details.'
-        });
-      }
-      
-      this.isSaving = false;
-    },
-    
-    async saveCollateral() {
-      this.isSaving = true;
-      const form = document.getElementById('collateralForm');
-      const formData = new FormData(form);
-      
-      try {
-        const response = await fetch('/admin/loans/store-collateral', {
-          method: 'POST',
-          headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Accept': 'application/json'
-          },
-          body: formData
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          this.loanData = { ...this.loanData, ...data.loan_data };
-          this.progress = 90;
-          Swal.fire({
-            icon: 'success',
-            title: 'Saved!',
-            text: 'Collateral information saved successfully.',
-            timer: 1500,
-            showConfirmButton: false
-          });
-          this.currentTab = 4;
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: data.message || 'Failed to save collateral information.'
-          });
-        }
-      } catch (error) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Failed to save collateral information.'
-        });
-      }
-      
-      this.isSaving = false;
+    formatCurrency(amount) {
+      return 'TSh ' + (amount || 0).toLocaleString('en-TZ', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     },
     
     async submitLoan() {
-      this.isSubmitting = true;
-      const form = document.getElementById('additionalForm');
+      this.loading = true;
+      const form = document.getElementById('loanForm');
       const formData = new FormData(form);
       
-      // Add all accumulated data
-      Object.keys(this.loanData).forEach(key => {
-        formData.append(key, this.loanData[key]);
-      });
+      // Add calculated values
+      formData.append('principal_amount', this.principalAmount);
+      formData.append('total_interest', this.totalInterest);
+      formData.append('total_repayment', this.totalRepayment);
+      formData.append('payment_amount', this.paymentAmount);
+      formData.append('end_date', this.endDate);
+      formData.append('payment_schedule', JSON.stringify(this.paymentSchedule));
       
       try {
-        const response = await fetch('/admin/loans/store', {
+        const response = await fetch('{{ route('admin.loans.store') }}', {
           method: 'POST',
           headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -453,48 +423,75 @@ function loanCreateForm() {
           body: formData
         });
         
+        const contentType = response.headers.get('content-type');
+        
+        if (!response.ok) {
+          if (contentType && contentType.includes('application/json')) {
+            const data = await response.json();
+            let errorMessage = 'Failed to create loan contract.';
+            if (data.errors) {
+              const errorMessages = Object.values(data.errors).flat();
+              errorMessage = errorMessages.join('\n');
+            } else if (data.message) {
+              errorMessage = data.message;
+            }
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: errorMessage
+            });
+          } else {
+            const text = await response.text();
+            console.error('Server returned HTML instead of JSON:', text);
+            Swal.fire({
+              icon: 'error',
+              title: 'Server Error',
+              text: 'Please check the form for validation errors.'
+            });
+          }
+          this.loading = false;
+          return;
+        }
+        
         const data = await response.json();
         
         if (data.success) {
-          this.progress = 100;
           Swal.fire({
             icon: 'success',
             title: 'Success!',
-            text: 'Loan application submitted successfully.',
+            text: 'Loan contract created successfully.',
             timer: 2000,
             showConfirmButton: false
           }).then(() => {
-            window.location.href = '/admin/loans';
+            window.location.href = '{{ route('admin.loans.index') }}';
           });
         } else {
+          let errorMessage = 'Failed to create loan contract.';
+          if (data.errors) {
+            const errorMessages = Object.values(data.errors).flat();
+            errorMessage = errorMessages.join('\n');
+          } else if (data.message) {
+            errorMessage = data.message;
+          }
           Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: data.message || 'Failed to submit loan application.'
+            text: errorMessage
           });
+          this.loading = false;
         }
       } catch (error) {
+        console.error('Error:', error);
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: 'Failed to submit loan application.'
+          text: error.message || 'Failed to create loan contract.'
         });
+        this.loading = false;
       }
-      
-      this.isSubmitting = false;
     }
   };
 }
-
-// Auto-fill on page load
-document.addEventListener('DOMContentLoaded', function() {
-  const form = document.querySelector('[x-data]');
-  if (form && form.__x) {
-    form.__x.$data.updateMemberNumber();
-    form.__x.$data.updateLoanDetails();
-  }
-});
 </script>
 @endpush
-
 @endsection
