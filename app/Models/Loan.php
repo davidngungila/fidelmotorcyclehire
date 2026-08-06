@@ -39,6 +39,13 @@ class Loan extends Model
         'monthly_income',
         'other_income',
         'work_experience',
+        'motorcycle_id',
+        'motorcycle_price',
+        'down_payment',
+        'financed_amount',
+        'payment_schedule',
+        'late_payment_penalty',
+        'total_penalties',
     ];
 
     protected $casts = [

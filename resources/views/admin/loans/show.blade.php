@@ -452,7 +452,7 @@
               <p class="text-lg font-black text-blue-800 dark:text-blue-400">{{ $fmt($outstanding) }}</p>
             </div>
             <div>
-              <p class="text-xs font-semibold text-purple-700 dark:text-purple-300">Minimum Payment</p>
+              <p class="text-xs font-semibold text-purple-700 dark:text-purple-300">Installment (Any Amount)</p>
               <p class="text-lg font-black text-purple-800 dark:text-purple-400">{{ $fmt($installment) }}</p>
             </div>
             <div id="excessInfo" class="hidden">
