@@ -145,7 +145,7 @@ class LoanController extends Controller
                 'user_id' => 'required|exists:users,id',
                 'member_number' => 'required|string|max:50',
                 'application_date' => 'required|date',
-                'purpose' => 'required|in:business,education,agriculture,personal,emergency,other',
+                'purpose' => 'required|in:business,education,agriculture,personal,emergency,other,motorcycle',
                 'purpose_description' => 'nullable|string',
             ]);
 
@@ -177,7 +177,7 @@ class LoanController extends Controller
                 'principal_amount' => 'required|numeric|min:0',
                 'interest_rate' => 'required|numeric|min:0|max:100',
                 'term_months' => 'required|integer|min:1',
-                'repayment_frequency' => 'nullable|in:monthly,biweekly,weekly',
+                'repayment_frequency' => 'nullable|in:daily,weekly,biweekly,monthly',
             ]);
 
             return response()->json([
@@ -596,7 +596,7 @@ class LoanController extends Controller
             'amount_paid' => 'nullable|numeric|min:0',
             'balance' => 'nullable|numeric|min:0',
             'status' => 'required|in:pending,approved,disbursed,active,paid,defaulted,rejected',
-            'purpose' => 'required|in:business,education,agriculture,personal,emergency,other',
+            'purpose' => 'required|in:business,education,agriculture,personal,emergency,other,motorcycle',
             'purpose_description' => 'nullable|string',
             'collateral' => 'nullable|string',
             'guarantor' => 'nullable|string',
@@ -958,13 +958,11 @@ class LoanController extends Controller
         }
 
         $validated = $request->validate([
-            'amount' => ['required', 'numeric', 'min:0', "gte:{$loan->monthly_payment}"],
+            'amount' => ['required', 'numeric', 'min:0'],
             'payment_date' => 'required|date',
             'payment_method' => 'required|in:cash,bank_transfer,mobile_money,cheque',
             'notes' => 'nullable|string',
             'allocate_excess_to' => 'nullable|in:savings,investment,refund',
-        ], [
-            'amount.gte' => "Payment amount must be at least the monthly installment of " . number_format((float) $loan->monthly_payment, 2) . " TSh",
         ]);
 
         $paymentAmount = (float) $validated['amount'];

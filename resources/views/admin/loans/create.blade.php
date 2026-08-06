@@ -150,7 +150,7 @@
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Number of Payments *</label>
-                <input type="number" name="number_of_payments" id="number_of_payments" value="{{ old('number_of_payments', 52) }}" required min="1" placeholder="Auto-calculated" class="form-input" readonly>
+                <input type="number" name="number_of_payments" id="number_of_payments" value="{{ old('number_of_payments', 52) }}" required min="1" placeholder="Auto-calculated" class="form-input" @input="updateNumberOfPayments()">
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Payment Amount (TSh) *</label>
@@ -431,21 +431,16 @@ function loanCreateForm() {
       this.sellingPrice = sellingPrice;
       this.downPayment = downPayment;
       
-      // Calculate principal amount
       this.principalAmount = Math.max(0, sellingPrice - downPayment);
-      
-      // No interest - total repayment equals principal
       this.totalInterest = 0;
       this.totalRepayment = this.principalAmount;
       
-      // Calculate number of payments based on payment amount
       if (paymentAmount > 0) {
         this.paymentAmount = paymentAmount;
         this.useManualPayment = true;
         const calculatedPayments = Math.ceil(this.totalRepayment / paymentAmount);
         document.getElementById('number_of_payments').value = calculatedPayments;
       } else {
-        // If no payment amount set, use default based on frequency
         this.useManualPayment = false;
         const defaultPayments = {
           'daily': 365,
@@ -459,7 +454,37 @@ function loanCreateForm() {
         document.getElementById('payment_amount').value = this.paymentAmount.toFixed(2);
       }
       
-      // Set payment frequency label
+      this.refreshSchedule();
+    },
+    
+    updateManualPayment() {
+      const manualAmount = parseFloat(document.getElementById('payment_amount').value) || 0;
+      if (manualAmount > 0) {
+        this.useManualPayment = true;
+        this.paymentAmount = manualAmount;
+        const calculatedPayments = Math.ceil(this.totalRepayment / manualAmount);
+        document.getElementById('number_of_payments').value = calculatedPayments;
+        this.refreshSchedule();
+      } else {
+        this.useManualPayment = false;
+        this.calculateRepayment();
+      }
+    },
+    
+    updateNumberOfPayments() {
+      const numPayments = parseInt(document.getElementById('number_of_payments').value) || 1;
+      if (numPayments > 0 && this.totalRepayment > 0) {
+        this.paymentAmount = this.totalRepayment / numPayments;
+        document.getElementById('payment_amount').value = this.paymentAmount.toFixed(2);
+        this.refreshSchedule();
+      }
+    },
+    
+    refreshSchedule() {
+      const paymentFrequency = document.getElementById('payment_frequency').value;
+      const startDate = document.getElementById('start_date').value;
+      const numberOfPayments = parseInt(document.getElementById('number_of_payments').value) || 1;
+      
       const frequencyLabels = {
         'daily': 'Daily',
         'weekly': 'Weekly',
@@ -468,10 +493,6 @@ function loanCreateForm() {
       };
       this.paymentFrequencyLabel = frequencyLabels[paymentFrequency] || 'Weekly';
       
-      // Get the actual number of payments for schedule calculation
-      const numberOfPayments = parseInt(document.getElementById('number_of_payments').value) || 1;
-      
-      // Calculate end date and payment schedule
       if (startDate && numberOfPayments > 0) {
         const startDateObj = new Date(startDate);
         const paymentIntervals = {
@@ -484,11 +505,15 @@ function loanCreateForm() {
         
         this.paymentSchedule = [];
         let currentDate = new Date(startDateObj);
+        let runningBalance = this.totalRepayment;
         
         for (let i = 0; i < numberOfPayments; i++) {
           currentDate.setDate(currentDate.getDate() + intervalDays);
+          const isLast = i === numberOfPayments - 1;
+          const paymentForSchedule = isLast ? runningBalance : this.paymentAmount;
+          runningBalance = Math.max(0, runningBalance - this.paymentAmount);
           this.paymentSchedule.push({
-            amount: this.paymentAmount,
+            amount: paymentForSchedule,
             date: currentDate.toISOString().split('T')[0]
           });
         }
@@ -497,24 +522,6 @@ function loanCreateForm() {
       } else {
         this.paymentSchedule = [];
         this.endDate = '—';
-      }
-    },
-    
-    updateManualPayment() {
-      const manualAmount = parseFloat(document.getElementById('payment_amount').value) || 0;
-      if (manualAmount > 0) {
-        this.useManualPayment = true;
-        this.paymentAmount = manualAmount;
-        // Recalculate number of payments based on manual payment amount
-        const calculatedPayments = Math.ceil(this.totalRepayment / manualAmount);
-        document.getElementById('number_of_payments').value = calculatedPayments;
-        // Recalculate total repayment
-        this.totalRepayment = this.paymentAmount * calculatedPayments;
-        // Recalculate interest
-        this.totalInterest = this.totalRepayment - this.principalAmount;
-      } else {
-        this.useManualPayment = false;
-        this.calculateRepayment();
       }
     },
     
