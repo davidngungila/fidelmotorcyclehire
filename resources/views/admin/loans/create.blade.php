@@ -73,12 +73,13 @@
                     <option value="{{ $motorcycle->id }}" 
                             data-brand="{{ $motorcycle->brand }}"
                             data-model="{{ $motorcycle->model }}"
+                            data-purchase-price="{{ $motorcycle->purchase_price }}"
                             data-selling-price="{{ $motorcycle->selling_price }}"
                             data-engine-number="{{ $motorcycle->engine_number }}"
                             data-chassis-number="{{ $motorcycle->chassis_number }}"
                             data-registration-number="{{ $motorcycle->registration_number }}"
                             {{ old('motorcycle_id') == $motorcycle->id ? 'selected' : '' }}>
-                      {{ $motorcycle->brand }} {{ $motorcycle->model }} ({{ $motorcycle->registration_number }}) - TSh {{ number_format($motorcycle->selling_price, 2) }}
+                      {{ $motorcycle->brand }} {{ $motorcycle->model }} ({{ $motorcycle->registration_number }}) - TSh {{ number_format($motorcycle->purchase_price, 2) }}
                     </option>
                   @endforeach
                 </select>
@@ -123,16 +124,20 @@
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Purchase Price (TSh) *</label>
+                <input type="number" name="purchase_price" id="purchase_price" value="{{ old('purchase_price') }}" required min="0" step="0.01" placeholder="Enter purchase price" class="form-input" @input="calculateSellingPrice()">
+              </div>
+              <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Profit Margin (%) *</label>
+                <input type="number" name="profit_margin" id="profit_margin" value="{{ old('profit_margin', 20) }}" required min="0" max="100" step="0.01" placeholder="Enter profit margin percentage" class="form-input" @input="calculateSellingPrice()">
+              </div>
+              <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Selling Price (TSh) *</label>
-                <input type="number" name="selling_price" id="selling_price" value="{{ old('selling_price') }}" required min="0" step="0.01" placeholder="Auto-filled from motorcycle" class="form-input" @input="calculateRepayment()">
+                <input type="number" name="selling_price" id="selling_price" value="{{ old('selling_price') }}" required min="0" step="0.01" placeholder="Auto-calculated from purchase price and profit margin" class="form-input" @input="calculateRepayment()">
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Down Payment (TSh) *</label>
                 <input type="number" name="down_payment" id="down_payment" value="{{ old('down_payment', 0) }}" required min="0" step="0.01" placeholder="Enter down payment amount" class="form-input" @input="calculateRepayment()">
-              </div>
-              <div>
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Interest Rate (%) *</label>
-                <input type="number" name="interest_rate" id="interest_rate" value="{{ old('interest_rate', 15) }}" required min="0" max="100" step="0.01" placeholder="Enter interest rate" class="form-input" @input="calculateRepayment()">
               </div>
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Payment Frequency *</label>
@@ -387,30 +392,38 @@ function loanCreateForm() {
         document.getElementById('engine_number').value = selectedOption.getAttribute('data-engine-number') || '';
         document.getElementById('chassis_number').value = selectedOption.getAttribute('data-chassis-number') || '';
         
-        const sellingPrice = parseFloat(selectedOption.getAttribute('data-selling-price')) || 0;
-        document.getElementById('selling_price').value = sellingPrice;
-        this.sellingPrice = sellingPrice;
+        const purchasePrice = parseFloat(selectedOption.getAttribute('data-purchase-price')) || 0;
+        document.getElementById('purchase_price').value = purchasePrice;
         this.motorcycleName = selectedOption.text.split('-')[0].trim();
         
-        this.calculateRepayment();
+        this.calculateSellingPrice();
       } else {
         document.getElementById('motorcycle_brand').value = '';
         document.getElementById('motorcycle_model').value = '';
         document.getElementById('registration_number').value = '';
         document.getElementById('engine_number').value = '';
         document.getElementById('chassis_number').value = '';
-        document.getElementById('selling_price').value = '';
-        this.sellingPrice = 0;
+        document.getElementById('purchase_price').value = '';
         this.motorcycleName = '';
         
-        this.calculateRepayment();
+        this.calculateSellingPrice();
       }
+    },
+    
+    calculateSellingPrice() {
+      const purchasePrice = parseFloat(document.getElementById('purchase_price').value) || 0;
+      const profitMargin = parseFloat(document.getElementById('profit_margin').value) || 0;
+      
+      const sellingPrice = purchasePrice * (1 + profitMargin / 100);
+      document.getElementById('selling_price').value = sellingPrice.toFixed(2);
+      this.sellingPrice = sellingPrice;
+      
+      this.calculateRepayment();
     },
     
     calculateRepayment() {
       const sellingPrice = parseFloat(document.getElementById('selling_price').value) || 0;
       const downPayment = parseFloat(document.getElementById('down_payment').value) || 0;
-      const interestRate = parseFloat(document.getElementById('interest_rate').value) || 0;
       const paymentFrequency = document.getElementById('payment_frequency').value;
       const numberOfPayments = parseInt(document.getElementById('number_of_payments').value) || 1;
       const startDate = document.getElementById('start_date').value;
@@ -421,11 +434,9 @@ function loanCreateForm() {
       // Calculate principal amount
       this.principalAmount = Math.max(0, sellingPrice - downPayment);
       
-      // Calculate total interest (simple interest)
-      this.totalInterest = this.principalAmount * (interestRate / 100);
-      
-      // Calculate total repayment
-      this.totalRepayment = this.principalAmount + this.totalInterest;
+      // No interest - total repayment equals principal
+      this.totalInterest = 0;
+      this.totalRepayment = this.principalAmount;
       
       // Calculate payment amount (unless manual override is set)
       if (!this.useManualPayment) {

@@ -242,9 +242,10 @@ class LoanController extends Controller
                 'registration_number' => 'required|string|max:255',
                 'engine_number' => 'required|string|max:255',
                 'chassis_number' => 'required|string|max:255',
+                'purchase_price' => 'required|numeric|min:0',
+                'profit_margin' => 'required|numeric|min:0|max:100',
                 'selling_price' => 'required|numeric|min:0',
                 'down_payment' => 'required|numeric|min:0',
-                'interest_rate' => 'required|numeric|min:0|max:100',
                 'payment_frequency' => 'required|in:daily,weekly,biweekly,monthly',
                 'number_of_payments' => 'required|integer|min:1',
                 'start_date' => 'required|date',
@@ -268,7 +269,7 @@ class LoanController extends Controller
                 'user_id' => $validated['user_id'],
                 'member_number' => $validated['member_number'],
                 'principal_amount' => $validated['principal_amount'],
-                'interest_rate' => $validated['interest_rate'],
+                'interest_rate' => 0,
                 'term_months' => $validated['number_of_payments'],
                 'application_date' => $validated['start_date'],
                 'disbursement_date' => $validated['start_date'],
@@ -280,7 +281,6 @@ class LoanController extends Controller
                 'collateral' => $validated['collateral'] ?? null,
                 'guarantor' => $validated['guarantor'] ?? null,
                 'notes' => $validated['notes'] ?? null,
-                // Store motorcycle details in notes or create separate relation
             ]);
 
             // Create repayment schedule based on payment frequency
@@ -352,9 +352,9 @@ class LoanController extends Controller
             $currentDate->modify("+{$intervalDays} days");
             $dueDate = $currentDate->format('Y-m-d');
             
-            // Simple interest calculation for each payment
-            $interestPortion = $balance * ($validated['interest_rate'] / 100 / 365 * $intervalDays);
-            $principalPortion = min($paymentAmount - $interestPortion, $balance);
+            // No interest - principal portion equals payment amount
+            $principalPortion = min($paymentAmount, $balance);
+            $interestPortion = 0;
             $balance = max(0, $balance - $principalPortion);
 
             \App\Models\LoanRepaymentSchedule::create([
