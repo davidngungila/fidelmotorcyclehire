@@ -148,6 +148,10 @@
                 <input type="number" name="number_of_payments" id="number_of_payments" value="{{ old('number_of_payments', 52) }}" required min="1" placeholder="Enter number of payments" class="form-input" @input="calculateRepayment()">
               </div>
               <div>
+                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Payment Amount (TSh) *</label>
+                <input type="number" name="manual_payment_amount" id="manual_payment_amount" value="{{ old('manual_payment_amount') }}" min="0" step="0.01" placeholder="Auto-calculated or enter manually" class="form-input" @input="updateManualPayment()">
+              </div>
+              <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Start Date *</label>
                 <input type="date" name="start_date" id="start_date" value="{{ old('start_date', date('Y-m-d')) }}" required class="form-input" @input="calculateRepayment()">
               </div>
@@ -156,9 +160,14 @@
 
           <!-- Repayment Summary -->
           <div class="border-t border-primary-100 dark:border-primary-900/50 pt-8">
-            <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2 mb-4">
-              <i class="fa-solid fa-chart-line text-primary-500 text-xs"></i> Repayment Summary
-            </h3>
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
+                <i class="fa-solid fa-chart-line text-primary-500 text-xs"></i> Repayment Summary
+              </h3>
+              <button type="button" @click="showPreviewModal = true" class="text-xs text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-200 font-semibold flex items-center gap-1">
+                <i class="fa-solid fa-eye"></i> Preview Schedule
+              </button>
+            </div>
             <div class="bg-primary-50 dark:bg-primary-900/30 rounded-xl p-5">
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
@@ -260,7 +269,6 @@
                 <div class="flex justify-between items-center text-xs bg-primary-50 dark:bg-primary-900/30 p-2 rounded">
                   <span x-text="'Payment ' + (index + 1)"></span>
                   <span x-text="formatCurrency(payment.amount)" class="font-semibold"></span>
-                  <span x-text="payment.date" class="text-primary-600 dark:text-primary-400"></span>
                 </div>
               </template>
             </div>
@@ -271,12 +279,75 @@
   </div>
 </div>
 
+<!-- Payment Schedule Preview Modal -->
+<div x-show="showPreviewModal" x-transition class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display: none;">
+  <div class="absolute inset-0 bg-black/50" @click="showPreviewModal = false"></div>
+  <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Payment Schedule Preview</h3>
+        <button @click="showPreviewModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
+    </div>
+    <div class="p-6 overflow-y-auto max-h-[60vh]">
+      <div class="space-y-4">
+        <div class="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <p class="text-gray-600 dark:text-gray-400">Payment Frequency</p>
+            <p class="font-semibold text-gray-900 dark:text-white" x-text="paymentFrequencyLabel">Weekly</p>
+          </div>
+          <div>
+            <p class="text-gray-600 dark:text-gray-400">Total Payments</p>
+            <p class="font-semibold text-gray-900 dark:text-white" x-text="paymentSchedule.length">0</p>
+          </div>
+          <div>
+            <p class="text-gray-600 dark:text-gray-400">Payment Amount</p>
+            <p class="font-semibold text-emerald-600 dark:text-emerald-400" x-text="formatCurrency(paymentAmount)">TSh 0.00</p>
+          </div>
+          <div>
+            <p class="text-gray-600 dark:text-gray-400">Total Repayment</p>
+            <p class="font-semibold text-primary-600 dark:text-primary-300" x-text="formatCurrency(totalRepayment)">TSh 0.00</p>
+          </div>
+        </div>
+        <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-left text-gray-600 dark:text-gray-400">
+                <th class="pb-2">#</th>
+                <th class="pb-2">Due Date</th>
+                <th class="pb-2 text-right">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="(payment, index) in paymentSchedule" :key="index">
+                <tr class="border-t border-gray-100 dark:border-gray-700">
+                  <td class="py-2 text-gray-900 dark:text-white" x-text="index + 1"></td>
+                  <td class="py-2 text-gray-600 dark:text-gray-400" x-text="payment.date"></td>
+                  <td class="py-2 text-right font-semibold text-gray-900 dark:text-white" x-text="formatCurrency(payment.amount)"></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+      <button @click="showPreviewModal = false" class="px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-all">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 function loanCreateForm() {
   return {
     loading: false,
+    showPreviewModal: false,
     customerName: '',
     motorcycleName: '',
     sellingPrice: 0,
@@ -288,6 +359,7 @@ function loanCreateForm() {
     paymentFrequencyLabel: 'Weekly',
     endDate: '—',
     paymentSchedule: [],
+    useManualPayment: false,
     
     updateCustomerInfo() {
       const select = document.getElementById('user_id');
@@ -355,8 +427,11 @@ function loanCreateForm() {
       // Calculate total repayment
       this.totalRepayment = this.principalAmount + this.totalInterest;
       
-      // Calculate payment amount
-      this.paymentAmount = this.totalRepayment / numberOfPayments;
+      // Calculate payment amount (unless manual override is set)
+      if (!this.useManualPayment) {
+        this.paymentAmount = this.totalRepayment / numberOfPayments;
+        document.getElementById('manual_payment_amount').value = this.paymentAmount.toFixed(2);
+      }
       
       // Set payment frequency label
       const frequencyLabels = {
@@ -393,6 +468,22 @@ function loanCreateForm() {
       } else {
         this.paymentSchedule = [];
         this.endDate = '—';
+      }
+    },
+    
+    updateManualPayment() {
+      const manualAmount = parseFloat(document.getElementById('manual_payment_amount').value) || 0;
+      if (manualAmount > 0) {
+        this.useManualPayment = true;
+        this.paymentAmount = manualAmount;
+        // Recalculate total repayment based on manual payment
+        const numberOfPayments = parseInt(document.getElementById('number_of_payments').value) || 1;
+        this.totalRepayment = this.paymentAmount * numberOfPayments;
+        // Recalculate interest
+        this.totalInterest = this.totalRepayment - this.principalAmount;
+      } else {
+        this.useManualPayment = false;
+        this.calculateRepayment();
       }
     },
     

@@ -230,38 +230,145 @@ class LoanController extends Controller
 
     public function store(Request $request)
     {
-        Gate::authorize('admin-only');
+        try {
+            Gate::authorize('admin-only');
 
-        $validated = $request->validate([
-            'loan_product_id' => 'nullable|exists:loan_products,id',
-            'user_id' => 'required|exists:users,id',
-            'member_number' => 'required|string|max:50',
-            'principal_amount' => 'required|numeric|min:0',
-            'interest_rate' => 'required|numeric|min:0|max:100',
-            'term_months' => 'required|integer|min:1',
-            'application_date' => 'required|date',
-            'purpose' => 'required|in:business,education,agriculture,personal,emergency,other',
-            'purpose_description' => 'nullable|string',
-            'collateral' => 'nullable|string',
-            'guarantor' => 'nullable|string',
-            'notes' => 'nullable|string',
-        ]);
+            $validated = $request->validate([
+                'user_id' => 'required|exists:users,id',
+                'member_number' => 'required|string|max:50',
+                'motorcycle_id' => 'required|exists:motorcycles,id',
+                'motorcycle_brand' => 'required|string|max:255',
+                'motorcycle_model' => 'required|string|max:255',
+                'registration_number' => 'required|string|max:255',
+                'engine_number' => 'required|string|max:255',
+                'chassis_number' => 'required|string|max:255',
+                'selling_price' => 'required|numeric|min:0',
+                'down_payment' => 'required|numeric|min:0',
+                'interest_rate' => 'required|numeric|min:0|max:100',
+                'payment_frequency' => 'required|in:daily,weekly,biweekly,monthly',
+                'number_of_payments' => 'required|integer|min:1',
+                'start_date' => 'required|date',
+                'principal_amount' => 'required|numeric|min:0',
+                'total_interest' => 'required|numeric|min:0',
+                'total_repayment' => 'required|numeric|min:0',
+                'payment_amount' => 'required|numeric|min:0',
+                'end_date' => 'required|date',
+                'collateral' => 'nullable|string',
+                'guarantor' => 'nullable|string',
+                'notes' => 'nullable|string',
+            ]);
 
-        // Generate sequential loan number
-        $today = date('Ymd');
-        $loanCountToday = Loan::where('loan_number', 'like', 'LN' . $today . '%')->count();
-        $sequentialNumber = str_pad((string) ($loanCountToday + 1), 4, '0', STR_PAD_LEFT);
-        $validated['loan_number'] = 'LN' . $today . $sequentialNumber;
-        $validated['status'] = 'pending';
+            // Generate sequential loan number
+            $today = date('Ymd');
+            $loanCountToday = Loan::where('loan_number', 'like', 'LN' . $today . '%')->count();
+            $sequentialNumber = str_pad((string) ($loanCountToday + 1), 4, '0', STR_PAD_LEFT);
+            
+            $loan = Loan::create([
+                'loan_number' => 'LN' . $today . $sequentialNumber,
+                'user_id' => $validated['user_id'],
+                'member_number' => $validated['member_number'],
+                'principal_amount' => $validated['principal_amount'],
+                'interest_rate' => $validated['interest_rate'],
+                'term_months' => $validated['number_of_payments'],
+                'application_date' => $validated['start_date'],
+                'disbursement_date' => $validated['start_date'],
+                'monthly_payment' => $validated['payment_amount'],
+                'total_amount_due' => $validated['total_repayment'],
+                'balance' => $validated['principal_amount'],
+                'status' => 'active',
+                'purpose' => 'motorcycle_purchase',
+                'collateral' => $validated['collateral'] ?? null,
+                'guarantor' => $validated['guarantor'] ?? null,
+                'notes' => $validated['notes'] ?? null,
+                // Store motorcycle details in notes or create separate relation
+            ]);
 
-        $loan = Loan::create($validated);
+            // Create repayment schedule based on payment frequency
+            $this->createMotorcycleRepaymentSchedule($loan, $validated);
 
-        // Create repayment schedule
-        $this->createRepaymentSchedule($loan);
+            // Update motorcycle status to Assigned
+            \App\Models\Motorcycle::where('id', $validated['motorcycle_id'])->update([
+                'status' => 'Assigned',
+                'assigned_to' => $validated['user_id'],
+                'sale_date' => now(),
+            ]);
 
-        $this->success('Loan application created successfully.');
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'subject_type' => 'loan',
+                'subject_id' => $loan->id,
+                'description' => "Admin created motorcycle hire purchase contract: {$loan->loan_number}",
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'properties' => [
+                    'motorcycle_id' => $validated['motorcycle_id'],
+                    'selling_price' => $validated['selling_price'],
+                    'down_payment' => $validated['down_payment'],
+                    'payment_frequency' => $validated['payment_frequency'],
+                ],
+            ]);
 
-        return redirect()->route('admin.loans.index');
+            return response()->json([
+                'success' => true,
+                'message' => 'Loan contract created successfully.',
+                'loan_id' => $loan->id,
+                'loan_number' => $loan->loan_number,
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    private function createMotorcycleRepaymentSchedule(Loan $loan, array $validated)
+    {
+        $principal = (float) $validated['principal_amount'];
+        $paymentAmount = (float) $validated['payment_amount'];
+        $numberOfPayments = (int) $validated['number_of_payments'];
+        $paymentFrequency = $validated['payment_frequency'];
+        $startDate = $validated['start_date'];
+
+        // Calculate interval days based on frequency
+        $intervalDays = match($paymentFrequency) {
+            'daily' => 1,
+            'weekly' => 7,
+            'biweekly' => 14,
+            'monthly' => 30,
+            default => 7,
+        };
+
+        $balance = $principal;
+        $currentDate = new \DateTime($startDate);
+
+        for ($i = 1; $i <= $numberOfPayments; $i++) {
+            $currentDate->modify("+{$intervalDays} days");
+            $dueDate = $currentDate->format('Y-m-d');
+            
+            // Simple interest calculation for each payment
+            $interestPortion = $balance * ($validated['interest_rate'] / 100 / 365 * $intervalDays);
+            $principalPortion = min($paymentAmount - $interestPortion, $balance);
+            $balance = max(0, $balance - $principalPortion);
+
+            \App\Models\LoanRepaymentSchedule::create([
+                'loan_id' => $loan->id,
+                'installment_number' => $i,
+                'due_date' => $dueDate,
+                'principal_amount' => $principalPortion,
+                'interest_amount' => $interestPortion,
+                'total_amount' => $paymentAmount,
+                'balance_after' => $balance,
+                'status' => 'pending',
+                'amount_paid' => 0,
+            ]);
+        }
     }
 
     private function createRepaymentSchedule(Loan $loan)
