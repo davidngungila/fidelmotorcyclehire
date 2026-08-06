@@ -84,17 +84,17 @@
               </td>
               <td class="text-right whitespace-nowrap">
                 <div class="flex items-center justify-end gap-1.5">
-                  <a :href="'/admin/motorcycles/' + motorcycle.id"
+                  <a :href="'/admin/motorcycles/' + motorcycle.encrypted_id"
                      class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-primary-100 hover:bg-primary-200 dark:bg-primary-900/40 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 text-sm transition-colors"
                      title="View Details">
                     <i class="fa-solid fa-eye text-xs"></i>
                   </a>
-                  <a :href="'/admin/motorcycles/' + motorcycle.id + '/edit'"
+                  <a :href="'/admin/motorcycles/' + motorcycle.encrypted_id + '/edit'"
                      class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-orange-50 hover:bg-orange-100 dark:bg-orange-900/30 dark:hover:bg-orange-900/50 text-orange-700 dark:text-orange-300 text-sm transition-colors border border-orange-200 dark:border-orange-800/40"
                      title="Edit">
                     <i class="fa-solid fa-pen text-xs"></i>
                   </a>
-                  <button @click="confirmDelete(motorcycle.id)"
+                  <button @click="confirmDelete(motorcycle.encrypted_id)"
                           class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-300 text-sm transition-colors border border-red-200 dark:border-red-800/40"
                           title="Delete">
                     <i class="fa-solid fa-trash text-xs"></i>

@@ -120,10 +120,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/motorcycles', [AdminMotorcycleController::class, 'index'])->name('motorcycles.index');
     Route::get('/motorcycles/create', [AdminMotorcycleController::class, 'create'])->name('motorcycles.create');
     Route::post('/motorcycles', [AdminMotorcycleController::class, 'store'])->name('motorcycles.store');
-    Route::get('/motorcycles/{motorcycle}', [AdminMotorcycleController::class, 'show'])->name('motorcycles.show');
-    Route::get('/motorcycles/{motorcycle}/edit', [AdminMotorcycleController::class, 'edit'])->name('motorcycles.edit');
-    Route::put('/motorcycles/{motorcycle}', [AdminMotorcycleController::class, 'update'])->name('motorcycles.update');
-    Route::delete('/motorcycles/{motorcycle}', [AdminMotorcycleController::class, 'destroy'])->name('motorcycles.destroy');
+    Route::get('/motorcycles/{encryptedId}', [AdminMotorcycleController::class, 'show'])->name('motorcycles.show');
+    Route::get('/motorcycles/{encryptedId}/edit', [AdminMotorcycleController::class, 'edit'])->name('motorcycles.edit');
+    Route::put('/motorcycles/{encryptedId}', [AdminMotorcycleController::class, 'update'])->name('motorcycles.update');
+    Route::delete('/motorcycles/{encryptedId}', [AdminMotorcycleController::class, 'destroy'])->name('motorcycles.destroy');
 
     Route::get('/loans/applications', [AdminLoanController::class, 'applications'])->name('loans.applications');
     Route::get('/loans', [AdminLoanController::class, 'index'])->name('loans.index');

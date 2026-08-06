@@ -4,16 +4,29 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Motorcycle;
+use App\Services\EncryptedIdService;
 use Illuminate\Http\Request;
 
 class MotorcycleController extends Controller
 {
+    public function __construct(
+        protected EncryptedIdService $encryptedIdService,
+    ) {
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
         $motorcycles = Motorcycle::with('assignedUser')->latest()->paginate(15);
+        
+        // Add encrypted IDs to each motorcycle
+        $motorcycles->getCollection()->transform(function ($motorcycle) {
+            $motorcycle->encrypted_id = $this->encryptedIdService->encrypt($motorcycle->id);
+            return $motorcycle;
+        });
+        
         return view('admin.motorcycles.index', compact('motorcycles'));
     }
 
@@ -53,25 +66,49 @@ class MotorcycleController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Motorcycle $motorcycle)
+    public function show(string $encryptedId)
     {
-        $motorcycle->load('assignedUser');
+        try {
+            $id = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            return redirect()->route('admin.motorcycles.index')
+                ->with('error', 'Invalid motorcycle ID.');
+        }
+
+        $motorcycle = Motorcycle::with('assignedUser')->findOrFail($id);
         return view('admin.motorcycles.show', compact('motorcycle'));
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Motorcycle $motorcycle)
+    public function edit(string $encryptedId)
     {
+        try {
+            $id = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            return redirect()->route('admin.motorcycles.index')
+                ->with('error', 'Invalid motorcycle ID.');
+        }
+
+        $motorcycle = Motorcycle::findOrFail($id);
         return view('admin.motorcycles.edit', compact('motorcycle'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Motorcycle $motorcycle)
+    public function update(Request $request, string $encryptedId)
     {
+        try {
+            $id = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            return redirect()->route('admin.motorcycles.index')
+                ->with('error', 'Invalid motorcycle ID.');
+        }
+
+        $motorcycle = Motorcycle::findOrFail($id);
+
         $validated = $request->validate([
             'brand' => 'required|string|max:255',
             'model' => 'required|string|max:255',
@@ -97,8 +134,16 @@ class MotorcycleController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Motorcycle $motorcycle)
+    public function destroy(string $encryptedId)
     {
+        try {
+            $id = $this->encryptedIdService->decrypt($encryptedId);
+        } catch (\Exception $e) {
+            return redirect()->route('admin.motorcycles.index')
+                ->with('error', 'Invalid motorcycle ID.');
+        }
+
+        $motorcycle = Motorcycle::findOrFail($id);
         $motorcycle->delete();
 
         return redirect()->route('admin.motorcycles.index')
