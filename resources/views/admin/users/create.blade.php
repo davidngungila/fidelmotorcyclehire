@@ -21,41 +21,14 @@
     <!-- Main Form Area -->
     <div class="lg:col-span-3">
       <div class="glass p-6 rounded-2xl">
-        <!-- Tabs Navigation -->
-        <div class="flex flex-wrap gap-2 mb-6 border-b border-primary-100 dark:border-primary-900/50 pb-4">
-          <button @click="currentTab = 1" :class="currentTab === 1 ? 'bg-primary-600 text-white' : 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300'" class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors">
-            <i class="fa-solid fa-user text-[10px]"></i> Basic Info
-          </button>
-          <button @click="currentTab = 2" :class="currentTab === 2 ? 'bg-primary-600 text-white' : 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300'" class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors">
-            <i class="fa-solid fa-address-book text-[10px]"></i> Contact
-          </button>
-          <button @click="currentTab = 3" :class="currentTab === 3 ? 'bg-primary-600 text-white' : 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300'" class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors">
-            <i class="fa-solid fa-id-card text-[10px]"></i> Customer Info
-          </button>
-          <button @click="currentTab = 4" :class="currentTab === 4 ? 'bg-primary-600 text-white' : 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300'" class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors">
-            <i class="fa-solid fa-lock text-[10px]"></i> Account
-          </button>
-          <button @click="currentTab = 5" :class="currentTab === 5 ? 'bg-primary-600 text-white' : 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300'" class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors">
-            <i class="fa-solid fa-users text-[10px]"></i> Next of Kin
-          </button>
-          <button @click="currentTab = 6" :class="currentTab === 6 ? 'bg-primary-600 text-white' : 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300'" class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors">
-            <i class="fa-solid fa-building-columns text-[10px]"></i> Banking
-          </button>
-          <button @click="currentTab = 7" :class="currentTab === 7 ? 'bg-primary-600 text-white' : 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300'" class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors">
-            <i class="fa-solid fa-file text-[10px]"></i> Documents
-          </button>
-          <button @click="currentTab = 8" :class="currentTab === 8 ? 'bg-primary-600 text-white' : 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300'" class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors">
-            <i class="fa-solid fa-note-sticky text-[10px]"></i> Additional
-          </button>
-        </div>
-
-        <!-- Tab 1: Basic Information -->
-        <div x-show="currentTab === 1" x-transition class="space-y-5">
-          <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
-            <i class="fa-solid fa-user text-primary-500 text-xs"></i> Basic Information
-          </h3>
-          <form id="basicInfoForm" @submit.prevent="saveBasicInfo" class="space-y-5">
-            @csrf
+        <form id="customerForm" @submit.prevent="saveCustomer" class="space-y-8">
+          @csrf
+          
+          <!-- Basic Information -->
+          <div>
+            <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2 mb-4">
+              <i class="fa-solid fa-user text-primary-500 text-xs"></i> Basic Information
+            </h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">First Name *</label>
@@ -107,21 +80,13 @@
                 </select>
               </div>
             </div>
-            <div class="flex justify-end">
-              <button type="submit" class="px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-all">
-                <i class="fa-solid fa-save mr-1.5"></i> Save & Continue
-              </button>
-            </div>
-          </form>
-        </div>
+          </div>
 
-        <!-- Tab 2: Contact Information -->
-        <div x-show="currentTab === 2" x-transition class="space-y-5">
-          <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
-            <i class="fa-solid fa-address-book text-primary-500 text-xs"></i> Contact Information
-          </h3>
-          <form id="contactInfoForm" @submit.prevent="saveContactInfo" class="space-y-5">
-            @csrf
+          <!-- Contact Information -->
+          <div class="border-t border-primary-100 dark:border-primary-900/50 pt-8">
+            <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2 mb-4">
+              <i class="fa-solid fa-address-book text-primary-500 text-xs"></i> Contact Information
+            </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Phone Number</label>
@@ -152,21 +117,13 @@
                 <textarea name="physical_address" rows="2" class="form-input"></textarea>
               </div>
             </div>
-            <div class="flex justify-end">
-              <button type="submit" class="px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-all">
-                <i class="fa-solid fa-save mr-1.5"></i> Save & Continue
-              </button>
-            </div>
-          </form>
-        </div>
+          </div>
 
-        <!-- Tab 3: Membership Details -->
-        <div x-show="currentTab === 3" x-transition class="space-y-5">
-          <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
-            <i class="fa-solid fa-id-card text-primary-500 text-xs"></i> Customer Information
-          </h3>
-          <form id="membershipDetailsForm" @submit.prevent="saveMembershipDetails" class="space-y-5">
-            @csrf
+          <!-- Customer Information -->
+          <div class="border-t border-primary-100 dark:border-primary-900/50 pt-8">
+            <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2 mb-4">
+              <i class="fa-solid fa-id-card text-primary-500 text-xs"></i> Customer Information
+            </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Branch</label>
@@ -210,21 +167,13 @@
                 <input type="number" name="initial_savings_deposit" required class="form-input" value="0">
               </div>
             </div>
-            <div class="flex justify-end">
-              <button type="submit" class="px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-all">
-                <i class="fa-solid fa-save mr-1.5"></i> Save & Continue
-              </button>
-            </div>
-          </form>
-        </div>
+          </div>
 
-        <!-- Tab 4: Account Information -->
-        <div x-show="currentTab === 4" x-transition class="space-y-5">
-          <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
-            <i class="fa-solid fa-lock text-primary-500 text-xs"></i> Account Information
-          </h3>
-          <form id="accountInfoForm" @submit.prevent="saveAccountInfo" class="space-y-5">
-            @csrf
+          <!-- Account Information -->
+          <div class="border-t border-primary-100 dark:border-primary-900/50 pt-8">
+            <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2 mb-4">
+              <i class="fa-solid fa-lock text-primary-500 text-xs"></i> Account Information
+            </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Username</label>
@@ -243,21 +192,13 @@
                 <label for="email_verified" class="text-sm text-primary-700 dark:text-primary-300">Email Verified</label>
               </div>
             </div>
-            <div class="flex justify-end">
-              <button type="submit" class="px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-all">
-                <i class="fa-solid fa-save mr-1.5"></i> Save & Continue
-              </button>
-            </div>
-          </form>
-        </div>
+          </div>
 
-        <!-- Tab 5: Next of Kin -->
-        <div x-show="currentTab === 5" x-transition class="space-y-5">
-          <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
-            <i class="fa-solid fa-users text-primary-500 text-xs"></i> Next of Kin
-          </h3>
-          <form id="nextOfKinForm" @submit.prevent="saveNextOfKin" class="space-y-5">
-            @csrf
+          <!-- Next of Kin -->
+          <div class="border-t border-primary-100 dark:border-primary-900/50 pt-8">
+            <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2 mb-4">
+              <i class="fa-solid fa-users text-primary-500 text-xs"></i> Next of Kin
+            </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Full Name</label>
@@ -276,21 +217,13 @@
                 <textarea name="kin_address" rows="2" class="form-input"></textarea>
               </div>
             </div>
-            <div class="flex justify-end">
-              <button type="submit" class="px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-all">
-                <i class="fa-solid fa-save mr-1.5"></i> Save & Continue
-              </button>
-            </div>
-          </form>
-        </div>
+          </div>
 
-        <!-- Tab 6: Banking & Mobile Money -->
-        <div x-show="currentTab === 6" x-transition class="space-y-5">
-          <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
-            <i class="fa-solid fa-building-columns text-primary-500 text-xs"></i> Banking & Mobile Money
-          </h3>
-          <form id="bankingInfoForm" @submit.prevent="saveBankingInfo" class="space-y-5">
-            @csrf
+          <!-- Banking & Mobile Money -->
+          <div class="border-t border-primary-100 dark:border-primary-900/50 pt-8">
+            <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2 mb-4">
+              <i class="fa-solid fa-building-columns text-primary-500 text-xs"></i> Banking & Mobile Money
+            </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Bank Name</label>
@@ -319,21 +252,13 @@
                 <input type="text" name="mobile_wallet_number" class="form-input font-mono">
               </div>
             </div>
-            <div class="flex justify-end">
-              <button type="submit" class="px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-all">
-                <i class="fa-solid fa-save mr-1.5"></i> Save & Continue
-              </button>
-            </div>
-          </form>
-        </div>
+          </div>
 
-        <!-- Tab 7: Documents -->
-        <div x-show="currentTab === 7" x-transition class="space-y-5">
-          <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
-            <i class="fa-solid fa-file text-primary-500 text-xs"></i> Documents
-          </h3>
-          <form id="documentsInfoForm" @submit.prevent="saveDocumentsInfo" class="space-y-5">
-            @csrf
+          <!-- Documents -->
+          <div class="border-t border-primary-100 dark:border-primary-900/50 pt-8">
+            <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2 mb-4">
+              <i class="fa-solid fa-file text-primary-500 text-xs"></i> Documents
+            </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Passport Photo</label>
@@ -352,21 +277,13 @@
                 <input type="file" name="other_attachments[]" multiple class="form-input">
               </div>
             </div>
-            <div class="flex justify-end">
-              <button type="submit" class="px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-all">
-                <i class="fa-solid fa-save mr-1.5"></i> Save & Continue
-              </button>
-            </div>
-          </form>
-        </div>
+          </div>
 
-        <!-- Tab 8: Additional Information -->
-        <div x-show="currentTab === 8" x-transition class="space-y-5">
-          <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2">
-            <i class="fa-solid fa-note-sticky text-primary-500 text-xs"></i> Additional Information
-          </h3>
-          <form id="additionalInfoForm" @submit.prevent="saveAdditionalInfo" class="space-y-5">
-            @csrf
+          <!-- Additional Information -->
+          <div class="border-t border-primary-100 dark:border-primary-900/50 pt-8">
+            <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2 mb-4">
+              <i class="fa-solid fa-note-sticky text-primary-500 text-xs"></i> Additional Information
+            </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div class="md:col-span-2">
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Notes</label>
@@ -377,13 +294,18 @@
                 <input type="text" name="tags" class="form-input" placeholder="e.g. VIP, Corporate">
               </div>
             </div>
-            <div class="flex justify-end">
-              <button type="submit" class="px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-all">
-                <i class="fa-solid fa-save mr-1.5"></i> Save & Complete
-              </button>
-            </div>
-          </form>
-        </div>
+          </div>
+
+          <div class="flex justify-end gap-3 pt-4">
+            <a href="{{ route('admin.users.index') }}" class="px-6 py-2.5 rounded-xl bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-bold transition-all">
+              Cancel
+            </a>
+            <button type="submit" :disabled="loading" class="px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+              <i :class="loading ? 'fa-solid fa-spinner fa-spin' : 'fa-solid fa-save'" class="mr-1.5"></i>
+              <span x-text="loading ? 'Creating Customer...' : 'Create Customer'">Create Customer</span>
+            </button>
+          </div>
+        </form>
       </div>
     </div>
 
@@ -396,26 +318,19 @@
         <div class="space-y-4">
           <div>
             <p class="text-xs text-primary-600 dark:text-primary-400">Customer Number</p>
-            <p x-text="summary.member_number || 'Auto-generated'" class="text-sm font-mono font-semibold text-primary-900 dark:text-white">Auto-generated</p>
+            <p class="text-sm font-mono font-semibold text-primary-900 dark:text-white">Auto-generated</p>
           </div>
           <div>
             <p class="text-xs text-primary-600 dark:text-primary-400">Registration Date</p>
-            <p x-text="summary.registration_date || '—'" class="text-sm font-semibold text-primary-900 dark:text-white">—</p>
+            <p class="text-sm font-semibold text-primary-900 dark:text-white">{{ now()->format('Y-m-d') }}</p>
           </div>
           <div>
             <p class="text-xs text-primary-600 dark:text-primary-400">Customer Type</p>
-            <p x-text="summary.member_type || '—'" class="text-sm font-semibold text-primary-900 dark:text-white">—</p>
+            <p class="text-sm font-semibold text-primary-900 dark:text-white">Standard</p>
           </div>
           <div>
             <p class="text-xs text-primary-600 dark:text-primary-400">Status</p>
-            <p x-text="summary.status || '—'" class="text-sm font-semibold text-primary-900 dark:text-white">—</p>
-          </div>
-          <div class="pt-4 border-t border-primary-100 dark:border-primary-900/50">
-            <p class="text-xs text-primary-600 dark:text-primary-400 mb-2">Progress</p>
-            <div class="w-full bg-primary-100 dark:bg-primary-900/40 rounded-full h-2">
-              <div class="bg-primary-600 h-2 rounded-full transition-all" :style="'width: ' + progress + '%'"></div>
-            </div>
-            <p class="text-xs text-primary-600 dark:text-primary-400 mt-1" x-text="progress + '% completed'"></p>
+            <p class="text-sm font-semibold text-primary-900 dark:text-white">Pending</p>
           </div>
         </div>
       </div>
@@ -427,22 +342,15 @@
 <script>
 function memberCreateForm() {
   return {
-    currentTab: 1,
-    userId: null,
-    summary: {
-      member_number: null,
-      registration_date: null,
-      member_type: null,
-      status: null
-    },
-    progress: 0,
+    loading: false,
     
-    async saveBasicInfo() {
-      const form = document.getElementById('basicInfoForm');
+    async saveCustomer() {
+      this.loading = true;
+      const form = document.getElementById('customerForm');
       const formData = new FormData(form);
       
       try {
-        const response = await fetch('{{ route('admin.users.store-basic-info') }}', {
+        const response = await fetch('{{ route('admin.users.store') }}', {
           method: 'POST',
           headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -456,7 +364,7 @@ function memberCreateForm() {
         if (!response.ok) {
           if (contentType && contentType.includes('application/json')) {
             const data = await response.json();
-            let errorMessage = 'Failed to save basic information.';
+            let errorMessage = 'Failed to create customer.';
             if (data.errors) {
               const errorMessages = Object.values(data.errors).flat();
               errorMessage = errorMessages.join('\n');
@@ -477,361 +385,45 @@ function memberCreateForm() {
               text: 'Please check the form for validation errors.'
             });
           }
+          this.loading = false;
           return;
         }
         
         const data = await response.json();
         
         if (data.success) {
-          this.userId = data.user_id;
-          this.summary.member_number = 'MB' + new Date().toISOString().slice(2,10).replace(/-/g,'') + Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-          this.summary.registration_date = formData.get('registration_date');
-          this.summary.member_type = 'Standard';
-          this.summary.status = formData.get('status');
-          this.progress = 14.28;
-          
           Swal.fire({
             icon: 'success',
-            title: 'Saved!',
-            text: 'Basic information saved successfully.',
-            timer: 1500,
-            showConfirmButton: false
-          });
-          
-          this.currentTab = 2;
-        } else {
-          let errorMessage = 'Failed to save basic information.';
-          if (data.errors) {
-            const errorMessages = Object.values(data.errors).flat();
-            errorMessage = errorMessages.join('\n');
-          } else if (data.message) {
-            errorMessage = data.message;
-          }
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: errorMessage
-          });
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: error.message || 'Failed to save basic information.'
-        });
-      }
-    },
-    
-    async saveContactInfo() {
-      const form = document.getElementById('contactInfoForm');
-      const formData = new FormData(form);
-      formData.append('_method', 'PUT');
-      
-      console.log('Saving contact info for user ID:', this.userId);
-      console.log('Form data:', Object.fromEntries(formData));
-      
-      try {
-        const response = await fetch(`{{ route('admin.users.store-contact-info', ':userId') }}`.replace(':userId', this.userId), {
-          method: 'POST',
-          headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Accept': 'application/json'
-          },
-          body: formData
-        });
-        
-        console.log('Response status:', response.status);
-        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-        
-        const contentType = response.headers.get('content-type');
-        console.log('Content type:', contentType);
-        
-        if (!response.ok) {
-          if (contentType && contentType.includes('application/json')) {
-            const data = await response.json();
-            console.log('Error data:', data);
-            let errorMessage = 'Failed to save contact information.';
-            if (data.errors) {
-              const errorMessages = Object.values(data.errors).flat();
-              errorMessage = errorMessages.join('\n');
-            } else if (data.message) {
-              errorMessage = data.message;
-            }
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: errorMessage
-            });
-          } else {
-            const text = await response.text();
-            console.error('Server returned HTML instead of JSON:', text);
-            Swal.fire({
-              icon: 'error',
-              title: 'Server Error',
-              text: 'Please check the form for validation errors.'
-            });
-          }
-          return;
-        }
-        
-        const data = await response.json();
-        console.log('Success data:', data);
-        
-        if (data.success) {
-          this.progress = 25;
-          Swal.fire({
-            icon: 'success',
-            title: 'Saved!',
-            text: 'Contact information saved successfully.',
-            timer: 1500,
-            showConfirmButton: false
-          });
-          this.currentTab = 3;
-        } else {
-          let errorMessage = 'Failed to save contact information.';
-          if (data.errors) {
-            const errorMessages = Object.values(data.errors).flat();
-            errorMessage = errorMessages.join('\n');
-          } else if (data.message) {
-            errorMessage = data.message;
-          }
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: errorMessage
-          });
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: error.message || 'Failed to save contact information.'
-        });
-      }
-    },
-    
-    async saveMembershipDetails() {
-      const form = document.getElementById('membershipDetailsForm');
-      const formData = new FormData(form);
-      formData.append('_method', 'PUT');
-      
-      try {
-        const response = await fetch(`{{ route('admin.users.store-membership-details', ':userId') }}`.replace(':userId', this.userId), {
-          method: 'POST',
-          headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Accept': 'application/json'
-          },
-          body: formData
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          this.progress = 37.5;
-          Swal.fire({
-            icon: 'success',
-            title: 'Saved!',
-            text: 'Membership details saved successfully.',
-            timer: 1500,
-            showConfirmButton: false
-          });
-          this.currentTab = 4;
-        }
-      } catch (error) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Failed to save membership details.'
-        });
-      }
-    },
-    
-    async saveAccountInfo() {
-      const form = document.getElementById('accountInfoForm');
-      const formData = new FormData(form);
-      formData.append('_method', 'PUT');
-      
-      try {
-        const response = await fetch(`{{ route('admin.users.store-account-info', ':userId') }}`.replace(':userId', this.userId), {
-          method: 'POST',
-          headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Accept': 'application/json'
-          },
-          body: formData
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          this.progress = 50;
-          Swal.fire({
-            icon: 'success',
-            title: 'Saved!',
-            text: 'Account information saved successfully.',
-            timer: 1500,
-            showConfirmButton: false
-          });
-          this.currentTab = 5;
-        }
-      } catch (error) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Failed to save account information.'
-        });
-      }
-    },
-    
-    async saveNextOfKin() {
-      const form = document.getElementById('nextOfKinForm');
-      const formData = new FormData(form);
-      formData.append('_method', 'PUT');
-      
-      try {
-        const response = await fetch(`{{ route('admin.users.store-next-of-kin', ':userId') }}`.replace(':userId', this.userId), {
-          method: 'POST',
-          headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Accept': 'application/json'
-          },
-          body: formData
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          this.progress = 62.5;
-          Swal.fire({
-            icon: 'success',
-            title: 'Saved!',
-            text: 'Next of kin information saved successfully.',
-            timer: 1500,
-            showConfirmButton: false
-          });
-          this.currentTab = 6;
-        }
-      } catch (error) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Failed to save next of kin information.'
-        });
-      }
-    },
-    
-    async saveBankingInfo() {
-      const form = document.getElementById('bankingInfoForm');
-      const formData = new FormData(form);
-      formData.append('_method', 'PUT');
-      
-      try {
-        const response = await fetch(`{{ route('admin.users.store-banking-info', ':userId') }}`.replace(':userId', this.userId), {
-          method: 'POST',
-          headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Accept': 'application/json'
-          },
-          body: formData
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          this.progress = 75;
-          Swal.fire({
-            icon: 'success',
-            title: 'Saved!',
-            text: 'Banking information saved successfully.',
-            timer: 1500,
-            showConfirmButton: false
-          });
-          this.currentTab = 7;
-        }
-      } catch (error) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Failed to save banking information.'
-        });
-      }
-    },
-    
-    async saveDocumentsInfo() {
-      const form = document.getElementById('documentsInfoForm');
-      const formData = new FormData(form);
-      formData.append('_method', 'PUT');
-      
-      try {
-        const response = await fetch(`{{ route('admin.users.store-documents-info', ':userId') }}`.replace(':userId', this.userId), {
-          method: 'POST',
-          headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Accept': 'application/json'
-          },
-          body: formData
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          this.progress = 87.5;
-          Swal.fire({
-            icon: 'success',
-            title: 'Saved!',
-            text: 'Documents saved successfully.',
-            timer: 1500,
-            showConfirmButton: false
-          });
-          this.currentTab = 8;
-        }
-      } catch (error) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Failed to save documents.'
-        });
-      }
-    },
-    
-    async saveAdditionalInfo() {
-      const form = document.getElementById('additionalInfoForm');
-      const formData = new FormData(form);
-      formData.append('_method', 'PUT');
-      
-      try {
-        const response = await fetch(`{{ route('admin.users.store-additional-info', ':userId') }}`.replace(':userId', this.userId), {
-          method: 'POST',
-          headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Accept': 'application/json'
-          },
-          body: formData
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          this.progress = 100;
-          Swal.fire({
-            icon: 'success',
-            title: 'Completed!',
-            text: 'Member created successfully!',
+            title: 'Success!',
+            text: 'Customer created successfully.',
             timer: 2000,
             showConfirmButton: false
           }).then(() => {
             window.location.href = '{{ route('admin.users.index') }}';
           });
+        } else {
+          let errorMessage = 'Failed to create customer.';
+          if (data.errors) {
+            const errorMessages = Object.values(data.errors).flat();
+            errorMessage = errorMessages.join('\n');
+          } else if (data.message) {
+            errorMessage = data.message;
+          }
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: errorMessage
+          });
+          this.loading = false;
         }
       } catch (error) {
+        console.error('Error:', error);
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: 'Failed to save additional information.'
+          text: error.message || 'Failed to create customer.'
         });
+        this.loading = false;
       }
     }
   };
