@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'admin@motorcyclehire.co.tz'],
             [
                 'name' => 'System Administrator',
-                'password' => Hash::make('Motorcycle@2024'),
+                'password' => Hash::make('password'),
                 'role' => 'admin',
                 'status' => 'active',
             ]
@@ -46,7 +46,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'customer@motorcyclehire.co.tz'],
             [
                 'name' => 'John Customer',
-                'password' => Hash::make('Customer@2024'),
+                'password' => Hash::make('password'),
                 'role' => 'member',
                 'member_number' => 'CUST001',
                 'status' => 'active',
@@ -70,8 +70,8 @@ class DatabaseSeeder extends Seeder
             InvestmentProductSeeder::class,
         ]);
 
-        $this->command->info('✓ Default admin user created: admin@motorcyclehire.co.tz / Motorcycle@2024');
-        $this->command->info('✓ Default customer user created: customer@motorcyclehire.co.tz / Customer@2024');
+        $this->command->info('✓ Default admin user created: admin@motorcyclehire.co.tz / password');
+        $this->command->info('✓ Default customer user created: customer@motorcyclehire.co.tz / password');
         $this->command->info('✓ Member types seeded successfully');
         $this->command->info('✓ Loan products seeded successfully');
         $this->command->info('✓ Savings products seeded successfully');
