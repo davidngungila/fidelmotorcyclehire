@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Reset Password - Feedtan Digital</title>
+    <title>Reset Password - Motorcycle Hire Purchase</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -84,15 +84,15 @@
          x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
          class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
-            <div class="w-20 h-20 border-4 border-green-200 border-t-green-600 rounded-full animate-spin mx-auto mb-6"></div>
+            <div class="w-20 h-20 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-6"></div>
             <h3 class="text-xl font-bold text-gray-900 mb-2">Resetting Password...</h3>
             <div class="min-h-[40px] flex items-center justify-center">
-                <p class="text-lg font-medium text-green-600" x-text="loadingSteps[currentStep]"></p>
+                <p class="text-lg font-medium text-blue-600" x-text="loadingSteps[currentStep]"></p>
             </div>
             <div class="flex justify-center gap-2 mt-6">
                 <template x-for="(step, index) in loadingSteps" :key="index">
                     <div class="w-2 h-2 rounded-full transition-all duration-300"
-                         :class="index < currentStep ? 'bg-green-600' : (index === currentStep ? 'bg-green-400 w-3' : 'bg-gray-300')"></div>
+                         :class="index < currentStep ? 'bg-blue-600' : (index === currentStep ? 'bg-blue-400 w-3' : 'bg-gray-300')"></div>
                 </template>
             </div>
         </div>
@@ -101,17 +101,17 @@
     <div class="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8" x-show="!loading">
         <div class="w-full max-w-md">
             <div class="text-center mb-8">
-                <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-600 rounded-2xl shadow-lg mb-4">
-                    <i class="fa-solid fa-leaf text-white text-2xl"></i>
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg mb-4">
+                    <i class="fa-solid fa-motorcycle text-white text-2xl"></i>
                 </div>
-                <h1 class="text-2xl font-bold text-gray-900 mb-1">Feedtan Digital</h1>
-                <p class="text-gray-500 text-sm">Membership Portal</p>
+                <h1 class="text-2xl font-bold text-gray-900 mb-1">Motorcycle Hire Purchase</h1>
+                <p class="text-gray-500 text-sm">Management System</p>
             </div>
 
             <div class="bg-white border border-gray-200 rounded-2xl shadow-lg p-6 sm:p-8">
                 <div class="text-center mb-6">
-                    <div class="inline-flex items-center justify-center w-16 h-16 bg-emerald-50 rounded-full mb-4">
-                        <i class="fa-solid fa-key text-3xl text-emerald-600"></i>
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-50 rounded-full mb-4">
+                        <i class="fa-solid fa-key text-3xl text-blue-600"></i>
                     </div>
                     <h2 class="text-xl font-bold text-gray-900 mb-1">Reset Password</h2>
                     <p class="text-gray-500 text-sm">Enter your new password below</p>
@@ -136,7 +136,7 @@
                                 required
                                 autofocus
                                 autocomplete="email"
-                                class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 @error('email') border-red-300 focus:ring-red-500 @enderror"
+                                class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 @error('email') border-red-300 focus:ring-red-500 @enderror"
                                 placeholder="you@example.com"
                             >
                         </div>
@@ -199,7 +199,7 @@
                     <button
                         type="submit"
                         @click="loading = true; currentStep = 0; const interval = setInterval(() => { if (currentStep < loadingSteps.length - 1) { currentStep++; } else { clearInterval(interval); } }, 300);"
-                        class="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+                        class="w-full py-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
                     >
                         <i class="fa-solid fa-rotate text-sm"></i>
                         <span>Reset Password</span>
@@ -207,7 +207,7 @@
                 </form>
 
                 <div class="mt-6 text-center">
-                    <a href="{{ route('login') }}" class="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-green-600 transition-colors">
+                    <a href="{{ route('login') }}" class="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
                         <i class="fa-solid fa-arrow-left text-xs"></i>
                         <span>Back to login</span>
                     </a>
@@ -215,7 +215,7 @@
             </div>
 
             <p class="text-center text-gray-400 text-xs mt-6">
-                &copy; {{ date('Y') }} Feedtan Digital. All rights reserved.
+                &copy; {{ date('Y') }} Motorcycle Hire Purchase. All rights reserved.
             </p>
         </div>
     </div>

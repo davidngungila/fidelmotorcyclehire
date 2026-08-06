@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Verify Email - Feedtan Digital</title>
+    <title>Verify Email - Motorcycle Hire Purchase</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -37,12 +37,12 @@
         }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-green-400 via-emerald-500 to-teal-600 relative overflow-hidden" x-data="{ toast: {{ session('flash') || session('status') ? 'true' : 'false' }}, toastMsg: '{{ session('flash')['message'] ?? (session('status') === 'verification-link-sent' ? 'A fresh verification link has been sent to your email address.' : '') }}', toastLevel: '{{ session('flash')['level'] ?? 'success' }}' }" x-init="if (toast) { setTimeout(() => toast = false, 5000); }">
+<body class="min-h-screen bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-700 relative overflow-hidden" x-data="{ toast: {{ session('flash') || session('status') ? 'true' : 'false' }}, toastMsg: '{{ session('flash')['message'] ?? (session('status') === 'verification-link-sent' ? 'A fresh verification link has been sent to your email address.' : '') }}', toastLevel: '{{ session('flash')['level'] ?? 'success' }}' }" x-init="if (toast) { setTimeout(() => toast = false, 5000); }">
 
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute -top-40 -right-40 w-96 h-96 bg-green-300/30 rounded-full blur-3xl"></div>
-        <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-emerald-300/30 rounded-full blur-3xl"></div>
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-teal-400/20 rounded-full blur-3xl"></div>
+        <div class="absolute -top-40 -right-40 w-96 h-96 bg-blue-300/30 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-indigo-300/30 rounded-full blur-3xl"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-purple-400/20 rounded-full blur-3xl"></div>
     </div>
 
     <div class="fixed top-6 right-6 z-50" x-show="toast" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:translate-x-4" x-transition:enter-end="opacity-100 translate-y-0 sm:translate-x-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:translate-x-0" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:translate-x-4">
@@ -78,12 +78,12 @@
         <div class="w-full max-w-md">
             <div class="text-center mb-8">
                 <div class="inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl shadow-lg mb-4">
-                    <div class="w-14 h-14 bg-gradient-to-br from-green-400 to-emerald-600 rounded-xl flex items-center justify-center">
-                        <i class="fa-solid fa-leaf text-white text-2xl"></i>
+                    <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-motorcycle text-white text-2xl"></i>
                     </div>
                 </div>
-                <h1 class="text-3xl font-bold text-white mb-2">Feedtan Digital</h1>
-                <p class="text-green-100 text-sm">Membership Portal</p>
+                <h1 class="text-3xl font-bold text-white mb-2">Motorcycle Hire Purchase</h1>
+                <p class="text-blue-100 text-sm">Management System</p>
             </div>
 
             <div class="glass rounded-3xl shadow-2xl p-8">
@@ -98,9 +98,9 @@
                 </div>
 
                 @if (session('status') == 'verification-link-sent')
-                    <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-start gap-3">
-                        <i class="fa-solid fa-circle-check text-green-500 mt-0.5"></i>
-                        <p class="text-sm text-green-800">A new verification link has been sent to the email address you provided during registration.</p>
+                    <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-3">
+                        <i class="fa-solid fa-circle-check text-blue-500 mt-0.5"></i>
+                        <p class="text-sm text-blue-800">A new verification link has been sent to the email address you provided during registration.</p>
                     </div>
                 @endif
 
@@ -109,7 +109,7 @@
                         @csrf
                         <button
                             type="submit"
-                            class="w-full py-3.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-xl shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40 transition-all duration-200 flex items-center justify-center gap-2"
+                            class="w-full py-3.5 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200 flex items-center justify-center gap-2"
                         >
                             <i class="fa-solid fa-paper-plane text-sm"></i>
                             <span>Resend Verification Email</span>
@@ -129,8 +129,8 @@
                 </div>
             </div>
 
-            <p class="text-center text-green-100 text-sm mt-8">
-                &copy; {{ date('Y') }} Feedtan Digital. All rights reserved.
+            <p class="text-center text-blue-100 text-sm mt-8">
+                &copy; {{ date('Y') }} Motorcycle Hire Purchase. All rights reserved.
             </p>
         </div>
     </div>
