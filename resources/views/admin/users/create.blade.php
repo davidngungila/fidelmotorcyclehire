@@ -119,81 +119,6 @@
             </div>
           </div>
 
-          <!-- Customer Information -->
-          <div class="border-t border-primary-100 dark:border-primary-900/50 pt-8">
-            <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2 mb-4">
-              <i class="fa-solid fa-id-card text-primary-500 text-xs"></i> Customer Information
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Branch</label>
-                <select name="branch_id" class="form-input">
-                  <option value="">Select branch...</option>
-                  <option value="1">Main Branch</option>
-                  <option value="2">Branch A</option>
-                  <option value="3">Branch B</option>
-                </select>
-              </div>
-              <div>
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Membership Category</label>
-                <input type="text" name="membership_category" class="form-input">
-              </div>
-              <div>
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Occupation</label>
-                <input type="text" name="occupation" class="form-input">
-              </div>
-              <div>
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Employer/Business</label>
-                <input type="text" name="employer_business" class="form-input">
-              </div>
-              <div>
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Monthly Income (TSh)</label>
-                <input type="number" name="monthly_income" class="form-input">
-              </div>
-              <div>
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Introduced By</label>
-                <input type="text" name="introduced_by" class="form-input">
-              </div>
-              <div>
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Joining Fee (TSh) *</label>
-                <input type="number" name="joining_fee" required class="form-input" value="0">
-              </div>
-              <div>
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Shares Purchased (TSh) *</label>
-                <input type="number" name="shares_purchased" required class="form-input" value="0">
-              </div>
-              <div class="md:col-span-2">
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Initial Savings Deposit (TSh) *</label>
-                <input type="number" name="initial_savings_deposit" required class="form-input" value="0">
-              </div>
-            </div>
-          </div>
-
-          <!-- Account Information -->
-          <div class="border-t border-primary-100 dark:border-primary-900/50 pt-8">
-            <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2 mb-4">
-              <i class="fa-solid fa-lock text-primary-500 text-xs"></i> Account Information
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Username</label>
-                <input type="text" name="username" class="form-input" placeholder="Leave blank to use member number">
-              </div>
-              <div>
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">New Password</label>
-                <input type="password" name="password" class="form-input" placeholder="Leave blank to keep current password">
-              </div>
-              <div>
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Confirm New Password</label>
-                <input type="password" name="password_confirmation" class="form-input" placeholder="Re-enter new password">
-              </div>
-              <div class="flex items-center gap-3">
-                <input type="checkbox" name="email_verified" id="email_verified" class="w-4 h-4 rounded">
-                <label for="email_verified" class="text-sm text-primary-700 dark:text-primary-300">Email Verified</label>
-              </div>
-            </div>
-          </div>
-
           <!-- Next of Kin -->
           <div class="border-t border-primary-100 dark:border-primary-900/50 pt-8">
             <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2 mb-4">
@@ -215,41 +140,6 @@
               <div class="md:col-span-2">
                 <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Address</label>
                 <textarea name="kin_address" rows="2" class="form-input"></textarea>
-              </div>
-            </div>
-          </div>
-
-          <!-- Banking & Mobile Money -->
-          <div class="border-t border-primary-100 dark:border-primary-900/50 pt-8">
-            <h3 class="font-bold text-primary-900 dark:text-white text-sm flex items-center gap-2 mb-4">
-              <i class="fa-solid fa-building-columns text-primary-500 text-xs"></i> Banking & Mobile Money
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Bank Name</label>
-                <input type="text" name="bank_name" class="form-input">
-              </div>
-              <div>
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Bank Account Number</label>
-                <input type="text" name="bank_account_number" class="form-input font-mono">
-              </div>
-              <div>
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Account Name</label>
-                <input type="text" name="account_name" class="form-input">
-              </div>
-              <div>
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Mobile Money Network</label>
-                <select name="mobile_money_network" class="form-input">
-                  <option value="">Select network...</option>
-                  <option value="mtn">MTN Mobile Money</option>
-                  <option value="airtel">Airtel Money</option>
-                  <option value="vodacom">Vodacom M-Pesa</option>
-                  <option value="tigopesa">Tigo Pesa</option>
-                </select>
-              </div>
-              <div>
-                <label class="form-label uppercase tracking-wider text-primary-700 dark:text-primary-300">Mobile Wallet Number</label>
-                <input type="text" name="mobile_wallet_number" class="form-input font-mono">
               </div>
             </div>
           </div>
